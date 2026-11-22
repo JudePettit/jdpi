@@ -1,0 +1,1128 @@
+{
+ "format": "vm-daily-synopsis-day/1",
+ "day": "2026-11-22",
+ "input": "2026-11-22-1fda29dc7f5e",
+ "generated": "2026-11-22T09:06:01.451Z",
+ "updated": "2026-11-22T09:06:01.451Z",
+ "window": {
+  "from": "2026-11-21T07:08:12.336Z",
+  "to": "2026-11-22T07:08:12.336Z"
+ },
+ "storeGenerated": "2026-11-22T07:08:12.336Z",
+ "authorship": "rules",
+ "model": null,
+ "label": {
+  "text": "This digest was assembled by rules, with no AI model: Vitruvian Manager’s code picked the stories and grouped the outlets’ own headlines beneath them, and no person checked it. The linked reports are the sources.",
+  "five": "The 5 Sided Analysis under each story lays out the outlets’ own headlines by side, far left to far right, by rules alone.",
+  "notProof": "A side with no headline here was not found among Vitruvian Manager’s outlets, which is not proof that the side did not report it.",
+  "meta": "Assembled by rules, with no AI model; no person checked it"
+ },
+ "rule": {
+  "minOutlets": 3,
+  "minSides": 2,
+  "cap": 10,
+  "fiveMinSides": 3,
+  "fiveNeedsLeftAndRight": true
+ },
+ "sides": [
+  {
+   "key": "far_left",
+   "label": "Far left"
+  },
+  {
+   "key": "left",
+   "label": "Left"
+  },
+  {
+   "key": "centre",
+   "label": "Centre"
+  },
+  {
+   "key": "right",
+   "label": "Right"
+  },
+  {
+   "key": "far_right",
+   "label": "Far right"
+  }
+ ],
+ "written": {
+  "status": "missing",
+  "note": "The written digest is not available for this day.",
+  "attempts": []
+ },
+ "lead": null,
+ "stories": [
+  {
+   "id": "s1",
+   "rank": 1,
+   "outlets": 9,
+   "lead": "s1-4",
+   "headlines": [
+    {
+     "id": "s1-1",
+     "side": "left",
+     "outlet": "The Independent",
+     "outletId": "independent",
+     "caution": true,
+     "access": "free",
+     "headline": "Top cartel boss El Chapo Isidro captured in Mexico with help from Trump admin",
+     "url": "https://www.independent.co.uk/news/world/americas/el-chapo-isidro-captured-fbi-sinaloa-trump-b3089155.html",
+     "published": "2026-11-21T14:46:50.000Z"
+    },
+    {
+     "id": "s1-2",
+     "side": "left",
+     "outlet": "The Guardian",
+     "outletId": "guardian",
+     "caution": false,
+     "access": "free",
+     "headline": "Alleged Mexican drug cartel boss ‘El Chapo Isidro’ arrested in special forces raid",
+     "url": "https://www.theguardian.com/world/2026/nov/21/alleged-mexican-drug-cartel-boss-el-chapo-isidro-meza-flores-arrested",
+     "published": "2026-11-21T17:46:55.000Z"
+    },
+    {
+     "id": "s1-3",
+     "side": "left",
+     "outlet": "The New York Times",
+     "outletId": "nyt",
+     "caution": false,
+     "access": "paid",
+     "headline": "Who Is the Mexican Drug Kingpin Known as El Chapo Isidro?",
+     "url": "https://www.nytimes.com/2026/11/21/world/americas/mexico-el-chapo-isidro-drug-kingpin.html",
+     "published": "2026-11-21T16:30:35.000Z"
+    },
+    {
+     "id": "s1-4",
+     "side": "centre",
+     "outlet": "Euronews",
+     "outletId": "euronews",
+     "caution": false,
+     "access": "free",
+     "headline": "Mexico captures FBI’s most-wanted cartel boss ‘El Chapo Isidro’, triggering violence",
+     "url": "https://www.euronews.com/2026/11/21/mexico-captures-fbis-most-wanted-cartel-boss-el-chapo-isidro-triggering-violence",
+     "published": "2026-11-21T14:20:35.000Z"
+    },
+    {
+     "id": "s1-5",
+     "side": "centre",
+     "outlet": "Euronews",
+     "outletId": "euronews",
+     "caution": false,
+     "access": "free",
+     "headline": "Video shows Mexican forces capturing 'El Chapo Isidro', FBI most-wanted cartel boss",
+     "url": "https://www.euronews.com/video/2026/11/21/video-shows-mexican-forces-capturing-el-chapo-isidro-fbi-most-wanted-cartel-boss",
+     "published": "2026-11-21T20:24:17.000Z"
+    },
+    {
+     "id": "s1-6",
+     "side": "centre",
+     "outlet": "France 24",
+     "outletId": "france24",
+     "caution": false,
+     "access": "free",
+     "headline": "Mexico captures drug cartel boss ‘El Chapo Isidro’ after deadly firefight",
+     "url": "https://www.france24.com/en/americas/20261121-mexico-captures-drug-cartel-boss-el-chapo-isidro-after-deadly-firefight",
+     "published": "2026-11-21T15:00:15.000Z"
+    },
+    {
+     "id": "s1-7",
+     "side": "centre",
+     "outlet": "UPI",
+     "outletId": "upi",
+     "caution": false,
+     "access": "free",
+     "headline": "Drug cartel boss 'El Chapo Isidro' arrested; violence breaks out",
+     "url": "https://www.upi.com/Top_News/World-News/2026/11/21/latam-mexico-el-chapo-isidro-arrested/9781795278569/",
+     "published": "2026-11-21T16:39:04.000Z"
+    },
+    {
+     "id": "s1-8",
+     "side": "centre",
+     "outlet": "Sky News",
+     "outletId": "skynews",
+     "caution": false,
+     "access": "unknown",
+     "headline": "Suspected cartel leader 'El Chapo Isidro' from FBI most-wanted list captured in Mexico",
+     "url": "https://news.sky.com/story/suspected-cartel-leader-el-chapo-isidro-from-fbi-most-wanted-list-captured-in-mexico-13614689",
+     "published": "2026-11-21T13:34:00.000Z"
+    },
+    {
+     "id": "s1-9",
+     "side": "centre",
+     "outlet": "Deutsche Welle",
+     "outletId": "dw",
+     "caution": false,
+     "access": "free",
+     "headline": "Mexican special forces arrest drug kingpin 'Chapo Isidro'",
+     "url": "https://www.dw.com/en/mexican-special-forces-arrest-drug-kingpin-chapo-isidro/a-80010745?maca=en-rss-en-all-1573-rdf",
+     "published": "2026-11-21T18:30:00.000Z"
+    },
+    {
+     "id": "s1-10",
+     "side": "right",
+     "outlet": "The Washington Times",
+     "outletId": "washingtontimes",
+     "caution": true,
+     "access": "unknown",
+     "headline": "Mexico detains top cartel boss 'El Chapo Isidro,' setting off a burst of violence in Sinaloa",
+     "url": "https://www.washingtontimes.com/news/2026/nov/21/mexico-detains-top-cartel-boss-el-chapo-isidro-setting-burst-violence/",
+     "published": "2026-11-21T17:53:16.000Z"
+    }
+   ],
+   "sentences": null,
+   "five": {
+    "sides": [
+     {
+      "key": "far_left",
+      "label": "Far left",
+      "outlets": 0,
+      "headlines": []
+     },
+     {
+      "key": "left",
+      "label": "Left",
+      "outlets": 3,
+      "headlines": [
+       "s1-1",
+       "s1-2",
+       "s1-3"
+      ]
+     },
+     {
+      "key": "centre",
+      "label": "Centre",
+      "outlets": 5,
+      "headlines": [
+       "s1-4",
+       "s1-5",
+       "s1-6",
+       "s1-7",
+       "s1-8",
+       "s1-9"
+      ]
+     },
+     {
+      "key": "right",
+      "label": "Right",
+      "outlets": 1,
+      "headlines": [
+       "s1-10"
+      ]
+     },
+     {
+      "key": "far_right",
+      "label": "Far right",
+      "outlets": 0,
+      "headlines": []
+     }
+    ],
+    "eligible": true,
+    "written": null,
+    "status": "missing",
+    "note": "The written comparison is not available for this story."
+   }
+  },
+  {
+   "id": "s2",
+   "rank": 2,
+   "outlets": 9,
+   "lead": "s2-1",
+   "headlines": [
+    {
+     "id": "s2-1",
+     "side": "centre",
+     "outlet": "France 24",
+     "outletId": "france24",
+     "caution": false,
+     "access": "free",
+     "headline": "FBI criminal database hacked",
+     "url": "https://www.france24.com/en/fbi-criminal-database-hacked",
+     "published": "2026-11-21T17:23:18.000Z"
+    },
+    {
+     "id": "s2-2",
+     "side": "centre",
+     "outlet": "The Hill",
+     "outletId": "thehill",
+     "caution": false,
+     "access": "free",
+     "headline": "FBI looking into possible breach of its crime database: Report",
+     "url": "https://thehill.com/policy/technology/6235094-fbi-investigates-ncic-breach/",
+     "published": "2026-11-21T13:43:48.000Z"
+    },
+    {
+     "id": "s2-3",
+     "side": "centre",
+     "outlet": "BBC News",
+     "outletId": "bbc",
+     "caution": false,
+     "access": "free",
+     "headline": "FBI reportedly investigating apparent hack of its criminal database",
+     "url": "https://www.bbc.co.uk/news/articles/cvze7de86pk3o",
+     "published": "2026-11-21T16:35:15.000Z"
+    },
+    {
+     "id": "s2-4",
+     "side": "right",
+     "outlet": "Fox News",
+     "outletId": "foxnews",
+     "caution": true,
+     "access": "free",
+     "headline": "FBI probes second cyberattack in months as hackers breach key crime database, sources say",
+     "url": "https://www.foxnews.com/politics/fbi-probes-second-cyberattack-months-hackers-breach-key-crime-database-sources-say",
+     "published": "2026-11-21T15:40:12.000Z"
+    },
+    {
+     "id": "s2-5",
+     "side": "right",
+     "outlet": "The Daily Caller",
+     "outletId": "dailycaller",
+     "caution": true,
+     "access": "free",
+     "headline": "National Crime Database Reportedly Hacked, Prompting FBI Investigation Of Potential Cyberattack",
+     "url": "https://dailycaller.com/2026/11/21/national-crime-database-hack-federal-bureau-investigation-probe-cyberattack",
+     "published": "2026-11-21T18:34:32.000Z"
+    },
+    {
+     "id": "s2-6",
+     "side": "right",
+     "outlet": "The Washington Times",
+     "outletId": "washingtontimes",
+     "caution": true,
+     "access": "unknown",
+     "headline": "FBI investigating apparent hack of a key criminal justice information database, AP source says",
+     "url": "https://www.washingtontimes.com/news/2026/nov/21/fbi-looking-apparent-hack-key-criminal-justice-information-database/",
+     "published": "2026-11-21T16:41:58.000Z"
+    },
+    {
+     "id": "s2-7",
+     "side": "far_right",
+     "outlet": "Breitbart",
+     "outletId": "breitbart",
+     "caution": true,
+     "access": "free",
+     "headline": "Hacked: FBI Database Used for Firearm Background Checks",
+     "url": "https://www.breitbart.com/2nd-amendment/2026/11/21/hacked-fbi-database-used-firearm-background-checks/",
+     "published": "2026-11-21T16:20:46.000Z"
+    },
+    {
+     "id": "s2-8",
+     "side": "far_right",
+     "outlet": "One America News",
+     "outletId": "oann",
+     "caution": true,
+     "access": "unknown",
+     "headline": "Trump responds to reports of FBI database breach: ‘It’s not good’",
+     "url": "https://news.google.com/rss/articles/CBMilwFBVV95cUxPSXl4MHRNOERfVzgtdU9QbTIzbVNtS20yZ095OTI5MXZWdWxGdHd0OGplUDlSLTcxRkZPaFVHdUJRTG9qbHVNNkR6UzA1clJNdUUxRVcwbnpOVV9CYTdTeU10VEl5OEZUeEZXSW91TThyRFQxU2Qyb3hrc09Qd0hTWmdTRUkzRHpDNnduaUJ3UWw5dl90M1pZ?oc=5",
+     "published": "2026-11-22T04:12:21.000Z"
+    },
+    {
+     "id": "s2-9",
+     "side": "far_right",
+     "outlet": "ZeroHedge",
+     "outletId": "zerohedge",
+     "caution": true,
+     "access": "free",
+     "headline": "FBI Probes Suspected Hack Of Critical Nationwide Crime Database As 'Cyber Pandemic' Fears Mount",
+     "url": "https://www.zerohedge.com/technology/fbi-probes-suspected-hack-critical-nationwide-crime-database-cyber-pandemic-fears-mount",
+     "published": "2026-11-21T14:30:00.000Z"
+    }
+   ],
+   "sentences": null,
+   "five": {
+    "sides": [
+     {
+      "key": "far_left",
+      "label": "Far left",
+      "outlets": 0,
+      "headlines": []
+     },
+     {
+      "key": "left",
+      "label": "Left",
+      "outlets": 0,
+      "headlines": []
+     },
+     {
+      "key": "centre",
+      "label": "Centre",
+      "outlets": 3,
+      "headlines": [
+       "s2-1",
+       "s2-2",
+       "s2-3"
+      ]
+     },
+     {
+      "key": "right",
+      "label": "Right",
+      "outlets": 3,
+      "headlines": [
+       "s2-4",
+       "s2-5",
+       "s2-6"
+      ]
+     },
+     {
+      "key": "far_right",
+      "label": "Far right",
+      "outlets": 3,
+      "headlines": [
+       "s2-7",
+       "s2-8",
+       "s2-9"
+      ]
+     }
+    ],
+    "eligible": false,
+    "written": null,
+    "status": "not-eligible",
+    "note": "No written comparison for this story: one is written only when at least three of the five sides carried it, one left of centre and one right of centre."
+   }
+  },
+  {
+   "id": "s3",
+   "rank": 3,
+   "outlets": 5,
+   "lead": "s3-2",
+   "headlines": [
+    {
+     "id": "s3-1",
+     "side": "left",
+     "outlet": "The Independent",
+     "outletId": "independent",
+     "caution": true,
+     "access": "free",
+     "headline": "Man accused of starting deadly LA wildfire found guilty after original mistrial",
+     "url": "https://www.independent.co.uk/news/world/americas/crime/jonathan-rinderknecht-la-palisades-fires-b3089090.html",
+     "published": "2026-11-21T09:05:12.000Z"
+    },
+    {
+     "id": "s3-2",
+     "side": "centre",
+     "outlet": "Deutsche Welle",
+     "outletId": "dw",
+     "caution": false,
+     "access": "free",
+     "headline": "Man convicted of arson over deadly 2025 Palisades fire in Los Angeles",
+     "url": "https://www.dw.com/en/man-convicted-of-arson-over-deadly-2025-palisades-fire-in-los-angeles/a-80007933?maca=en-rss-en-all-1573-rdf",
+     "published": "2026-11-21T07:10:00.000Z"
+    },
+    {
+     "id": "s3-3",
+     "side": "centre",
+     "outlet": "France 24",
+     "outletId": "france24",
+     "caution": false,
+     "access": "free",
+     "headline": "Man convicted of starting palisades fire",
+     "url": "https://www.france24.com/en/man-convicted-of-starting-palisades-fire",
+     "published": "2026-11-21T17:21:55.000Z"
+    },
+    {
+     "id": "s3-4",
+     "side": "far_right",
+     "outlet": "American Greatness",
+     "outletId": "amgreatness",
+     "caution": true,
+     "access": "free",
+     "headline": "Jury Convicts California Man of Starting Palisades Fire",
+     "url": "https://amgreatness.com/2026/11/21/jury-convicts-california-man-of-starting-palisades-fire/",
+     "published": "2026-11-21T08:44:32.000Z"
+    },
+    {
+     "id": "s3-5",
+     "side": "far_right",
+     "outlet": "ZeroHedge",
+     "outletId": "zerohedge",
+     "caution": true,
+     "access": "free",
+     "headline": "\"Now We Have The Answer\": Retrial Jury Convicts Man Who Sparked Palisades Inferno",
+     "url": "https://www.zerohedge.com/political/now-we-have-answer-retrial-jury-convicts-man-who-sparked-palisades-inferno",
+     "published": "2026-11-21T17:05:00.000Z"
+    }
+   ],
+   "sentences": null,
+   "five": {
+    "sides": [
+     {
+      "key": "far_left",
+      "label": "Far left",
+      "outlets": 0,
+      "headlines": []
+     },
+     {
+      "key": "left",
+      "label": "Left",
+      "outlets": 1,
+      "headlines": [
+       "s3-1"
+      ]
+     },
+     {
+      "key": "centre",
+      "label": "Centre",
+      "outlets": 2,
+      "headlines": [
+       "s3-2",
+       "s3-3"
+      ]
+     },
+     {
+      "key": "right",
+      "label": "Right",
+      "outlets": 0,
+      "headlines": []
+     },
+     {
+      "key": "far_right",
+      "label": "Far right",
+      "outlets": 2,
+      "headlines": [
+       "s3-4",
+       "s3-5"
+      ]
+     }
+    ],
+    "eligible": true,
+    "written": null,
+    "status": "missing",
+    "note": "The written comparison is not available for this story."
+   }
+  },
+  {
+   "id": "s4",
+   "rank": 4,
+   "outlets": 4,
+   "lead": "s4-1",
+   "headlines": [
+    {
+     "id": "s4-1",
+     "side": "left",
+     "outlet": "The Independent",
+     "outletId": "independent",
+     "caution": true,
+     "access": "free",
+     "headline": "24 dead after boat carrying mourners to funeral capsizes in Nigeria",
+     "url": "https://www.independent.co.uk/news/world/africa/nigeria-funeral-boat-capsizes-victims-b3089271.html",
+     "published": "2026-11-21T21:23:44.000Z"
+    },
+    {
+     "id": "s4-2",
+     "side": "centre",
+     "outlet": "UPI",
+     "outletId": "upi",
+     "caution": false,
+     "access": "free",
+     "headline": "At least 24 dead after boat carrying mourners capsizes in Nigeria",
+     "url": "https://www.upi.com/Top_News/World-News/2026/11/21/nigeria-boat-funeral-capsizes/8291795307056/",
+     "published": "2026-11-22T00:29:44.000Z"
+    },
+    {
+     "id": "s4-3",
+     "side": "centre",
+     "outlet": "Deutsche Welle",
+     "outletId": "dw",
+     "caution": false,
+     "access": "free",
+     "headline": "Nigeria: At least 24 dead after boat capsizes",
+     "url": "https://www.dw.com/en/nigeria-at-least-24-dead-after-boat-capsizes/a-80011248?maca=en-rss-en-all-1573-rdf",
+     "published": "2026-11-21T23:52:00.000Z"
+    },
+    {
+     "id": "s4-4",
+     "side": "centre",
+     "outlet": "Sky News",
+     "outletId": "skynews",
+     "caution": false,
+     "access": "unknown",
+     "headline": "At least 24 dead after boat taking passengers to funeral capsizes in Nigeria",
+     "url": "https://news.sky.com/story/at-least-24-dead-after-boat-taking-passengers-to-funeral-capsizes-in-nigeria-13615057",
+     "published": "2026-11-21T21:32:00.000Z"
+    }
+   ],
+   "sentences": null,
+   "five": {
+    "sides": [
+     {
+      "key": "far_left",
+      "label": "Far left",
+      "outlets": 0,
+      "headlines": []
+     },
+     {
+      "key": "left",
+      "label": "Left",
+      "outlets": 1,
+      "headlines": [
+       "s4-1"
+      ]
+     },
+     {
+      "key": "centre",
+      "label": "Centre",
+      "outlets": 3,
+      "headlines": [
+       "s4-2",
+       "s4-3",
+       "s4-4"
+      ]
+     },
+     {
+      "key": "right",
+      "label": "Right",
+      "outlets": 0,
+      "headlines": []
+     },
+     {
+      "key": "far_right",
+      "label": "Far right",
+      "outlets": 0,
+      "headlines": []
+     }
+    ],
+    "eligible": false,
+    "written": null,
+    "status": "not-eligible",
+    "note": "No written comparison for this story: one is written only when at least three of the five sides carried it, one left of centre and one right of centre."
+   }
+  },
+  {
+   "id": "s5",
+   "rank": 5,
+   "outlets": 4,
+   "lead": "s5-3",
+   "headlines": [
+    {
+     "id": "s5-1",
+     "side": "centre",
+     "outlet": "The Hill",
+     "outletId": "thehill",
+     "caution": false,
+     "access": "free",
+     "headline": "Trump wants to work with Democrats on placing 10 percent cap on credit card interest rates",
+     "url": "https://thehill.com/business/6235394-trump-calls-credit-card-cap/",
+     "published": "2026-11-21T20:28:45.000Z"
+    },
+    {
+     "id": "s5-2",
+     "side": "centre",
+     "outlet": "Axios",
+     "outletId": "axios",
+     "caution": false,
+     "access": "unknown",
+     "headline": "Trump says he'd work with Dems to cap credit card interest, fees",
+     "url": "https://www.axios.com/2026/11/21/trump-credit-cards-rates-warren",
+     "published": "2026-11-21T16:48:20.000Z"
+    },
+    {
+     "id": "s5-3",
+     "side": "right",
+     "outlet": "The Washington Times",
+     "outletId": "washingtontimes",
+     "caution": true,
+     "access": "unknown",
+     "headline": "Trump vows to work with Democrats to cap credit card interest rates at 10%",
+     "url": "https://www.washingtontimes.com/news/2026/nov/21/trump-vows-work-dems-cap-credit-card-interest-rates-10/",
+     "published": "2026-11-21T17:54:34.000Z"
+    },
+    {
+     "id": "s5-4",
+     "side": "right",
+     "outlet": "Washington Examiner",
+     "outletId": "washingtonexaminer",
+     "caution": false,
+     "access": "paid",
+     "headline": "Trump on credit card interest rate cap: ‘I would do it’",
+     "url": "https://www.washingtonexaminer.com/policy/economy/4811339/trump-credit-card-interest-rate-cap/",
+     "published": "2026-11-21T23:36:28.000Z"
+    }
+   ],
+   "sentences": null,
+   "five": {
+    "sides": [
+     {
+      "key": "far_left",
+      "label": "Far left",
+      "outlets": 0,
+      "headlines": []
+     },
+     {
+      "key": "left",
+      "label": "Left",
+      "outlets": 0,
+      "headlines": []
+     },
+     {
+      "key": "centre",
+      "label": "Centre",
+      "outlets": 2,
+      "headlines": [
+       "s5-1",
+       "s5-2"
+      ]
+     },
+     {
+      "key": "right",
+      "label": "Right",
+      "outlets": 2,
+      "headlines": [
+       "s5-3",
+       "s5-4"
+      ]
+     },
+     {
+      "key": "far_right",
+      "label": "Far right",
+      "outlets": 0,
+      "headlines": []
+     }
+    ],
+    "eligible": false,
+    "written": null,
+    "status": "not-eligible",
+    "note": "No written comparison for this story: one is written only when at least three of the five sides carried it, one left of centre and one right of centre."
+   }
+  },
+  {
+   "id": "s6",
+   "rank": 6,
+   "outlets": 3,
+   "lead": "s6-2",
+   "headlines": [
+    {
+     "id": "s6-1",
+     "side": "left",
+     "outlet": "The Independent",
+     "outletId": "independent",
+     "caution": true,
+     "access": "free",
+     "headline": "Trump hints at ‘four or five’ finalists for White House press secretary after telling Katie Zacharia ‘you don’t need this’",
+     "url": "https://www.independent.co.uk/news/world/americas/us-politics/trump-press-secretary-katie-zacharia-b3089289.html",
+     "published": "2026-11-22T00:02:20.000Z"
+    },
+    {
+     "id": "s6-2",
+     "side": "centre",
+     "outlet": "The Hill",
+     "outletId": "thehill",
+     "caution": false,
+     "access": "free",
+     "headline": "California State Bar places Katie Zacharia under investigation",
+     "url": "https://thehill.com/homenews/administration/6235105-california-bar-investigates-zacharia/",
+     "published": "2026-11-21T13:54:58.000Z"
+    },
+    {
+     "id": "s6-3",
+     "side": "centre",
+     "outlet": "The Hill",
+     "outletId": "thehill",
+     "caution": false,
+     "access": "free",
+     "headline": "Trump praises Zacharia amid California state bar investigation",
+     "url": "https://thehill.com/homenews/administration/6235423-trump-defends-zacharia-departure/",
+     "published": "2026-11-21T21:07:46.000Z"
+    },
+    {
+     "id": "s6-4",
+     "side": "far_right",
+     "outlet": "The Gateway Pundit",
+     "outletId": "gatewaypundit",
+     "caution": true,
+     "access": "free",
+     "headline": "California State Bar Launches Investigation Into Former Trump Press Secretary Katie Zacharia Following Soros-Linked Group’s Complaint — Zacharia BLASTS “Partisan Hit Operation”",
+     "url": "https://www.thegatewaypundit.com/2026/11/california-state-bar-launches-investigation-former-trump-press/",
+     "published": "2026-11-22T00:40:48.000Z"
+    }
+   ],
+   "sentences": null,
+   "five": {
+    "sides": [
+     {
+      "key": "far_left",
+      "label": "Far left",
+      "outlets": 0,
+      "headlines": []
+     },
+     {
+      "key": "left",
+      "label": "Left",
+      "outlets": 1,
+      "headlines": [
+       "s6-1"
+      ]
+     },
+     {
+      "key": "centre",
+      "label": "Centre",
+      "outlets": 1,
+      "headlines": [
+       "s6-2",
+       "s6-3"
+      ]
+     },
+     {
+      "key": "right",
+      "label": "Right",
+      "outlets": 0,
+      "headlines": []
+     },
+     {
+      "key": "far_right",
+      "label": "Far right",
+      "outlets": 1,
+      "headlines": [
+       "s6-4"
+      ]
+     }
+    ],
+    "eligible": true,
+    "written": null,
+    "status": "missing",
+    "note": "The written comparison is not available for this story."
+   }
+  },
+  {
+   "id": "s7",
+   "rank": 7,
+   "outlets": 3,
+   "lead": "s7-2",
+   "headlines": [
+    {
+     "id": "s7-1",
+     "side": "left",
+     "outlet": "The Atlantic",
+     "outletId": "atlantic",
+     "caution": false,
+     "access": "metered",
+     "headline": "What Trump’s Summit in China Reveals",
+     "url": "https://www.theatlantic.com/national/2026/11/trump-summit-china-washington-week/689539/",
+     "published": "2026-11-21T16:18:16.000Z"
+    },
+    {
+     "id": "s7-2",
+     "side": "centre",
+     "outlet": "France 24",
+     "outletId": "france24",
+     "caution": false,
+     "access": "free",
+     "headline": "Was Vladimir Putin 'snubbed' by Xi Jinping? Viral handshake video is AI fake",
+     "url": "https://www.france24.com/en/tv-shows/truth-or-fake/20261121-was-vladimir-putin-snubbed-by-xi-jinping-viral-handshake-video-is-ai-fake",
+     "published": "2026-11-21T10:16:44.000Z"
+    },
+    {
+     "id": "s7-3",
+     "side": "right",
+     "outlet": "Washington Examiner",
+     "outletId": "washingtonexaminer",
+     "caution": false,
+     "access": "paid",
+     "headline": "A lame-duck Trump was exactly what Xi and Putin wanted",
+     "url": "https://www.washingtonexaminer.com/in_focus/4810832/lame-duck-trump-what-xi-putin-wanted/",
+     "published": "2026-11-21T19:00:00.000Z"
+    }
+   ],
+   "sentences": null,
+   "five": {
+    "sides": [
+     {
+      "key": "far_left",
+      "label": "Far left",
+      "outlets": 0,
+      "headlines": []
+     },
+     {
+      "key": "left",
+      "label": "Left",
+      "outlets": 1,
+      "headlines": [
+       "s7-1"
+      ]
+     },
+     {
+      "key": "centre",
+      "label": "Centre",
+      "outlets": 1,
+      "headlines": [
+       "s7-2"
+      ]
+     },
+     {
+      "key": "right",
+      "label": "Right",
+      "outlets": 1,
+      "headlines": [
+       "s7-3"
+      ]
+     },
+     {
+      "key": "far_right",
+      "label": "Far right",
+      "outlets": 0,
+      "headlines": []
+     }
+    ],
+    "eligible": true,
+    "written": null,
+    "status": "missing",
+    "note": "The written comparison is not available for this story."
+   }
+  },
+  {
+   "id": "s8",
+   "rank": 8,
+   "outlets": 3,
+   "lead": "s8-3",
+   "headlines": [
+    {
+     "id": "s8-1",
+     "side": "centre",
+     "outlet": "France 24",
+     "outletId": "france24",
+     "caution": false,
+     "access": "free",
+     "headline": "Endurance athlete swims in Hormuz Strait",
+     "url": "https://www.france24.com/en/endurance-athlete-swims-in-hormuz-strait",
+     "published": "2026-11-21T16:02:59.000Z"
+    },
+    {
+     "id": "s8-2",
+     "side": "centre",
+     "outlet": "Euronews",
+     "outletId": "euronews",
+     "caution": false,
+     "access": "free",
+     "headline": "Strait of Hormuz: Athlete swims through war zone to expose war's environmental toll",
+     "url": "https://www.euronews.com/video/2026/11/21/strait-of-hormuz-athlete-swims-through-war-zone-to-expose-wars-environmental-toll",
+     "published": "2026-11-21T12:18:40.000Z"
+    },
+    {
+     "id": "s8-3",
+     "side": "right",
+     "outlet": "New York Post",
+     "outletId": "nypost",
+     "caution": true,
+     "access": "free",
+     "headline": "Endurance athlete Lewis Pugh braves Strait of Hormuz amid explosions to highlight Iran war’s impact on wildlife",
+     "url": "https://nypost.com/2026/11/22/world-news/british-swimmer-lewis-pugh-braves-strait-of-hormuz-amid-explosions-to-highlight-iran-wars-impact-on-wildlife/",
+     "published": "2026-11-22T06:46:36.000Z"
+    }
+   ],
+   "sentences": null,
+   "five": {
+    "sides": [
+     {
+      "key": "far_left",
+      "label": "Far left",
+      "outlets": 0,
+      "headlines": []
+     },
+     {
+      "key": "left",
+      "label": "Left",
+      "outlets": 0,
+      "headlines": []
+     },
+     {
+      "key": "centre",
+      "label": "Centre",
+      "outlets": 2,
+      "headlines": [
+       "s8-1",
+       "s8-2"
+      ]
+     },
+     {
+      "key": "right",
+      "label": "Right",
+      "outlets": 1,
+      "headlines": [
+       "s8-3"
+      ]
+     },
+     {
+      "key": "far_right",
+      "label": "Far right",
+      "outlets": 0,
+      "headlines": []
+     }
+    ],
+    "eligible": false,
+    "written": null,
+    "status": "not-eligible",
+    "note": "No written comparison for this story: one is written only when at least three of the five sides carried it, one left of centre and one right of centre."
+   }
+  },
+  {
+   "id": "s9",
+   "rank": 9,
+   "outlets": 3,
+   "lead": "s9-1",
+   "headlines": [
+    {
+     "id": "s9-1",
+     "side": "centre",
+     "outlet": "France 24",
+     "outletId": "france24",
+     "caution": false,
+     "access": "free",
+     "headline": "Russia launches ballistic missile attack on Zelensky's hometown in central Ukraine",
+     "url": "https://www.france24.com/en/russia-launches-ballistic-missile-attack-on-zelensky-s-hometown-in-central-ukraine",
+     "published": "2026-11-21T19:55:07.000Z"
+    },
+    {
+     "id": "s9-2",
+     "side": "centre",
+     "outlet": "Euronews",
+     "outletId": "euronews",
+     "caution": false,
+     "access": "free",
+     "headline": "Ballistic missile attack on Zelenskyy's hometown kills two people",
+     "url": "https://www.euronews.com/2026/11/21/ballistic-missile-attack-on-zelenskyys-hometown-kills-two-people",
+     "published": "2026-11-21T13:57:15.000Z"
+    },
+    {
+     "id": "s9-3",
+     "side": "far_right",
+     "outlet": "Breitbart",
+     "outletId": "breitbart",
+     "caution": true,
+     "access": "free",
+     "headline": "Russian Missile Attack on Zelensky's Hometown in Central Ukraine Kills Two, Wounds Dozens",
+     "url": "https://www.breitbart.com/europe/2026/11/21/russian-missile-attack-on-zelenskys-hometown-in-central-ukraine-kills-two-wounds-dozens/",
+     "published": "2026-11-21T16:37:58.000Z"
+    }
+   ],
+   "sentences": null,
+   "five": {
+    "sides": [
+     {
+      "key": "far_left",
+      "label": "Far left",
+      "outlets": 0,
+      "headlines": []
+     },
+     {
+      "key": "left",
+      "label": "Left",
+      "outlets": 0,
+      "headlines": []
+     },
+     {
+      "key": "centre",
+      "label": "Centre",
+      "outlets": 2,
+      "headlines": [
+       "s9-1",
+       "s9-2"
+      ]
+     },
+     {
+      "key": "right",
+      "label": "Right",
+      "outlets": 0,
+      "headlines": []
+     },
+     {
+      "key": "far_right",
+      "label": "Far right",
+      "outlets": 1,
+      "headlines": [
+       "s9-3"
+      ]
+     }
+    ],
+    "eligible": false,
+    "written": null,
+    "status": "not-eligible",
+    "note": "No written comparison for this story: one is written only when at least three of the five sides carried it, one left of centre and one right of centre."
+   }
+  },
+  {
+   "id": "s10",
+   "rank": 10,
+   "outlets": 3,
+   "lead": "s10-2",
+   "headlines": [
+    {
+     "id": "s10-1",
+     "side": "left",
+     "outlet": "Slate",
+     "outletId": "slate",
+     "caution": false,
+     "access": "metered",
+     "headline": "There’s a Myth About Grand Theft Auto That Started in 1997. This is What the Research Actually Says.",
+     "url": "https://slate.com/technology/2026/11/grand-theft-auto-violent-videogame-consequences-research.html?via=rss",
+     "published": "2026-11-21T15:00:00.000Z"
+    },
+    {
+     "id": "s10-2",
+     "side": "left",
+     "outlet": "The Independent",
+     "outletId": "independent",
+     "caution": true,
+     "access": "free",
+     "headline": "MAGA rep says he believes adults are ‘bad parents’ if they let their kids play the new Grand Theft Auto",
+     "url": "https://www.independent.co.uk/news/world/americas/us-politics/gta-6-maga-parents-children-b3089213.html",
+     "published": "2026-11-21T17:45:20.000Z"
+    },
+    {
+     "id": "s10-3",
+     "side": "right",
+     "outlet": "Daily Mail",
+     "outletId": "dailymail",
+     "caution": false,
+     "access": "free",
+     "headline": "The British public-school brothers behind Grand Theft Auto whose Coronation Street actress mother helped inspire the biggest video game in history... and make them multi-millionaires",
+     "url": "https://www.dailymail.com/news/article-16311189/Sam-Dan-Houser-Grand-Theft-Auto.html?ns_mchannel=rss&ns_campaign=1490",
+     "published": "2026-11-21T17:38:57.000Z"
+    }
+   ],
+   "sentences": null,
+   "five": {
+    "sides": [
+     {
+      "key": "far_left",
+      "label": "Far left",
+      "outlets": 0,
+      "headlines": []
+     },
+     {
+      "key": "left",
+      "label": "Left",
+      "outlets": 2,
+      "headlines": [
+       "s10-1",
+       "s10-2"
+      ]
+     },
+     {
+      "key": "centre",
+      "label": "Centre",
+      "outlets": 0,
+      "headlines": []
+     },
+     {
+      "key": "right",
+      "label": "Right",
+      "outlets": 1,
+      "headlines": [
+       "s10-3"
+      ]
+     },
+     {
+      "key": "far_right",
+      "label": "Far right",
+      "outlets": 0,
+      "headlines": []
+     }
+    ],
+    "eligible": false,
+    "written": null,
+    "status": "not-eligible",
+    "note": "No written comparison for this story: one is written only when at least three of the five sides carried it, one left of centre and one right of centre."
+   }
+  }
+ ]
+}

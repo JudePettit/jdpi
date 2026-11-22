@@ -119,12 +119,9 @@ function activeSpan(w, a, b) {
   return `${first === last ? first : `${first}–${end}`} · ${ys.length} yr${ys.length > 1 ? 's' : ''}`;
 }
 // The places a war was fought in during the period; `where` names places the map has no shape for.
-// A place Wikidata dates from a later year than the one shown is "today’s …" (the land, not a state of then), as
-// under the map; over a period that reaches the state's own years, its plain name stands alone.
-function placesIn(w, a, b) {
-  const all = new Set([...yearsIn(w, a, b).flatMap(([y]) => locIn(w, y).map(q => unplacedName(q, y))), ...(w.where || [])]);
-  return [...all].filter(n => !(n.startsWith('today’s ') && all.has(n.slice('today’s '.length))));
-}
+// (Not "today’s …" by Wikidata's inception here: that date is a change of regime for some states, Ethiopia 1974 and
+// Kuwait 1991, which would be mislabelled in every row; a place's earlier name comes from the NAMED_AS table.)
+const placesIn = (w, a, b) => [...new Set([...yearsIn(w, a, b).flatMap(([y]) => locIn(w, y).map(q => nameOf(q, y))), ...(w.where || [])])];
 // "Costa Rica: no armed conflict of 25 or more battle deaths recorded by UCDP/PRIO in 1990." (design/prp-mapkit.js):
 // from 1946 UCDP/PRIO's record, before it VM's list from Wikidata, and a period across 1946 names both.
 const NO_CONFLICT = { what: 'armed conflict of 25 or more battle deaths', source: 'UCDP/PRIO' };
@@ -380,8 +377,8 @@ function warDetail(w) {
   const warYears = w.years.filter(([, x]) => x === 2).length;
   // The war's places and parties over all its years, by their names in the year it began.
   const began = w.years[0][0];
-  const places = [...new Set([...w.loc.map(q => unplacedName(q, began)), ...(w.where || [])])];
-  const parties = w.states.filter(q => !w.loc.includes(q)).map(q => unplacedName(q, began));
+  const places = [...new Set([...w.loc.map(q => nameOf(q, began)), ...(w.where || [])])];
+  const parties = w.states.filter(q => !w.loc.includes(q)).map(q => nameOf(q, began));
   const intro = w.src === 'wikidata'
     ? `Wikidata lists ${esc(w.name)} as ${/^[aeiou]/i.test(w.type) ? 'an' : 'a'} ${esc(w.type.toLowerCase())}, ${esc(wdDates(w))}${places.length ? `, fought in ${esc(places.join(', '))}` : ''}. No free source codes how intense it was, and VM gives no battle-death total for it.`
     : `UCDP records this ${esc(w.type.toLowerCase())} over ${esc(w.aim)}${places.length ? ` in ${esc(places.join(', '))}` : ''}, active in ${activeYears} year${activeYears > 1 ? 's' : ''} between ${w.years[0][0]} and ${w.years.at(-1)[0]}${warYears ? `, ${warYears} of them at war level (1,000+ battle deaths)` : ''}.`;

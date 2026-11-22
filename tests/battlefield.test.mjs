@@ -706,7 +706,14 @@ test('Retrospective: a listed war is never counted "at war level"', pageTest, as
     // A period across 1946 holds both kinds, counted apart.
     await go('#y=1950&f=1940&v=table', '1940–1950');
     assert.equal(await text('#k-wars-label'), 'Wars');
-    assert.match(await text('#panel .sub'), /^\d+ armed conflicts: \d+ at war level at some point, \d+ listed wars? of no coded size$/);
+    const mixed = /^(\d+) armed conflicts: (\d+) at war level at some point, (\d+) listed wars? of no coded size$/.exec(await text('#panel .sub'));
+    assert.ok(mixed, 'the summary counts the two kinds apart');
+    // The counts themselves, against the table's own level column: a listed war is in neither "at war level" figure.
+    const [n, war, listed] = mixed.slice(1).map(Number), rows = l => page.locator(`#table-rows tr[data-id] .lvl.l${l}`).count();
+    assert.deepEqual([war, listed, n], [await rows(2), await rows(3), await page.locator('#table-rows tr[data-id]').count()]);
+    assert.ok(war > 0 && listed > 0 && n > war + listed, `1940–1950 holds wars, listed wars and minor conflicts: ${n}, ${war}, ${listed}`);
+    assert.equal(await text('#k-wars'), String(war + listed));
+    assert.equal(await text('#k-conflicts'), String(n));
     assert.deepEqual(errors, []);
   } finally { await browser.close(); }
 });

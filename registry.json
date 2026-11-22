@@ -511,7 +511,7 @@
           },
           "host": "Vitruvian Manager",
           "url": "battlefield/history/index.html",
-          "description": "Move through the years from 1926 to 2025, or set a period of years with the timeline's two handles, to see every war and armed conflict on a historical map, with sides, intensity and Wikipedia links.",
+          "description": "Move through the years from 1926 to 2025, or set a period of years with the timeline's two handles, to see wars from 1926 and, from 1946, every armed conflict in UCDP/PRIO's record on a historical map, with sides, intensity where a source codes it, and Wikipedia links.",
           "aliases": [
             "world-map"
           ]

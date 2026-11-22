@@ -1,4 +1,4 @@
-/* Retrospective Battlefield (PRP · Retrospective Geopolitics) — every war and armed conflict, year by year, 1926–2025.
+/* Retrospective Battlefield (PRP · Retrospective Geopolitics) — wars from 1926 and UCDP/PRIO's armed conflicts from 1946, year by year, to 2025.
    Borders: Cliopatria v0.2.1 (CC BY 4.0), the polities of each year, wound for d3 by design/prp-map-d3.js; from 1946
    a small state no row holds as Natural Earth's point (public domain). No place is drawn on a border of today (fixer,
    20 November 2026). Conflicts: UCDP/PRIO ACD (1946–2025) and Wikidata's wars of 1926–1945 as VM lists them (CC0).

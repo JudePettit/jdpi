@@ -546,7 +546,7 @@ Every armed conflict recorded this year from UCDP's candidate events, grouped in
 2. Remember that the data are **provisional and about a month behind**, and fill the latest days with graded near-real-time sources: FIRMS detections, geolocated video and local news.
 
 ### Workflow: Retrospective Battlefield and War Focus (historical base rates)
-Every war and armed conflict from 1926 to 2025 on a slider (UCDP/PRIO data from 1946, the Correlates of War before that), and the major wars of the last century month by month.
+Wars from 1926 and armed conflicts from 1946 to 2025 on a slider (UCDP/PRIO data from 1946, a list of wars from Wikidata before that), and the major wars of the last century month by month.
 1. Define a reference class (interstate wars, civil wars with foreign intervention, wars in one region) and count how many there were, how long they lasted and how they ended.
 2. In War Focus, compare the shape of a current war (monthly deaths, territory changing hands) with comparable past ones.
 3. Mind the seam: before 1946 only wars with 1,000 or more battle deaths are listed, so smaller conflicts seem to appear suddenly in 1946.

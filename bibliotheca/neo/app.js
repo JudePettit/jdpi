@@ -64,6 +64,7 @@ import { chapterTerms, span, nearestTerm, follow, fresh, tour, SCREEN, TOUR_EVER
 import { picturesFor, turnOf } from './lib/pictures.js';
 import { flatScenes } from '../../kino/lib/format.js';
 import { Narrator, KEYS } from './lib/narrator.js';
+import { WORDING, isShown, plain, cite, nameMap, linksFrom, readOn } from '../lib/sources.js';
 
 const $ = s => document.querySelector(s);
 const $$ = (s, root = document) => [...root.querySelectorAll(s)];
@@ -171,8 +172,10 @@ async function loadBook(slug) {
   // frame scheduled by the observer would look for them, and a big volume takes a moment).
   S.observer?.disconnect(); S.observer = null;
   S.ci = -1; S.visible = new Set(); S.current = null; S.pin = null; S.chipsKey = '';
-  let book;
-  try { book = await getJson(`${DATA}books/${encodeURIComponent(slug)}.json`); } catch (e) {
+  let book, links = null;
+  // The source links are read with the book, so their line is in the front matter before a deep link scrolls (a line
+  // added afterwards would push the paragraph down from under the head).
+  try { [book, links] = await Promise.all([getJson(`${DATA}books/${encodeURIComponent(slug)}.json`), loadLinks().catch(() => null)]); } catch (e) {
     if (seq === S.bookSeq) $('#text').innerHTML = `<p class="prp-empty">This book could not load: ${esc(e.message)}</p>`;
     return false;
   }
@@ -181,7 +184,7 @@ async function loadBook(slug) {
   S.labels = new Map(book.author?.qid ? [[book.author.qid, book.author.name]] : []);
   for (const c of S.chapters) for (const p of c.paragraphs) for (const t of validTerms(p)) if (!S.labels.has(t.qid)) S.labels.set(t.qid, t.label);
   $('#shelf').value = slug;
-  renderBookFront(); renderToc(); renderSources();
+  renderBookFront(); renderToc(); renderSources(); renderBookSources(links);
   return true;
 }
 
@@ -263,6 +266,57 @@ function renderBookFront() {
     pd(b.rights?.us) && pd(b.rights?.uk) ? (unknownDeaths(b.rights)
       ? `<span>Public domain <b>US</b> · <b>UK</b> on a reasonable search${euPd(b.rights) ? ' · <b>EU</b>' : euUnconfirmed(b.rights) ? ' · <b>EU rights unconfirmed</b>' : ''}</span>`
       : `<span>Public domain <b>US · UK${euPd(b.rights) ? ' · EU' : ''}</b>${euUnconfirmed(b.rights) ? ' · <b>EU rights unconfirmed</b>' : ''}</span>`) : ''].join('');
+}
+/* Primary and secondary sources (MI-14): the subjects this book is judged a primary or a secondary source on, from the
+   one file of judgements (bibliotheca/data/source-links.json), in the one table's words (../lib/sources.js): the main
+   text's by tag, then those with a note in place of a tag, then the parts by other hands (a translator's preface), each
+   with its basis, its notes and its evidence. A subject is linked to its Master Index entry once the entry is found (when
+   the list is first opened); one with no entry is named, and said to have none. A set's links are shown on each volume. */
+const loadLinks = once(() => getJson(`${DATA}source-links.json`));
+function renderBookSources(file) {
+  const b = S.book, box = $('#book-srcs');
+  if (!box) return;
+  box.hidden = true; box.open = false; $('#book-srcs-body').innerHTML = '';
+  if (!file) return;
+  const shelf = { books: S.shelf };
+  const links = linksFrom(file, b.slug, shelf).filter(isShown);
+  if (!links.length) return;
+  const names = nameMap(file, shelf), heads = new Map(S.chapters.map(c => [c.n, c.heading || c.title || null]));
+  const ctx = { name: q => names.get(q) || S.labels.get(q) || null, title: slug => S.shelf.find(x => x.slug === slug)?.title || null, chapter: (slug, ch) => (slug === b.slug ? heads.get(ch) ?? null : null) };
+  // A chapter of a book on the shelf opens here (the address's hash); a Master Index tag opens its entry. Inside the
+  // shell an entry's link moves the shell (its route, with data-shell-hash for the click handler, and _top if that is
+  // passed by), never loading a second shell into this frame (review P1); on its own the page opens the entry.
+  const entryAttrs = (q, target) => (embedded ? linkAttrs(placeLink('rs', 'encyclopedia', `encyclopedia/index.html#${q}`)) : `href="${esc(entryUrl(q))}"${target ? ` target="${target}" rel="noopener"` : ''}`);
+  const citeHtml = c => !c.href ? esc(c.text) : /^https?:/.test(c.href) ? `<a href="${esc(c.href)}" target="_blank" rel="noreferrer">${esc(c.text)}</a>`
+    : c.href.startsWith('encyclopedia/') ? `<a ${entryAttrs(c.href.slice(c.href.indexOf('#') + 1), '_blank')}>${esc(c.text)}</a>`
+    : `<a href="${esc(c.href.slice(c.href.indexOf('#')))}">${esc(c.text)}</a>`;
+  const row = (l, badge) => {
+    const p = plain(l), read = readOn(l);
+    const bits = [badge ? `<span class="prp-kind">${esc(p.tag || WORDING.noted)}</span>` : '', p.part && badge ? `<span class="nc-src-bit nc-src-part">${esc(p.part)}</span>` : '',
+      p.basis ? `<span class="nc-src-bit">${esc(p.basis)}</span>` : '', ...p.flags.map(f => `<span class="nc-src-bit">${esc(f)}</span>`)].filter(Boolean).join('');
+    return `<li class="nc-src" data-q="${esc(l.subject.q)}"><span class="nc-src-subj">${esc(l.subject.label)}</span>${bits}
+      <details class="nc-src-ev"><summary>${esc(WORDING.evidence)}</summary><p>${esc(l.evidence)}</p><ul>${l.source.map(s => `<li>${citeHtml(cite(s, ctx))}</li>`).join('')}</ul>${read ? `<p class="nc-src-note">${esc(read)}</p>` : ''}</details></li>`;
+  };
+  const main = links.filter(l => !l.part), parts = links.filter(l => l.part);
+  const sect = (h, list, badge = false) => (list.length ? `<h3>${esc(h)}</h3><ul class="nc-src-list">${list.map(l => row(l, badge)).join('')}</ul>` : '');
+  $('#book-srcs-head').textContent = WORDING.heading;
+  $('#book-srcs-body').innerHTML = sect(WORDING.on.primary, main.filter(l => l.tag === 'primary')) + sect(WORDING.on.secondary, main.filter(l => l.tag === 'secondary'))
+    + sect(WORDING.noted, main.filter(l => !l.tag)) + sect(WORDING.partsApart, parts, true) + `<p class="nc-src-about">${esc(WORDING.about)}</p>`;
+  box.hidden = false;
+  // The entries, asked for once the list is open: a subject with one is linked to it, one with none says so.
+  box.ontoggle = () => {
+    if (!box.open || box.dataset.asked === b.slug) return;
+    box.dataset.asked = b.slug;
+    const qs = [...new Set(links.map(l => l.subject.q))];
+    Promise.all(qs.map(q => entity(q).then(e => [q, e]))).then(found => {
+      if (S.book !== b) return;
+      for (const [q, e] of found) for (const el of box.querySelectorAll(`.nc-src[data-q="${q}"] > .nc-src-subj`)) {
+        el.outerHTML = e ? `<a class="term srcsubj nc-src-subj" data-qid="${esc(q)}" data-jdpi-ency="${esc(q)}" ${entryAttrs(q)} title="${esc(e.name || e.label)} · Master Index">${el.innerHTML}</a>`
+          : `${el.outerHTML}<span class="nc-src-wait">${esc(WORDING.waiting)}</span>`;
+      }
+    });
+  };
+  delete box.dataset.asked;
 }
 function renderToc() {
   $('#toc-list').innerHTML = S.chapters.map((c, i) => {

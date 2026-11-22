@@ -1,6 +1,6 @@
 # Vitruvian Manager datasets
 
-Generated 2026-11-21 from https://jdpi.pages.dev/integration/catalog.json. Read the live catalogue for current row counts.
+Generated 2026-11-22 from https://jdpi.pages.dev/integration/catalog.json. Read the live catalogue for current row counts.
 
 ## Realtime Geopolitics
 
@@ -14,7 +14,7 @@ Global Headline Tracker: outlets. The most-read news outlets of each covered cou
 
 ### volatility-latest
 
-Geopolitical Volatility: latest scores. The Geopolitical Volatility Index (0–100) for every country on the latest day (2026-11-20), with its five components: conflict & security (35%), political/diplomatic escalation (20%), civil unrest (20%), economic disruption (10%) and cross-border spread (15%). It measures news coverage of events, not events on the ground.
+Geopolitical Volatility: latest scores. The Geopolitical Volatility Index (0–100) for every country on the latest day (2026-11-21), with its five components: conflict & security (35%), political/diplomatic escalation (20%), civil unrest (20%), economic disruption (10%) and cross-border spread (15%). It measures news coverage of events, not events on the ground.
 
 - Rows: 236 · refresh: daily · licence: Index © JDP-Iq (method gvi-1.2-q96); GDELT data free to use with attribution to the GDELT Project.
 - File: https://jdpi.pages.dev/integration/data/volatility-latest.json (records at `records`)
@@ -22,9 +22,9 @@ Geopolitical Volatility: latest scores. The Geopolitical Volatility Index (0–1
 
 ### volatility-daily
 
-Geopolitical Volatility: daily scores. Daily Geopolitical Volatility Index scores and components for every country over the last 56 days, for trends and comparisons.
+Geopolitical Volatility: daily scores. Daily Geopolitical Volatility Index scores and components for every country over the last 57 days, for trends and comparisons.
 
-- Rows: 11,850 · refresh: daily · licence: Index © JDP-Iq (method gvi-1.2-q96); GDELT data free to use with attribution to the GDELT Project.
+- Rows: 12,059 · refresh: daily · licence: Index © JDP-Iq (method gvi-1.2-q96); GDELT data free to use with attribution to the GDELT Project.
 - Files: https://jdpi.pages.dev/integration/data/volatility-daily/0.json, https://jdpi.pages.dev/integration/data/volatility-daily/1.json, https://jdpi.pages.dev/integration/data/volatility-daily/2.json (+9 more) (records at `records`)
 - Fields: `date` (date), `iso3` (string), `name` (string), `score` (number), `conflict` (number), `political` (number), `unrest` (number), `economic` (number), `spread` (number), `events` (number), `tone` (number), `coverage` (string)
 
@@ -32,7 +32,7 @@ Geopolitical Volatility: daily scores. Daily Geopolitical Volatility Index score
 
 Geopolitical Volatility: global mean. The world mean of the Geopolitical Volatility Index each day, with the number of GDELT events and quarter-hour files processed.
 
-- Rows: 56 · refresh: daily · licence: Index © JDP-Iq; GDELT data free to use with attribution to the GDELT Project.
+- Rows: 57 · refresh: daily · licence: Index © JDP-Iq; GDELT data free to use with attribution to the GDELT Project.
 - File: https://jdpi.pages.dev/integration/data/volatility-global.json (records at `records`)
 - Fields: `date` (date), `mean_score` (number), `events` (number), `files` (number)
 
@@ -94,9 +94,9 @@ National Analysis: key indicator time series. Yearly values since 1980 for every
 
 ### upcoming-political-events
 
-Realtime Calendar: recent and upcoming events. The Realtime Calendar's window: political events from six months ago to eighteen months ahead (2026-05-21 to 2028-05-21 at the last build): elections, referendums, summits, new leaders, coups, ceasefires, protests, court rulings and more.
+Realtime Calendar: recent and upcoming events. The Realtime Calendar's window: political events from six months ago to eighteen months ahead (2026-05-22 to 2028-05-22 at the last build): elections, referendums, summits, new leaders, coups, ceasefires, protests, court rulings and more.
 
-- Rows: 321 · refresh: daily · licence: Summaries from Wikipedia, CC BY-SA 4.0 (credit Wikipedia); facts from Wikidata (CC0) and UCDP/PRIO (CC BY 4.0); compilation © JDP-Iq. Leaders to 2015 after Archigos 4.1 (Goemans, Gleditsch and Chiozza), whose page states no licence: kept with its citation until VM’s owner decides.
+- Rows: 320 · refresh: daily · licence: Summaries from Wikipedia, CC BY-SA 4.0 (credit Wikipedia); facts from Wikidata (CC0) and UCDP/PRIO (CC BY 4.0); compilation © JDP-Iq. Leaders to 2015 after Archigos 4.1 (Goemans, Gleditsch and Chiozza), whose page states no licence: kept with its citation until VM’s owner decides.
 - File: https://jdpi.pages.dev/integration/data/upcoming-political-events.json (records at `records`)
 - Fields: `date` (date), `country` (string), `title` (string), `type` (string), `status` (string), `source` (string), `summary` (string), `ref` (string), `refName` (string), `level` (string), `iso3` (string), `class` (string), `precision` (string)
 
@@ -130,7 +130,7 @@ Daily Synopsis: the day's major stories. Each day's major political stories, pic
 
 Economics Briefing: stories and papers. Every paper and story in the Economics Briefing over the last 7 days, classed by fields (macro, monetary, trade, labour, development, finance, public, energy) and by type (papers or news). Join `source` to econ-briefing-sources.
 
-- Rows: 564 · refresh: 6-hourly · licence: Titles, links and short summaries © their publishers, quoted for reference; classification and metadata © JDP-Iq.
+- Rows: 566 · refresh: 6-hourly · licence: Titles, links and short summaries © their publishers, quoted for reference; classification and metadata © JDP-Iq.
 - File: https://jdpi.pages.dev/econ/briefing/data/stories.json (records at `items`)
 - Fields: `id` (string), `title` (string), `url` (string), `source` (string), `kind` (string), `tier` (number), `fields` (array), `type` (string), `published` (date), `summary` (string), `section` (string), `doi` (string), `authors` (string), `also` (array), `undated` (boolean), `access` (string), `alt` (array)
 
@@ -140,13 +140,13 @@ Economics Briefing: sources. The journals, preprint servers, institutions and ne
 
 - Rows: 50 · refresh: 6-hourly · licence: Metadata © JDP-Iq.
 - File: https://jdpi.pages.dev/econ/briefing/data/stories.json (records at `sources`)
-- Fields: `id` (string), `outlet` (string), `outletId` (string), `name` (string), `url` (string), `feed` (string), `kind` (string), `tier` (number), `fields` (array), `qid` (string), `status` (string), `count` (number), `stored` (number), `latest` (date), `checked` (date), `lastOk` (date), `etag` (string), `lastModified` (string), `error` (string), `notModified` (boolean), `strict` (boolean), `badge` (string), `access` (string)
+- Fields: `id` (string), `outlet` (string), `outletId` (string), `name` (string), `url` (string), `feed` (string), `kind` (string), `tier` (number), `fields` (array), `qid` (string), `status` (string), `count` (number), `stored` (number), `latest` (date), `checked` (date), `lastOk` (date), `etag` (string), `lastModified` (string), `notModified` (boolean), `strict` (boolean), `badge` (string), `access` (string)
 
 ### science-briefing-stories
 
 Scientific Briefing: stories and papers. Every paper and story in the Scientific Briefing over the last 7 days, classed by disciplines (physics, chemistry, biology, earth, space) and by type (papers or news). Join `source` to science-briefing-sources.
 
-- Rows: 1,405 · refresh: 6-hourly · licence: Titles, links and short summaries © their publishers, quoted for reference; classification and metadata © JDP-Iq.
+- Rows: 1,401 · refresh: 6-hourly · licence: Titles, links and short summaries © their publishers, quoted for reference; classification and metadata © JDP-Iq.
 - File: https://jdpi.pages.dev/science/briefing/data/stories.json (records at `items`)
 - Fields: `id` (string), `title` (string), `url` (string), `source` (string), `kind` (string), `tier` (number), `disciplines` (array), `type` (string), `published` (date), `summary` (string), `section` (string), `doi` (string), `also` (array), `undated` (boolean), `access` (string), `alt` (array)
 
@@ -162,7 +162,7 @@ Scientific Briefing: sources. The journals, preprint servers, institutions and n
 
 Digital Briefing: stories and papers. Every paper and story in the Digital Briefing over the last 7 days, classed by fields (ai, software, security, hardware, networks, quantum, privacy, policy) and by type (papers or news). Join `source` to digital-briefing-sources.
 
-- Rows: 1,368 · refresh: 6-hourly · licence: Titles, links and short summaries © their publishers, quoted for reference; classification and metadata © JDP-Iq.
+- Rows: 1,369 · refresh: 6-hourly · licence: Titles, links and short summaries © their publishers, quoted for reference; classification and metadata © JDP-Iq.
 - File: https://jdpi.pages.dev/digital/briefing/data/stories.json (records at `items`)
 - Fields: `id` (string), `title` (string), `url` (string), `source` (string), `kind` (string), `tier` (number), `fields` (array), `type` (string), `published` (date), `summary` (string), `section` (string), `doi` (string), `authors` (string), `also` (array), `undated` (boolean), `access` (string), `accessMark` (string), `alt` (array)
 
@@ -335,3 +335,13 @@ Kino: documentaries and courses. Every Kino documentary and Great Thinkers cours
 - Rows: 18 · refresh: monthly · licence: Documentary texts and index © JDP-Iq; images from Wikimedia Commons, each under its own licence (kino/data/media.json).
 - File: https://jdpi.pages.dev/kino/data/index.json (records at `docs`)
 - Fields: `id` (string), `title` (string), `category` (string), `era` (array), `cutoff` (string), `minutes` (number), `books` (array), `summary` (string), `subjects` (array), `scenes` (number), `parts` (number), `quiz` (number), `sources` (number), `scholarly` (number), `links` (array), `preview` (object), `path` (string)
+
+## Bibliotheca
+
+### bibliotheca-source-links
+
+Bibliotheca: primary and secondary sources. Every judgement of a Bibliotheca book as a primary or a secondary source, one row per link between one work on the shelf and one subject (a happening, an idea or a person): its tag (primary, secondary or none), the basis of the tag, any note standing beside it or in its place (flags), the evidence in one sentence, the sources it rests on (statements on Wikidata read on the day judged, the book’s own chapters), its confidence and the day judged. A tag belongs to the link, never to the book as a whole. Rows with `shown` true (strong or fair evidence, with a tag or a note) are the ones the Master Index and Neo Book show; the others are kept with the reason they are held. Each judgement was made for Vitruvian Manager by an AI model (Claude), reading the evidence named, and checked by Vitruvian Manager’s rules; no person checked it. `entry` says whether the subject has a Master Index entry today; get_entity gives an entry’s shown links as source_links, and a book’s own entry the subjects it is a source on as source_links_from.
+
+- Rows: 65 · refresh: on change · licence: Judgements, evidence sentences and wording © JDP-Iq; the Wikidata statements they cite are CC0.
+- File: https://jdpi.pages.dev/integration/data/bibliotheca-source-links.json (records at `records`)
+- Fields: `work` (string), `work_qid` (string), `work_title` (string), `part` (string), `part_by` (string), `subject_qid` (string), `subject_label` (string), `subject_kind` (string), `tag` (string), `tag_words` (string), `basis` (string), `basis_words` (string), `flags` (array), `flag_words` (array), `evidence` (string), `sources` (array), `source_words` (array), `confidence` (string), `shown` (boolean), `held` (string), `why` (string), `note` (string), `judged` (date), `entry` (boolean)

@@ -96,7 +96,8 @@
                 "mm",
                 "ns",
                 "ds",
-                "kino"
+                "kino",
+                "bibliotheca"
               ]
             }
           }
@@ -136,7 +137,7 @@
             "name": "module",
             "in": "query",
             "required": false,
-            "description": "Only one module (rt, hb, rs, mm, ns, ds, kino) or submodule id.",
+            "description": "Only one module (rt, hb, rs, mm, ns, ds, kino, bibliotheca) or submodule id.",
             "schema": {
               "type": "string"
             }
@@ -189,6 +190,7 @@
             "schema": {
               "type": "string",
               "enum": [
+                "bibliotheca-source-links",
                 "congress-members",
                 "congress-trades",
                 "daily-synopsis-stories",
@@ -272,6 +274,7 @@
             "schema": {
               "type": "string",
               "enum": [
+                "bibliotheca-source-links",
                 "congress-members",
                 "congress-trades",
                 "daily-synopsis-stories",
@@ -1319,7 +1322,8 @@
               "mm",
               "ns",
               "ds",
-              "kino"
+              "kino",
+              "bibliotheca"
             ]
           },
           "submodule": {
@@ -1636,6 +1640,24 @@
           },
           "encyclopaedia": {
             "type": "string"
+          },
+          "source_links": {
+            "type": "array",
+            "items": {
+              "type": "object"
+            },
+            "description": "Present when Bibliotheca holds a book judged a primary or a secondary source on this entry: each { work, work_qid, work_title, opens, part, tag, tag_words, basis, basis_words, flags, flag_words, evidence, sources: [{ text, href }], wikidata_read, confidence, judged }. Only links on strong or fair evidence; the dataset bibliotheca-source-links holds every link."
+          },
+          "source_links_from": {
+            "type": "array",
+            "items": {
+              "type": "object"
+            },
+            "description": "On a book’s own entry: the subjects it is judged a source on, each { subject_qid, subject_label, part, tag, tag_words, basis, basis_words, flags, flag_words, evidence, sources, wikidata_read, confidence, judged }."
+          },
+          "source_links_about": {
+            "type": "string",
+            "description": "How the source links were judged: by an AI model (Claude), checked by Vitruvian Manager’s rules; no person checked them."
           },
           "licence": {
             "type": "string"

@@ -25,6 +25,7 @@ import { isDisambiguation, getBatched, entityLabel, nameOf, otherLabel, shownNam
 import { lostCounts, refuseIfLost } from '../../calendar/scripts/guard.mjs';
 import { typeOf, TYPE_NAMES } from './types.mjs';
 import { schoolSelfTags } from './thinkers.mjs';
+import { applySourceLinks, readSourceLinks } from './source-links.mjs';
 
 const here = fileURLToPath(new URL('.', import.meta.url));
 const jdpiDir = resolve(here, '../..');
@@ -408,6 +409,10 @@ if (namesBack.length) console.log(`${namesBack.length} short names kept as label
 // (thinkers.mjs schoolSelfTags), in a full build and in --only alike.
 const ownSchools = schoolSelfTags(records);
 if (ownSchools.length) console.log(`${ownSchools.length} schools given their own School value (${ownSchools.join(', ')})`);
+// Primary and secondary sources (MI-14): the shown links of bibliotheca/data/source-links.json on the entries of their
+// subjects and of their works (source-links.mjs), made again from the file on every build, full or --only.
+const srcLinks = applySourceLinks(records, readSourceLinks(jdpiDir));
+console.log(`source links: ${srcLinks.on} on subjects' entries, ${srcLinks.from} on works' entries, ${srcLinks.waiting} waiting for an entry`);
 const readOut = f => JSON.parse(readFileSync(join(OUT, f), 'utf8'));
 // Everything is written into lake/data.new; only when all of it is there does it replace lake/data.
 rmSync(NEW, { recursive: true, force: true });

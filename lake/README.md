@@ -85,6 +85,10 @@ Each book's cast (`bibliotheca/data/cast/<slug>.json`, made by `bibliotheca/scri
 
 A record's book-only names (`local`) feed its entity but not the name, since the name means someone else in other books (the Prince's "Cyrus", or "Naples", which there means the Kingdom). The book's shelf decision gives the name back to the entity. Every book is tagged against the one lake. So a cast record that is dropped, moved or made book-only changes the other books' terms at their next re-tag. After changing a cast, re-tag every book.
 
+### Primary and secondary sources
+
+Which books are primary or secondary sources on which subjects (ledger MI-14) is judged in one file, `bibliotheca/data/source-links.json`, under the rule and its wording in `bibliotheca/lib/sources.js`. Every build, full or `--only`, reads that file (`scripts/source-links.mjs`) and puts its shown links (high or medium confidence, with a tag or a note) on the records: `src` on a subject's entry (one item per book or part by another hand: the work, its title, the volumes it opens, the tag, basis, notes and evidence, each source named in words with its address, and the words the page shows), `srcFrom` on a work's own entry where the lake holds the work, and the tags "Primary source on:<subject>" and "Secondary source on:<subject>" on that work's entry, from its main text's tagged links only. No tag goes on a subject's entry, none on an author's, and no entry is made: a subject the lake does not hold has its link on the book side only (Neo Book) and gains it here at the first build after the lake holds it, with no change to the file. After changing the file, run `node lake/scripts/build.mjs --only bibliotheca` and then the catalogue (the dataset `bibliotheca-source-links`, and `get_entity`'s `source_links`).
+
 ## Refresh
 
 `.github/workflows/lake-refresh.yml` rebuilds monthly (on the 3rd), tags every book again, counts the new tags (`--only bibliotheca`) and commits `data/`. Summaries are cached in `scripts/summary-cache.json`, so a refresh only fetches new articles.

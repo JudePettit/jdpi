@@ -24,8 +24,8 @@ Ground rules for assistants:
 ### Realtime Geopolitics
 
 - [headline-outlets](https://jdpi.pages.dev/api/v1/datasets/headline-outlets): Global Headline Tracker: outlets. The most-read news outlets of each covered country whose front pages the Global Headline Tracker follows, with the feed it reads.
-- [volatility-latest](https://jdpi.pages.dev/api/v1/datasets/volatility-latest): Geopolitical Volatility: latest scores. The Geopolitical Volatility Index (0–100) for every country on the latest day (2026-11-20), with its five components: conflict & security (35%), political/diplomatic escalation (20%), civil unrest (20%), economic disruption (10%) and cross-border spread (15%).
-- [volatility-daily](https://jdpi.pages.dev/api/v1/datasets/volatility-daily): Geopolitical Volatility: daily scores. Daily Geopolitical Volatility Index scores and components for every country over the last 56 days, for trends and comparisons.
+- [volatility-latest](https://jdpi.pages.dev/api/v1/datasets/volatility-latest): Geopolitical Volatility: latest scores. The Geopolitical Volatility Index (0–100) for every country on the latest day (2026-11-21), with its five components: conflict & security (35%), political/diplomatic escalation (20%), civil unrest (20%), economic disruption (10%) and cross-border spread (15%).
+- [volatility-daily](https://jdpi.pages.dev/api/v1/datasets/volatility-daily): Geopolitical Volatility: daily scores. Daily Geopolitical Volatility Index scores and components for every country over the last 57 days, for trends and comparisons.
 - [volatility-global](https://jdpi.pages.dev/api/v1/datasets/volatility-global): Geopolitical Volatility: global mean. The world mean of the Geopolitical Volatility Index each day, with the number of GDELT events and quarter-hour files processed.
 - [realtime-wars](https://jdpi.pages.dev/api/v1/datasets/realtime-wars): Realtime Battlefield: wars this year. Every armed conflict recorded so far in 2026, grouped into wars, with deaths, events, status and a plain-English background.
 - [realtime-war-months](https://jdpi.pages.dev/api/v1/datasets/realtime-war-months): Realtime Battlefield: war by month. Each war's deaths, events and civilian deaths month by month in 2026, with Vitruvian Manager's monthly note (change on the previous month, deadliest areas).
@@ -34,7 +34,7 @@ Ground rules for assistants:
 - [national-indicators](https://jdpi.pages.dev/api/v1/datasets/national-indicators): National Analysis: indicator definitions. The 41 indicators behind National Analysis: PESTLE dimension, unit, which direction is better and the change that counts as improving or worsening, and each one's yearly map layer (every country, every year, in national/data/years/, described by its manifest.json: the layers the time slider and the Omni-Map read).
 - [national-indicator-latest](https://jdpi.pages.dev/api/v1/datasets/national-indicator-latest): National Analysis: latest indicator values. For each country and indicator, the latest value, its year, the change on the previous value and whether that counts as improving, stable or worsening.
 - [national-key-series](https://jdpi.pages.dev/api/v1/datasets/national-key-series): National Analysis: key indicator time series. Yearly values since 1980 for every country of eight headline indicators (NY.GDP.MKTP.KD.ZG: GDP growth, % a year.
-- [upcoming-political-events](https://jdpi.pages.dev/api/v1/datasets/upcoming-political-events): Realtime Calendar: recent and upcoming events. The Realtime Calendar's window: political events from six months ago to eighteen months ahead (2026-05-21 to 2028-05-21 at the last build): elections, referendums, summits, new leaders, coups, ceasefires, protests, court rulings and more.
+- [upcoming-political-events](https://jdpi.pages.dev/api/v1/datasets/upcoming-political-events): Realtime Calendar: recent and upcoming events. The Realtime Calendar's window: political events from six months ago to eighteen months ahead (2026-05-22 to 2028-05-22 at the last build): elections, referendums, summits, new leaders, coups, ceasefires, protests, court rulings and more.
 
 ### Omni News
 
@@ -82,11 +82,15 @@ Ground rules for assistants:
 
 - [kino-documentaries](https://jdpi.pages.dev/api/v1/datasets/kino-documentaries): Kino: documentaries and courses. Every Kino documentary and Great Thinkers course: category, era, running time, subjects (Wikidata ids), scenes, parts, quiz questions, how many sources (and scholarly sources) it draws on, and the Vitruvian Manager submodules its scenes link to.
 
+### Bibliotheca
+
+- [bibliotheca-source-links](https://jdpi.pages.dev/api/v1/datasets/bibliotheca-source-links): Bibliotheca: primary and secondary sources. Every judgement of a Bibliotheca book as a primary or a secondary source, one row per link between one work on the shelf and one subject (a happening, an idea or a person): its tag (primary, secondary or none), the basis of the tag, any note standing beside it or in its place (flags), the evidence in one sentence, the sources it rests on (statements on Wikidata read on the day judged, the book’s own chapters), its confidence and the day judged.
+
 ## Optional
 
 - [Local MCP server](https://jdpi.pages.dev/integration/mcp/prp-mcp.mjs): one file, Node 18+, no dependencies; the same tools without the edge time budget (`node prp-mcp.mjs --help`)
 - [Briefing feeds](https://jdpi.pages.dev/api/v1/briefings): RSS and JSON Feed for the intelligence, scientific, economics and digital briefings
 - [Realtime Calendar as iCalendar](https://jdpi.pages.dev/integration/feeds/realtime-calendar.ics); filtered calendars at https://jdpi.pages.dev/api/v1/calendar.ics?country=…&type=…
-- [Bibliotheca · Neo Book](https://jdpi.pages.dev/bibliotheca/neo/index.html): a reading room of public-domain books with the Master Index's terms marked through the text. It has no dataset of its own; in encyclopaedia-entities its submodule id in appears_in is neo-classic
+- [Bibliotheca · Neo Book](https://jdpi.pages.dev/bibliotheca/neo/index.html): a reading room of public-domain books with the Master Index's terms marked through the text. Its judgements of each book as a primary or a secondary source on a subject are the dataset bibliotheca-source-links (above); in encyclopaedia-entities its submodule id in appears_in is neo-classic
 - [Digital Science · Omni-Map](https://jdpi.pages.dev/omni/index.html): dated borders (Cliopatria v0.2.1, every year it covers, 3400 BC to AD 2024) and the battles VM holds on one map, opened from a tagged name in Neo Book; a view is a recipe in its address (VR/1) and saves as a citable bundle. It has no dataset of its own yet
 - [Vitruvian Manager submodules](https://jdpi.pages.dev/registry.json): every page of Vitruvian Manager with what it does

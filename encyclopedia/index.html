@@ -85,6 +85,16 @@ main{min-width:0}
 .inbook{margin-top:4px;color:var(--prp-text-2);font-size:12.5px;line-height:1.6;overflow-wrap:anywhere}.inbook a{color:var(--prp-link)!important}
 .inbook details{display:inline}.inbook summary{display:inline;cursor:pointer;color:var(--prp-link)}
 .note,.nosum{color:var(--prp-muted);font-size:12.5px}.nosum{margin:0}
+/* Primary and secondary sources: the mark on a book's line, its evidence a click away, the rule's link */
+.srcmark{margin-top:4px;color:var(--prp-text-2);font-size:12.5px;line-height:1.6;overflow-wrap:anywhere}
+.srcmark .prp-kind{margin-right:6px;border-color:var(--prp-primary);background:var(--prp-primary-soft);color:var(--prp-text);vertical-align:1px}
+.srcmark>span:not(.prp-kind)+span::before{content:'· ';color:var(--prp-faint)}.srcmark>span+span{margin-left:4px}
+.srcev summary{display:inline;cursor:pointer;color:var(--prp-link);margin-left:8px}.srcev[open]{display:block;margin:4px 0 2px}.srcev[open] summary{margin-left:0}
+.srcev p{margin:4px 0}.srcev ul{margin:2px 0 4px;padding-left:18px}.srcev li a{color:var(--prp-link)!important}
+.srcmark .srcev{display:inline}.srcmark .srcev[open]{display:block}
+.srcs .ment a.srcsubj{font-weight:600}.srcname{font-weight:600;color:var(--prp-text)}.srcwait{margin-left:8px;color:var(--prp-muted);font-size:12px}
+.srcrule{margin:8px 0 0 10px}.srcs .srcrule{margin-left:0}.srcrule .more{margin:0}
+.group[data-sources] .note{margin:0 0 4px}
 /* Pop-out */
 .modal{position:fixed;inset:0;z-index:50;display:grid;place-items:center;padding:16px;background:var(--prp-scrim)}
 .mbox{position:relative;width:min(720px,100%);max-height:85vh;overflow:auto;padding:20px 22px;background:var(--prp-surface);border:1px solid var(--prp-line);border-radius:var(--prp-radius-lg);box-shadow:var(--prp-shadow-2);color:var(--prp-text-2)}
@@ -142,7 +152,7 @@ main{min-width:0}
 
   <footer class="prp-sources">
     <p><b>Sources.</b> Facts from <a href="https://www.wikidata.org" target="_blank" rel="noreferrer">Wikidata</a> (CC0). Summaries from <a href="https://en.wikipedia.org" target="_blank" rel="noreferrer">Wikipedia</a> (CC BY-SA 4.0; the text stays under that licence). Tags combine Wikidata facts with Vitruvian Manager’s own tags: schools of thought, ideologies and fields, in the discipline’s words, and a position on the line from left to right (the Political Briefing’s five), which is Vitruvian Manager’s own placement, from the Politics course, until a source is cited, and says so beside the tag.</p>
-    <p><b>Method.</b> Every submodule reports the people, places, wars, parties and ideas it mentions; each is matched to its Wikidata ID, given tags from its facts, and linked back to the exact place it appears. Each entry has one type, read from its Wikidata classes: a polity is a state that no longer exists; a period, a named span of history; a site, an archaeological site, a monument or a building of historical note; a series, a grouping of other entries, such as a series of wars or the events of one year. An entry’s “Appears in Vitruvian Manager” counts those places, by module and submodule; a book is one place, and its line says how many times and in which chapters the book names the entry. A person’s name is shown without the realm Wikidata adds after a regnal number (“Frederik X”, not “Frederik X of Denmark”); the full label is kept among the other names. Refreshed monthly.</p>
+    <p><b>Method.</b> Every submodule reports the people, places, wars, parties and ideas it mentions; each is matched to its Wikidata ID, given tags from its facts, and linked back to the exact place it appears. Each entry has one type, read from its Wikidata classes: a polity is a state that no longer exists; a period, a named span of history; a site, an archaeological site, a monument or a building of historical note; a series, a grouping of other entries, such as a series of wars or the events of one year. An entry’s “Appears in Vitruvian Manager” counts those places, by module and submodule; a book is one place, and its line says how many times and in which chapters the book names the entry. A person’s name is shown without the realm Wikidata adds after a regnal number (“Frederik X”, not “Frederik X of Denmark”); the full label is kept among the other names. A book of Bibliotheca judged a primary or a secondary source on an entry says so on its line, with the evidence a click away; a work’s own entry lists the subjects it is a source on. The judgements are kept in one reviewed list, and the entry links to what its tags mean. Refreshed monthly.</p>
   </footer>
 </div>
 <div class="modal" id="modal" hidden role="dialog" aria-modal="true" aria-labelledby="mtitle"><div class="mbox"><button class="mclose" id="mclose" type="button" aria-label="Close">×</button><h2 id="mtitle"></h2><div id="mbody"></div></div></div>
@@ -197,7 +207,7 @@ const NO_SUMMARY = { redirect: 'No summary: Wikipedia has no article of its own 
 // filter and in the filter's note.
 const TYPE_NOTE = { Polity: 'A state that no longer exists.', Period: 'A named span of history.', Site: 'An archaeological site, a monument or a building of historical note.', Series: 'A grouping of other entries, such as a series of wars or the events of one year.' };
 const typeNote = counts => Object.keys(TYPE_NOTE).filter(n => [...counts.keys()].some(t => tagValue[t] === n)).map(n => `${n}: ${TYPE_NOTE[n].replace(/^./, c => c.toLowerCase())}`).join(' ');
-const FACET_ORDER = ['Type', 'Nationality', 'Role', 'School', 'Political position', 'Ideology', 'Theory', 'Occupation', 'Field', 'Movement', 'Party', 'Position held', 'Led', 'In power in', 'Conflict', 'Event type', 'Member of', 'Investment style', 'Century', 'Appears in'];
+const FACET_ORDER = ['Type', 'Nationality', 'Role', 'School', 'Political position', 'Ideology', 'Theory', 'Occupation', 'Field', 'Movement', 'Party', 'Position held', 'Led', 'In power in', 'Conflict', 'Event type', 'Member of', 'Investment style', 'Primary source on', 'Secondary source on', 'Century', 'Appears in'];
 const PAGE = 100;
 let idx, rows, tagFacet = [], tagValue = [], tagShown = [], byQid = new Map(), shown = PAGE, lastEntry = null;
 const sel = new Map(); // facet → Set(tagId)
@@ -418,6 +428,8 @@ async function renderEntity(q) {
   const box = $('#entity');
   box.innerHTML = '<div class="empty">Loading…</div>';
   const e = await entity(q).catch(() => null);
+  // The rule's module, only for an entry a book is judged a source on (or a work's own entry): its wording table.
+  const SRC = e && (e.src || e.srcFrom) ? await import('../bibliotheca/lib/sources.js').catch(() => null) : null;
   if (!e) { box.innerHTML = `<div class="prp-panel empty">No entry for ${esc(q)}. <a href="#explore">Back to the Explorer</a></div>`; setEntryTab(q, q); return; }
   // The shown name (a person's without the realm, lake/scripts/resolve.mjs shownName); the label stays among its names.
   const name = e.name || e.label;
@@ -439,7 +451,18 @@ async function renderEntity(q) {
     const first = m.w.slice(0, 12).map(at).join(' · '), rest = m.w.slice(12);
     return `<div class="inbook">Where in the book: ${first}${rest.length ? ` · <details><summary>${rest.length} more chapter${rest.length === 1 ? '' : 's'}</summary> ${rest.map(at).join(' · ')}</details>` : ''}</div>`;
   };
-  const ment = m => `<div class="ment">${linkHtml(m.m, m.u, esc(m.c))}${inBook(m)}<small>${m.d ? esc(fmtDate(m.d)) : ''}</small></div>`;
+  // Primary and secondary sources (MI-14): the lake puts a book's shown judgement on its subject's entry (e.src) and on
+  // the work's own entry (e.srcFrom), in words, from bibliotheca/data/source-links.json (lake/scripts/source-links.mjs).
+  // The words of the headings and the rule are the one table's (bibliotheca/lib/sources.js WORDING), read here, not typed.
+  const W = SRC?.WORDING;
+  const bookOf = m => (m.m === 'neo-classic' ? decodeURIComponent(/[#&]book=([^&]+)/.exec(m.u)?.[1] || '') || null : null);
+  const citeHtml = c => !c.href ? esc(c.text) : /^https?:/.test(c.href) ? `<a href="${esc(c.href)}" target="_blank" rel="noreferrer">${esc(c.text)}</a>`
+    : c.href.startsWith('encyclopedia/') ? `<a href="${esc(c.href.slice(c.href.indexOf('#')))}">${esc(c.text)}</a>` : linkHtml('neo-classic', LIVE + c.href, esc(c.text));
+  const evidenceHtml = x => `<details class="srcev"><summary>${esc(W.evidence)}</summary><p>${esc(x.evidence)}</p><ul>${x.cites.map(c => `<li>${citeHtml(c)}</li>`).join('')}</ul>${x.read ? `<p class="note">${esc(x.read)}</p>` : ''}</details>`;
+  const sayHtml = (x, badge) => `${badge ? `<span class="prp-kind">${esc(x.say.tag || W.noted)}</span>` : ''}${x.say.basis ? `<span class="srcwhy">${esc(x.say.basis)}</span>` : ''}${x.say.flags.map(f => `<span class="srcflag">${esc(f)}</span>`).join('')}${x.say.part ? `<span class="srcpart">${esc(x.say.part)}</span>` : ''}`;
+  const markHtml = x => `<div class="srcmark" title="${esc(x.evidence)}">${sayHtml(x, true)}${evidenceHtml(x)}</div>`;
+  const marksOn = m => { const b = W && e.src ? bookOf(m) : null; return b ? e.src.filter(x => x.vols.includes(b)).map(markHtml).join('') : ''; };
+  const ment = m => `<div class="ment">${linkHtml(m.m, m.u, esc(m.c))}${inBook(m)}${marksOn(m)}<small>${m.d ? esc(fmtDate(m.d)) : ''}</small></div>`;
   const popouts = [];
   const groupOf = (mod, list) => {
     let more = '';
@@ -448,6 +471,25 @@ async function renderEntity(q) {
   };
   const suites = new Map();
   for (const [mod, list] of groups) { const s = MODULE_SUITE[mod] || ''; (suites.get(s) || suites.set(s, []).get(s)).push(groupOf(mod, list)); }
+  // A book judged a source on the entry that names it nowhere the index reads is listed under Bibliotheca, apart, so
+  // the count above the appearances still counts the places that name it; the rule's paragraph is a click away.
+  const what = W ? `<p class="srcrule"><button type="button" class="more" data-srcwhat>${esc(W.what)}</button></p>` : '';
+  if (W && e.src?.length) {
+    const named = new Set((groups.get('neo-classic') || []).map(bookOf).filter(Boolean));
+    const apart = e.src.filter(x => !x.vols.some(v => named.has(v)));
+    const list = suites.get('bibliotheca') || suites.set('bibliotheca', []).get('bibliotheca');
+    if (apart.length) list.push(`<div class="group" data-sources><h4>${esc(W.notNamed)}</h4><p class="note">${esc(W.notNamedNote)}</p>${apart.map(x => `<div class="ment">${linkHtml('neo-classic', `${LIVE}bibliotheca/neo/index.html#book=${encodeURIComponent(x.book)}`, esc(x.title))}${markHtml(x)}</div>`).join('')}</div>`);
+    list.push(what);
+  }
+  // A work's own entry: the subjects it is a primary or a secondary source on, each linked to its entry where one exists.
+  let fromHtml = '';
+  if (W && e.srcFrom?.length) {
+    const row = (x, badge) => { const r = byQid.get(x.q);
+      return `<div class="ment" data-q="${esc(x.q)}">${r ? `<a class="srcsubj" href="#${esc(x.q)}">${esc(r[1])}</a>` : `<span class="srcname">${esc(x.label)}</span><span class="srcwait">${esc(W.waiting)}</span>`}<div class="srcmark">${sayHtml(x, badge)}${evidenceHtml(x)}</div></div>`; };
+    const sect = (h, list, badge = false) => (list.length ? `<div class="group"><h4>${esc(h)}<span>${list.length}</span></h4>${list.map(x => row(x, badge)).join('')}</div>` : '');
+    const main = e.srcFrom.filter(x => !x.part);
+    fromHtml = `<div class="card srcs"><h3>${esc(W.heading)}</h3>${sect(W.on.primary, main.filter(x => x.tag === 'primary'))}${sect(W.on.secondary, main.filter(x => x.tag === 'secondary'))}${sect(W.noted, main.filter(x => !x.tag))}${sect(W.partsApart, e.srcFrom.filter(x => x.part), true)}${what}</div>`;
+  }
   const groupHtml = [...suites].map(([s, html]) => `<div class="suite">${s ? `<p class="sname">${esc(SUITE_NAME[s] || s)}</p>` : ''}${html.join('')}</div>`).join('');
   // The header counts places: a book is one place however often it names the entry (its line says how often and where).
   const places = e.places ?? e.mentions.length;
@@ -461,12 +503,14 @@ async function renderEntity(q) {
       <div class="card"><h3>Summary</h3>${e.summary ? `<p class="summary">${esc(e.summary)}</p>` : `<p class="nosum">${esc(NO_SUMMARY[e.ns] || 'No summary available.')}</p>`}
         ${e.wiki ? `<p class="links">${e.ns === 'redirect' || e.ns === 'disambiguation' ? '' : '<button type="button" class="more" id="fullintro">See more</button>'}<a href="https://en.wikipedia.org/wiki/${encodeURIComponent(e.wiki.replace(/ /g, '_'))}" target="_blank" rel="noreferrer">Wikipedia ↗</a><a href="https://www.wikidata.org/wiki/${e.q}" target="_blank" rel="noreferrer">Wikidata ↗</a></p>` : ''}</div>
       <div class="card"><h3>Appears in Vitruvian Manager · ${places.toLocaleString('en-GB')}</h3>${groupHtml || '<p class="note">Not mentioned directly; linked from related entries.</p>'}</div>
+      ${fromHtml}
     </div><div>
       ${factRows.length || relRows.length ? `<div class="card"><h3>Facts</h3><dl class="facts">${factRows.join('')}${relRows.join('')}</dl></div>` : ''}
       <div class="card"><h3>Tags · select to filter</h3><div class="tags">${e.tags.filter(t => !t.startsWith('Appears in:')).map(t => tagIdOf.has(t) ? `<button type="button" class="chip" data-add="${esc(tagIdOf.get(t))}" title="${esc(t)}">${esc(t.split(':').slice(1).join(':'))}</button>${e.tn?.[t] ? `<small class="tnote">${esc(e.tn[t])}</small>` : ''}` : '').join('')}</div></div>
     </div></div>`;
   box.querySelectorAll('[data-add]').forEach(b => b.onclick = () => addTag(+b.dataset.add));
   box.querySelectorAll('[data-pop]').forEach(b => b.onclick = () => openModal(popouts[+b.dataset.pop].title, popouts[+b.dataset.pop].html));
+  box.querySelectorAll('[data-srcwhat]').forEach(b => b.onclick = () => openModal(W.heading, `<p>${esc(W.about)}</p>`));
   $('#fullintro')?.addEventListener('click', async () => {
     openModal(e.label, '<p class="note">Loading from Wikipedia…</p>');
     try {

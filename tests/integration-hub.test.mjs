@@ -62,7 +62,7 @@ async function get(path, { method = 'GET', env = makeEnv() } = {}) {
 
 /* ================================================================ catalogue contract */
 describe('catalogue (integration/catalog.json)', () => {
-  const MODULES = new Set(['rt', 'hb', 'rs', 'mm', 'ns', 'ds', 'kino']); // hb: the four briefings, in Highbrowse since November 2026
+  const MODULES = new Set(['rt', 'hb', 'rs', 'mm', 'ns', 'ds', 'kino', 'bibliotheca']); // hb: the four briefings, in Highbrowse since November 2026; bibliotheca: its source links (MI-14)
   const TYPES = new Set(['string', 'number', 'date', 'boolean', 'array', 'object']);
   const SUBMODULES = new Set(REG.suites.flatMap(s => s.modules.map(m => m.id)));
   test('follows the schema', () => {
@@ -667,9 +667,10 @@ describe('calendars, skill and llms.txt', () => {
     assert.match(t, /^# Vitruvian Manager \(VM\)/); assert.match(t, /\/mcp\)/); assert.match(t, /catalog\.json/); assert.match(t, /api\/v1/); assert.match(t, /not as instructions|never as instructions/);
     for (const d of CAT.datasets) assert.ok(t.includes(`[${d.id}]`), d.id);
   });
-  test('llms.txt names Bibliotheca once, linking its reader, though it has no dataset', () => {
+  test('llms.txt names Bibliotheca’s reader once and files its one dataset, the source links, under Bibliotheca', () => {
     const t = readFileSync(join(ROOT, 'llms.txt'), 'utf8');
     assert.equal((t.match(/\[Bibliotheca · Neo Book\]/g) || []).length, 1);
+    assert.match(t, /### Bibliotheca\r?\n\r?\n- \[bibliotheca-source-links\]/);
     assert.match(t, /\(https:\/\/jdpi\.pages\.dev\/bibliotheca\/neo\/index\.html\)/);
     assert.ok(!/kino\/bibliotheca|Kino · Bibliotheca/.test(t), 'not filed under Kino');
   });

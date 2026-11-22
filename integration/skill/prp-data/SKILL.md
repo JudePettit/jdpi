@@ -27,6 +27,7 @@ small JSON API. Everything is public; no keys, no sign-in. Nothing here can chan
 | Today's news across the political spectrum | `latest_briefing` with `briefing: "intelligence"` | `GET /api/v1/briefings/intelligence` |
 | New papers or news in science, economics or technology | `latest_briefing` with `scientific`, `economics` or `digital`, and a `topic` | `GET /api/v1/briefings/scientific?topic=physics` |
 | Who or what is X? Where does Vitruvian Manager mention it? | `search_encyclopaedia`, then `get_entity` | `GET /api/v1/search?q=…`, `GET /api/v1/entities/{qid}` |
+| Is a book on Bibliotheca's shelf a primary or a secondary source on X, and on what evidence? | `get_entity` (its `source_links`; a book's own entry, `source_links_from`), or `query_dataset` on `bibliotheca-source-links` | `GET /api/v1/datasets/bibliotheca-source-links/rows?f.subject_qid=Q78994` |
 | Any table: wars, volatility, indicators, trades, holdings, breakthroughs… | `query_dataset` | `GET /api/v1/datasets/{id}/rows?f.<field>=<value>&sort=-date` |
 | Where and when, on a map (dated borders, battles) | none (a page) | `omni/index.html#vr=1&t=1446..1514&at=1494&fill=borders&l=battles&focus=Q153529` (VR/1; borders 3400 BC to AD 2024) |
 | Which Vitruvian Manager page shows this? | `list_submodules` | `GET /api/v1/submodules` |

@@ -28,6 +28,8 @@ import { lostCounts, refuseIfLost } from '../../calendar/scripts/guard.mjs';
 import { volatilityMovers, briefingFacts, writeHeads } from './heads.mjs';
 import { groupBattles, ownFigure, stateOf } from '../../battlefield/focus/figures.mjs';
 import { TYPES as MASTER_INDEX_TYPES } from '../../lake/scripts/types.mjs';
+import { LINKS_PATH as SOURCE_LINKS_PATH, BASES, FLAGS, plain, isShown, cite, nameMap, workTitle } from '../../bibliotheca/lib/sources.js';
+import { readSourceLinks } from '../../lake/scripts/source-links.mjs';
 // No download carries a value from a cite-only source (integration/scripts/cite-only.mjs, the Correlates of War): since
 // MP-11 (Jude, 17 November 2026: free data only; built 20 November) none is read here, so none is imported.
 // Each licence line says what the source's own terms say, as read on the date integration/sources.json gives.
@@ -613,6 +615,40 @@ spec({
     ['private', 'True for private submodules behind their own sign-in'], ['url', 'Address'], ['planned_url', 'Address once built (in-build submodules)'], ['host', 'Where it is hosted'], ['description', 'What it does'], ['views', 'Tabs inside the page']]
 });
 
+// ---- Bibliotheca ----------------------------------------------------------------------------------------------
+// Primary and secondary sources (MI-14): every link of bibliotheca/data/source-links.json, the one file the judgements
+// live in, one row each, in the rule's own words (bibliotheca/lib/sources.js) and with its sources named as the lake's
+// build names them (lake/scripts/source-links.mjs). `entry` is read from the lake, so it says what is so today.
+if (has(SOURCE_LINKS_PATH)) {
+  const ctx = readSourceLinks(ROOT), file = ctx.file;
+  const lakeNames = new Map(J('lake/data/index.json').rows.map(r => [r[0], r[1]]));
+  const names = nameMap(file, ctx.shelf);
+  const citeCtx = { name: q => lakeNames.get(q) || names.get(q) || null, title: slug => ctx.shelf.books.find(b => b.slug === slug)?.title || null, chapter: ctx.chapter };
+  const absolute = h => (h ? (/^https?:/.test(h) ? h : BASE_URL + h) : null);
+  spec({
+    id: 'bibliotheca-source-links', title: 'Bibliotheca: primary and secondary sources', module: 'bibliotheca', submodule: 'neo-classic',
+    description: 'Every judgement of a Bibliotheca book as a primary or a secondary source, one row per link between one work on the shelf and one subject (a happening, an idea or a person): its tag (primary, secondary or none), the basis of the tag, any note standing beside it or in its place (flags), the evidence in one sentence, the sources it rests on (statements on Wikidata read on the day judged, the book’s own chapters), its confidence and the day judged. A tag belongs to the link, never to the book as a whole. Rows with `shown` true (strong or fair evidence, with a tag or a note) are the ones the Master Index and Neo Book show; the others are kept with the reason they are held. Each judgement was made for Vitruvian Manager by an AI model (Claude), reading the evidence named, and checked by Vitruvian Manager’s rules; no person checked it. `entry` says whether the subject has a Master Index entry today; get_entity gives an entry’s shown links as source_links, and a book’s own entry the subjects it is a source on as source_links_from.',
+    derive: () => file.links.map(l => {
+      const p = plain(l);
+      return { work: l.work, work_qid: l.wq || null, work_title: workTitle(ctx.shelf, l.work), part: l.part?.heading || null, part_by: l.part?.by || null,
+        subject_qid: l.subject.q, subject_label: l.subject.label, subject_kind: l.subject.kind, tag: l.tag, tag_words: p.tag, basis: l.basis, basis_words: p.basis,
+        flags: l.flags || [], flag_words: p.flags, evidence: l.evidence, sources: l.source, source_words: l.source.map(s => { const c = cite(s, citeCtx); return { text: c.text, href: absolute(c.href) }; }),
+        confidence: l.confidence, shown: isShown(l), held: l.held || null, why: l.why || null, note: l.note || null, judged: l.judged, entry: lakeNames.has(l.subject.q) };
+    }),
+    from: [SOURCE_LINKS_PATH, 'bibliotheca/data/index.json', 'lake/data/index.json'], refresh: 'on change', updated: file.judged || TODAY, page: 'bibliotheca/neo/index.html',
+    licence: 'Judgements, evidence sentences and wording © JDP-Iq; the Wikidata statements they cite are CC0.', sources: ['The books on Bibliotheca’s shelf, read by chapter', 'Wikidata (CC0), read on the day judged', 'Vitruvian Manager’s rule for primary and secondary sources (bibliotheca/lib/sources.js)'],
+    fields: [['work', 'The work’s shelf slug: a book’s, or a set’s for every volume of it'], ['work_qid', 'The work’s Wikidata id, where the shelf gives one'], ['work_title', 'The work’s title'],
+      ['part', 'For a part by another hand (a translator’s preface, an editor’s introduction): its heading; null for the main text'], ['part_by', 'The part’s writer'],
+      ['subject_qid', 'The subject’s Wikidata id; its Master Index page, where it has one, is encyclopedia/index.html#<qid>'], ['subject_label', 'The subject'], ['subject_kind', 'happening, idea or person'],
+      ['tag', 'primary, secondary or null (no tag)'], ['tag_words', 'The tag in words: Primary source, Secondary source'], ['basis', `Why the tag: ${Object.keys(BASES).join(', ')}`], ['basis_words', 'The basis in plain words, as the pages show it'],
+      ['flags', `Notes beside a tag or in its place, each { id, years?, to?, with? }: ${Object.keys(FLAGS).join(', ')}. For RETROSPECTIVE, years is the gap from the start of the writing (where the book says when it began) or from its date, and to the gap to its last revision`], ['flag_words', 'The notes in plain words'], ['evidence', 'The evidence in one sentence: what was read, described, never quoted'],
+      ['sources', 'What the judgement rests on, as stored: { wd, p, v? } a Wikidata statement, { book, ch } a chapter of a book on the shelf, { collection } a collection’s heading, { lake, tag } a Master Index tag'],
+      ['source_words', 'Each source in words, with its address: { text, href }'], ['confidence', 'high, medium or low'], ['shown', 'True when the pages show the link: high or medium confidence, with a tag or a note'],
+      ['held', 'Why a low one is not shown'], ['why', 'Why the book is plainly about the subject'], ['note', 'Anything else a reader should know (the parts)'], ['judged', 'The day judged'],
+      ['entry', 'True when the subject has a Master Index entry today (read from the lake, not from the file)']]
+  });
+}
+
 // ---- Kino -----------------------------------------------------------------------------------------------------
 spec({
   id: 'kino-documentaries', title: 'Kino: documentaries and courses', module: 'kino', submodule: 'kino-political-events', submodules: REG.suites.find(s => s.id === 'kino')?.modules.map(m => m.id) || [],
@@ -698,7 +734,7 @@ for (const s of SPECS) {
   log(`${s.id.padEnd(34)} ${String(allRows.length).padStart(6)} rows  ${String(parts.length).padStart(2)} part(s)  ${(entry.bytes / 1024).toFixed(0).padStart(5)} KB  max part cost ${Math.max(...parts.map(p => p.cost))}`);
 }
 
-const MODULE_ORDER = ['rt', 'hb', 'rs', 'oi', 'mm', 'ns', 'ds', 'kino'];
+const MODULE_ORDER = ['rt', 'hb', 'rs', 'oi', 'mm', 'ns', 'ds', 'kino', 'bibliotheca'];
 catalogue.sort((a, b) => MODULE_ORDER.indexOf(a.module) - MODULE_ORDER.indexOf(b.module));
 const CATALOGUE = {
   generated: STAMP, // a full time, as every shard has: the freshness check reads a bare date as the end of its day
@@ -875,7 +911,7 @@ putJson('integration/data/query-index.json', {
   const lines = ['# Vitruvian Manager datasets', '', `Generated ${TODAY} from ${BASE_URL}integration/catalog.json. Read the live catalogue for current row counts.`, ''];
   for (const m of MODULE_ORDER) {
     const list = catalogue.filter(d => d.module === m); if (!list.length) continue;
-    lines.push(`## ${{ rt: 'Realtime Geopolitics', rs: 'Retrospective Geopolitics', oi: 'Intelligence Collection', mm: 'Wealth Automation', ns: 'Natural Science', ds: 'Digital Science', kino: 'Kino' }[m]}`, '');
+    lines.push(`## ${{ rt: 'Realtime Geopolitics', rs: 'Retrospective Geopolitics', oi: 'Intelligence Collection', mm: 'Wealth Automation', ns: 'Natural Science', ds: 'Digital Science', kino: 'Kino', bibliotheca: 'Bibliotheca' }[m]}`, '');
     for (const d of list) {
       lines.push(`### ${d.id}`, '', `${d.title}. ${d.description}`, '', `- Rows: ${d.rows.toLocaleString('en-GB')} · refresh: ${d.refresh} · licence: ${d.licence}`, `- File${d.urls ? 's' : ''}: ${(d.urls || [d.url]).slice(0, 3).map(u => BASE_URL + u).join(', ')}${(d.urls || []).length > 3 ? ` (+${d.urls.length - 3} more)` : ''} (records at \`${d.records || '(root)'}\`)`,
         `- Fields: ${d.fields.map(f => `\`${f.name}\` (${f.type})`).join(', ')}`, '');

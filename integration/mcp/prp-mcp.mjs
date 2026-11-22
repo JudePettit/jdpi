@@ -557,9 +557,24 @@ export function createPRP({ read, limits = {}, origin = BASE_URL } = {}) {
       facts: e.facts || {}, related: Object.fromEntries(Object.entries(e.rel || {}).map(([k, v]) => [k, v.map(([q, label]) => ({ qid: q, label }))])), tags: e.tags || [], tag_notes: e.tn || {},
       mentions: mentions.slice(0, maxM).map(m => ({ submodule: m.m, submodule_name: names[m.m] || m.m, context: m.c || null, date: m.d || null, url: m.u })),
       total_mentions: e.total ?? mentions.length, ...(mentions.length > maxM ? { more_mentions: mentions.length - maxM } : {}),
-      encyclopaedia: `${site}encyclopedia/index.html#${e.q}`, licence: 'Facts: Wikidata (CC0). Summary: Wikipedia (CC BY-SA 4.0).', notice: NOTICE
+      encyclopaedia: `${site}encyclopedia/index.html#${e.q}`,
+      // Primary and secondary sources (MI-14): the Bibliotheca books judged a source on this entry, and, on a work's own
+      // entry, the subjects it is judged a source on (lake/scripts/source-links.mjs; every link, shown or not, is the
+      // dataset bibliotheca-source-links).
+      ...(e.src?.length ? { source_links: e.src.map(x => sourceLink(x, { work: x.work, work_qid: x.wq || null, work_title: x.title, opens: `${site}bibliotheca/neo/index.html#book=${encodeURIComponent(x.book)}` })) } : {}),
+      ...(e.srcFrom?.length ? { source_links_from: e.srcFrom.map(x => sourceLink(x, { subject_qid: x.q, subject_label: x.label })) } : {}),
+      ...(e.src?.length || e.srcFrom?.length ? { source_links_about: SOURCE_LINKS_ABOUT } : {}),
+      licence: 'Facts: Wikidata (CC0). Summary: Wikipedia (CC BY-SA 4.0).', notice: NOTICE
     };
   }
+  const SOURCE_LINKS_ABOUT = 'Each source link judges one book of Bibliotheca a primary or a secondary source on one subject (tag and basis), or gives a note in place of a tag (flags), with the evidence in one sentence and the sources it rests on. Each was made for Vitruvian Manager by an AI model (Claude) from the evidence named, and checked by Vitruvian Manager’s rules; no person checked it. Only links resting on strong or fair evidence are given here; the dataset bibliotheca-source-links holds every link.';
+  const sourceLink = (x, head) => {
+    const out = { ...head, part: x.part ? x.say.part : null, tag: x.tag, tag_words: x.say.tag, basis: x.basis, basis_words: x.say.basis, flags: x.flags || [], flag_words: x.say.flags || [],
+      evidence: x.evidence, sources: (x.cites || []).map(c => ({ text: c.text, href: c.href ? (/^https?:/.test(c.href) ? c.href : site + c.href) : null })), wikidata_read: x.read || null,
+      confidence: x.confidence, judged: x.judged };
+    for (const k of Object.keys(out)) if (out[k] === undefined) delete out[k];
+    return out;
+  };
 
   async function countryIndex() { return getJson('integration/data/countries/index.json'); }
   async function resolveCountry(input) {
@@ -740,7 +755,7 @@ export function createPRP({ read, limits = {}, origin = BASE_URL } = {}) {
       description: 'Find people, places, polities (states that no longer exist), periods, sites, series, parties, elections, wars, events, ideas and organisations in the Vitruvian Manager Master Index (more than 14,000 entries keyed by Wikidata id) by name or alias. Returns ids, descriptions and how often Vitruvian Manager mentions each.',
       inputSchema: S({ query: { type: 'string', description: 'Name or part of one, e.g. "Mearsheimer", "Korean War", "1997 UK general election".' }, type: { type: 'string', enum: TYPE_LIST, description: 'Only this type.' }, limit: { type: 'integer', minimum: 1, maximum: 25, description: 'Results (default 10).' } }, ['query']) },
     { name: 'get_entity', title: 'Get a Master Index entry', fn: getEntity,
-      description: 'The full Master Index record for a Wikidata id (or an English Wikipedia title): description, Wikipedia summary, facts, related entities, tags and every place Vitruvian Manager mentions it, with links.',
+      description: 'The full Master Index record for a Wikidata id (or an English Wikipedia title): description, Wikipedia summary, facts, related entities, tags and every place Vitruvian Manager mentions it, with links; and, where Bibliotheca holds a book judged a primary or a secondary source on it, those judgements with their evidence (source_links; on a book\'s own entry, source_links_from).',
       inputSchema: S({ qid: { type: 'string', description: 'Wikidata id, e.g. "Q461830".' }, title: { type: 'string', description: 'English Wikipedia title instead of a qid, e.g. "John Mearsheimer".' }, mentions: { type: 'integer', minimum: 1, maximum: 50, description: 'How many mentions to list (default 15).' } }) },
     { name: 'upcoming_events', title: 'Political calendar', fn: upcomingEvents,
       description: `Political events from Vitruvian Manager's Realtime and Historical Calendars in a date range (default: today to 18 months ahead): elections, referendums, summits, new leaders, coups, ceasefires, protests, court rulings and more. Filter by country and type. Types: ${Object.keys(EVENT_TYPES).join(', ')}; families: ${Object.keys(EVENT_FAMILIES).join(', ')}.`,

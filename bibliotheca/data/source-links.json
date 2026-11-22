@@ -1,0 +1,2526 @@
+{
+ "judged": "2026-11-22",
+ "about": "Judged by an AI model (Claude) for ledger MI-14, from Wikidata statements read on the day judged and the chapters of the books on the shelf, then read again by a second AI review the same day and corrected where it found the evidence wanting; no person checked it. The rule and its wording are in bibliotheca/lib/sources.js.",
+ "links": [
+  {
+   "work": "the-prince",
+   "wq": "Q131719",
+   "part": null,
+   "subject": {
+    "q": "Q1399",
+    "label": "Niccolò Machiavelli",
+    "kind": "person"
+   },
+   "tag": "primary",
+   "basis": "OWN",
+   "flags": [],
+   "evidence": "Wikidata names Machiavelli as the author of The Prince, and in the dedication he offers the prince his own knowledge, learned by long experience of the affairs of his day.",
+   "source": [
+    {
+     "wd": "Q131719",
+     "p": "P50",
+     "v": "Q1399"
+    },
+    {
+     "book": "the-prince",
+     "ch": 0
+    }
+   ],
+   "confidence": "high",
+   "why": "His own book, and in the dedication he sets out his own experience as its ground.",
+   "note": "The notes in this edition are not marked by hand on the shelf; only Machiavelli’s text is tagged.",
+   "judged": "2026-11-22",
+   "entry": true
+  },
+  {
+   "work": "the-prince",
+   "wq": "Q131719",
+   "part": null,
+   "subject": {
+    "q": "Q273348",
+    "label": "Italian Wars",
+    "kind": "happening"
+   },
+   "tag": "primary",
+   "basis": "WIT",
+   "flags": [],
+   "evidence": "In chapter III the author tells how he spoke at Nantes with the Cardinal of Rouen while Cesare Borgia was occupying the Romagna, and in chapter VII how Borgia spoke to him of his plans; the dedication says his knowledge comes from long experience of the affairs of his day. The wars ran on for thirty years after his death, so he saw only their first part.",
+   "source": [
+    {
+     "book": "the-prince",
+     "ch": 3
+    },
+    {
+     "book": "the-prince",
+     "ch": 7
+    },
+    {
+     "book": "the-prince",
+     "ch": 0
+    }
+   ],
+   "dates": {
+    "born": [
+     1469,
+     "Q1399",
+     "P569"
+    ],
+    "died": [
+     1527,
+     "Q1399",
+     "P570"
+    ],
+    "start": [
+     1494,
+     "Q273348",
+     "P580"
+    ],
+    "end": [
+     1559,
+     "Q273348",
+     "P582"
+    ],
+    "written": [
+     1513,
+     "shelf"
+    ]
+   },
+   "confidence": "medium",
+   "why": "The book draws its examples from the French and Spanish invasions of Italy and ends, in chapter XXVI, with a call to free Italy from the foreign armies.",
+   "note": "The notes in this edition are not marked by hand on the shelf; only Machiavelli’s text is tagged.",
+   "judged": "2026-11-22",
+   "entry": false
+  },
+  {
+   "work": "the-prince",
+   "wq": "Q131719",
+   "part": null,
+   "subject": {
+    "q": "Q2087151",
+    "label": "Italian Wars of 1499–1504",
+    "kind": "happening"
+   },
+   "tag": "primary",
+   "basis": "WIT",
+   "flags": [],
+   "evidence": "In chapter III the author recounts his own talk at Nantes with the Cardinal of Rouen during the French king’s Italian campaign, and in chapter VII his talk with Cesare Borgia on the day Pope Julius II was elected; Wikidata places Borgia in these wars and dates Julius II’s election to 1503.",
+   "source": [
+    {
+     "book": "the-prince",
+     "ch": 3
+    },
+    {
+     "book": "the-prince",
+     "ch": 7
+    },
+    {
+     "wd": "Q187998",
+     "p": "P607",
+     "v": "Q2087151"
+    },
+    {
+     "wd": "Q80516",
+     "p": "P39"
+    }
+   ],
+   "dates": {
+    "born": [
+     1469,
+     "Q1399",
+     "P569"
+    ],
+    "died": [
+     1527,
+     "Q1399",
+     "P570"
+    ],
+    "start": [
+     1499,
+     "Q2087151",
+     "P580"
+    ],
+    "end": [
+     1504,
+     "Q2087151",
+     "P582"
+    ],
+    "written": [
+     1513,
+     "shelf"
+    ]
+   },
+   "confidence": "high",
+   "why": "Chapters III and VII study Louis XII’s conquest of Milan and Cesare Borgia’s campaigns in the Romagna, both part of these wars.",
+   "note": "The notes in this edition are not marked by hand on the shelf; only Machiavelli’s text is tagged.",
+   "judged": "2026-11-22",
+   "entry": true
+  },
+  {
+   "work": "the-prince",
+   "wq": "Q131719",
+   "part": null,
+   "subject": {
+    "q": "Q187998",
+    "label": "Cesare Borgia",
+    "kind": "person"
+   },
+   "tag": "primary",
+   "basis": "WIT",
+   "flags": [],
+   "evidence": "In chapter VII the author says that Cesare Borgia himself told him, on the day Julius II was elected, that he had provided for everything that might follow his father’s death, except his own grave illness at that moment; their lives overlap on Wikidata’s dates.",
+   "source": [
+    {
+     "book": "the-prince",
+     "ch": 7
+    }
+   ],
+   "dates": {
+    "born": [
+     1469,
+     "Q1399",
+     "P569"
+    ],
+    "died": [
+     1527,
+     "Q1399",
+     "P570"
+    ],
+    "start": [
+     1475,
+     "Q187998",
+     "P569"
+    ],
+    "end": [
+     1507,
+     "Q187998",
+     "P570"
+    ]
+   },
+   "confidence": "high",
+   "why": "Chapter VII is a study of Cesare Borgia’s rise and fall, held up as a model for a new prince.",
+   "note": "The notes in this edition are not marked by hand on the shelf; only Machiavelli’s text is tagged.",
+   "judged": "2026-11-22",
+   "entry": true
+  },
+  {
+   "work": "the-prince",
+   "wq": "Q131719",
+   "part": null,
+   "subject": {
+    "q": "Q471183",
+    "label": "Realism",
+    "kind": "idea"
+   },
+   "tag": null,
+   "basis": null,
+   "flags": [],
+   "evidence": "The only link between the book and the school is the Master Index’s own school tag on Machiavelli; Wikidata gives him no such movement, and the text does not use the name.",
+   "source": [
+    {
+     "lake": "Q1399",
+     "tag": "School:Realism"
+    }
+   ],
+   "confidence": "low",
+   "held": "No source dates the school’s name against Machiavelli’s life, so neither a tag nor the note that he wrote before the idea had its name can be shown; the study’s suggestion of the latter rested on memory.",
+   "why": "The book is read as a founding text of political realism, and the Master Index files its author under that school.",
+   "note": "The notes in this edition are not marked by hand on the shelf; only Machiavelli’s text is tagged.",
+   "judged": "2026-11-22",
+   "entry": true
+  },
+  {
+   "work": "peloponnesian-war",
+   "wq": "Q639493",
+   "part": null,
+   "subject": {
+    "q": "Q33745",
+    "label": "Peloponnesian War",
+    "kind": "happening"
+   },
+   "tag": "primary",
+   "basis": "PART",
+   "flags": [],
+   "evidence": "In Book I, chapter I the author says he began his history when the war broke out; in Book IV, chapter XIV he tells of his own command at Thasos and Eion; in Book V, chapter XVI he says he lived through the whole war and was exiled for twenty years after Amphipolis. Wikidata gives his office as Athenian general in 424 and 423 BC.",
+   "source": [
+    {
+     "book": "peloponnesian-war",
+     "ch": 1
+    },
+    {
+     "book": "peloponnesian-war",
+     "ch": 14
+    },
+    {
+     "book": "peloponnesian-war",
+     "ch": 16
+    },
+    {
+     "wd": "Q41683",
+     "p": "P39",
+     "v": "Q83874251"
+    },
+    {
+     "wd": "Q639493",
+     "p": "P921",
+     "v": "Q33745"
+    }
+   ],
+   "dates": {
+    "born": [
+     -460,
+     "Q41683",
+     "P569"
+    ],
+    "died": [
+     -395,
+     "Q41683",
+     "P570"
+    ],
+    "start": [
+     -431,
+     "Q33745",
+     "P580"
+    ],
+    "end": [
+     -404,
+     "Q33745",
+     "P582"
+    ],
+    "written": [
+     -431,
+     "shelf"
+    ]
+   },
+   "confidence": "high",
+   "why": "The book is the history of this war, and Wikidata gives the war as its main subject.",
+   "judged": "2026-11-22",
+   "entry": false
+  },
+  {
+   "work": "peloponnesian-war",
+   "wq": "Q639493",
+   "part": null,
+   "subject": {
+    "q": "Q41683",
+    "label": "Thucydides",
+    "kind": "person"
+   },
+   "tag": "primary",
+   "basis": "OWN",
+   "flags": [],
+   "evidence": "Wikidata names Thucydides as the author, the opening line of Book I names him as its writer, and Book II closes each year as one of the war of which he was the historian.",
+   "source": [
+    {
+     "wd": "Q639493",
+     "p": "P50",
+     "v": "Q41683"
+    },
+    {
+     "book": "peloponnesian-war",
+     "ch": 1
+    },
+    {
+     "book": "peloponnesian-war",
+     "ch": 7
+    }
+   ],
+   "confidence": "high",
+   "why": "His own book, and the only source for much of his own life, including his command and exile.",
+   "judged": "2026-11-22",
+   "entry": true
+  },
+  {
+   "work": "peloponnesian-war",
+   "wq": "Q639493",
+   "part": null,
+   "subject": {
+    "q": "Q471183",
+    "label": "Realism",
+    "kind": "idea"
+   },
+   "tag": null,
+   "basis": null,
+   "flags": [],
+   "evidence": "The only link between the book and the school is the Master Index’s own school tag on Thucydides; Wikidata gives him no such movement, and the text does not use the name.",
+   "source": [
+    {
+     "lake": "Q41683",
+     "tag": "School:Realism"
+    }
+   ],
+   "confidence": "low",
+   "held": "No source dates the school’s name against the author’s life, so no tag and no note can be shown; the study’s suggestion rested on memory.",
+   "why": "The book is read as a founding text of political realism, and the Master Index files its author under that school.",
+   "judged": "2026-11-22",
+   "entry": true
+  },
+  {
+   "work": "origin-of-species",
+   "wq": "Q20124",
+   "part": null,
+   "subject": {
+    "q": "Q1035",
+    "label": "Charles Darwin",
+    "kind": "person"
+   },
+   "tag": "primary",
+   "basis": "OWN",
+   "flags": [],
+   "evidence": "Wikidata names Darwin as the author, and he writes the introduction in the first person, from his own voyage onward.",
+   "source": [
+    {
+     "wd": "Q20124",
+     "p": "P50",
+     "v": "Q1035"
+    },
+    {
+     "book": "origin-of-species",
+     "ch": 0
+    }
+   ],
+   "confidence": "high",
+   "why": "His own book, setting out the theory he is known for.",
+   "judged": "2026-11-22",
+   "entry": true
+  },
+  {
+   "work": "origin-of-species",
+   "wq": "Q20124",
+   "part": null,
+   "subject": {
+    "q": "Q43478",
+    "label": "natural selection",
+    "kind": "idea"
+   },
+   "tag": "primary",
+   "basis": "OWN",
+   "flags": [],
+   "evidence": "In chapter IV the author names the principle natural selection and develops it as his own theory; Wikidata gives him as its discoverer and gives natural selection as the book’s main subject.",
+   "source": [
+    {
+     "book": "origin-of-species",
+     "ch": 4
+    },
+    {
+     "wd": "Q43478",
+     "p": "P61",
+     "v": "Q1035"
+    },
+    {
+     "wd": "Q20124",
+     "p": "P921",
+     "v": "Q43478"
+    }
+   ],
+   "confidence": "high",
+   "why": "The book is the first full statement of the theory of natural selection.",
+   "judged": "2026-11-22",
+   "entry": false
+  },
+  {
+   "work": "origin-of-species",
+   "wq": "Q20124",
+   "part": null,
+   "subject": {
+    "q": "Q1063",
+    "label": "evolution",
+    "kind": "idea"
+   },
+   "tag": "primary",
+   "basis": "OWN",
+   "flags": [],
+   "evidence": "The historical sketch traces earlier views that species change, from Lamarck on; in chapter VII the author counts himself among those who hold that species evolve slowly and gradually, and chapter XV sums up his case for descent with modification. Wikidata gives no statement tying him to the idea, so the evidence is the book’s alone.",
+   "source": [
+    {
+     "book": "origin-of-species",
+     "ch": 0
+    },
+    {
+     "book": "origin-of-species",
+     "ch": 7
+    },
+    {
+     "book": "origin-of-species",
+     "ch": 15
+    }
+   ],
+   "confidence": "medium",
+   "why": "The book argues that species were not created separately but descend, changed, from earlier forms; the study’s row for it was the theory of evolution.",
+   "judged": "2026-11-22",
+   "entry": false
+  },
+  {
+   "work": "origin-of-species",
+   "wq": "Q20124",
+   "part": null,
+   "subject": {
+    "q": "Q202261",
+    "label": "social Darwinism",
+    "kind": "idea"
+   },
+   "tag": null,
+   "basis": null,
+   "flags": [],
+   "evidence": "The book never uses the name, and Wikidata gives natural selection, not social Darwinism, as its main subject.",
+   "source": [
+    {
+     "wd": "Q20124",
+     "p": "P921",
+     "v": "Q43478"
+    }
+   ],
+   "confidence": "low",
+   "held": "The study listed this subject and left it blank, since the author is not an exponent; the book is not about it, so no tag and no note is given, and the judgement is kept here so that it can be seen.",
+   "why": "The study named it as a subject later readers drew from the book.",
+   "judged": "2026-11-22",
+   "entry": false
+  },
+  {
+   "work": "origin-of-species",
+   "wq": "Q20124",
+   "part": null,
+   "subject": {
+    "q": "Q1564366",
+    "label": "Second voyage of HMS Beagle",
+    "kind": "happening"
+   },
+   "tag": "primary",
+   "basis": "PART",
+   "flags": [
+    {
+     "id": "RETROSPECTIVE",
+     "years": 23
+    }
+   ],
+   "evidence": "The introduction opens with the author on board the Beagle as its naturalist, struck by what he saw in South America; Wikidata lists him among the voyage’s participants. The book appeared twenty-three years after the voyage ended.",
+   "source": [
+    {
+     "book": "origin-of-species",
+     "ch": 0
+    },
+    {
+     "wd": "Q1035",
+     "p": "P1344",
+     "v": "Q1564366"
+    },
+    {
+     "wd": "Q1564366",
+     "p": "P710",
+     "v": "Q1035"
+    }
+   ],
+   "dates": {
+    "born": [
+     1809,
+     "Q1035",
+     "P569"
+    ],
+    "died": [
+     1882,
+     "Q1035",
+     "P570"
+    ],
+    "start": [
+     1831,
+     "Q1564366",
+     "P580"
+    ],
+    "end": [
+     1836,
+     "Q1564366",
+     "P582"
+    ],
+    "written": [
+     1859,
+     "shelf"
+    ]
+   },
+   "confidence": "high",
+   "why": "The book starts from what the author observed on the voyage and returns to it in its chapters on distribution.",
+   "judged": "2026-11-22",
+   "entry": false
+  },
+  {
+   "work": "wealth-of-nations",
+   "wq": "Q233562",
+   "part": null,
+   "subject": {
+    "q": "Q9381",
+    "label": "Adam Smith",
+    "kind": "person"
+   },
+   "tag": "primary",
+   "basis": "OWN",
+   "flags": [],
+   "evidence": "Wikidata names Smith as the author, and he sets out the plan of the work in its introduction.",
+   "source": [
+    {
+     "wd": "Q233562",
+     "p": "P50",
+     "v": "Q9381"
+    },
+    {
+     "book": "wealth-of-nations-1",
+     "ch": 0
+    }
+   ],
+   "confidence": "high",
+   "why": "His own book, and the work he is chiefly known for.",
+   "judged": "2026-11-22",
+   "entry": true
+  },
+  {
+   "work": "wealth-of-nations",
+   "wq": "Q233562",
+   "part": null,
+   "subject": {
+    "q": "Q271857",
+    "label": "classical economics",
+    "kind": "idea"
+   },
+   "tag": null,
+   "basis": null,
+   "flags": [
+    {
+     "id": "FORERUNNER"
+    }
+   ],
+   "evidence": "Wikidata names Karl Marx as the one who gave classical economics its name, and gives his birth as 1818, after the author died in 1790; the book itself does not use the name, and the Master Index files the author under the school by its own tag.",
+   "source": [
+    {
+     "wd": "Q271857",
+     "p": "P3938",
+     "v": "Q9061"
+    },
+    {
+     "wd": "Q9061",
+     "p": "P569"
+    },
+    {
+     "wd": "Q9381",
+     "p": "P570"
+    },
+    {
+     "lake": "Q9381",
+     "tag": "School:Classical economics"
+    }
+   ],
+   "dates": {
+    "died": [
+     1790,
+     "Q9381",
+     "P570"
+    ],
+    "written": [
+     1776,
+     "shelf"
+    ],
+    "named": [
+     1818,
+     "Q9061",
+     "P569"
+    ]
+   },
+   "confidence": "medium",
+   "why": "The book is counted as the founding work of classical economics, and the Master Index files its author under that school.",
+   "judged": "2026-11-22",
+   "entry": true
+  },
+  {
+   "work": "wealth-of-nations",
+   "wq": "Q233562",
+   "part": null,
+   "subject": {
+    "q": "Q207449",
+    "label": "division of labour",
+    "kind": "idea"
+   },
+   "tag": "primary",
+   "basis": "OWN",
+   "flags": [],
+   "evidence": "Book I, chapters I to III set out in the author’s own voice how the division of labour raises the productive powers of labour, what gives rise to it and how the extent of the market limits it; Wikidata gives it as one of the book’s main subjects.",
+   "source": [
+    {
+     "book": "wealth-of-nations-1",
+     "ch": 101
+    },
+    {
+     "book": "wealth-of-nations-1",
+     "ch": 102
+    },
+    {
+     "book": "wealth-of-nations-1",
+     "ch": 103
+    },
+    {
+     "wd": "Q233562",
+     "p": "P921",
+     "v": "Q207449"
+    }
+   ],
+   "confidence": "medium",
+   "why": "The book opens with three chapters on the division of labour, the ground of its whole argument.",
+   "judged": "2026-11-22",
+   "entry": false
+  },
+  {
+   "work": "wealth-of-nations",
+   "wq": "Q233562",
+   "part": null,
+   "subject": {
+    "q": "Q729119",
+    "label": "economic liberalism",
+    "kind": "idea"
+   },
+   "tag": "primary",
+   "basis": "OWN",
+   "flags": [],
+   "evidence": "In Book IV, chapter IX the author concludes his case that, once every preference and restraint on trade is taken away, each person should be free, within the law, to employ labour and capital as they think best; Wikidata gives economic liberalism among his fields of work.",
+   "source": [
+    {
+     "book": "wealth-of-nations-2",
+     "ch": 409
+    },
+    {
+     "wd": "Q9381",
+     "p": "P101",
+     "v": "Q729119"
+    }
+   ],
+   "confidence": "medium",
+   "why": "Book IV argues against state direction of trade and industry and for natural liberty, the core of economic liberalism.",
+   "judged": "2026-11-22",
+   "entry": true
+  },
+  {
+   "work": "wealth-of-nations",
+   "wq": "Q233562",
+   "part": null,
+   "subject": {
+    "q": "Q200435",
+    "label": "free trade",
+    "kind": "idea"
+   },
+   "tag": "primary",
+   "basis": "OWN",
+   "flags": [],
+   "evidence": "In Book IV, chapters II and III the author argues in his own voice against restraints on imports and for leaving trade free.",
+   "source": [
+    {
+     "book": "wealth-of-nations-2",
+     "ch": 402
+    },
+    {
+     "book": "wealth-of-nations-2",
+     "ch": 403
+    }
+   ],
+   "confidence": "medium",
+   "why": "Book IV is a sustained case against restraints on foreign trade.",
+   "judged": "2026-11-22",
+   "entry": true
+  },
+  {
+   "work": "wealth-of-nations",
+   "wq": "Q233562",
+   "part": null,
+   "subject": {
+    "q": "Q584987",
+    "label": "labour theory of value",
+    "kind": "idea"
+   },
+   "tag": "primary",
+   "basis": "OWN",
+   "flags": [],
+   "evidence": "In Book I, chapter V the author argues in his own voice that labour is the true measure of what goods are worth in exchange; Wikidata gives the labour theory of value as one of the book’s main subjects.",
+   "source": [
+    {
+     "book": "wealth-of-nations-1",
+     "ch": 105
+    },
+    {
+     "wd": "Q233562",
+     "p": "P921",
+     "v": "Q584987"
+    }
+   ],
+   "confidence": "medium",
+   "why": "Book I, chapter V sets out the author’s own account of labour as the measure of value.",
+   "judged": "2026-11-22",
+   "entry": false
+  },
+  {
+   "work": "wealth-of-nations",
+   "wq": "Q233562",
+   "part": null,
+   "subject": {
+    "q": "Q162527",
+    "label": "mercantilism",
+    "kind": "idea"
+   },
+   "tag": "secondary",
+   "basis": "OUTSIDE",
+   "flags": [],
+   "evidence": "In the introduction to Book IV the author says he will explain two systems of political economy, and chapters I to VIII describe and attack what he calls the commercial or mercantile system, ending with its conclusion; he writes as its critic, not its exponent.",
+   "source": [
+    {
+     "book": "wealth-of-nations-2",
+     "ch": 400
+    },
+    {
+     "book": "wealth-of-nations-2",
+     "ch": 401
+    },
+    {
+     "book": "wealth-of-nations-2",
+     "ch": 408
+    }
+   ],
+   "confidence": "medium",
+   "why": "Most of Book IV is an account and critique of the mercantile system.",
+   "judged": "2026-11-22",
+   "entry": false
+  },
+  {
+   "work": "wealth-of-nations",
+   "wq": "Q233562",
+   "part": null,
+   "subject": {
+    "q": "Q183244",
+    "label": "physiocracy",
+    "kind": "idea"
+   },
+   "tag": "secondary",
+   "basis": "OUTSIDE",
+   "flags": [],
+   "evidence": "In Book IV, chapter IX the author describes the agricultural systems of the French economists and judges them from outside, setting his own system of natural liberty against them.",
+   "source": [
+    {
+     "book": "wealth-of-nations-2",
+     "ch": 409
+    }
+   ],
+   "confidence": "medium",
+   "why": "Book IV, chapter IX is an account and critique of the physiocrats’ system.",
+   "judged": "2026-11-22",
+   "entry": true
+  },
+  {
+   "work": "decline-and-fall",
+   "wq": "Q313030",
+   "part": null,
+   "subject": {
+    "q": "Q161841",
+    "label": "Edward Gibbon",
+    "kind": "person"
+   },
+   "tag": "primary",
+   "basis": "OWN",
+   "flags": [],
+   "evidence": "Wikidata names Gibbon as the author, and in the first volume his own prefaces follow the editor’s.",
+   "source": [
+    {
+     "wd": "Q313030",
+     "p": "P50",
+     "v": "Q161841"
+    },
+    {
+     "book": "decline-and-fall-1",
+     "ch": 0
+    }
+   ],
+   "confidence": "high",
+   "why": "His own book, the work he is known for.",
+   "note": "The first volume’s prefaces include the editor Milman’s preface of 1845 in the same chapter as Gibbon’s own, and the notes of Gibbon and his editors are not marked by hand on the shelf; only Gibbon’s text is tagged.",
+   "judged": "2026-11-22",
+   "entry": false
+  },
+  {
+   "work": "decline-and-fall",
+   "wq": "Q313030",
+   "part": null,
+   "subject": {
+    "q": "Q12539",
+    "label": "Age of Enlightenment",
+    "kind": "idea"
+   },
+   "tag": null,
+   "basis": null,
+   "flags": [],
+   "evidence": "Wikidata gives neither the Enlightenment among the book’s main subjects nor any movement for the author, and the book is a history of Rome and its successors, not of the author’s own age.",
+   "source": [
+    {
+     "wd": "Q313030",
+     "p": "P921"
+    }
+   ],
+   "confidence": "low",
+   "held": "The study suggested the book as a primary source on the history writing of its own age and asked for a person to confirm it; that is not a subject the book is about, so no tag and no note is given, and the judgement is kept here so that it can be seen.",
+   "why": "The study named the book as a work of the Enlightenment.",
+   "note": "The first volume’s prefaces include the editor Milman’s preface of 1845 in the same chapter as Gibbon’s own, and the notes of Gibbon and his editors are not marked by hand on the shelf; only Gibbon’s text is tagged.",
+   "judged": "2026-11-22",
+   "entry": true
+  },
+  {
+   "work": "decline-and-fall",
+   "wq": "Q313030",
+   "part": null,
+   "subject": {
+    "q": "Q2277",
+    "label": "Roman Empire",
+    "kind": "happening"
+   },
+   "tag": "secondary",
+   "basis": "BORNAFTER",
+   "flags": [],
+   "evidence": "Wikidata gives the author’s birth as 1737, long after 395, the end that Wikidata gives for the empire.",
+   "source": [
+    {
+     "wd": "Q161841",
+     "p": "P569"
+    },
+    {
+     "wd": "Q2277",
+     "p": "P576"
+    },
+    {
+     "wd": "Q313030",
+     "p": "P921",
+     "v": "Q2277"
+    },
+    {
+     "book": "decline-and-fall-1",
+     "ch": 1
+    }
+   ],
+   "dates": {
+    "born": [
+     1737,
+     "Q161841",
+     "P569"
+    ],
+    "end": [
+     395,
+     "Q2277",
+     "P576"
+    ]
+   },
+   "confidence": "high",
+   "why": "The book is the history of the Roman Empire from the age of the Antonines, and Wikidata gives the empire as its main subject.",
+   "note": "The first volume’s prefaces include the editor Milman’s preface of 1845 in the same chapter as Gibbon’s own, and the notes of Gibbon and his editors are not marked by hand on the shelf; only Gibbon’s text is tagged.",
+   "judged": "2026-11-22",
+   "entry": true
+  },
+  {
+   "work": "decline-and-fall",
+   "wq": "Q313030",
+   "part": null,
+   "subject": {
+    "q": "Q42834",
+    "label": "Western Roman Empire",
+    "kind": "happening"
+   },
+   "tag": "secondary",
+   "basis": "BORNAFTER",
+   "flags": [],
+   "evidence": "Wikidata gives the author’s birth as 1737, long after the western empire ended in 476.",
+   "source": [
+    {
+     "wd": "Q161841",
+     "p": "P569"
+    },
+    {
+     "wd": "Q42834",
+     "p": "P576"
+    },
+    {
+     "book": "decline-and-fall-3",
+     "ch": 36
+    }
+   ],
+   "dates": {
+    "born": [
+     1737,
+     "Q161841",
+     "P569"
+    ],
+    "end": [
+     476,
+     "Q42834",
+     "P576"
+    ]
+   },
+   "confidence": "high",
+   "why": "Chapter XXXVI tells the end of the empire in the West and the reign of Odoacer.",
+   "note": "The first volume’s prefaces include the editor Milman’s preface of 1845 in the same chapter as Gibbon’s own, and the notes of Gibbon and his editors are not marked by hand on the shelf; only Gibbon’s text is tagged.",
+   "judged": "2026-11-22",
+   "entry": true
+  },
+  {
+   "work": "decline-and-fall",
+   "wq": "Q313030",
+   "part": null,
+   "subject": {
+    "q": "Q12544",
+    "label": "Byzantine Empire",
+    "kind": "happening"
+   },
+   "tag": "secondary",
+   "basis": "BORNAFTER",
+   "flags": [],
+   "evidence": "Wikidata gives the author’s birth as 1737, long after the eastern empire ended in 1453.",
+   "source": [
+    {
+     "wd": "Q161841",
+     "p": "P569"
+    },
+    {
+     "wd": "Q12544",
+     "p": "P576"
+    },
+    {
+     "wd": "Q313030",
+     "p": "P921",
+     "v": "Q12544"
+    },
+    {
+     "book": "decline-and-fall-6",
+     "ch": 68
+    }
+   ],
+   "dates": {
+    "born": [
+     1737,
+     "Q161841",
+     "P569"
+    ],
+    "end": [
+     1453,
+     "Q12544",
+     "P576"
+    ]
+   },
+   "confidence": "high",
+   "why": "The later volumes follow the empire in the East to the fall of Constantinople in chapter LXVIII.",
+   "note": "The first volume’s prefaces include the editor Milman’s preface of 1845 in the same chapter as Gibbon’s own, and the notes of Gibbon and his editors are not marked by hand on the shelf; only Gibbon’s text is tagged.",
+   "judged": "2026-11-22",
+   "entry": true
+  },
+  {
+   "work": "decline-and-fall",
+   "wq": "Q313030",
+   "part": null,
+   "subject": {
+    "q": "Q131192",
+    "label": "Migration Period",
+    "kind": "happening"
+   },
+   "tag": "secondary",
+   "basis": "BORNAFTER",
+   "flags": [],
+   "evidence": "Wikidata gives the author’s birth as 1737, long after the end of this period, which Wikidata puts in 568.",
+   "source": [
+    {
+     "wd": "Q161841",
+     "p": "P569"
+    },
+    {
+     "wd": "Q131192",
+     "p": "P582"
+    },
+    {
+     "wd": "Q313030",
+     "p": "P921",
+     "v": "Q131192"
+    },
+    {
+     "book": "decline-and-fall-3",
+     "ch": 30
+    },
+    {
+     "book": "decline-and-fall-3",
+     "ch": 31
+    }
+   ],
+   "dates": {
+    "born": [
+     1737,
+     "Q161841",
+     "P569"
+    ],
+    "end": [
+     568,
+     "Q131192",
+     "P582"
+    ]
+   },
+   "confidence": "high",
+   "why": "The third volume tells the invasions of the Goths, Vandals and other peoples who overran the western provinces.",
+   "note": "The first volume’s prefaces include the editor Milman’s preface of 1845 in the same chapter as Gibbon’s own, and the notes of Gibbon and his editors are not marked by hand on the shelf; only Gibbon’s text is tagged.",
+   "judged": "2026-11-22",
+   "entry": false
+  },
+  {
+   "work": "decline-and-fall",
+   "wq": "Q313030",
+   "part": null,
+   "subject": {
+    "q": "Q9458",
+    "label": "Muhammad",
+    "kind": "person"
+   },
+   "tag": "secondary",
+   "basis": "BORNAFTER",
+   "flags": [],
+   "evidence": "Wikidata gives the author’s birth as 1737, long after Muhammad died in 632.",
+   "source": [
+    {
+     "wd": "Q161841",
+     "p": "P569"
+    },
+    {
+     "wd": "Q9458",
+     "p": "P570"
+    },
+    {
+     "wd": "Q313030",
+     "p": "P921",
+     "v": "Q9458"
+    },
+    {
+     "book": "decline-and-fall-5",
+     "ch": 50
+    }
+   ],
+   "dates": {
+    "born": [
+     1737,
+     "Q161841",
+     "P569"
+    ],
+    "end": [
+     632,
+     "Q9458",
+     "P570"
+    ]
+   },
+   "confidence": "high",
+   "why": "Chapter L is a life of Muhammad and an account of his teaching.",
+   "note": "The first volume’s prefaces include the editor Milman’s preface of 1845 in the same chapter as Gibbon’s own, and the notes of Gibbon and his editors are not marked by hand on the shelf; only Gibbon’s text is tagged.",
+   "judged": "2026-11-22",
+   "entry": true
+  },
+  {
+   "work": "decline-and-fall",
+   "wq": "Q313030",
+   "part": null,
+   "subject": {
+    "q": "Q12546",
+    "label": "Crusades",
+    "kind": "happening"
+   },
+   "tag": "secondary",
+   "basis": "BORNAFTER",
+   "flags": [],
+   "evidence": "Wikidata gives the author’s birth as 1737, long after the crusades ended in 1291.",
+   "source": [
+    {
+     "wd": "Q161841",
+     "p": "P569"
+    },
+    {
+     "wd": "Q12546",
+     "p": "P582"
+    },
+    {
+     "wd": "Q313030",
+     "p": "P921",
+     "v": "Q12546"
+    },
+    {
+     "book": "decline-and-fall-5",
+     "ch": 58
+    },
+    {
+     "book": "decline-and-fall-6",
+     "ch": 59
+    }
+   ],
+   "dates": {
+    "born": [
+     1737,
+     "Q161841",
+     "P569"
+    ],
+    "end": [
+     1291,
+     "Q12546",
+     "P582"
+    ]
+   },
+   "confidence": "high",
+   "why": "Chapters LVIII to LXI tell the history of the crusades.",
+   "note": "The first volume’s prefaces include the editor Milman’s preface of 1845 in the same chapter as Gibbon’s own, and the notes of Gibbon and his editors are not marked by hand on the shelf; only Gibbon’s text is tagged.",
+   "judged": "2026-11-22",
+   "entry": false
+  },
+  {
+   "work": "decline-and-fall",
+   "wq": "Q313030",
+   "part": null,
+   "subject": {
+    "q": "Q12560",
+    "label": "Ottoman Empire",
+    "kind": "happening"
+   },
+   "tag": null,
+   "basis": null,
+   "flags": [
+    {
+     "id": "CONTEMPORARY"
+    }
+   ],
+   "evidence": "The author lived while the Ottoman Empire stood, but the book tells only its rise, from its origins in Bithynia in chapter LXIV to the conquest of Constantinople, centuries before his birth.",
+   "source": [
+    {
+     "wd": "Q313030",
+     "p": "P921",
+     "v": "Q12560"
+    },
+    {
+     "wd": "Q12560",
+     "p": "P571"
+    },
+    {
+     "wd": "Q12560",
+     "p": "P576"
+    },
+    {
+     "book": "decline-and-fall-6",
+     "ch": 64
+    }
+   ],
+   "dates": {
+    "born": [
+     1737,
+     "Q161841",
+     "P569"
+    ],
+    "died": [
+     1794,
+     "Q161841",
+     "P570"
+    ],
+    "start": [
+     1299,
+     "Q12560",
+     "P571"
+    ],
+    "end": [
+     1922,
+     "Q12560",
+     "P576"
+    ]
+   },
+   "confidence": "low",
+   "held": "The Master Index entry is the whole empire to 1922, while the book treats only its early centuries, which ended long before the author was born; neither tag fits the whole, and the overlap of dates alone says nothing.",
+   "why": "The last volume tells the rise of the Ottoman Turks and their conquest of the eastern empire, and Wikidata gives the Ottoman Empire as a main subject.",
+   "note": "The first volume’s prefaces include the editor Milman’s preface of 1845 in the same chapter as Gibbon’s own, and the notes of Gibbon and his editors are not marked by hand on the shelf; only Gibbon’s text is tagged.",
+   "judged": "2026-11-22",
+   "entry": true
+  },
+  {
+   "work": "on-war",
+   "wq": "Q1981770",
+   "part": null,
+   "subject": {
+    "q": "Q76430",
+    "label": "Carl von Clausewitz",
+    "kind": "person"
+   },
+   "tag": "primary",
+   "basis": "OWN",
+   "flags": [],
+   "evidence": "Wikidata names Clausewitz as the author, and the notice in the book is his own, dated at Berlin in 1827.",
+   "source": [
+    {
+     "wd": "Q1981770",
+     "p": "P50",
+     "v": "Q76430"
+    },
+    {
+     "book": "on-war",
+     "ch": 2
+    }
+   ],
+   "confidence": "high",
+   "why": "His own book, the work he is known for.",
+   "note": "The work was left unfinished at the author’s death and published by his widow in 1832, as her preface and his own notice say; her preface says he expanded it from 1818 and worked on it until the spring of 1830. The notes of this English edition are not marked by hand on the shelf; the introduction, the first preface and the memoir are tagged apart.",
+   "judged": "2026-11-22",
+   "entry": false
+  },
+  {
+   "work": "on-war",
+   "wq": "Q1981770",
+   "part": null,
+   "subject": {
+    "q": "Q78994",
+    "label": "Napoleonic Wars",
+    "kind": "happening"
+   },
+   "tag": "primary",
+   "basis": "PART",
+   "flags": [],
+   "evidence": "Wikidata gives the author as a combatant in the Napoleonic Wars and at the battles of Jena–Auerstedt, Borodino, Leipzig, Ligny and Wavre, and the translator’s memoir in the book tells of his service from the campaign of 1806 to Wavre in 1815; the book weighs Bonaparte’s campaigns, among them the march on Moscow in Book II, chapter V, but nowhere says in the author’s own words that he was there, so the evidence is fair rather than strong. His widow’s preface says he expanded the work from 1818, three years after the wars ended.",
+   "source": [
+    {
+     "wd": "Q76430",
+     "p": "P607",
+     "v": "Q78994"
+    },
+    {
+     "wd": "Q76430",
+     "p": "P607",
+     "v": "Q154426"
+    },
+    {
+     "wd": "Q76430",
+     "p": "P607",
+     "v": "Q184320"
+    },
+    {
+     "wd": "Q76430",
+     "p": "P607",
+     "v": "Q151005"
+    },
+    {
+     "wd": "Q76430",
+     "p": "P607",
+     "v": "Q855429"
+    },
+    {
+     "wd": "Q76430",
+     "p": "P607",
+     "v": "Q920107"
+    },
+    {
+     "book": "on-war",
+     "ch": 4
+    },
+    {
+     "book": "on-war",
+     "ch": 205
+    },
+    {
+     "book": "on-war",
+     "ch": 1
+    }
+   ],
+   "dates": {
+    "born": [
+     1780,
+     "Q76430",
+     "P569"
+    ],
+    "died": [
+     1831,
+     "Q76430",
+     "P570"
+    ],
+    "start": [
+     1803,
+     "Q78994",
+     "P580"
+    ],
+    "end": [
+     1815,
+     "Q78994",
+     "P582"
+    ],
+    "written": [
+     1830,
+     "shelf"
+    ],
+    "begun": [
+     1818,
+     "on-war",
+     1
+    ]
+   },
+   "confidence": "medium",
+   "why": "The wars of Bonaparte are the book’s chief examples throughout.",
+   "note": "The work was left unfinished at the author’s death and published by his widow in 1832, as her preface and his own notice say; her preface says he expanded it from 1818 and worked on it until the spring of 1830. The notes of this English edition are not marked by hand on the shelf; the introduction, the first preface and the memoir are tagged apart.",
+   "judged": "2026-11-22",
+   "entry": true
+  },
+  {
+   "work": "on-war",
+   "wq": "Q1981770",
+   "part": null,
+   "subject": {
+    "q": "Q207318",
+    "label": "French Revolutionary Wars",
+    "kind": "happening"
+   },
+   "tag": "primary",
+   "basis": "PART",
+   "flags": [
+    {
+     "id": "RETROSPECTIVE",
+     "years": 16,
+     "to": 28
+    }
+   ],
+   "evidence": "Wikidata places the author at the siege of Mainz of 1793, part of the War of the First Coalition and so of these wars; the memoir in the book says he served in the campaigns of 1793 and 1794 on the Rhine, and Book VI, chapter XXIII discusses the Prussian campaigns of those years in the Vosges. His widow’s preface says he expanded the work from 1818 and worked on it until 1830, sixteen to twenty-eight years after these wars ended.",
+   "source": [
+    {
+     "wd": "Q76430",
+     "p": "P607",
+     "v": "Q558435"
+    },
+    {
+     "wd": "Q558435",
+     "p": "P361",
+     "v": "Q18817"
+    },
+    {
+     "wd": "Q18817",
+     "p": "P361",
+     "v": "Q207318"
+    },
+    {
+     "book": "on-war",
+     "ch": 4
+    },
+    {
+     "book": "on-war",
+     "ch": 623
+    },
+    {
+     "book": "on-war",
+     "ch": 1
+    }
+   ],
+   "dates": {
+    "born": [
+     1780,
+     "Q76430",
+     "P569"
+    ],
+    "died": [
+     1831,
+     "Q76430",
+     "P570"
+    ],
+    "start": [
+     1792,
+     "Q207318",
+     "P580"
+    ],
+    "end": [
+     1802,
+     "Q207318",
+     "P582"
+    ],
+    "written": [
+     1830,
+     "shelf"
+    ],
+    "begun": [
+     1818,
+     "on-war",
+     1
+    ]
+   },
+   "confidence": "medium",
+   "why": "The book returns again and again to the way the wars of the French Revolution changed warfare, in Books II, III and V.",
+   "note": "The work was left unfinished at the author’s death and published by his widow in 1832, as her preface and his own notice say; her preface says he expanded it from 1818 and worked on it until the spring of 1830. The notes of this English edition are not marked by hand on the shelf; the introduction, the first preface and the memoir are tagged apart.",
+   "judged": "2026-11-22",
+   "entry": true
+  },
+  {
+   "work": "on-war",
+   "wq": "Q1981770",
+   "part": null,
+   "subject": {
+    "q": "Q33143",
+    "label": "Seven Years’ War",
+    "kind": "happening"
+   },
+   "tag": "secondary",
+   "basis": "BORNAFTER",
+   "flags": [],
+   "evidence": "Wikidata gives the author’s birth as 1780, after the war ended in 1763.",
+   "source": [
+    {
+     "wd": "Q76430",
+     "p": "P569"
+    },
+    {
+     "wd": "Q33143",
+     "p": "P582"
+    },
+    {
+     "book": "on-war",
+     "ch": 102
+    },
+    {
+     "book": "on-war",
+     "ch": 504
+    }
+   ],
+   "dates": {
+    "born": [
+     1780,
+     "Q76430",
+     "P569"
+    ],
+    "end": [
+     1763,
+     "Q33143",
+     "P582"
+    ]
+   },
+   "confidence": "high",
+   "why": "Frederick the Great’s campaigns in this war are among the book’s standing examples, in Book I, chapter II and Book V.",
+   "note": "The work was left unfinished at the author’s death and published by his widow in 1832, as her preface and his own notice say; her preface says he expanded it from 1818 and worked on it until the spring of 1830. The notes of this English edition are not marked by hand on the shelf; the introduction, the first preface and the memoir are tagged apart.",
+   "judged": "2026-11-22",
+   "entry": true
+  },
+  {
+   "work": "on-war",
+   "wq": "Q1981770",
+   "part": null,
+   "subject": {
+    "q": "Q219087",
+    "label": "military strategy",
+    "kind": "idea"
+   },
+   "tag": "primary",
+   "basis": "OWN",
+   "flags": [],
+   "evidence": "In his notice and in Book III, chapter I the author sets out his own theory of strategy; Wikidata gives military strategy as the book’s main subject.",
+   "source": [
+    {
+     "book": "on-war",
+     "ch": 2
+    },
+    {
+     "book": "on-war",
+     "ch": 301
+    },
+    {
+     "wd": "Q1981770",
+     "p": "P921",
+     "v": "Q219087"
+    }
+   ],
+   "confidence": "medium",
+   "why": "Book III is a treatise on strategy, and the whole work a theory of war.",
+   "note": "The work was left unfinished at the author’s death and published by his widow in 1832, as her preface and his own notice say; her preface says he expanded it from 1818 and worked on it until the spring of 1830. The notes of this English edition are not marked by hand on the shelf; the introduction, the first preface and the memoir are tagged apart.",
+   "judged": "2026-11-22",
+   "entry": false
+  },
+  {
+   "work": "on-war",
+   "wq": "Q1981770",
+   "part": null,
+   "subject": {
+    "q": "Q198",
+    "label": "war",
+    "kind": "idea"
+   },
+   "tag": null,
+   "basis": null,
+   "flags": [],
+   "evidence": "Wikidata gives war as a main subject of the book, and the author’s notice presents the work as materials for a theory of war.",
+   "source": [
+    {
+     "wd": "Q1981770",
+     "p": "P921",
+     "v": "Q198"
+    },
+    {
+     "book": "on-war",
+     "ch": 2
+    }
+   ],
+   "confidence": "low",
+   "held": "War itself is a general subject, neither a happening with dates nor a doctrine one could hold, so none of the rule’s tests fits it; the book’s own theory is carried by its link on military strategy.",
+   "why": "The book is a theory of war, and Wikidata gives war as its main subject.",
+   "note": "The work was left unfinished at the author’s death and published by his widow in 1832, as her preface and his own notice say; her preface says he expanded it from 1818 and worked on it until the spring of 1830. The notes of this English edition are not marked by hand on the shelf; the introduction, the first preface and the memoir are tagged apart.",
+   "judged": "2026-11-22",
+   "entry": false
+  },
+  {
+   "work": "on-war",
+   "wq": "Q1981770",
+   "part": {
+    "ch": 0,
+    "heading": "Introduction",
+    "by": "F. N. Maude",
+    "byq": "Q16872712"
+   },
+   "subject": {
+    "q": "Q76430",
+    "label": "Carl von Clausewitz",
+    "kind": "person"
+   },
+   "tag": "secondary",
+   "basis": "BORNAFTER",
+   "flags": [],
+   "evidence": "The introduction is by the editor Maude, who writes of the spread of Clausewitz’s teaching since his day; Wikidata gives Maude’s birth as 1854, after Clausewitz died in 1831.",
+   "source": [
+    {
+     "book": "on-war",
+     "ch": 0
+    },
+    {
+     "wd": "Q16872712",
+     "p": "P569"
+    },
+    {
+     "wd": "Q76430",
+     "p": "P570"
+    }
+   ],
+   "dates": {
+    "born": [
+     1854,
+     "Q16872712",
+     "P569"
+    ],
+    "end": [
+     1831,
+     "Q76430",
+     "P570"
+    ]
+   },
+   "confidence": "high",
+   "why": "The introduction is an essay on Clausewitz and his influence on the nations of Europe.",
+   "judged": "2026-11-22",
+   "entry": false
+  },
+  {
+   "work": "on-war",
+   "wq": "Q1981770",
+   "part": {
+    "ch": 1,
+    "heading": "Preface to the first edition",
+    "by": "Marie von Clausewitz",
+    "byq": "Q71317"
+   },
+   "subject": {
+    "q": "Q76430",
+    "label": "Carl von Clausewitz",
+    "kind": "person"
+   },
+   "tag": "primary",
+   "basis": "WIT",
+   "flags": [],
+   "evidence": "The preface is by the author’s widow, who tells of his work on the book in the last twelve years of his life until the spring of 1830; Wikidata gives her as his wife and as the work’s editor.",
+   "source": [
+    {
+     "book": "on-war",
+     "ch": 1
+    },
+    {
+     "wd": "Q71317",
+     "p": "P26",
+     "v": "Q76430"
+    },
+    {
+     "wd": "Q1981770",
+     "p": "P98",
+     "v": "Q71317"
+    }
+   ],
+   "dates": {
+    "born": [
+     1779,
+     "Q71317",
+     "P569"
+    ],
+    "died": [
+     1836,
+     "Q71317",
+     "P570"
+    ],
+    "start": [
+     1780,
+     "Q76430",
+     "P569"
+    ],
+    "end": [
+     1831,
+     "Q76430",
+     "P570"
+    ]
+   },
+   "confidence": "high",
+   "why": "The preface is a first-hand account of how Clausewitz wrote the book and left it unfinished.",
+   "judged": "2026-11-22",
+   "entry": false
+  },
+  {
+   "work": "on-war",
+   "wq": "Q1981770",
+   "part": {
+    "ch": 4,
+    "heading": "Brief memoir of General Clausewitz",
+    "by": "J. J. Graham",
+    "byq": "Q29584485"
+   },
+   "subject": {
+    "q": "Q76430",
+    "label": "Carl von Clausewitz",
+    "kind": "person"
+   },
+   "tag": "secondary",
+   "basis": "FROMOTHERS",
+   "flags": [],
+   "evidence": "The memoir is by the translator, J. J. Graham, who signs it; it tells the general’s career from his first campaigns to his death and names the memoirs of General Brandt, on which it draws, as the fullest account of his later life. Nothing in it says the translator knew him.",
+   "source": [
+    {
+     "book": "on-war",
+     "ch": 4
+    },
+    {
+     "wd": "Q29584485",
+     "p": "P569"
+    },
+    {
+     "wd": "Q29584485",
+     "p": "P570"
+    }
+   ],
+   "confidence": "medium",
+   "why": "The memoir is a short life of Clausewitz.",
+   "judged": "2026-11-22",
+   "entry": false
+  },
+  {
+   "work": "communist-manifesto",
+   "wq": "Q40591",
+   "part": null,
+   "subject": {
+    "q": "Q9061",
+    "label": "Karl Marx",
+    "kind": "person"
+   },
+   "tag": "primary",
+   "basis": "OWN",
+   "flags": [],
+   "evidence": "Wikidata names Marx as one of the two authors.",
+   "source": [
+    {
+     "wd": "Q40591",
+     "p": "P50",
+     "v": "Q9061"
+    }
+   ],
+   "confidence": "high",
+   "why": "His own book, written with Engels.",
+   "note": "Engels’s preface of 1888 and the preamble are held in one chapter, and his notes are not marked by hand on the shelf; only the Manifesto’s own text is tagged.",
+   "judged": "2026-11-22",
+   "entry": true
+  },
+  {
+   "work": "communist-manifesto",
+   "wq": "Q40591",
+   "part": null,
+   "subject": {
+    "q": "Q34787",
+    "label": "Friedrich Engels",
+    "kind": "person"
+   },
+   "tag": "primary",
+   "basis": "OWN",
+   "flags": [],
+   "evidence": "Wikidata names Engels as one of the two authors, and his preface tells how the two were commissioned to write it.",
+   "source": [
+    {
+     "wd": "Q40591",
+     "p": "P50",
+     "v": "Q34787"
+    },
+    {
+     "book": "communist-manifesto",
+     "ch": 0
+    }
+   ],
+   "confidence": "high",
+   "why": "His own book, written with Marx.",
+   "note": "Engels’s preface of 1888 and the preamble are held in one chapter, and his notes are not marked by hand on the shelf; only the Manifesto’s own text is tagged.",
+   "judged": "2026-11-22",
+   "entry": true
+  },
+  {
+   "work": "communist-manifesto",
+   "wq": "Q40591",
+   "part": null,
+   "subject": {
+    "q": "Q7264",
+    "label": "Marxism",
+    "kind": "idea"
+   },
+   "tag": "primary",
+   "basis": "OWN",
+   "flags": [],
+   "evidence": "Wikidata gives Marxism as Marx’s ideology and names Marx and Engels as its founders; Section I states in their own voice that history is the history of class struggles, the core of the doctrine.",
+   "source": [
+    {
+     "wd": "Q9061",
+     "p": "P1142",
+     "v": "Q7264"
+    },
+    {
+     "wd": "Q7264",
+     "p": "P61",
+     "v": "Q9061"
+    },
+    {
+     "book": "communist-manifesto",
+     "ch": 1
+    }
+   ],
+   "confidence": "high",
+   "why": "The Manifesto is the first public statement of the doctrine later called Marxism, and Wikidata gives Marxism as its movement.",
+   "note": "Engels’s preface of 1888 and the preamble are held in one chapter, and his notes are not marked by hand on the shelf; only the Manifesto’s own text is tagged.",
+   "judged": "2026-11-22",
+   "entry": true
+  },
+  {
+   "work": "communist-manifesto",
+   "wq": "Q40591",
+   "part": null,
+   "subject": {
+    "q": "Q6186",
+    "label": "communism",
+    "kind": "idea"
+   },
+   "tag": "primary",
+   "basis": "OWN",
+   "flags": [],
+   "evidence": "Wikidata gives communism as Marx’s ideology and as a main subject of the book; the preamble says Communists met in London to sketch this statement of their views, and Section II sets out their aims.",
+   "source": [
+    {
+     "wd": "Q9061",
+     "p": "P1142",
+     "v": "Q6186"
+    },
+    {
+     "wd": "Q40591",
+     "p": "P921",
+     "v": "Q6186"
+    },
+    {
+     "book": "communist-manifesto",
+     "ch": 0
+    },
+    {
+     "book": "communist-manifesto",
+     "ch": 2
+    }
+   ],
+   "confidence": "high",
+   "why": "The Manifesto is the programme of the Communists, in their own name.",
+   "note": "Engels’s preface of 1888 and the preamble are held in one chapter, and his notes are not marked by hand on the shelf; only the Manifesto’s own text is tagged.",
+   "judged": "2026-11-22",
+   "entry": true
+  },
+  {
+   "work": "communist-manifesto",
+   "wq": "Q40591",
+   "part": null,
+   "subject": {
+    "q": "Q642562",
+    "label": "Communist League",
+    "kind": "happening"
+   },
+   "tag": "primary",
+   "basis": "ACT",
+   "flags": [],
+   "evidence": "Engels’s preface says the League’s congress in London in November 1847 commissioned Marx and Engels to write the Manifesto as its platform, and the preamble says it was sketched by Communists assembled in London; Wikidata names both authors among the League’s founders.",
+   "source": [
+    {
+     "book": "communist-manifesto",
+     "ch": 0
+    },
+    {
+     "wd": "Q642562",
+     "p": "P112",
+     "v": "Q9061"
+    },
+    {
+     "wd": "Q642562",
+     "p": "P112",
+     "v": "Q34787"
+    }
+   ],
+   "confidence": "high",
+   "why": "The Manifesto is the League’s own programme.",
+   "note": "Engels’s preface of 1888 and the preamble are held in one chapter, and his notes are not marked by hand on the shelf; only the Manifesto’s own text is tagged.",
+   "judged": "2026-11-22",
+   "entry": true
+  },
+  {
+   "work": "communist-manifesto",
+   "wq": "Q40591",
+   "part": null,
+   "subject": {
+    "q": "Q1744607",
+    "label": "class struggle",
+    "kind": "idea"
+   },
+   "tag": "primary",
+   "basis": "OWN",
+   "flags": [],
+   "evidence": "Section I opens by stating, in the authors’ own voice, that the history of all society so far is the history of class struggles, and goes on to trace the struggle of bourgeois and proletarians.",
+   "source": [
+    {
+     "book": "communist-manifesto",
+     "ch": 1
+    }
+   ],
+   "confidence": "high",
+   "why": "Section I is built on the idea of class struggle.",
+   "note": "Engels’s preface of 1888 and the preamble are held in one chapter, and his notes are not marked by hand on the shelf; only the Manifesto’s own text is tagged.",
+   "judged": "2026-11-22",
+   "entry": true
+  },
+  {
+   "work": "communist-manifesto",
+   "wq": "Q40591",
+   "part": null,
+   "subject": {
+    "q": "Q7272",
+    "label": "socialism",
+    "kind": "idea"
+   },
+   "tag": null,
+   "basis": null,
+   "flags": [
+    {
+     "id": "DISPUTED"
+    }
+   ],
+   "evidence": "Wikidata gives Marxism and communism as Marx’s ideologies and classes both as kinds of socialism, which would make the book a statement of one form of it; but Engels’s preface says that in 1847 the work could not have been called a socialist manifesto, since socialism then meant the utopian sects and middle-class reformers, and Section III attacks those socialist writings one school after another.",
+   "source": [
+    {
+     "wd": "Q9061",
+     "p": "P1142",
+     "v": "Q7264"
+    },
+    {
+     "wd": "Q9061",
+     "p": "P1142",
+     "v": "Q6186"
+    },
+    {
+     "wd": "Q7264",
+     "p": "P279",
+     "v": "Q7272"
+    },
+    {
+     "wd": "Q6186",
+     "p": "P279",
+     "v": "Q7272"
+    },
+    {
+     "book": "communist-manifesto",
+     "ch": 0
+    },
+    {
+     "book": "communist-manifesto",
+     "ch": 3
+    },
+    {
+     "wd": "Q40591",
+     "p": "P921",
+     "v": "Q7272"
+    }
+   ],
+   "confidence": "medium",
+   "why": "Section III is a survey and critique of socialist literature, and Wikidata gives socialism as a main subject.",
+   "note": "Engels’s preface of 1888 and the preamble are held in one chapter, and his notes are not marked by hand on the shelf; only the Manifesto’s own text is tagged.",
+   "judged": "2026-11-22",
+   "entry": true
+  },
+  {
+   "work": "communist-manifesto",
+   "wq": "Q40591",
+   "part": null,
+   "subject": {
+    "q": "Q3588",
+    "label": "Revolutions of 1848",
+    "kind": "happening"
+   },
+   "tag": null,
+   "basis": null,
+   "flags": [
+    {
+     "id": "CONTEMPORARY"
+    }
+   ],
+   "evidence": "Wikidata dates the Manifesto’s publication to February 1848, weeks after the first of the revolutions began; Section IV looks forward to a coming revolution in Germany rather than describing one, so the authors lived through the revolutions but the text does not witness them.",
+   "source": [
+    {
+     "wd": "Q40591",
+     "p": "P577"
+    },
+    {
+     "wd": "Q3588",
+     "p": "P580"
+    },
+    {
+     "book": "communist-manifesto",
+     "ch": 4
+    }
+   ],
+   "dates": {
+    "born": [
+     1818,
+     "Q9061",
+     "P569"
+    ],
+    "died": [
+     1883,
+     "Q9061",
+     "P570"
+    ],
+    "start": [
+     1848,
+     "Q3588",
+     "P580"
+    ],
+    "end": [
+     1849,
+     "Q3588",
+     "P582"
+    ]
+   },
+   "confidence": "medium",
+   "why": "The Manifesto appeared on the eve of the revolutions and its last section is a call to them.",
+   "note": "Engels’s preface of 1888 and the preamble are held in one chapter, and his notes are not marked by hand on the shelf; only the Manifesto’s own text is tagged.",
+   "judged": "2026-11-22",
+   "entry": false
+  },
+  {
+   "work": "capital-and-interest",
+   "wq": "Q4212911",
+   "part": null,
+   "subject": {
+    "q": "Q311535",
+    "label": "Eugen von Böhm-Bawerk",
+    "kind": "person"
+   },
+   "tag": "primary",
+   "basis": "OWN",
+   "flags": [],
+   "evidence": "Wikidata names Böhm-Bawerk as the author, and the translator’s preface presents the book as his.",
+   "source": [
+    {
+     "wd": "Q4212911",
+     "p": "P50",
+     "v": "Q311535"
+    },
+    {
+     "book": "capital-and-interest",
+     "ch": 0
+    }
+   ],
+   "confidence": "high",
+   "why": "His own book.",
+   "note": "The translator Smart’s preface is held apart, but it names none of these subjects as such, so it carries no link.",
+   "judged": "2026-11-22",
+   "entry": true
+  },
+  {
+   "work": "capital-and-interest",
+   "wq": "Q4212911",
+   "part": null,
+   "subject": {
+    "q": "Q203411",
+    "label": "Austrian school",
+    "kind": "idea"
+   },
+   "tag": "primary",
+   "basis": "OWN",
+   "flags": [],
+   "evidence": "Wikidata gives the Austrian school as the author’s movement; the book itself does not use the name.",
+   "source": [
+    {
+     "wd": "Q311535",
+     "p": "P135",
+     "v": "Q203411"
+    }
+   ],
+   "confidence": "medium",
+   "why": "The book is one of the Austrian school’s main works on capital and interest.",
+   "note": "The translator Smart’s preface is held apart, but it names none of these subjects as such, so it carries no link.",
+   "judged": "2026-11-22",
+   "entry": true
+  },
+  {
+   "work": "capital-and-interest",
+   "wq": "Q4212911",
+   "part": null,
+   "subject": {
+    "q": "Q7264",
+    "label": "Marxism",
+    "kind": "idea"
+   },
+   "tag": "secondary",
+   "basis": "OUTSIDE",
+   "flags": [],
+   "evidence": "Book VI, chapter III examines and rejects Marx’s theory of surplus value from outside it, as one of the exploitation theories of interest; Wikidata gives the author’s movement as the Austrian school.",
+   "source": [
+    {
+     "book": "capital-and-interest",
+     "ch": 603
+    },
+    {
+     "wd": "Q311535",
+     "p": "P135",
+     "v": "Q203411"
+    }
+   ],
+   "confidence": "high",
+   "why": "A chapter of the book is a critique of Marx’s theory of interest.",
+   "note": "The translator Smart’s preface is held apart, but it names none of these subjects as such, so it carries no link.",
+   "judged": "2026-11-22",
+   "entry": true
+  },
+  {
+   "work": "capital-and-interest",
+   "wq": "Q4212911",
+   "part": null,
+   "subject": {
+    "q": "Q271857",
+    "label": "classical economics",
+    "kind": "idea"
+   },
+   "tag": "secondary",
+   "basis": "OUTSIDE",
+   "flags": [],
+   "evidence": "Book I, chapter IV examines Adam Smith’s treatment of interest from outside it, but the book does not name the classical school.",
+   "source": [
+    {
+     "book": "capital-and-interest",
+     "ch": 104
+    }
+   ],
+   "confidence": "low",
+   "held": "Only the Master Index’s own school tags tie Smith and Ricardo to classical economics, and the book does not name the school, so the tag is not shown.",
+   "why": "The history of theories in Books I and II examines Smith, Ricardo and their followers.",
+   "note": "The translator Smart’s preface is held apart, but it names none of these subjects as such, so it carries no link.",
+   "judged": "2026-11-22",
+   "entry": true
+  },
+  {
+   "work": "positive-theory-of-capital",
+   "wq": null,
+   "part": null,
+   "subject": {
+    "q": "Q311535",
+    "label": "Eugen von Böhm-Bawerk",
+    "kind": "person"
+   },
+   "tag": "primary",
+   "basis": "OWN",
+   "flags": [],
+   "evidence": "The shelf names Böhm-Bawerk as the author, and the author’s preface is his own.",
+   "source": [
+    {
+     "book": "positive-theory-of-capital",
+     "ch": 1
+    }
+   ],
+   "confidence": "high",
+   "why": "His own book.",
+   "judged": "2026-11-22",
+   "entry": true
+  },
+  {
+   "work": "positive-theory-of-capital",
+   "wq": null,
+   "part": null,
+   "subject": {
+    "q": "Q203411",
+    "label": "Austrian school",
+    "kind": "idea"
+   },
+   "tag": "primary",
+   "basis": "OWN",
+   "flags": [],
+   "evidence": "Wikidata gives the Austrian school as the author’s movement; the translator’s preface says the book’s theory of value is that of Jevons and Menger, now the fundamental doctrine of the Austrian school, and the author sets it out himself in Books III and IV.",
+   "source": [
+    {
+     "wd": "Q311535",
+     "p": "P135",
+     "v": "Q203411"
+    },
+    {
+     "book": "positive-theory-of-capital",
+     "ch": 0
+    },
+    {
+     "book": "positive-theory-of-capital",
+     "ch": 301
+    }
+   ],
+   "confidence": "high",
+   "why": "The book is one of the Austrian school’s main works, built on its theory of value.",
+   "judged": "2026-11-22",
+   "entry": true
+  },
+  {
+   "work": "positive-theory-of-capital",
+   "wq": null,
+   "part": {
+    "ch": 0,
+    "heading": "Translator’s preface",
+    "by": "William Smart",
+    "byq": "Q8018517"
+   },
+   "subject": {
+    "q": "Q203411",
+    "label": "Austrian school",
+    "kind": "idea"
+   },
+   "tag": "secondary",
+   "basis": "FROMOTHERS",
+   "flags": [],
+   "evidence": "The translator’s preface explains the Austrian school’s theory of value to English readers as an account of Jevons’s, Menger’s and the author’s work.",
+   "source": [
+    {
+     "book": "positive-theory-of-capital",
+     "ch": 0
+    }
+   ],
+   "confidence": "medium",
+   "why": "The preface introduces the school’s doctrine of value as the key to the book.",
+   "judged": "2026-11-22",
+   "entry": true
+  },
+  {
+   "work": "karl-marx-and-the-close-of-his-system",
+   "wq": null,
+   "part": null,
+   "subject": {
+    "q": "Q311535",
+    "label": "Eugen von Böhm-Bawerk",
+    "kind": "person"
+   },
+   "tag": "primary",
+   "basis": "OWN",
+   "flags": [],
+   "evidence": "The shelf names Böhm-Bawerk as the author, and he writes the chapters in the first person.",
+   "source": [
+    {
+     "book": "karl-marx-and-the-close-of-his-system",
+     "ch": 1
+    }
+   ],
+   "confidence": "high",
+   "why": "His own book.",
+   "note": "Bonar’s preface and the author’s introduction are held in one chapter on the shelf; only the author’s text is tagged.",
+   "judged": "2026-11-22",
+   "entry": true
+  },
+  {
+   "work": "karl-marx-and-the-close-of-his-system",
+   "wq": null,
+   "part": null,
+   "subject": {
+    "q": "Q7264",
+    "label": "Marxism",
+    "kind": "idea"
+   },
+   "tag": "secondary",
+   "basis": "OUTSIDE",
+   "flags": [],
+   "evidence": "Chapters I to IV examine Marx’s theory of value and surplus value and argue that it fails; in chapter V the author places himself among the Austrian economists opposed to the Marxian system; Wikidata gives his movement as the Austrian school.",
+   "source": [
+    {
+     "book": "karl-marx-and-the-close-of-his-system",
+     "ch": 1
+    },
+    {
+     "book": "karl-marx-and-the-close-of-his-system",
+     "ch": 5
+    },
+    {
+     "wd": "Q311535",
+     "p": "P135",
+     "v": "Q203411"
+    }
+   ],
+   "confidence": "high",
+   "why": "The whole book is a critique of the economic system of Capital.",
+   "note": "Bonar’s preface and the author’s introduction are held in one chapter on the shelf; only the author’s text is tagged.",
+   "judged": "2026-11-22",
+   "entry": true
+  },
+  {
+   "work": "karl-marx-and-the-close-of-his-system",
+   "wq": null,
+   "part": null,
+   "subject": {
+    "q": "Q9061",
+    "label": "Karl Marx",
+    "kind": "person"
+   },
+   "tag": "secondary",
+   "basis": "OUTSIDE",
+   "flags": [],
+   "evidence": "Wikidata gives Karl Marx as the work’s main subject, and the book studies his economic system as Capital sets it out, from the theory of value in chapter I to the question of its contradiction in chapter III; the author nowhere says that he knew him.",
+   "source": [
+    {
+     "wd": "Q6372070",
+     "p": "P921",
+     "v": "Q9061"
+    },
+    {
+     "book": "karl-marx-and-the-close-of-his-system",
+     "ch": 1
+    },
+    {
+     "book": "karl-marx-and-the-close-of-his-system",
+     "ch": 3
+    }
+   ],
+   "confidence": "medium",
+   "why": "The book is named for Marx and is a study of his economic system as he left it.",
+   "note": "Bonar’s preface and the author’s introduction are held in one chapter on the shelf; only the author’s text is tagged.",
+   "judged": "2026-11-22",
+   "entry": true
+  },
+  {
+   "work": "karl-marx-and-the-close-of-his-system",
+   "wq": null,
+   "part": null,
+   "subject": {
+    "q": "Q203411",
+    "label": "Austrian school",
+    "kind": "idea"
+   },
+   "tag": "primary",
+   "basis": "OWN",
+   "flags": [],
+   "evidence": "In chapter V the author counts himself among the Austrian economists, and Wikidata gives the Austrian school as his movement.",
+   "source": [
+    {
+     "book": "karl-marx-and-the-close-of-his-system",
+     "ch": 5
+    },
+    {
+     "wd": "Q311535",
+     "p": "P135",
+     "v": "Q203411"
+    }
+   ],
+   "confidence": "high",
+   "why": "The book argues the Austrian school’s case against Marx.",
+   "note": "Bonar’s preface and the author’s introduction are held in one chapter on the shelf; only the author’s text is tagged.",
+   "judged": "2026-11-22",
+   "entry": true
+  },
+  {
+   "work": "origin-of-money",
+   "wq": null,
+   "part": null,
+   "subject": {
+    "q": "Q84177",
+    "label": "Carl Menger",
+    "kind": "person"
+   },
+   "tag": "primary",
+   "basis": "OWN",
+   "flags": [],
+   "evidence": "The shelf names Menger as the author, and the introduction is his own.",
+   "source": [
+    {
+     "book": "origin-of-money",
+     "ch": 1
+    }
+   ],
+   "confidence": "high",
+   "why": "His own essay.",
+   "judged": "2026-11-22",
+   "entry": true
+  },
+  {
+   "work": "origin-of-money",
+   "wq": null,
+   "part": null,
+   "subject": {
+    "q": "Q203411",
+    "label": "Austrian school",
+    "kind": "idea"
+   },
+   "tag": "primary",
+   "basis": "OWN",
+   "flags": [],
+   "evidence": "The essay does not name the Austrian school, and Wikidata gives Menger no movement; other books on the shelf, Wieser’s preface to Natural Value and Smart’s preface to the Positive Theory, name Menger as the source of the school’s theory, and the Master Index files him under it.",
+   "source": [
+    {
+     "book": "natural-value",
+     "ch": 1,
+     "other": true
+    },
+    {
+     "book": "positive-theory-of-capital",
+     "ch": 0,
+     "other": true
+    },
+    {
+     "lake": "Q84177",
+     "tag": "School:Austrian school"
+    }
+   ],
+   "confidence": "low",
+   "held": "The evidence lies only in other books and the Master Index’s own tag, not in this essay or a statement on Wikidata, so the tag is not shown.",
+   "why": "Menger founded the Austrian school, and the essay applies its method to the rise of money.",
+   "judged": "2026-11-22",
+   "entry": true
+  },
+  {
+   "work": "natural-value",
+   "wq": null,
+   "part": null,
+   "subject": {
+    "q": "Q84482",
+    "label": "Friedrich von Wieser",
+    "kind": "person"
+   },
+   "tag": "primary",
+   "basis": "OWN",
+   "flags": [],
+   "evidence": "The shelf names Wieser as the author, and the author’s preface is his own.",
+   "source": [
+    {
+     "book": "natural-value",
+     "ch": 1
+    }
+   ],
+   "confidence": "high",
+   "why": "His own book.",
+   "judged": "2026-11-22",
+   "entry": false
+  },
+  {
+   "work": "natural-value",
+   "wq": null,
+   "part": null,
+   "subject": {
+    "q": "Q203411",
+    "label": "Austrian school",
+    "kind": "idea"
+   },
+   "tag": "primary",
+   "basis": "OWN",
+   "flags": [],
+   "evidence": "In his preface the author places his work in the line of the new theory of value developed in Austria after Menger and says he has applied Menger’s theory himself; the editor’s preface says Book I states the Austrian theory.",
+   "source": [
+    {
+     "book": "natural-value",
+     "ch": 1
+    },
+    {
+     "book": "natural-value",
+     "ch": 0
+    }
+   ],
+   "confidence": "high",
+   "why": "The book is a statement of the Austrian school’s theory of value.",
+   "judged": "2026-11-22",
+   "entry": true
+  },
+  {
+   "work": "natural-value",
+   "wq": null,
+   "part": null,
+   "subject": {
+    "q": "Q842271",
+    "label": "marginal utility",
+    "kind": "idea"
+   },
+   "tag": "primary",
+   "basis": "OWN",
+   "flags": [],
+   "evidence": "Book I, chapter V, under that title, develops the idea in the author’s own voice, and he says there that the name was his suggestion.",
+   "source": [
+    {
+     "book": "natural-value",
+     "ch": 105
+    }
+   ],
+   "confidence": "high",
+   "why": "Book I is built on marginal utility, and a chapter carries its name.",
+   "judged": "2026-11-22",
+   "entry": false
+  },
+  {
+   "work": "natural-value",
+   "wq": null,
+   "part": {
+    "ch": 0,
+    "heading": "Editor’s preface",
+    "by": "William Smart",
+    "byq": "Q8018517"
+   },
+   "subject": {
+    "q": "Q203411",
+    "label": "Austrian school",
+    "kind": "idea"
+   },
+   "tag": "secondary",
+   "basis": "FROMOTHERS",
+   "flags": [],
+   "evidence": "The editor’s preface explains the Austrian school’s theory for English readers and says that Book I of Wieser’s work states it.",
+   "source": [
+    {
+     "book": "natural-value",
+     "ch": 0
+    }
+   ],
+   "confidence": "medium",
+   "why": "The preface introduces the book as a statement of the school’s theory.",
+   "note": "The editor says in his preface that he is connected with the Austrian school himself, so his account is not wholly from outside it; it is tagged as an account of another writer’s work.",
+   "judged": "2026-11-22",
+   "entry": true
+  },
+  {
+   "work": "natural-value",
+   "wq": null,
+   "part": {
+    "ch": 0,
+    "heading": "Editor’s preface",
+    "by": "William Smart",
+    "byq": "Q8018517"
+   },
+   "subject": {
+    "q": "Q842271",
+    "label": "marginal utility",
+    "kind": "idea"
+   },
+   "tag": "secondary",
+   "basis": "FROMOTHERS",
+   "flags": [],
+   "evidence": "The editor’s preface explains the theory of value built on marginal utility as Wieser and his predecessors set it out.",
+   "source": [
+    {
+     "book": "natural-value",
+     "ch": 0
+    }
+   ],
+   "confidence": "medium",
+   "why": "The preface introduces the book’s theory of value.",
+   "note": "The editor says in his preface that he is connected with the Austrian school himself, so his account is not wholly from outside it; it is tagged as an account of another writer’s work.",
+   "judged": "2026-11-22",
+   "entry": false
+  }
+ ]
+}

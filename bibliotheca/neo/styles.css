@@ -60,6 +60,27 @@ button { cursor: pointer; }
 .nc-byline { margin: 6px 0 0; color: var(--prp-text-2); font: italic var(--prp-fs-md)/1.5 var(--prp-font-serif); }
 .nc-byline a.term { font-style: normal; }
 .nc-book-front .prp-meta { margin-top: 8px; }
+/* What the book is judged a primary or a secondary source on (MI-14): closed, one line under the meta. */
+.nc-srcs { margin-top: 10px; font: var(--prp-fs-sm)/1.55 var(--prp-font-ui); color: var(--prp-text-2); }
+.nc-srcs > summary { cursor: pointer; color: var(--prp-link); font-weight: 500; }
+.nc-srcs h3 { margin: 12px 0 4px; color: var(--prp-muted); font: 500 var(--prp-fs-xs) var(--prp-font-mono); letter-spacing: .06em; text-transform: uppercase; }
+.nc-src-list { margin: 0; padding: 0; list-style: none; }
+.nc-src { padding: 5px 0; border-top: 1px solid var(--prp-line-soft); overflow-wrap: anywhere; }
+.nc-src-bit { margin-left: 8px; }
+.nc-src-bit + .nc-src-bit { margin-left: 4px; }
+.nc-src-bit + .nc-src-bit::before { content: '· '; color: var(--prp-faint); }
+.nc-src-wait { margin-left: 8px; }
+.nc-src .prp-kind { margin-left: 8px; border-color: var(--prp-primary); background: var(--prp-primary-soft); color: var(--prp-text); vertical-align: 1px; }
+.nc-src-subj { font-weight: 600; color: var(--prp-text); }
+a.nc-src-subj { color: var(--prp-link); }
+.nc-src-wait { color: var(--prp-muted); font-size: var(--prp-fs-xs); }
+.nc-src-ev { display: inline; margin-left: 8px; }
+.nc-src-ev > summary { display: inline; cursor: pointer; color: var(--prp-link); }
+.nc-src-ev[open] { display: block; margin: 4px 0 2px; }
+.nc-src-ev p { margin: 4px 0; }
+.nc-src-ev ul { margin: 2px 0 4px; padding-left: 18px; }
+.nc-src-note { color: var(--prp-muted); }
+.nc-src-about { margin: 12px 0 2px; max-width: 75ch; color: var(--prp-muted); }
 
 /* --- The reader: a sticky chapter head (contents, title, position, terms, pane), the text ----------------------------- */
 .nc-reader { position: relative; }

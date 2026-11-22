@@ -672,7 +672,7 @@ test('Retrospective: a period of years shows every conflict active in it at its 
   const one = { big: await page.locator('#year-big').innerText(), url: page.url(), handles: [await page.locator('#from').inputValue(), await page.locator('#year').inputValue()] };
   await browser.close();
   assert.equal(period.label, 'Period');
-  assert.match(period.sub, /^\d+ armed conflicts, \d+ at war level at some point$/);
+  assert.match(period.sub, /^\d+ wars on VM’s list from Wikidata; no free source codes their size$/);
   assert.ok(period.red >= red1942, `places at war 1939–1945: ${period.red}; 1942: ${red1942}`);
   assert.equal(period.card, 'Listed war · 1939–45 · 7 yrs'); // World War II leads: on VM's list, active in all seven years
   assert.deepEqual(period.handles, ['1939', '1945']);
@@ -681,6 +681,42 @@ test('Retrospective: a period of years shows every conflict active in it at its 
   assert.match(one.url, /#y=1939&c=Q30$/);
   assert.deepEqual(one.handles, ['1939', '1939']);
   assert.deepEqual(errors, []);
+});
+
+// A reader's review (22 Nov 2026) caught two things in the years before 1946: every conflict was counted "at war
+// level" although the page says no source codes a listed war's size, and the table named places by states founded
+// later (the People's Republic of China in 1930) without the "today’s …" the page uses under its map.
+test('Retrospective: a listed war is never counted "at war level", and a place younger than the year is "today’s …" in the table', pageTest, async () => {
+  const { browser, page, errors } = await open('battlefield/history/#y=1930&v=table');
+  try {
+    const text = sel => page.locator(sel).first().textContent().then(t => t.trim());
+    const go = async (hash, big) => {
+      await page.evaluate(h => { location.hash = h; }, hash);
+      await page.waitForFunction(b => document.querySelector('#year-big').textContent === b, big);
+    };
+    await page.waitForSelector('#table-rows tr[data-id]', { timeout: 20000 });
+    // 1930: only wars on VM's list from Wikidata, so the counter says "Listed wars" and counts them all.
+    assert.equal(await text('#k-wars-label'), 'Listed wars');
+    assert.equal(await text('#k-wars'), await text('#k-conflicts'));
+    assert.match(await text('#panel .sub'), /^\d+ wars? on VM’s list from Wikidata; no free source codes their size$/);
+    const rows1930 = await page.locator('#table-rows').innerText();
+    assert.match(rows1930, /today’s People's Republic of China/);
+    assert.doesNotMatch(rows1930, /(^|[^s] )People's Republic of China/m);
+    // A war's own panel names its places the same way.
+    await page.locator('#table-rows tr', { hasText: 'today’s People\'s Republic of China' }).first().locator('.rowbtn').click();
+    await page.waitForFunction(() => /fought in /.test(document.querySelector('#panel')?.textContent || ''));
+    assert.match(await page.locator('#panel').innerText(), /today’s People's Republic of China/);
+    // 1950: UCDP/PRIO's record, whose war level is a measured size; the state exists, so its plain name.
+    await go('#y=1950&v=table', '1950');
+    assert.equal(await text('#k-wars-label'), 'At war level');
+    assert.match(await text('#panel .sub'), /^\d+ armed conflicts, \d+ at war level$/);
+    assert.doesNotMatch(await page.locator('#table-rows').innerText(), /today’s People's Republic of China/);
+    // A period across 1946 holds both kinds, counted apart.
+    await go('#y=1950&f=1940&v=table', '1940–1950');
+    assert.equal(await text('#k-wars-label'), 'Wars');
+    assert.match(await text('#panel .sub'), /^\d+ armed conflicts: \d+ at war level at some point, \d+ listed wars? of no coded size$/);
+    assert.deepEqual(errors, []);
+  } finally { await browser.close(); }
 });
 
 // AC-13: what pointing at a country says follows the year shown: that year's parties, and when it has no conflict, one

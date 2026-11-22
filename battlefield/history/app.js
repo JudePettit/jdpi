@@ -99,6 +99,16 @@ const onSoil = (w, q, a, b) => yearsIn(w, a, b).some(([y]) => locIn(w, y).includ
 const statesIn = (w, y) => (w.statesYears ? w.statesYears[y] || [] : w.states);
 const partyIn = (w, q, a, b) => yearsIn(w, a, b).some(([y]) => statesIn(w, y).includes(q));
 const atWarLevel = l => l === 2 || l === 3;
+// What the conflicts of a year or period amount to. "At war level" is a measured size (UCDP/PRIO: 1,000 or more
+// battle deaths in a year); a war on VM's list from Wikidata has no coded size, so it is counted apart and is never
+// said to be "at war level" (before 1946 every conflict shown is such a listed war).
+function tally(list, a, y) {
+  const peak = list.map(w => peakIn(w, a, y)), war = peak.filter(l => l === 2).length, listed = peak.filter(l => l === 3).length;
+  const n = list.length, s = k => (k === 1 ? '' : 's'), some = a === y ? '' : ' at some point';
+  if (!listed) return { label: 'At war level', count: war, sub: `${n} armed conflict${s(n)}, ${war} at war level${some}` };
+  if (listed === n) return { label: 'Listed wars', count: n, sub: `${n} war${s(n)} on VM’s list from Wikidata; no free source codes their size` };
+  return { label: 'Wars', count: war + listed, sub: `${n} armed conflict${s(n)}: ${war} at war level${some}, ${listed} listed war${s(listed)} of no coded size` };
+}
 const single = () => state.from === state.year;
 const periodText = () => (single() ? String(state.year) : `${state.from}–${state.year}`);
 // "1939–45 · 7 yrs": the years a war was active in the period.
@@ -109,7 +119,12 @@ function activeSpan(w, a, b) {
   return `${first === last ? first : `${first}–${end}`} · ${ys.length} yr${ys.length > 1 ? 's' : ''}`;
 }
 // The places a war was fought in during the period; `where` names places the map has no shape for.
-const placesIn = (w, a, b) => [...new Set([...yearsIn(w, a, b).flatMap(([y]) => locIn(w, y).map(q => nameOf(q, y))), ...(w.where || [])])];
+// A place Wikidata dates from a later year than the one shown is "today’s …" (the land, not a state of then), as
+// under the map; over a period that reaches the state's own years, its plain name stands alone.
+function placesIn(w, a, b) {
+  const all = new Set([...yearsIn(w, a, b).flatMap(([y]) => locIn(w, y).map(q => unplacedName(q, y))), ...(w.where || [])]);
+  return [...all].filter(n => !(n.startsWith('today’s ') && all.has(n.slice('today’s '.length))));
+}
 // "Costa Rica: no armed conflict of 25 or more battle deaths recorded by UCDP/PRIO in 1990." (design/prp-mapkit.js):
 // from 1946 UCDP/PRIO's record, before it VM's list from Wikidata, and a period across 1946 names both.
 const NO_CONFLICT = { what: 'armed conflict of 25 or more battle deaths', source: 'UCDP/PRIO' };
@@ -365,8 +380,8 @@ function warDetail(w) {
   const warYears = w.years.filter(([, x]) => x === 2).length;
   // The war's places and parties over all its years, by their names in the year it began.
   const began = w.years[0][0];
-  const places = [...new Set([...w.loc.map(q => nameOf(q, began)), ...(w.where || [])])];
-  const parties = w.states.filter(q => !w.loc.includes(q)).map(q => nameOf(q, began));
+  const places = [...new Set([...w.loc.map(q => unplacedName(q, began)), ...(w.where || [])])];
+  const parties = w.states.filter(q => !w.loc.includes(q)).map(q => unplacedName(q, began));
   const intro = w.src === 'wikidata'
     ? `Wikidata lists ${esc(w.name)} as ${/^[aeiou]/i.test(w.type) ? 'an' : 'a'} ${esc(w.type.toLowerCase())}, ${esc(wdDates(w))}${places.length ? `, fought in ${esc(places.join(', '))}` : ''}. No free source codes how intense it was, and VM gives no battle-death total for it.`
     : `UCDP records this ${esc(w.type.toLowerCase())} over ${esc(w.aim)}${places.length ? ` in ${esc(places.join(', '))}` : ''}, active in ${activeYears} year${activeYears > 1 ? 's' : ''} between ${w.years[0][0]} and ${w.years.at(-1)[0]}${warYears ? `, ${warYears} of them at war level (1,000+ battle deaths)` : ''}.`;
@@ -427,8 +442,8 @@ function renderPanel() {
       ${ever.length ? seeMore(cards(ever), 6, `${cname} · all conflicts ${state.data.firstYear}–${state.data.lastYear}`,
         `<p class="sub">${ever.length} conflicts: ${soil.length} fought on its territory, ${away.length} fought abroad. Before ${state.data.ucdpFrom} only the wars on VM’s list from Wikidata are shown.</p>${byDecade(ever)}`) : '<p class="empty">None recorded.</p>'}`}`;
   } else {
-    const list = warsInPeriod(a, y), wars = list.filter(w => atWarLevel(peakIn(w, a, y))).length;
-    html = `<h2>${when}</h2><p class="sub">${list.length} armed conflict${list.length === 1 ? '' : 's'}, ${wars} at war level${a === y ? '' : ' at some point'}</p>
+    const list = warsInPeriod(a, y);
+    html = `<h2>${when}</h2><p class="sub">${tally(list, a, y).sub}</p>
       ${list.length ? seeMore(list.map(w => warCard(w)), 15, `All armed conflicts in ${when}`) : '<p class="empty">No conflicts recorded.</p>'}
       <p class="note">${a === y ? 'Click a country or a war for details. Press ▶ or drag the slider to move through the years; drag its hollow start handle back to cover a period of years.' : `Every armed conflict active in at least one year from ${a} to ${y}, at its peak level then. Click a country or a war for details; bring the hollow start handle back onto the end for a single year.`}</p>`;
   }
@@ -449,7 +464,9 @@ function renderKpis() {
   $('.kpis').classList.toggle('is-period', a !== y);
   $('#year-big').textContent = periodText();
   $('#k-conflicts').textContent = list.length;
-  $('#k-wars').textContent = list.filter(w => atWarLevel(peakIn(w, a, y))).length;
+  const t = tally(list, a, y);
+  $('#k-wars-label').textContent = t.label;
+  $('#k-wars').textContent = t.count;
 }
 
 /* ---------------------------------------------------------------- table view */

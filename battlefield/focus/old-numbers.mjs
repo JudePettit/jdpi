@@ -9,14 +9,16 @@
 // (../history/data/borders.topo.json) drew it under that state's name, from 1926, where the Battlefield's table has no
 // answer or another state (East Germany, 265; Czechoslovakia, 315; Serbia from 2006, 345; Taiwan and Korea under
 // Japanese rule, 713 and 730). oldNumber() reads a run only in its own years; in any other year the Battlefield's answer
-// stands. Not a crosswalk of borders: a number to the state it named. Loaded only when an old number is asked for.
+// stands. The United States' territories the old border file drew apart (3, Alaska, and 4, Hawaii, to 1959; 6, Puerto
+// Rico, throughout) open the United States in every year it drew them, as they did before (third read, 22 November
+// 2026). Not a crosswalk of borders: a number to the state it named. Loaded only when an old number is asked for.
 export const OLD_NUMBERS = {
-  3: [[1941, 1945, 'Q30']], 4: [[1941, 1945, 'Q30']], 6: [[1941, 1945, 'Q30']], 20: [[1939, 1945, 'Q16'], [1950, 1953, 'Q16']],
+  3: [[1926, 1959, 'Q30']], 4: [[1926, 1959, 'Q30']], 6: [[1926, 9999, 'Q30']], 20: [[1939, 1945, 'Q16'], [1950, 1953, 'Q16']],
   21: [[1926, 1948, 'Q38610']], 31: [[1939, 1945, 'Q778']], 51: [[1939, 1945, 'Q766']], 53: [[1939, 1945, 'Q244']],
   80: [[1939, 1945, 'Q242']], 110: [[1939, 1945, 'Q734']], 140: [[1942, 1945, 'Q155']], 211: [[1940, 1945, 'Q31']],
   212: [[1940, 1945, 'Q32']], 255: [[1926, 1945, 'Q183']], 265: [[1949, 1990, 'Q16957']], 290: [[1939, 1945, 'Q36'], [2003, 2011, 'Q36']],
   291: [[1926, 1938, 'Q216173']], 305: [[1939, 1945, 'Q40']], 315: [[1926, 1992, 'Q33946']], 325: [[1940, 1945, 'Q38']],
-  338: [[1939, 1945, 'Q233']], 345: [[2006, 2025, 'Q403']], 355: [[1941, 1945, 'Q219']], 375: [[1939, 1945, 'Q33']],
+  338: [[1939, 1945, 'Q233']], 345: [[2006, 9999, 'Q403']], 355: [[1941, 1945, 'Q219']], 375: [[1939, 1945, 'Q33']],
   385: [[1940, 1945, 'Q20']], 390: [[1940, 1945, 'Q35']], 511: [[1926, 1964, 'Q157904']], 515: [[1926, 1962, 'Q590743']],
   521: [[1926, 1960, 'Q662653']], 551: [[1939, 1945, 'Q953']], 552: [[1939, 1945, 'Q954'], [1998, 2003, 'Q954']],
   553: [[1939, 1945, 'Q1020']], 571: [[1939, 1945, 'Q963']], 572: [[1939, 1945, 'Q1050']], 602: [[1926, 1956, 'Q457242']],

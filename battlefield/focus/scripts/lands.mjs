@@ -34,6 +34,9 @@ const FRAGMENT = 0.1, WHOLE = 0.5, SHARE_IN = 0.5, INSIDE = 0.25, GAP = 12;
 // there only in part is marked so (a fifth element, 1, in its `left` entry) and the page says only part of the shape is
 // the holder's (third review R1: Japan's polygon over Timor in 1943, half Portugal's, half the Netherlands' Indies).
 const ALL = 0.9;
+// Shares are sums of sample weights, so nine tenths exactly can come out a hair under (0.8999999999999999): compare
+// against ALL less this (third read, 22 November 2026).
+const ALL_BUT = ALL - 1e-9;
 // The land a place taking no part is read on (rule 2's second half, and `whose`) is only its main rows': each holding a
 // tenth (MAIN_ROW) or more of what its rows hold that year. A lesser row the crosswalk files under it is no ground for
 // naming it a land's holder: Cliopatria's "Estado Novo" rows of 1979–2024 (cl-508df3f28d, cl-b16dfbb288) are Cabinda
@@ -210,7 +213,7 @@ export function makeLands(files, placeOf, drawn, { from = 1900, to = 2024, fileF
       if (q === x || skip?.has(q) || !boxMeets(s.box, p) || !boxMeets(s.box, n)) continue;
       const sp = shareBy(s, p), sn = n === p ? sp : shareBy(s, n);
       if (sp < SHARE_IN || sn < SHARE_IN) continue;
-      if (!(p.total < own && n.total < own) && !(Math.min(sp, sn) >= ALL && s.area < FRAGMENT * own)) continue;
+      if (!(p.total < own && n.total < own) && !(Math.min(sp, sn) >= ALL_BUT && s.area < FRAGMENT * own)) continue;
       if (p.year === b && whose(x, q, s.poly, b) !== q) continue;
       const ry = b - p.year <= n.year - b ? p.year : n.year;
       return { q, ry, share: ry === p.year ? sp : sn };
@@ -257,7 +260,7 @@ export function makeLands(files, placeOf, drawn, { from = 1900, to = 2024, fileF
         for (const [q, rf] of refs) {
           if (q === x || !meets(r.box[i], rf.box) || !(r.area[i] / rf.total > r.area[i] / own)) continue;
           const s = shareIn(r, i, rf);
-          if (s >= SHARE_IN) { mark(r, i, q, rf.year, s < ALL); return; }
+          if (s >= SHARE_IN) { mark(r, i, q, rf.year, s < ALL_BUT); return; }
         }
       });
     }
@@ -278,7 +281,7 @@ export function makeLands(files, placeOf, drawn, { from = 1900, to = 2024, fileF
       r.polys.forEach((poly, i) => {
         if (isMarked(r, i)) return;
         const o = onOther(x, { poly, area: r.area[i], box: r.box[i], get smp() { return samplesOf(r, i); } }, b, qs);
-        if (o) mark(r, i, o.q, o.ry, o.share < ALL);
+        if (o) mark(r, i, o.q, o.ry, o.share < ALL_BUT);
       });
     }
     // Where each war state's reference land lies, by its points: in a coloured polygon of another place (a point in the

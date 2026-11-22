@@ -2085,6 +2085,14 @@ test('data (third review R1): a shape only part of which lies on its holder\'s l
     for (const [y, e] of Object.entries(w.lands || {})) for (const l of e.left || []) assert.ok(l.length === 4 || (l.length === 5 && l[4] === 1), `${x.id} ${y}: ${JSON.stringify(l)}`);
   }
 });
+test('lands (third read): nine tenths is compared with a hair of tolerance, so a share of exactly 0.9 summed from sample weights counts as whole', () => {
+  const src = readFileSync(new URL('../battlefield/focus/scripts/lands.mjs', import.meta.url), 'utf8');
+  assert.match(src, /const ALL_BUT = ALL - 1e-9;/);
+  assert.ok(!/[<>]=? ALL/.test(src), 'no comparison against ALL itself');
+  // The sum the tolerance is for: ninety samples of a hundredth each.
+  let t = 0; for (let i = 0; i < 90; i++) t += 0.01;
+  assert.ok(t >= 0.9 - 1e-9, 'the sum counts as nine tenths with the tolerance');
+});
 test('data (third review R2): a speck of a war state\'s row wholly on a larger state\'s land is that state\'s; land that changed hands stays the row\'s', async () => {
   const ww2 = await dataFile('battlefield/focus/data/wars/ww2.json');
   // Nazi Germany's row of 1939 draws specks on Mallorca and on the Gallipoli peninsula: Spain's land and Turkey's.
@@ -2242,7 +2250,8 @@ test('focus (second review X4): every Gleditsch–Ward number the wars used open
 // battlefield/history/data/borders.topo.json), at the first year from 1926 that it resolves under a name the file
 // gave it, with the state War Focus opens. A pair whose names differ only in form is listed in OLD_LOOSE; a number
 // with no state of its own among the Battlefield's places and the war files' names is left out (OLD_LEFT_OUT: the
-// United States' territories 3, 4 and 6, which War Focus keyed as the United States in 1941–45; French and Spanish
+// United States' territories 3, 4 and 6, which name no state of their own and open the United States in the years
+// the file drew them (asserted at the test's end); French and Spanish
 // colonies; Tibet; the Federation of Rhodesia and Nyasaland; Gaza and the West Bank; and the like).
 const OLD_BORDER = [
   [2, 1926, 'Q30'], [20, 1926, 'Q16'], [21, 1926, 'Q38610'], [31, 1926, 'Q778'], [40, 1926, 'Q241'],
@@ -2325,6 +2334,11 @@ test('focus (third review R5): every number of the previous border file opens a 
   assert.equal(focus(552, 1970), 'Q217169', 'Rhodesia in 1970');
   assert.equal(focus(713, 1930), 'Q137816', 'Taiwan under Japanese rule in 1930');
   assert.equal(focus(345, 2010), 'Q403', 'Serbia in 2010');
+  // Third read: the United States' territories the old file drew apart open the United States in every year it drew
+  // them (Alaska and Hawaii to 1959, Puerto Rico throughout), not only in 1941–45; after 1959, 3 and 4 name nothing.
+  for (const [n, y] of [[3, 1930], [3, 1950], [3, 1959], [4, 1950], [4, 1959], [6, 1950], [6, 1968], [6, 2003], [6, 2026]]) assert.equal(focus(n, y), 'Q30', `gw:${n} in ${y}`);
+  for (const [n, y] of [[3, 1960], [4, 1960]]) assert.equal(oldNumber(n, y), null, `gw:${n} names nothing in ${y}`);
+  assert.equal(focus(345, 2026), 'Q403', 'Serbia in 2026');
 });
 test('places: a month shows its year\'s border, and after 2024 2024\'s; the page says what a yearly border cannot show', () => {
   assert.equal(P.borderYear('1941-06', 2024), 1941);

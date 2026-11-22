@@ -56,6 +56,16 @@ export const CANONICAL = {
   Q5187: 'Q159',                                   // the Chechen Republic of Ichkeria's area → Russia, where UCDP places the Chechen wars
 };
 
+/** A place the tables above key by a later state's item, named in earlier years by the earlier states' own items, oldest
+    first: place Q → [earlier Q, …] (VM's own, by hand, 22 November 2026, MP-16). The build writes each earlier item's
+    English label and the year Wikidata ends it (P576) beside the place (`was`: [{ n, to }]), and the page names the
+    place by the first of them whose last year is not before the year shown: Yugoslavia (the item of 1945–1992) is the
+    Kingdom of Serbs, Croats and Slovenes to 1929 and the Kingdom of Yugoslavia to 1945, as War Focus names it for its
+    war (focus/scripts/wars.mjs nameAs). */
+export const NAMED_AS = { Q83286: ['Q15102440', 'Q191077'] };
+/** A place's name in a year: `p` is places.json's { n, was? }. */
+export const nameIn = (p, year) => p?.was?.find(w => year <= w.to)?.n || p?.n || null;
+
 /** Rows Cliopatria names that the crosswalk leaves without a Q-id, or gives the wrong one: [name, from, to, Q]. A Q of
     null: the row is a part or a puppet of a state that has no row of its own in those years, so it stands for no
     place VM lists (the page draws it under Cliopatria's name) and the state is listed as one VM cannot place; a part

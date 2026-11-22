@@ -238,6 +238,41 @@ test('Retrospective data: a state with no row of its own is listed as unplaced, 
   for (let y = 1926; y <= PLACES.bordersTo; y++) assert.deepEqual(rowsFor('Q23792', y), [], `${y}: a row drawn as Palestine`);
 });
 
+// MP-16 (Jude, 22 November 2026): the crosswalk keys Yugoslavia's earlier states by the later state's item (CANONICAL),
+// so the place carried only that item's label, "Socialist Federal Republic of Yugoslavia", in every year from 1926.
+// The place now also carries each earlier state's label to the year Wikidata ends it (NAMED_AS, `was`): the Kingdom of
+// Serbs, Croats and Slovenes to 1929 and the Kingdom of Yugoslavia to 1945, the pair War Focus holds for its war
+// (focus/scripts/wars.mjs nameAs), and the page names the place by the year shown.
+test('Retrospective data: Yugoslavia carries its earlier states’ names to 1929 and to 1945, the last as War Focus has it', async () => {
+  const { NAMED_AS, CANONICAL } = await import('../battlefield/scripts/history-places.mjs');
+  assert.deepEqual(NAMED_AS, { Q83286: ['Q15102440', 'Q191077'] });
+  const dated = Object.keys(PLACES.places).filter(q => PLACES.places[q].was);
+  assert.deepEqual(dated, Object.keys(NAMED_AS), 'a place carries earlier names only where the table gives them');
+  for (const [q, earlier] of Object.entries(NAMED_AS)) {
+    const p = PLACES.places[q];
+    assert.ok(Object.values(CANONICAL).includes(q), `${q} is a place another item is folded into`);
+    assert.equal(p.was.length, earlier.length, `${q}: one name for each earlier item`);
+    for (const [i, w] of p.was.entries()) {
+      assert.ok(!PLACES.places[earlier[i]], `${earlier[i]} is not a place of its own`);
+      assert.deepEqual(Object.keys(w), ['n', 'to']);
+      assert.ok(w.n && w.n !== p.n, `${q}: an earlier name is another name`);
+      assert.ok(Number.isInteger(w.to) && w.to >= 1926 && w.to < 2025 && (!i || w.to > p.was[i - 1].to), `${q}: ${w.to} in order`);
+    }
+  }
+  assert.deepEqual(PLACES.places.Q83286, { n: 'Socialist Federal Republic of Yugoslavia', iso3: 'YUG',
+    was: [{ n: 'Kingdom of Serbs, Croats and Slovenes', to: 1929 }, { n: 'Kingdom of Yugoslavia', to: 1945 }] });
+  const focus = JSON.parse(readFileSync(new URL('../battlefield/focus/data/wars/ww2.json', import.meta.url), 'utf8')).names.Q83286;
+  assert.deepEqual(PLACES.places.Q83286.was.at(-1), focus.then, 'one earlier name and one last year in both modules');
+  const { nameIn } = await import('../battlefield/scripts/history-places.mjs');
+  assert.deepEqual([1926, 1929, 1930, 1945, 1946, 1991].map(y => nameIn(PLACES.places.Q83286, y)), ['Kingdom of Serbs, Croats and Slovenes', 'Kingdom of Serbs, Croats and Slovenes',
+    'Kingdom of Yugoslavia', 'Kingdom of Yugoslavia', 'Socialist Federal Republic of Yugoslavia', 'Socialist Federal Republic of Yugoslavia']);
+  assert.equal(nameIn(PLACES.places.Q159, 1930), PLACES.places.Q159.n, 'a place with no earlier name keeps its own');
+  // The page says so in its Method, and reads the same field.
+  const method = readFileSync(new URL('../battlefield/history/index.html', import.meta.url), 'utf8');
+  for (const w of [...PLACES.places.Q83286.was.map(w => `${w.n} to ${w.to}`), PLACES.places.Q83286.n]) assert.ok(method.includes(w.replace(/^Kingdom/, 'the Kingdom')) || method.includes(w), `the Method names ${w}`);
+  assert.ok(readFileSync(new URL('../battlefield/history/app.js', import.meta.url), 'utf8').includes('placeOf(q)?.was?.find(w => y <= w.to)?.n'), 'the page reads `was` by the same rule');
+});
+
 // AC-13 (Jude, 16 November 2026): a UCDP conflict's states were stored once for all its years, so Tonga stood in "Iraq:
 // government" for all 35 of its active years. Each conflict keeps its state parties year by year, from UCDP's
 // "Government of …" sides, each name read as a Q-id (omni/scripts/ucdp-places.mjs).
@@ -733,6 +768,64 @@ test('Retrospective: places off Cliopatria’s rows are named, never drawn on to
     await page.waitForFunction(() => /part of World War II, shown here/.test(document.querySelector('#panel .old-address')?.textContent || ''), null, { timeout: 20000 });
     await page.goto(`${BASE}/battlefield/history/#y=1929&w=c118`, { waitUntil: 'domcontentloaded' });
     await page.waitForFunction(() => /Sino-Soviet conflict \(1929\).*does not hold it/.test(document.querySelector('#panel .old-address')?.textContent || ''), null, { timeout: 20000 });
+    assert.deepEqual(errors, []);
+  } finally { await browser.close(); }
+});
+
+// MP-16 (Jude, 22 November 2026): Yugoslavia was named "Socialist Federal Republic of Yugoslavia" in every year,
+// 1927, 1930 and 1941 among them. To 1929 it is the Kingdom of Serbs, Croats and Slovenes and to 1945 the Kingdom of
+// Yugoslavia, each Wikidata's label for the state of those years: in the pointer's sentence, the panel's heading,
+// its border line, the line under the map, a war's places and the search; after 1945 it keeps the later state's name.
+test('Retrospective: Yugoslavia has its name of the year: two kingdoms to 1929 and 1945, the Socialist Federal Republic after', pageTest, async () => {
+  const { browser, page, errors } = await open('battlefield/history/#y=1930');
+  try {
+    await page.waitForSelector('#map path.shape[data-key="Q83286"]', { timeout: 20000 });
+    const go = async (h, done) => { await page.evaluate(h => { location.hash = h; }, h); await page.waitForFunction(done, null, { timeout: 10000 }); };
+    assert.equal(await tipOf(page, 'Q83286'), 'Kingdom of Yugoslavia: no war recorded by VM’s list of wars from Wikidata in 1930.');
+    await go('#y=1930&c=Q83286', () => document.querySelector('#panel h2')?.textContent === 'Kingdom of Yugoslavia');
+    assert.match(await page.locator('#panel .sub').innerText(), /^Kingdom of Yugoslavia: no war recorded/);
+    // 1927 and 1929: the Kingdom of Serbs, Croats and Slovenes, which took the name Yugoslavia in October 1929.
+    await go('#y=1927&c=Q83286', () => document.querySelector('#year-big').textContent === '1927' && document.querySelector('#panel h2')?.textContent !== 'Kingdom of Yugoslavia');
+    assert.equal(await page.locator('#panel h2').innerText(), 'Kingdom of Serbs, Croats and Slovenes');
+    assert.equal(await tipOf(page, 'Q83286'), 'Kingdom of Serbs, Croats and Slovenes: no war recorded by VM’s list of wars from Wikidata in 1927.');
+    await go('#y=1929&c=Q83286', () => document.querySelector('#year-big').textContent === '1929');
+    assert.equal(await page.locator('#panel h2').innerText(), 'Kingdom of Serbs, Croats and Slovenes');
+    // 1941: occupied, on no row of its own, so it is named under the map and in its panel, as the Kingdom.
+    await go('#y=1941&c=Q83286', () => /1941/.test(document.querySelector('#unplaced').textContent) && document.querySelector('#panel .border-note'));
+    assert.equal(await page.locator('#panel h2').innerText(), 'Kingdom of Yugoslavia');
+    assert.equal(await page.locator('#panel .border-note').innerText(), 'VM cannot place Kingdom of Yugoslavia on a free border for 1941, so it is not drawn.');
+    const under = await page.locator('#unplaced').innerText();
+    assert.match(under, /Kingdom of Yugoslavia/);
+    assert.doesNotMatch(under, /Socialist Federal Republic|today’s Kingdom/);
+    // World War II's own panel lists its places by the names of the year the war began.
+    await go('#y=1941&w=Q362', () => document.querySelector('#panel h2')?.textContent === 'World War II');
+    const ww2 = await page.locator('#panel').innerText();
+    assert.match(ww2, /Kingdom of Yugoslavia/);
+    assert.doesNotMatch(ww2, /Socialist Federal Republic of Yugoslavia/);
+    // 1945 is the Kingdom's last year; from 1946 the place has the later state's name.
+    await go('#y=1945&c=Q83286', () => document.querySelector('#year-big').textContent === '1945' && document.querySelector('#panel h2'));
+    assert.equal(await page.locator('#panel h2').innerText(), 'Kingdom of Yugoslavia');
+    await go('#y=1946&c=Q83286', () => document.querySelector('#year-big').textContent === '1946' && document.querySelector('#panel h2')?.textContent !== 'Kingdom of Yugoslavia');
+    assert.equal(await page.locator('#panel h2').innerText(), 'Socialist Federal Republic of Yugoslavia');
+    await go('#y=1991&c=Q83286', () => document.querySelector('#year-big').textContent === '1991' && document.querySelector('#panel .war'));
+    assert.equal(await page.locator('#panel h2').innerText(), 'Socialist Federal Republic of Yugoslavia');
+    assert.doesNotMatch(await page.locator('#panel').innerText(), /Kingdom of Yugoslavia/);
+    // The search finds the place by either name, and each opens in a year of that name.
+    const pick = async text => {
+      await page.fill('#search', text);
+      await page.waitForFunction(() => !document.querySelector('#search-results').hidden);
+      const first = await page.locator('#search-results li').first().innerText();
+      await page.locator('#search').press('Enter');
+      return first;
+    };
+    await go('#y=2025', () => document.querySelector('#year-big').textContent === '2025');
+    assert.match(await pick('kingdom of yugo'), /^Kingdom of Yugoslavia\s*Country · to 1945$/);
+    await page.waitForFunction(() => document.querySelector('#panel h2')?.textContent === 'Kingdom of Yugoslavia', null, { timeout: 10000 });
+    assert.ok(+(await page.locator('#year-big').innerText()) <= 1945);
+    await go('#y=2025', () => document.querySelector('#year-big').textContent === '2025');
+    assert.match(await pick('socialist federal'), /^Socialist Federal Republic of Yugoslavia\s*Country · YUG$/);
+    await page.waitForFunction(() => document.querySelector('#panel h2')?.textContent === 'Socialist Federal Republic of Yugoslavia', null, { timeout: 10000 });
+    assert.ok(+(await page.locator('#year-big').innerText()) > 1945);
     assert.deepEqual(errors, []);
   } finally { await browser.close(); }
 });

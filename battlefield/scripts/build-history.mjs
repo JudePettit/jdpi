@@ -39,7 +39,7 @@ import { parseCsv } from './csv.mjs';
 import { COW_WIKI, UCDP_WIKI } from './history-wiki.mjs';
 import { FOUGHT_IN, CHECKED_THROUGH } from './history-fought.mjs';
 import { actors, interstateName } from './ucdp.mjs';
-import { rowQid, drawnRow, canonical, placeAt, CANONICAL } from './history-places.mjs';
+import { rowQid, drawnRow, canonical, placeAt, CANONICAL, NAMED_AS } from './history-places.mjs';
 import { fetchWars, selectWars, THEN, FIRST as WD_FIRST, LAST as WD_LAST } from './wars-1926.mjs';
 import { placeResolver, governments, SPECIAL } from '../../omni/scripts/ucdp-places.mjs';
 import { entities, byTitles, sha256 } from '../../omni/scripts/history-common.mjs';
@@ -176,6 +176,18 @@ for (let y = FIRST; y <= LAST; y++) {
   rowsOfYear.set(y, list);
 }
 const got = await entities([...allPlaces], { props: 'claims|labels', cache: CACHE, tag: 'bfpl' });
+// A place keyed by a later state's item carries its earlier states' names (history-places.mjs NAMED_AS): each earlier
+// item's English label and the year Wikidata ends it (P576), oldest first. A year takes the name it began with.
+const earlier = await entities(Object.values(NAMED_AS).flat(), { props: 'claims|labels', cache: CACHE, tag: 'bfwas' });
+const wasOf = q => (NAMED_AS[q] || []).map(id => {
+  const e = earlier[id], to = (e?.claims?.P576 || []).filter(c => c.rank !== 'deprecated').map(c => /^\+?(-?\d+)-/.exec(c.mainsnak?.datavalue?.value?.time || '')?.[1]).filter(Boolean).map(Number);
+  if (!e?.labels?.en?.value || !to.length) throw new Error(`Wikidata gives ${id} no English label or no end (P576), so ${q}'s earlier name has no last year`);
+  return { n: e.labels.en.value, to: Math.max(...to) };
+});
+for (const q of Object.keys(NAMED_AS)) {
+  if (!allPlaces.has(q)) throw new Error(`NAMED_AS names ${q}, which is not a place`);
+  if (wasOf(q).some((w, i, l) => i && w.to <= l[i - 1].to)) throw new Error(`${q}: its earlier names are not oldest first`);
+}
 const neBy = new Map(ne.filter(p => p.q).map(p => [p.q, p])), smallBy = new Map(small.filter(p => p.q).map(p => [p.q, p]));
 const places = {};
 for (const q of [...allPlaces].sort((a, b) => +a.slice(1) - +b.slice(1))) {
@@ -187,7 +199,7 @@ for (const q of [...allPlaces].sort((a, b) => +a.slice(1) - +b.slice(1))) {
   if (nat?.iso3 && iso.length && !iso.includes(nat.iso3) && !/^X/.test(nat.iso3)) throw new Error(`${q}: Wikidata's ISO3 ${iso.join(', ')} is not Natural Earth's ${nat.iso3}`);
   const since = (e.claims?.P571 || []).filter(c => c.rank !== 'deprecated').map(c => /^\+?(-?\d+)-/.exec(c.mainsnak?.datavalue?.value?.time || '')?.[1]).filter(Boolean).map(Number);
   places[q] = { n: e.labels?.en?.value || nat?.n || q, ...(nat?.iso3 || iso[0] ? { iso3: nat?.iso3 || iso[0] } : {}),
-    ...(since.length && Math.min(...since) > FIRST ? { since: Math.min(...since) } : {}) };
+    ...(since.length && Math.min(...since) > FIRST ? { since: Math.min(...since) } : {}), ...(NAMED_AS[q] ? { was: wasOf(q) } : {}) };
 }
 
 // ---- 6. Where each war place is drawn each year: a Cliopatria row; from 1946 a small state's point; else unplaced

@@ -65,12 +65,18 @@ async function shapesOf(y) {
   return { features: rows, points };
 }
 // A place named for a year before Wikidata dates it (its inception) is "today’s …": the land, not a state of then.
-const unplacedName = (q, y) => (placeOf(q)?.since > y ? `today’s ${nameOf(q)}` : nameOf(q));
+// One that has an earlier state's name for the year (`was`) is that state, by its name.
+const unplacedName = (q, y) => (!earlierName(q, y) && placeOf(q)?.since > y ? `today’s ${nameOf(q, y)}` : nameOf(q, y));
 const placeOf = q => state.places.places[q] || null;
-// A place's name: Wikidata's English label (the build's); a row VM holds no place for keeps Cliopatria's name.
-function nameOf(key) {
+// The earlier state's name a place has in year y (places.json `was`, oldest first, each to its last year: the build's,
+// from history-places.mjs NAMED_AS): Yugoslavia is the Kingdom of Serbs, Croats and Slovenes to 1929 and the Kingdom of
+// Yugoslavia to 1945.
+const earlierName = (q, y) => placeOf(q)?.was?.find(w => y <= w.to)?.n || null;
+// A place's name in year y (the year shown, where none is given): Wikidata's English label (the build's), or its
+// earlier state's for that year; a row VM holds no place for keeps Cliopatria's name.
+function nameOf(key, y = state.year) {
   if (key?.startsWith('row:')) return state.features.find(f => f.properties.key === key)?.properties.row || 'This polity';
-  return placeOf(key)?.n || key;
+  return earlierName(key, y) || placeOf(key)?.n || key;
 }
 const rowNameOf = key => state.features.find(f => f.properties.key === key && f.properties.kind === 'row')?.properties.row || null;
 
@@ -103,7 +109,7 @@ function activeSpan(w, a, b) {
   return `${first === last ? first : `${first}–${end}`} · ${ys.length} yr${ys.length > 1 ? 's' : ''}`;
 }
 // The places a war was fought in during the period; `where` names places the map has no shape for.
-const placesIn = (w, a, b) => [...new Set([...yearsIn(w, a, b).flatMap(([y]) => locIn(w, y).map(nameOf)), ...(w.where || [])])];
+const placesIn = (w, a, b) => [...new Set([...yearsIn(w, a, b).flatMap(([y]) => locIn(w, y).map(q => nameOf(q, y))), ...(w.where || [])])];
 // "Costa Rica: no armed conflict of 25 or more battle deaths recorded by UCDP/PRIO in 1990." (design/prp-mapkit.js):
 // from 1946 UCDP/PRIO's record, before it VM's list from Wikidata, and a period across 1946 names both.
 const NO_CONFLICT = { what: 'armed conflict of 25 or more battle deaths', source: 'UCDP/PRIO' };
@@ -357,8 +363,10 @@ function warDetail(w) {
   const a = state.from, y = state.year, l = peakIn(w, a, y), ys = yearsIn(w, a, y);
   const activeYears = w.years.length;
   const warYears = w.years.filter(([, x]) => x === 2).length;
-  const places = [...new Set([...w.loc.map(nameOf), ...(w.where || [])])];
-  const parties = w.states.filter(q => !w.loc.includes(q)).map(nameOf);
+  // The war's places and parties over all its years, by their names in the year it began.
+  const began = w.years[0][0];
+  const places = [...new Set([...w.loc.map(q => nameOf(q, began)), ...(w.where || [])])];
+  const parties = w.states.filter(q => !w.loc.includes(q)).map(q => nameOf(q, began));
   const intro = w.src === 'wikidata'
     ? `Wikidata lists ${esc(w.name)} as ${/^[aeiou]/i.test(w.type) ? 'an' : 'a'} ${esc(w.type.toLowerCase())}, ${esc(wdDates(w))}${places.length ? `, fought in ${esc(places.join(', '))}` : ''}. No free source codes how intense it was, and VM gives no battle-death total for it.`
     : `UCDP records this ${esc(w.type.toLowerCase())} over ${esc(w.aim)}${places.length ? ` in ${esc(places.join(', '))}` : ''}, active in ${activeYears} year${activeYears > 1 ? 's' : ''} between ${w.years[0][0]} and ${w.years.at(-1)[0]}${warYears ? `, ${warYears} of them at war level (1,000+ battle deaths)` : ''}.`;
@@ -570,11 +578,20 @@ function setupSearch() {
   // Places, each opening in the first year a war touched it when the year shown is outside its years.
   const firstYear = new Map();
   for (const w of state.data.wars) for (const [y] of w.years) for (const q of [...locIn(w, y), ...statesIn(w, y)]) if (!firstYear.has(q) || firstYear.get(q) > y) firstYear.set(q, y);
-  for (const [q, p] of Object.entries(state.places.places)) index.push({ label: p.n, sub: `Country${p.iso3 ? ` · ${p.iso3}` : ''}`, key: `${p.n} ${p.iso3 || ''}`.toLowerCase(), q, year: firstYear.get(q) || null });
+  // A place with earlier names (`was`) is found by each: an earlier name opens in the first year a war touched the place
+  // under it, the later name in the first such year after the earlier names' last.
+  const firstFrom = (q, from, to) => { const ys = state.data.wars.flatMap(w => w.years.map(([y]) => y).filter(y => y >= from && y <= to && [...locIn(w, y), ...statesIn(w, y)].includes(q))); return ys.length ? Math.min(...ys) : null; };
+  for (const [q, p] of Object.entries(state.places.places)) {
+    const was = p.was || [], after = was.length ? was.at(-1).to + 1 : null;
+    index.push({ label: p.n, sub: `Country${p.iso3 ? ` · ${p.iso3}` : ''}`, key: `${p.n} ${p.iso3 || ''}`.toLowerCase(), q, year: (after ? firstFrom(q, after, state.data.lastYear) || after : firstYear.get(q)) || null, from: after });
+    was.forEach((w, i) => { const from = i ? was[i - 1].to + 1 : state.data.firstYear; index.push({ label: w.n, sub: `Country · to ${w.to}`, key: w.n.toLowerCase(), q, year: firstFrom(q, from, w.to) || w.to, from, to: w.to }); });
+  }
   let results = [];
   const choose = r => {
     input.value = ''; list.hidden = true;
-    if (r.war) selectWar(r.war); else { if (r.year && !state.features.some(f => f.properties.key === r.q)) setPeriod(null, Math.max(r.year, state.data.firstYear), { push: false }); select(r.q); }
+    // A place opens in the year shown where it is drawn then under the name chosen; else in the year the name gives.
+    const named = r.from == null && r.to == null ? true : state.year >= (r.from ?? state.data.firstYear) && state.year <= (r.to ?? state.data.lastYear);
+    if (r.war) selectWar(r.war); else { if (r.year && !(named && state.features.some(f => f.properties.key === r.q))) setPeriod(null, Math.max(r.year, state.data.firstYear), { push: false }); select(r.q); }
   };
   input.addEventListener('input', () => {
     const q = input.value.trim().toLowerCase();

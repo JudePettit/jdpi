@@ -99,7 +99,7 @@ function loadYear(y) {
 // state and year (X5).
 function warFeatures(fs, ly) {
   const left = new Map();
-  for (const [id, idx, q, ry] of state.war?.lands?.[ly]?.left || []) (left.get(id) || left.set(id, []).get(id)).push({ idx: new Set(idx), q, ry });
+  for (const [id, idx, q, ry, part] of state.war?.lands?.[ly]?.left || []) (left.get(id) || left.set(id, []).get(id)).push({ idx: new Set(idx), q, ry, part });
   if (!left.size) return fs;
   const own = [], cut = [];
   for (const f of fs) {
@@ -111,7 +111,7 @@ function warFeatures(fs, ly) {
     es.forEach((e, k) => {
       const out = polys.filter((_, i) => e.idx.has(i));
       if (out.length) cut.push({ type: 'Feature', geometry: { type: 'MultiPolygon', coordinates: out },
-        properties: { key: `left:${f.properties.id}`, row: f.properties.row, id: `${f.properties.id}~left${k ? k : ''}`, of: e.q, ry: e.ry, holder: f.properties.key } });
+        properties: { key: `left:${f.properties.id}`, row: f.properties.row, id: `${f.properties.id}~left${k ? k : ''}`, of: e.q, ry: e.ry, part: e.part, holder: f.properties.key } });
     });
   }
   return [...cut, ...own];
@@ -119,7 +119,7 @@ function warFeatures(fs, ly) {
 const isLeft = key => key.startsWith('left:');
 function leftText(p, y = state.landsYear) {
   const of = nameIn(p.of, y);
-  return p.of === p.holder ? `Only a fragment of ${of} this year: left uncoloured` : `On ${of}’s land (its border of ${p.ry}): left uncoloured`;
+  return p.of === p.holder ? `Only a fragment of ${of} this year: left uncoloured` : p.part ? `Part of this shape lies on ${of}’s land (its border of ${p.ry}); VM cannot draw the parts apart: left uncoloured` : `On ${of}’s land (its border of ${p.ry}): left uncoloured`;
 }
 // The places drawn in the year shown: its rows' (and, with the dots, placed()).
 const rowKeys = () => new Set(features.filter(f => !isLeft(f.properties.key)).map(f => f.properties.key));
@@ -468,8 +468,8 @@ function hideTip() { $('#tooltip').hidden = true; lastNote = null; }
 // When the reader talks about states or battles, they are outlined in the module accent (drawn over their neighbours)
 // and the map eases to fit them all; ⟲ or the end of the reading brings back the whole theatre.
 // A country named by Documentary mode or Kino (design/prp-focus.js): a Q-id; an old gw:<number> (written before 21
-// November 2026), read as its place in the year shown through War Focus's own old numbers (old-numbers.mjs, loaded
-// when one is asked for; second review X4), then places.json's oldCountries, else its ISO3; or an ISO3, through the
+// November 2026), read as its place in the year shown through War Focus's own old numbers in their years (old-numbers.mjs,
+// loaded when one is asked for; X4, R4), then places.json's oldCountries, else its ISO3; or an ISO3, through the
 // places' ISO3. The state's shapes that year, or its dot.
 let OLD = null;
 function keyFor(id) {
@@ -477,7 +477,7 @@ function keyFor(id) {
   const byIso = iso3 => (iso3 ? Object.entries(state.places.places).find(([, p]) => p.iso3 === iso3)?.[0] || DOTS.find(d => d.iso3 === iso3)?.q || null : null);
   if (/^gw:\d+$/.test(id)) {
     const n = id.slice(3);
-    return oldCountry(OLD?.OLD_NUMBERS, state.places.places, n, state.year) || oldCountry(state.places.oldCountries, state.places.places, n, state.year) || byIso(PRPFocus.iso3OfGw?.(+n));
+    return OLD?.oldNumber?.(n, state.year) || oldCountry(state.places.oldCountries, state.places.places, n, state.year) || byIso(PRPFocus.iso3OfGw?.(+n));
   }
   if (/^[A-Z]{3}$/.test(id)) return byIso(id);
   return null;

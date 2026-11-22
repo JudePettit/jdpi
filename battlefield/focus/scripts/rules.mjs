@@ -136,10 +136,13 @@ export function partsWithin(edges, dates, root, span, { places = null, points = 
  * one of the two whose rows alone hold it in the nearest year after, failing that before; second review X3), so Oman,
  * Qatar and Bahrain are not Britain's and Newfoundland is Canada's. Where `whose` is not given or names neither, the
  * part goes to the place for which it is the larger share of its territory, so a state's area never reaches lands
- * another row holds.
+ * another row holds. A part on land that another place holds by its reference land (`holder(q, polygon, year, key)`,
+ * lands.mjs makeLands, rule 2) in every year the part is the state's is not the state's either, whether or not a row
+ * of the other's draws it then (third review R3: the United States' part over Japan in 1950–51, Japan having no row
+ * of 1946–51); Newfoundland stays Canada's.
  * Returns Map Q → [[w, s, e, n], ...].
  */
-export function stateBoxes(topo, from, to, placeOf, whose = null) {
+export function stateBoxes(topo, from, to, placeOf, whose = null, holder = null) {
   const [sx, sy] = topo.transform?.scale || [1, 1], [tx, ty] = topo.transform?.translate || [0, 0];
   const arcBox = topo.arcs.map(arc => {
     let x = 0, y = 0, b = [Infinity, Infinity, -Infinity, -Infinity];
@@ -189,7 +192,12 @@ export function stateBoxes(topo, from, to, placeOf, whose = null) {
       const w = whose && qx && qo ? whose(qx, qo, x.poly.map(ringOf), y) : null;
       if (w ? w === qo : share(o) > share(x)) return;
     }
-    for (const q of x.qs) (out.get(q) || out.set(q, []).get(q)).push(x.box);
+    let rings = null;
+    for (const q of x.qs) {
+      let all = !!holder;
+      for (let y = x.a; y <= x.z && all; y++) if (placeOf(x.id, y) === q && !holder(q, rings ||= x.poly.map(ringOf), y, `${x.id}#${x.box}`)) all = false;
+      if (!all) (out.get(q) || out.set(q, []).get(q)).push(x.box);
+    }
   });
   return out;
 }

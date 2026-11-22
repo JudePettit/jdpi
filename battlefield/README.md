@@ -54,9 +54,12 @@ are Wikidata items; no Correlates of War value, CShapes border or Gleditsch–Wa
   focus with a number (`c=<number>`, Kino's and Documentary mode's `gw:<number>`) opens the same state: the number is
   read as its Q-id for the year shown (`oldCountries` in `history/data/places.json`, through `history/old-countries.js`).
   A number War Focus itself used before 21 November 2026 that the Battlefield's table lacks, or gives another state for
-  War Focus's years (255 Germany, 552 Zimbabwe, 713 Taiwan under Japanese rule to 1945, and 48 more), is in
-  `focus/old-numbers.mjs`, each the Q-id the conversion gave it in `scripts/wars.mjs`; War Focus reads it first (loaded
-  only when a number is asked for), the Battlefield after its own (second review X4).
+  War Focus's years (255 Germany, 552 Zimbabwe in 1939–45 and 1998–2003, 713 Taiwan under Japanese rule to 1945, and
+  48 more), is in `focus/old-numbers.mjs`, each the Q-id the conversion gave it in `scripts/wars.mjs` for the years of
+  the wars that used it; so is a number of War Focus's previous border file (`history/data/borders.topo.json`) for the
+  years it drew it under that state's name where the Battlefield's table has none (265 East Germany, 315
+  Czechoslovakia; third review R5). War Focus reads a run only in its own years, then the Battlefield's table (loaded
+  only when a number is asked for; R4), the Battlefield after its own (second review X4).
 - **States with no free border:** a state taking part with no Cliopatria row of its own that year (and no dot) is listed
   under the map, above the battles and months tables and in the war's panel, "VM cannot place … on a free border for
   <year>", in its side's colour, and still counted on its side. It is never drawn on a guessed shape, on today's border
@@ -74,7 +77,9 @@ are Wikidata items; no Correlates of War value, CShapes border or Gleditsch–Wa
     state's territory than of the row's own (`left`): the United States' part over South Vietnam (1967–75) and over Iraq
     (2006–11), Norway and Libya inside Nazi Germany's row of 1942, Greenland in the United States' row of 1943–44;
   - likewise a polygon of a war state's own row that lies half or more on the land of a state outside the war (its
-    rows in the nearest years before and after, within twelve) and is the smaller share of that war state's land: Japan
+    rows in the nearest years before and after, each within twelve, so land that
+    changed hands for good, as Kaliningrad, Crimea in 2024, Goa or the Dodecanese in Greece's row, stays the row's) and is the smaller
+    share of that war state's land, or a speck wholly on it (Nazi Germany's on Mallorca in 1939; third review R2): Japan
     in the United States' row of 1950–53 (the Korean War: Tokyo is never drawn as the United States), Oman, Qatar and
     Bahrain in Britain's row of 2001–21, the Dutch East Indies in the Empire of Japan's row of 1943–45 (second review
     X1, 22 November 2026). Where both states are drawn in the year, the land goes to the one that alone holds it in the
@@ -86,7 +91,8 @@ are Wikidata items; no Correlates of War value, CShapes border or Gleditsch–Wa
     Colonial Empire's or the British Overseas Territories' (groupings of a state's dependencies);
   - each such part is its own entry, naming its own state and the year of that state's border it was measured
     against, so one row can hold several (Nazi Germany's of 1942: Norway's of 1940, Libya's of 1953, Yugoslavia's of
-    1940); pointing at it names that state (second review X5);
+    1940); pointing at it names that state (second review X5), and where less than nine tenths of the polygon lies on
+    that land it says only part of the shape does (Japan's Timor of 1943, Portugal's in part; third review R1);
   - Cliopatria's rows are dissolved shapes, so land joined to its holder (France and Poland inside Germany in 1942,
     Serb-held Bosnia inside Serbia-Montenegro in 1992–95, Burma inside the British Raj) is in the same polygon and cannot
     be cut out without drawing another year's border; where a quarter or more of a war state's land lies in another
@@ -104,7 +110,8 @@ are Wikidata items; no Correlates of War value, CShapes border or Gleditsch–Wa
   Algeria in the Algerian War, Indonesia in 1945, Angola in 1975, Korea and Taiwan in the wars with Japan, Kuwait in the
   Gulf War. Cliopatria's own rows place some land with another state: its "Kingdom of Great Britain" row (1969–2023)
   holds Oman, Qatar and Bahrain, so War Focus's theatre boxes give those parts to the states whose land they are, not
-  to Britain, and the map leaves them uncoloured (`stateBoxes`, `scripts/rules.mjs`, with `whose`, `scripts/lands.mjs`);
+  to Britain, and the map leaves them uncoloured (`stateBoxes`, `scripts/rules.mjs`, with `whose`, `scripts/lands.mjs`;
+  a part on land a state outside the war holds by its reference land gives no box either, `holder`: Japan's over Java);
   its United States row of 2006–2023 covers Iraq, its United States row of 1967–2005 covers South Vietnam, and its
   Honduras row of 1979–1991 covers El Salvador, so Iraq (2006–11), South Vietnam (1967–72) and El Salvador are listed,
   not drawn, and the United States' parts over them are left uncoloured; Bosnia and Herzegovina in 1992–95 is drawn only

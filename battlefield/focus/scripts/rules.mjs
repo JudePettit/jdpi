@@ -130,12 +130,16 @@ export function partsWithin(edges, dates, root, span, { places = null, points = 
  * Retrospective Battlefield's crosswalk, places.json `rows`); a composite, a row with no shape and a row with no place
  * give none (21 November 2026: until then CShapes 2.0's borders, by Gleditsch–Ward number).
  * Cliopatria's rows can draw the same land twice: its Kingdom of Great Britain of 1969–2023 carries a part over Oman,
- * Qatar and Bahrain, each also a row of its own. A part whose box is mostly another place's part in the same years
- * (overlap at least half of the two boxes together) is left to the place for which it is the larger share of its
- * territory (Oman's, not Britain's), so a state's area never reaches lands another row holds.
+ * Qatar and Bahrain, each also a row of its own; its British Colonial Empire of 1947–57 carries Newfoundland, part of
+ * Canada's row from 1949. A part whose box is mostly another place's part in the same years (overlap at least half of
+ * the two boxes together) goes to the place whose land it is: `whose(a, b, polygon, year)` (lands.mjs makeLands, the
+ * one of the two whose rows alone hold it in the nearest year after, failing that before; second review X3), so Oman,
+ * Qatar and Bahrain are not Britain's and Newfoundland is Canada's. Where `whose` is not given or names neither, the
+ * part goes to the place for which it is the larger share of its territory, so a state's area never reaches lands
+ * another row holds.
  * Returns Map Q → [[w, s, e, n], ...].
  */
-export function stateBoxes(topo, from, to, placeOf) {
+export function stateBoxes(topo, from, to, placeOf, whose = null) {
   const [sx, sy] = topo.transform?.scale || [1, 1], [tx, ty] = topo.transform?.translate || [0, 0];
   const arcBox = topo.arcs.map(arc => {
     let x = 0, y = 0, b = [Infinity, Infinity, -Infinity, -Infinity];
@@ -147,7 +151,13 @@ export function stateBoxes(topo, from, to, placeOf) {
     return b;
   });
   const area = b => Math.max(0, b[2] - b[0]) * Math.max(0, b[3] - b[1]);
-  const parts = [], total = new Map(); // { qs, a, z, box }, and each place's summed part areas
+  // A part's polygon as [lon, lat] rings, decoded only when `whose` is asked about it.
+  const arcPts = new Map(), arcOf = i => {
+    if (!arcPts.has(i)) { let x = 0, y = 0; arcPts.set(i, topo.arcs[i].map(([dx, dy]) => (topo.transform ? [(x += dx) * sx + tx, (y += dy) * sy + ty] : [dx, dy]))); }
+    return arcPts.get(i);
+  };
+  const ringOf = idx => { const out = []; for (const i of idx) { const a = i < 0 ? arcOf(~i).slice().reverse() : arcOf(i); if (out.length) out.pop(); out.push(...a); } return out; };
+  const parts = [], total = new Map(); // { id, qs, a, z, box, poly }, and each place's summed part areas
   for (const g of Object.values(topo.objects)[0].geometries) {
     const p = g.properties || {};
     if (!(p.f <= to && p.t >= from) || p.k !== 'POLITY' || /^\(.+\)$/.test(p.n || '')) continue;
@@ -159,7 +169,7 @@ export function stateBoxes(topo, from, to, placeOf) {
       let b = [Infinity, Infinity, -Infinity, -Infinity];
       for (const ring of poly) for (const i of ring) { const x = arcBox[i < 0 ? ~i : i]; b = [Math.min(b[0], x[0]), Math.min(b[1], x[1]), Math.max(b[2], x[2]), Math.max(b[3], x[3])]; }
       if (!isFinite(b[0])) continue;
-      parts.push({ qs, a, z, box: b });
+      parts.push({ id: p.id, qs, a, z, box: b, poly });
       for (const q of qs) total.set(q, (total.get(q) || 0) + area(b));
     }
   }
@@ -174,7 +184,10 @@ export function stateBoxes(topo, from, to, placeOf) {
       const o = parts[m];
       if (m === k || o.a > x.z || o.z < x.a || [...o.qs].some(q => x.qs.has(q))) continue;
       const i = [Math.max(x.box[0], o.box[0]), Math.max(x.box[1], o.box[1]), Math.min(x.box[2], o.box[2]), Math.min(x.box[3], o.box[3])], ia = area(i);
-      if (ia > 0 && ia >= 0.5 * (area(x.box) + area(o.box) - ia) && share(o) > share(x)) return;
+      if (!(ia > 0 && ia >= 0.5 * (area(x.box) + area(o.box) - ia))) continue;
+      const y = Math.max(x.a, o.a), qx = placeOf(x.id, y), qo = placeOf(o.id, y);
+      const w = whose && qx && qo ? whose(qx, qo, x.poly.map(ringOf), y) : null;
+      if (w ? w === qo : share(o) > share(x)) return;
     }
     for (const q of x.qs) (out.get(q) || out.set(q, []).get(q)).push(x.box);
   });

@@ -527,13 +527,14 @@ function unplacedOf(w, s, end, lands) {
 // The Retrospective Battlefield's years (its data/wars.json), for the page's links to a state there: UCDP/PRIO's first
 // year and its last.
 const RETRO = (() => { const r = JSON.parse(readFileSync(join(SITE, 'battlefield/history/data/wars.json'), 'utf8')); return { ucdpFrom: r.ucdpFrom, lastYear: r.lastYear }; })();
-// The boxes of the war's states' rows in its years (stateBoxes). A state no row holds then (Vietnam, Cambodia and Laos
+// The boxes of the war's states' rows in its years (stateBoxes, a land two rows draw going to the place whose land it is,
+// lands.mjs whose). A state no row holds then (Vietnam, Cambodia and Laos
 // in 1946–54, Algeria to 1962) takes its reference land's (lands.mjs ref: its own rows in the nearest year within twelve
 // of the war's, that it is whole), else the war's committed bbox, so partsWithin keeps a theatre for every state
 // (21 November 2026).
 function theatreBoxes(w, end, bbox = null) {
   const a = Math.min(+w.start.slice(0, 4), PLACES.bordersTo), b = Math.min(+end.slice(0, 4), PLACES.bordersTo), out = new Map();
-  for (const t of CLIO) for (const [q, bs] of stateBoxes(t, a, b, placeOf)) (out.get(q) || out.set(q, []).get(q)).push(...bs);
+  for (const t of CLIO) for (const [q, bs] of stateBoxes(t, a, b, placeOf, LANDS.whose)) (out.get(q) || out.set(q, []).get(q)).push(...bs);
   const s = statesOf(w);
   for (const q of warStates(s)) {
     if (out.get(q)?.length) continue;

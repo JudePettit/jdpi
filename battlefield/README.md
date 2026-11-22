@@ -53,6 +53,10 @@ are Wikidata items; no Correlates of War value, CShapes border or Gleditsch–Wa
   April 1992 and the FRY (Q838261) from 27 April. No Gleditsch–Ward number is read, joined or shown. An old address or
   focus with a number (`c=<number>`, Kino's and Documentary mode's `gw:<number>`) opens the same state: the number is
   read as its Q-id for the year shown (`oldCountries` in `history/data/places.json`, through `history/old-countries.js`).
+  A number War Focus itself used before 21 November 2026 that the Battlefield's table lacks, or gives another state for
+  War Focus's years (255 Germany, 552 Zimbabwe, 713 Taiwan under Japanese rule to 1945, and 48 more), is in
+  `focus/old-numbers.mjs`, each the Q-id the conversion gave it in `scripts/wars.mjs`; War Focus reads it first (loaded
+  only when a number is asked for), the Battlefield after its own (second review X4).
 - **States with no free border:** a state taking part with no Cliopatria row of its own that year (and no dot) is listed
   under the map, above the battles and months tables and in the war's panel, "VM cannot place … on a free border for
   <year>", in its side's colour, and still counted on its side. It is never drawn on a guessed shape, on today's border
@@ -69,6 +73,20 @@ are Wikidata items; no Correlates of War value, CShapes border or Gleditsch–Wa
     twelve, that it is whole) is drawn uncoloured, with a dotted edge, when that land is the larger share of the war
     state's territory than of the row's own (`left`): the United States' part over South Vietnam (1967–75) and over Iraq
     (2006–11), Norway and Libya inside Nazi Germany's row of 1942, Greenland in the United States' row of 1943–44;
+  - likewise a polygon of a war state's own row that lies half or more on the land of a state outside the war (its
+    rows in the nearest years before and after, within twelve) and is the smaller share of that war state's land: Japan
+    in the United States' row of 1950–53 (the Korean War: Tokyo is never drawn as the United States), Oman, Qatar and
+    Bahrain in Britain's row of 2001–21, the Dutch East Indies in the Empire of Japan's row of 1943–45 (second review
+    X1, 22 November 2026). Where both states are drawn in the year, the land goes to the one that alone holds it in the
+    latest year both are drawn (`whose`): Newfoundland is Canada's from 1949, Norway's land Norway's in 1942. The other
+    state's land is read on its main rows only (each a tenth or more of its land that year), never on a row listed in
+    `NOT_REFERENCE` or for a place in `NOT_HOLDER`, so no land is named another's falsely: Cabinda, which the
+    crosswalk's Cabinda-only rows of 1979–2024 file under Portugal, stays Angola's; France's polygons of 1991 on the
+    Comoros and Mayotte are not named Cape Verde's (its row also draws the Comoros); no part is named the British
+    Colonial Empire's or the British Overseas Territories' (groupings of a state's dependencies);
+  - each such part is its own entry, naming its own state and the year of that state's border it was measured
+    against, so one row can hold several (Nazi Germany's of 1942: Norway's of 1940, Libya's of 1953, Yugoslavia's of
+    1940); pointing at it names that state (second review X5);
   - Cliopatria's rows are dissolved shapes, so land joined to its holder (France and Poland inside Germany in 1942,
     Serb-held Bosnia inside Serbia-Montenegro in 1992–95, Burma inside the British Raj) is in the same polygon and cannot
     be cut out without drawing another year's border; where a quarter or more of a war state's land lies in another
@@ -80,11 +98,13 @@ are Wikidata items; no Correlates of War value, CShapes border or Gleditsch–Wa
   Q83286. Japan's Taiwan in the wars with Japan is Q137816, Taiwan under Japanese rule, not Q865 (which Wikidata dates
   from 1912 as the Republic of China).
 - **What was lost in the move** (`warfocus-borders-compare.tsv`, each war at its first, middle and last month, 117
-  checks): 475 states drawn on CShapes, 273 on Cliopatria; 197 moved to "cannot place", 1 drawn only now. The largest
+  checks; counted again on 22 November 2026): 475 states drawn on CShapes, 272 on Cliopatria; 198 moved to "cannot
+  place", 1 drawn only now. The largest
   are colonies and occupied states Cliopatria holds within their rulers' rows: Sudan and Libya in the Second World War,
   Algeria in the Algerian War, Indonesia in 1945, Angola in 1975, Korea and Taiwan in the wars with Japan, Kuwait in the
   Gulf War. Cliopatria's own rows place some land with another state: its "Kingdom of Great Britain" row (1969–2023)
-  holds Oman, Qatar and Bahrain, so War Focus's theatre boxes leave those parts out (`stateBoxes`, `scripts/rules.mjs`);
+  holds Oman, Qatar and Bahrain, so War Focus's theatre boxes give those parts to the states whose land they are, not
+  to Britain, and the map leaves them uncoloured (`stateBoxes`, `scripts/rules.mjs`, with `whose`, `scripts/lands.mjs`);
   its United States row of 2006–2023 covers Iraq, its United States row of 1967–2005 covers South Vietnam, and its
   Honduras row of 1979–1991 covers El Salvador, so Iraq (2006–11), South Vietnam (1967–72) and El Salvador are listed,
   not drawn, and the United States' parts over them are left uncoloured; Bosnia and Herzegovina in 1992–95 is drawn only

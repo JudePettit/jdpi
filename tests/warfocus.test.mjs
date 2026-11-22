@@ -2006,6 +2006,151 @@ test('data: WWII names Yugoslavia the Kingdom to 1945, and Japan\'s Taiwan is it
     assert.match(w.names.Q137816.n, /Taiwan/);
   }
 });
+// The uncoloured entries over a point in a year: [the row's place, the land's state, its border year] of each.
+const leftAt = (w, pt, y) => polysIn(y).flatMap(r => (w.lands?.[y]?.left || [])
+  .filter(([id, idx]) => id === r.id && idx.some(i => inRing(pt, r.polys[i][0]) && !r.polys[i].slice(1).some(h => inRing(pt, h))))
+  .map(([, , q, ry]) => [r.q, q, ry]));
+test('data (second review X1): a war state\'s polygon on the land of a state outside the war is left uncoloured (Tokyo, Muscat, Jakarta); St John\'s and Taipei stay coloured', async () => {
+  // Cliopatria's United States row of 1950–53 holds Japan, its British row of 2001–21 Oman, Qatar and Bahrain, its Empire of Japan row of
+  // 1943–45 the Dutch East Indies: none of these is the holder's land, and none is in the war.
+  for (const [war, at, from, to, holder, q] of [['korean-war', [139.69, 35.68], 1950, 1953, 'Q30', 'Q17'], ['afghanistan-2001', [58.41, 23.59], 2001, 2021, 'Q145', 'Q842'],
+    ['afghanistan-2001', [51.53, 25.29], 2001, 2021, 'Q145', 'Q846'], ['afghanistan-2001', [50.58, 26.23], 2001, 2021, 'Q145', 'Q398'], ['second-sino-japanese', [106.85, -6.21], 1943, 1945, 'Q17', 'Q252']]) {
+    const w = await dataFile(`battlefield/focus/data/wars/${war}.json`);
+    for (let y = from; y <= to; y++) {
+      assert.ok(!colouredAt(w, at, y).some(([, , p]) => p === holder), `${war} ${y}: ${q}'s point coloured as ${holder}`);
+      assert.ok(leftAt(w, at, y).some(([h, of]) => h === holder && of === q), `${war} ${y}: ${holder}'s part over ${q} left uncoloured (${JSON.stringify(leftAt(w, at, y))})`);
+    }
+  }
+  // The war state's own land stays coloured: Newfoundland is Canada's from 1949, Taiwan the Republic of China's from
+  // 1945, Cabinda Angola's (the crosswalk's Cabinda-only rows under Portugal are no reference, lands.mjs MAIN_ROW),
+  // the United Kingdom's polygon on Gibraltar its own (no "British Overseas Territories" holder, NOT_HOLDER).
+  for (const [war, at, from, to, q] of [['korean-war', [-52.71, 47.56], 1950, 1953, 'Q16'], ['chinese-civil-war-2', [121.56, 25.04], 1946, 1949, 'Q148'],
+    ['angolan-civil-war', [12.19, -5.55], 1979, 2002, 'Q916'], ['second-congo', [12.19, -5.55], 1998, 2003, 'Q916'], ['afghanistan-2001', [-5.49, 36.18], 2001, 2021, 'Q145']]) {
+    const w = await dataFile(`battlefield/focus/data/wars/${war}.json`);
+    for (let y = from; y <= to; y++) {
+      assert.ok(colouredAt(w, at, y).some(([, , p]) => p === q), `${war} ${y}: ${q} coloured at its own point`);
+      assert.deepEqual(leftAt(w, at, y), [], `${war} ${y}: nothing left uncoloured there`);
+    }
+  }
+  // No land is named a holder's falsely: France's polygons of 1991 on the Comoros and Mayotte are never Cape Verde's
+  // (its row also draws the Comoros, lands.mjs NOT_REFERENCE), and no part is named the British Colonial Empire's or
+  // the British Overseas Territories', groupings of a state's dependencies (NOT_HOLDER).
+  const gulf = await dataFile('battlefield/focus/data/wars/gulf-war.json');
+  assert.ok(!(gulf.lands[1991]?.left || []).some(([, , q]) => q === 'Q1011'), 'no Cape Verde in 1991');
+  for (const x of (await dataFile('battlefield/focus/data/index.json')).wars) {
+    const w = await dataFile(`battlefield/focus/data/wars/${x.id}.json`);
+    for (const [y, e] of Object.entries(w.lands || {})) for (const [id, , q] of e.left || []) assert.ok(!['Q8680', 'Q46395', 'Q1011'].includes(q), `${x.id} ${y}: ${id} named ${q}`);
+  }
+});
+test('data (second review X5): each uncoloured part names its own state and border year, several in one row (Nazi Germany\'s of 1942)', async () => {
+  const ww2 = await dataFile('battlefield/focus/data/wars/ww2.json');
+  for (const [at, q, ry] of [[[10.75, 59.91], 'Q20', 1940], [[13.19, 32.89], 'Q1016', 1953], [[20.46, 44.82], 'Q83286', 1940]]) assert.deepEqual(leftAt(ww2, at, 1942), [['Q183', q, ry]], `${q} in 1942`);
+  // No polygon is in two entries.
+  const index = await dataFile('battlefield/focus/data/index.json');
+  for (const x of index.wars) {
+    const w = await dataFile(`battlefield/focus/data/wars/${x.id}.json`);
+    for (const [y, e] of Object.entries(w.lands || {})) {
+      const seen = new Set();
+      for (const [id, idx] of e.left || []) for (const i of idx) { assert.ok(!seen.has(`${id} ${i}`), `${x.id} ${y}: ${id} #${i} twice`); seen.add(`${id} ${i}`); }
+    }
+  }
+});
+test('theatre (second review X3): a land two rows draw goes to the state whose land it is: Canada keeps Newfoundland, Britain has no box over Oman, Qatar or Bahrain', async () => {
+  const { decodeRows, makeLands } = await import('../battlefield/focus/scripts/lands.mjs');
+  const { stateBoxes } = await import('../battlefield/focus/scripts/rules.mjs');
+  const topo = ['1900-1999', '2000-2024'].map(f => localJson(`../omni/data/borders/${f}.topo.json`));
+  const placeOf = (id, y) => P.rowPlace(PLACES.rows, id, y);
+  const L = makeLands(topo.map(decodeRows), placeOf, (p, has) => P.drawnRow({ properties: p, geometry: has ? {} : null }), { to: PLACES.bordersTo });
+  assert.equal(typeof L.whose, 'function');
+  // whose: the latest year both are drawn in which one alone holds the land.
+  const polyAt = (holder, pt, y) => polysIn(y).filter(r => r.q === holder).flatMap(r => r.polys).find(p => inRing(pt, p[0]));
+  for (const [q, holder, at, y] of [['Q20', 'Q183', [10.75, 59.91], 1942], ['Q180573', 'Q30', [106.66, 10.76], 1968], ['Q842', 'Q145', [58.41, 23.59], 2001], ['Q16', 'Q8680', [-52.71, 47.56], 1950], ['Q17', 'Q30', [139.69, 35.68], 1950]]) {
+    const p = polyAt(holder, at, y);
+    assert.ok(p, `${holder}'s polygon at ${at} in ${y}`);
+    assert.equal(L.whose(q, holder, p, y), q, `${y}: ${holder}'s polygon at ${at} is ${q}'s land`);
+    assert.equal(L.whose(holder, q, p, y), q, `${y}: either way round`);
+  }
+  const inBox = ([x, y], b) => x >= b[0] && x <= b[2] && y >= b[1] && y <= b[3];
+  const korea = new Map(stateBoxes(topo[0], 1950, 1953, placeOf, L.whose)), afg = new Map(stateBoxes(topo[1], 2001, 2021, placeOf, L.whose));
+  assert.ok((korea.get('Q16') || []).some(b => inBox([-52.71, 47.56], b)), 'the Korean War: Canada keeps a box over St John\'s');
+  for (const [c, at] of [['Muscat', [58.41, 23.59]], ['Doha', [51.53, 25.29]], ['Manama', [50.58, 26.23]]]) assert.ok(!(afg.get('Q145') || []).some(b => inBox(at, b)), `the War in Afghanistan: no British box over ${c}`);
+  assert.ok((afg.get('Q842') || []).some(b => inBox([58.41, 23.59], b)), 'Oman keeps its own box');
+  // The share of area alone (no whose), as before, gave Newfoundland's box to the larger row.
+  assert.ok(!(new Map(stateBoxes(topo[0], 1950, 1953, placeOf)).get('Q16') || []).some(b => inBox([-52.71, 47.56], b)), 'by share alone Canada loses it');
+});
+// Every number the wars used before 21 November 2026 (git 9e6c818^ scripts/wars.mjs), at the first and last years of
+// the wars that used it, with the Q-id the conversion gave it entry by entry (scripts/wars.mjs).
+const OLD_GW = [
+  [2, 1941, 'Q30'], [2, 2021, 'Q30'], [3, 1941, 'Q30'], [3, 1945, 'Q30'], [4, 1941, 'Q30'], [4, 1945, 'Q30'],
+  [6, 1941, 'Q30'], [6, 1945, 'Q30'], [20, 1939, 'Q16'], [20, 1953, 'Q16'], [21, 1939, 'Q38610'],
+  [21, 1945, 'Q38610'], [31, 1939, 'Q778'], [31, 1945, 'Q778'], [51, 1939, 'Q766'], [51, 1945, 'Q766'],
+  [52, 1939, 'Q754'], [52, 1945, 'Q754'], [53, 1939, 'Q244'], [53, 1945, 'Q244'], [70, 1942, 'Q96'],
+  [70, 1945, 'Q96'], [80, 1939, 'Q242'], [80, 1945, 'Q242'], [92, 1979, 'Q792'], [92, 1992, 'Q792'],
+  [110, 1939, 'Q734'], [110, 1945, 'Q734'], [115, 1940, 'Q730'], [115, 1945, 'Q730'], [140, 1942, 'Q155'],
+  [140, 1945, 'Q155'], [145, 1932, 'Q750'], [145, 1935, 'Q750'], [150, 1932, 'Q733'], [150, 1935, 'Q733'],
+  [200, 1939, 'Q145'], [200, 2021, 'Q145'], [210, 1940, 'Q55'], [210, 1945, 'Q55'], [211, 1940, 'Q31'],
+  [211, 1945, 'Q31'], [212, 1940, 'Q32'], [212, 1945, 'Q32'], [220, 1939, 'Q142'], [220, 1991, 'Q142'],
+  [230, 1936, 'Q29'], [230, 1939, 'Q29'], [255, 1939, 'Q183'], [255, 1945, 'Q183'], [290, 1939, 'Q36'],
+  [290, 2011, 'Q36'], [305, 1939, 'Q40'], [305, 1945, 'Q40'], [310, 1941, 'Q28'], [310, 1945, 'Q28'],
+  [315, 1939, 'Q33946'], [315, 1945, 'Q33946'], [325, 1940, 'Q38'], [325, 1945, 'Q38'], [338, 1939, 'Q233'],
+  [338, 1945, 'Q233'], [339, 1939, 'Q222'], [339, 1945, 'Q222'], [345, 1941, 'Q83286'], [345, 1993, 'Q838261'],
+  [346, 1992, 'Q225'], [346, 1995, 'Q225'], [350, 1940, 'Q41'], [350, 1949, 'Q41'], [352, 1939, 'Q229'],
+  [352, 1945, 'Q229'], [355, 1941, 'Q219'], [355, 1945, 'Q219'], [360, 1941, 'Q218'], [360, 1945, 'Q218'],
+  [365, 1939, 'Q15180'], [365, 1989, 'Q15180'], [365, 2022, 'Q159'], [365, 2026, 'Q159'], [369, 2022, 'Q212'],
+  [369, 2026, 'Q212'], [375, 1939, 'Q33'], [375, 1945, 'Q33'], [385, 1940, 'Q20'], [385, 1945, 'Q20'],
+  [390, 1940, 'Q35'], [390, 1945, 'Q35'], [420, 1939, 'Q1005'], [420, 1945, 'Q1005'], [451, 1939, 'Q1044'],
+  [451, 1945, 'Q1044'], [452, 1939, 'Q117'], [452, 1945, 'Q117'], [475, 1939, 'Q1033'], [475, 1970, 'Q1033'],
+  [490, 1940, 'Q974'], [490, 2003, 'Q974'], [500, 1939, 'Q1036'], [500, 2003, 'Q1036'], [501, 1939, 'Q114'],
+  [501, 1945, 'Q114'], [510, 1939, 'Q924'], [510, 1945, 'Q924'], [515, 1940, 'Q590743'], [515, 1945, 'Q590743'],
+  [516, 1998, 'Q967'], [516, 2003, 'Q967'], [517, 1998, 'Q1037'], [517, 2003, 'Q1037'], [521, 1939, 'Q662653'],
+  [521, 1945, 'Q662653'], [530, 1939, 'Q115'], [530, 2022, 'Q115'], [531, 1940, 'Q986'], [531, 2022, 'Q986'],
+  [540, 1975, 'Q916'], [540, 2003, 'Q916'], [541, 1977, 'Q1029'], [541, 1992, 'Q1029'], [551, 1939, 'Q953'],
+  [551, 1945, 'Q953'], [552, 1939, 'Q954'], [552, 2003, 'Q954'], [553, 1939, 'Q1020'], [553, 1945, 'Q1020'],
+  [560, 1939, 'Q258'], [560, 1945, 'Q258'], [565, 1939, 'Q1030'], [565, 2003, 'Q1030'], [570, 1939, 'Q1013'],
+  [570, 1945, 'Q1013'], [571, 1939, 'Q963'], [571, 1945, 'Q963'], [572, 1939, 'Q1050'], [572, 1945, 'Q1050'],
+  [602, 1936, 'Q457242'], [602, 1939, 'Q457242'], [615, 1954, 'Q262'], [615, 1962, 'Q262'], [620, 1940, 'Q1016'],
+  [620, 1945, 'Q1016'], [625, 1939, 'Q1049'], [625, 2026, 'Q1049'], [630, 1941, 'Q794'], [630, 1988, 'Q794'],
+  [640, 1945, 'Q43'], [640, 1953, 'Q43'], [645, 1943, 'Q796'], [645, 2011, 'Q796'], [651, 1939, 'Q79'],
+  [651, 1991, 'Q79'], [652, 1991, 'Q858'], [652, 2024, 'Q858'], [660, 1975, 'Q822'], [660, 1990, 'Q822'],
+  [663, 1939, 'Q810'], [663, 1945, 'Q810'], [665, 1939, 'Q193714'], [665, 1945, 'Q193714'], [666, 2023, 'Q801'],
+  [666, 2025, 'Q801'], [670, 1991, 'Q851'], [678, 2014, 'Q805'], [678, 2026, 'Q805'], [681, 1939, 'Q49910'],
+  [681, 1945, 'Q49910'], [690, 1990, 'Q817'], [690, 1991, 'Q817'], [700, 1979, 'Q889'], [700, 2021, 'Q889'],
+  [710, 1926, 'Q148'], [710, 1953, 'Q148'], [712, 1939, 'Q711'], [712, 1945, 'Q711'], [713, 1931, 'Q137816'],
+  [713, 1945, 'Q137816'], [730, 1931, 'Q503585'], [730, 1945, 'Q503585'], [731, 1950, 'Q423'], [731, 1953, 'Q423'],
+  [732, 1950, 'Q884'], [732, 1973, 'Q884'], [740, 1931, 'Q17'], [740, 1945, 'Q17'], [750, 1939, 'Q668'],
+  [750, 1971, 'Q668'], [770, 1971, 'Q843'], [775, 1939, 'Q836'], [775, 1945, 'Q836'], [780, 1939, 'Q854'],
+  [780, 2009, 'Q854'], [800, 1942, 'Q869'], [800, 1972, 'Q869'], [811, 1941, 'Q424'], [811, 1975, 'Q424'],
+  [812, 1941, 'Q819'], [812, 1975, 'Q819'], [815, 1940, 'Q881'], [815, 1954, 'Q881'], [816, 1955, 'Q172640'],
+  [816, 1975, 'Q172640'], [817, 1955, 'Q180573'], [817, 1975, 'Q180573'], [821, 1939, 'Q1400154'],
+  [821, 1945, 'Q1400154'], [822, 1939, 'Q1973084'], [822, 1945, 'Q1973084'], [823, 1939, 'Q1147441'],
+  [823, 1945, 'Q1147441'], [824, 1939, 'Q1658411'], [824, 1945, 'Q1658411'], [827, 1939, 'Q376178'],
+  [827, 1945, 'Q376178'], [835, 1939, 'Q921'], [835, 1945, 'Q921'], [840, 1941, 'Q928'], [840, 1945, 'Q928'],
+  [850, 1940, 'Q252'], [850, 1945, 'Q252'], [860, 1942, 'Q574'], [860, 1945, 'Q574'], [900, 1939, 'Q408'],
+  [900, 2011, 'Q408'], [911, 1939, 'Q530560'], [911, 1945, 'Q530560'], [912, 1939, 'Q1443945'],
+  [912, 1945, 'Q1443945'], [920, 1939, 'Q664'], [920, 1972, 'Q664'], [940, 1939, 'Q685'], [940, 1945, 'Q685'],
+  [950, 1939, 'Q712'], [950, 1945, 'Q712'], [5200, 1940, 'Q319984'], [5200, 1945, 'Q319984'],
+  [7351, 1941, 'Q696736'], [7351, 1945, 'Q696736'],
+];
+test('focus (second review X4): every Gleditsch–Ward number the wars used opens the state War Focus keyed it as, in the year shown; the Battlefield opens one for each', async () => {
+  const { oldCountry } = await import('../battlefield/history/old-countries.js');
+  const { OLD_NUMBERS } = await import('../battlefield/focus/old-numbers.mjs');
+  // War Focus (app.js keyFor): its own old numbers first, then the Battlefield's.
+  const focus = (n, y) => oldCountry(OLD_NUMBERS, PLACES.places, n, y) || oldCountry(PLACES.oldCountries, PLACES.places, n, y);
+  for (const [n, y, q] of OLD_GW) assert.equal(focus(n, y), q, `gw:${n} in ${y}`);
+  assert.equal(focus(255, 1942), 'Q183');
+  assert.equal(focus(365, 1941), 'Q15180');
+  assert.equal(focus(365, 2022), 'Q159');
+  // Every Q-id the table gives is a place the Battlefield knows or a state a war file names.
+  const names = new Set();
+  for (const x of (await dataFile('battlefield/focus/data/index.json')).wars) for (const q of Object.keys((await dataFile(`battlefield/focus/data/wars/${x.id}.json`)).names || {})) names.add(q);
+  for (const [n, runs] of Object.entries(OLD_NUMBERS)) for (const [, , q] of runs) assert.ok(PLACES.places[q] || names.has(q), `${n}: ${q}`);
+  // The Battlefield (history/app.js keyFor): War Focus's old links there were c=<number> with y its last year.
+  const last = localJson('../battlefield/history/data/wars.json').lastYear;
+  const field = (n, y) => oldCountry(PLACES.oldCountries, PLACES.places, n, y) || oldCountry(OLD_NUMBERS, PLACES.places, n, y);
+  for (const n of new Set(OLD_GW.map(([n]) => n))) assert.match(String(field(n, last)), /^Q\d+$/, `c=${n} in ${last}`);
+  assert.equal(field(255, last), 'Q183');
+  assert.match(readFileSync(new URL('../battlefield/history/app.js', import.meta.url), 'utf8'), /oldCountry\(OLD_NUMBERS, state\.places\.places, id\.slice\(3\), y\)/);
+});
 test('places: a month shows its year\'s border, and after 2024 2024\'s; the page says what a yearly border cannot show', () => {
   assert.equal(P.borderYear('1941-06', 2024), 1941);
   assert.equal(P.borderYear('2025-03', 2024), 2024);
@@ -2150,8 +2295,99 @@ test('page: an old focus by Gleditsch–Ward number opens the same state by its 
   };
   assert.deepEqual(await hit('#war=ww2&m=1941-07', 'gw:365'), ['Q15180'], '365 in 1941: the Soviet Union');
   assert.deepEqual(await hit('#war=russia-ukraine&m=2022-03', 'gw:365'), ['Q159'], '365 in 2022: Russia');
+  // A number only War Focus used (old-numbers.mjs; second review X4): 255, Germany.
+  assert.deepEqual(await hit('#war=ww2&m=1942-06', 'gw:255'), ['Q183'], '255 in 1942: Germany');
   assert.deepEqual(await hit('#war=ww2&m=1941-07', 'Q15180'), ['Q15180'], 'the Q-id itself');
   assert.deepEqual(await hit('#war=ww2&m=1941-07', 'FIN'), ['Q33'], 'an ISO3 through the places');
+  assert.deepEqual(errors, []);
+});
+test('page (second review X2): a name in a war file is shown as text, never read as markup', pageTest, async t => {
+  const browser = await launch({ args: ['--mute-audio'] });
+  t.after(() => browser.close());
+  const page = await browser.newPage({ viewport: { width: 1400, height: 900 } });
+  const errors = [];
+  page.on('pageerror', e => errors.push(e.message));
+  const BAD = '<img src="x" class="vm-injected" onerror="window.__vmInjected=1">';
+  // The Soviet Union's name, the first of the Allies' side list in 1942, given as markup.
+  await page.route('**/battlefield/focus/data/wars/ww2.json', async r => {
+    const res = await r.fetch(), w = await res.json();
+    w.names.Q15180 = { n: BAD };
+    await r.fulfill({ response: res, json: w });
+  });
+  await openAt(page, '#war=ww2&m=1942-06');
+  await page.waitForFunction(() => document.querySelector('#panel .side-list'), null, { timeout: 30000 });
+  await page.waitForTimeout(500);
+  assert.ok((await page.locator('#panel').innerText()).includes(BAD), 'the name is shown as it is written');
+  assert.equal(await page.locator('img.vm-injected').count(), 0, 'no element made from it');
+  assert.equal(await page.evaluate(() => window.__vmInjected), undefined);
+  await page.close();
+  assert.deepEqual(errors, []);
+});
+test('page (second review X5, X7): each uncoloured part names its own state, and the side list and the line under the map name Yugoslavia the Kingdom in 1942', pageTest, async t => {
+  const browser = await launch({ args: ['--mute-audio'] });
+  t.after(() => browser.close());
+  const page = await browser.newPage({ viewport: { width: 1400, height: 900 } });
+  await openAt(page, '#war=ww2&m=1942-06');
+  // Pointing at the part of Nazi Germany's row that is Norway's land (Oslo): Norway, its border of 1940.
+  const tipAt = pt => page.evaluate(p => {
+    const n = d3.selectAll('#map path.state.left').filter(f => d3.geoContains(f, p)).nodes()[0];
+    if (!n) return null;
+    const b = n.getBoundingClientRect();
+    n.dispatchEvent(new MouseEvent('mousemove', { bubbles: true, clientX: b.x + b.width / 2, clientY: b.y + b.height / 2 }));
+    return document.querySelector('#tooltip').innerText;
+  }, pt);
+  assert.match(await tipAt([10.75, 59.91]) || '', /Nazi Germany\s+On Norway’s land \(its border of 1940\): left uncoloured/);
+  assert.match(await tipAt([20.46, 44.82]) || '', /On Kingdom of Yugoslavia’s land \(its border of 1940\): left uncoloured/);
+  // The side list (its first fourteen, the rest in the window "+ more").
+  let sides = await page.locator('#panel .side-list').allInnerTexts();
+  for (const more of await page.locator('#panel .side-list .more').all()) {
+    await more.click();
+    await page.waitForSelector('#modal:not([hidden])', { timeout: 5000 });
+    sides.push(await page.locator('#modal-body').innerText());
+    await page.keyboard.press('Escape');
+  }
+  sides = sides.join(' | ');
+  assert.match(sides, /Kingdom of Yugoslavia/);
+  assert.doesNotMatch(sides, /Socialist Federal Republic/);
+  assert.doesNotMatch(await page.locator('.map-unplaced').innerText(), /Socialist Federal Republic/);
+});
+test('page (second review X6): borders that fail are not kept: the month shows no other year\'s, says so, and loads them when asked again; a late answer changes nothing', pageTest, async t => {
+  const browser = await launch({ args: ['--mute-audio'] });
+  t.after(() => browser.close());
+  const page = await browser.newPage({ viewport: { width: 1400, height: 900 } });
+  const errors = [];
+  page.on('pageerror', e => errors.push(e.message));
+  await openAt(page, '#war=ww2&m=1942-09');
+  const keys = () => page.evaluate(() => [...document.querySelectorAll('#map path.state')].map(p => p.dataset.key).sort().join());
+  const of1942 = await keys();
+  const status = () => page.locator('#status').innerText();
+  // 1943's span fails: no shapes of 1942 under a month of 1943, and the line says so.
+  await page.route('**/data/borders/1943-1944.topo.json', r => r.abort());
+  await page.evaluate(() => { location.hash = '#war=ww2&m=1943-03'; });
+  await page.waitForFunction(() => /could not be loaded/.test(document.querySelector('#status').textContent), null, { timeout: 15000 });
+  assert.equal(await status(), 'The borders for 1943 could not be loaded.');
+  assert.equal(await page.locator('#map path.state').count(), 0, 'no other year\'s borders under March 1943');
+  // Asked again, held until the map has moved back to 1942: the late answer leaves 1942's map as it is.
+  await page.unroute('**/data/borders/1943-1944.topo.json');
+  let release, asked = false;
+  const held = new Promise(res => { release = res; });
+  await page.route('**/data/borders/1943-1944.topo.json', async r => { asked = true; await held; await r.continue(); });
+  await page.evaluate(() => { location.hash = '#war=ww2&m=1943-04'; });
+  for (let i = 0; i < 50 && !asked; i++) await page.waitForTimeout(100);
+  assert.ok(asked, 'the span is asked for again');
+  await page.evaluate(() => { location.hash = '#war=ww2&m=1942-10'; });
+  await page.waitForFunction(() => document.querySelectorAll('#map path.state').length > 10, null, { timeout: 15000 });
+  assert.equal(await keys(), of1942, '1942\'s map again');
+  assert.doesNotMatch(await status(), /could not be loaded/);
+  release();
+  await page.waitForTimeout(1500);
+  assert.equal(await keys(), of1942, 'the late answer for 1943 changes nothing');
+  assert.doesNotMatch(await status(), /could not be loaded/);
+  // And 1943 itself now loads.
+  await page.evaluate(() => { location.hash = '#war=ww2&m=1943-05'; });
+  await page.waitForFunction(k => document.querySelectorAll('#map path.state').length > 10 && [...document.querySelectorAll('#map path.state')].map(p => p.dataset.key).sort().join() !== k, of1942, { timeout: 15000 });
+  assert.match(await status(), / v /);
+  await page.close();
   assert.deepEqual(errors, []);
 });
 test('page: the caption says the borders are yearly, and that 2025 is drawn on 2024\'s', pageTest, async t => {

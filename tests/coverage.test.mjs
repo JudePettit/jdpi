@@ -246,7 +246,9 @@ test('a historical state is one entry in the gap rules: the Soviet Union taking 
   assert.deepEqual(R.placeGroup('Q15180'), { key: 'Q15180:RUS,UKR', q: 'Q15180', name: 'the Soviet Union', successors: ['RUS', 'UKR'] });
   assert.equal(R.placeGroup('Q142'), null);
   assert.equal(R.placeGroup('Q838261').name, 'Serbia and Montenegro');
-  // War Focus still reads Gleditsch–Ward codes (until it moves to Cliopatria): its groups are unchanged.
+  // War Focus reads Q-ids since 21 November 2026 (Cliopatria's borders), so its states group by placeGroup above; the
+  // Gleditsch–Ward groups stay for an old number still read through gwIso (a Political Retrospective key it has no
+  // item for): unchanged.
   assert.deepEqual(R.gwGroup(365, '1950-07-01'), { key: 'gw365:RUS,UKR', gw: 365, name: 'the Soviet Union', successors: ['RUS', 'UKR'] });
   assert.equal(R.gwGroup(365, '1995-07-01'), null, 'Russia after 1991 is one country');
   // A Korean War: France fought in, the Soviet Union took part; the film draws France.

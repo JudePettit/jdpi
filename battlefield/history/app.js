@@ -16,6 +16,7 @@
    places.json's oldCountries, c=<ISO3> through the places' ISO3, and w=c<number> (a Correlates of War war) through
    wars.json's oldIds; one VM can no longer show says so. */
 import { oldCountry } from './old-countries.js';
+import { OLD_NUMBERS } from '../focus/old-numbers.mjs';
 
 const W = 1000, H = 600, DOT_R = 3.2;
 const state = { year: 2025, from: 2025, selected: null, war: null, data: null, places: null, focus: {}, view: 'map', note: null,
@@ -179,8 +180,10 @@ function clearFocus() { focusHits.clear(); paintFocus(); }
 function keyFor(id, y = state.year) {
   if (/^Q\d+$/.test(id)) return id;
   // UCDP's number for a country, kept from before 20 November 2026; one it gave two places (365: the Soviet Union to
-  // 1991, then Russia) opens the place of the year shown, a year between them too (old-countries.js).
-  if (/^gw:\d+$/.test(id)) return oldCountry(state.places.oldCountries, state.places.places, id.slice(3), y);
+  // 1991, then Russia) opens the place of the year shown, a year between them too (old-countries.js). A number only
+  // War Focus used (its links here wrote c=<number> until 21 November 2026: 255, Germany) is read as War Focus keyed
+  // it (../focus/old-numbers.mjs; second review X4).
+  if (/^gw:\d+$/.test(id)) return oldCountry(state.places.oldCountries, state.places.places, id.slice(3), y) || oldCountry(OLD_NUMBERS, state.places.places, id.slice(3), y);
   if (/^[A-Z]{3}$/.test(id)) return Object.entries(state.places.places).find(([, p]) => p.iso3 === id)?.[0] || null;
   return null;
 }

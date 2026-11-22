@@ -14,7 +14,13 @@
 //    none. A polygon of another row that lies mostly (SHARE_IN, half its area or more) inside the
 //    reference land of one of the war's states is drawn uncoloured (`left`, with the reference year) when that land is
 //    the larger share of the war state's territory than of the row's own (the rule stateBoxes keeps for Britain's row
-//    over Oman): the United States' part over South Vietnam, never Czechoslovakia inside Austria-Hungary.
+//    over Oman): the United States' part over South Vietnam, never Czechoslovakia inside Austria-Hungary. A polygon of a
+//    war state's row that lies on the land of a place taking no part is drawn uncoloured too (second review X1, 22
+//    November 2026: Tokyo in the United States' row of 1946–51 is Japan's, never the United States'), the land being
+//    the other place's in its whole years both before and after; where both rows draw it that year, the one that keeps
+//    it (`whose`); the other place's land is read on its main rows only, and never on a row or place listed below
+//    (MAIN_ROW, NOT_REFERENCE, NOT_HOLDER). Each `left` entry names its own holder and reference year, so one row can leave Norway's land, and
+//    Yugoslavia's, each under its own name (second review X5).
 // 3. Cliopatria's rows are dissolved shapes: a land joined to its holder (France inside Germany in 1942, Serb-held
 //    Bosnia inside Serbia-Montenegro, Burma inside the British Raj) is in the same polygon and cannot be cut out without
 //    drawing a border of another year, which VM never does. Where a quarter (INSIDE) or more of a war state's reference
@@ -23,6 +29,21 @@
 // Areas are worked on the plane of longitude and latitude, each polygon scaled by the cosine of its mean latitude, and
 // shares by points on a grid inside each polygon: good enough for shares of a half and a quarter, never drawn.
 const FRAGMENT = 0.1, WHOLE = 0.5, SHARE_IN = 0.5, INSIDE = 0.25, GAP = 12;
+// The land a place taking no part is read on (rule 2's second half, and `whose`) is only its main rows': each holding a
+// tenth (MAIN_ROW) or more of what its rows hold that year. A lesser row the crosswalk files under it is no ground for
+// naming it a land's holder: Cliopatria's "Estado Novo" rows of 1979–2024 (cl-508df3f28d, cl-b16dfbb288) are Cabinda
+// alone, Angola's land, which the Battlefield's crosswalk keys to Portugal (Q45) beside Portugal's own row.
+const MAIN_ROW = 0.1;
+// Rows the crosswalk files under a place that are not that place's land alone, so never its reference land in that
+// rule (fixer 2, 22 November 2026; places.json is not changed):
+//   cl-bdc9ff6cf8  "Republic of Cabo Verde", 1976–2023: Cape Verde's islands and the Comoros (with Mayotte), keyed to
+//                  Cape Verde (Q1011); France's row of 1991 over the Comoros and Mayotte would be named Cape Verde's.
+const NOT_REFERENCE = new Set(['cl-bdc9ff6cf8']);
+// Places the crosswalk gives to Cliopatria's rows of a state's dependencies, not a state of their own: never named a
+// land's holder in that rule. Q8680, "British Colonial Empire" (1926–1999: British colonies, and Australia's Papua and
+// New Guinea, which Cliopatria files with them); Q46395, "British Overseas Territories" (2000–2024: Gibraltar and the
+// rest, the United Kingdom's own).
+const NOT_HOLDER = new Set(['Q8680', 'Q46395']);
 
 /** Cliopatria's rows (the Omni-Map's TopoJSON) as polygons of [lon, lat] rings, with each polygon's area and box. */
 export function decodeRows(topo) {
@@ -102,25 +123,59 @@ export function makeLands(files, placeOf, drawn, { from = 1900, to = 2024, fileF
     const vs = near(q, y).filter(v => v != null);
     return !theatre || !vs.length || a >= WHOLE * Math.max(...vs);
   };
-  // A state's reference land for year y: its rows' polygons in the nearest year they are whole.
+  // A place's land in year z: its rows' polygons that year, whole or not; `main`, its main rows' only, none of
+  // NOT_REFERENCE (MAIN_ROW).
+  const landCache = new Map();
+  function landOf(q, z, main = false) {
+    const k = q + '@' + z + (main ? 'm' : '');
+    if (landCache.has(k)) return landCache.get(k);
+    const polys = [], boxes = [], areas = [], all = areaIn(q, z);
+    for (const { r, q: p } of rowsByYear.get(z) || []) {
+      if (p !== q || (main && (NOT_REFERENCE.has(r.p.id) || r.area.reduce((s, a) => s + a, 0) < MAIN_ROW * all))) continue;
+      r.polys.forEach((poly, i) => { polys.push(poly); boxes.push(r.box[i]); areas.push(r.area[i]); });
+    }
+    const total = areas.reduce((s, a) => s + a, 0);
+    let points = null; // its sample points, worked out the first time they are asked for (rule 3)
+    const out = { year: z, polys, boxes, total, box: boxes.reduce((b, x) => [Math.min(b[0], x[0]), Math.min(b[1], x[1]), Math.max(b[2], x[2]), Math.max(b[3], x[3])], [Infinity, Infinity, -Infinity, -Infinity]),
+      get points() { return points || (points = polys.flatMap((poly, i) => samples(poly, areas[i], areas[i] / total > 0.05 ? 14 : 6))); } };
+    landCache.set(k, out);
+    return out;
+  }
+  // A state's reference land for year y: its rows' polygons in the nearest year they are whole (`dir` -1 or 1: the
+  // nearest such year no later, or no earlier, than y).
   const refCache = new Map();
-  function ref(q, y, theatre = false) {
+  function ref(q, y, theatre = false, dir = 0, main = false) {
     y = at(y);
-    const k = q + '@' + y + (theatre ? 't' : '');
+    const k = q + '@' + y + (theatre ? 't' : '') + dir + (main ? 'm' : '');
     if (refCache.has(k)) return refCache.get(k);
     let out = null;
-    for (let d = 0; d <= GAP && !out; d++) for (const z of d ? [y - d, y + d] : [y]) {
-      if (out || z < from || z > to || !whole(q, z, theatre)) continue;
-      const polys = [], boxes = [], areas = [];
-      for (const { r, q: p } of rowsByYear.get(z)) if (p === q) r.polys.forEach((poly, i) => { polys.push(poly); boxes.push(r.box[i]); areas.push(r.area[i]); });
-      const total = areas.reduce((s, a) => s + a, 0);
-      out = { year: z, polys, boxes, total, box: boxes.reduce((b, x) => [Math.min(b[0], x[0]), Math.min(b[1], x[1]), Math.max(b[2], x[2]), Math.max(b[3], x[3])], [Infinity, Infinity, -Infinity, -Infinity]),
-        points: polys.flatMap((poly, i) => samples(poly, areas[i], areas[i] / total > 0.05 ? 14 : 6)) };
+    for (let d = 0; d <= GAP && !out; d++) for (const z of !d ? [y] : dir ? [y + dir * d] : [y - d, y + d]) {
+      if (!out && z >= from && z <= to && whole(q, z, theatre)) out = landOf(q, z, main);
     }
+    if (out && !out.total) out = null;
     refCache.set(k, out);
     return out;
   }
   const inRef = (pt, rf) => rf.polys.some((p, i) => inBox(pt, rf.boxes[i]) && inPoly(pt, p));
+  const shareOf = (smp, rf) => { let s = 0, t = 0; for (const [pt, w] of smp) { t += w; if (inRef(pt, rf)) s += w; } return t > 0 ? s / t : 0; };
+  /**
+   * Whose land it is where two places' rows draw the same land in year y (Cliopatria's Britain of 1969–2023 over Oman,
+   * its British Colonial Empire of 1947–57 over Newfoundland, part of Canada from 1949): of `a` and `b`, the one whose
+   * rows alone hold it (SHARE_IN of `poly`'s area) in the latest year that both are drawn and either does: the one
+   * that keeps it. Oman, alone in 2024; Canada, alone from 1958; Norway, not Germany, whose rows draw it with Norway's
+   * in 1940 and alone in 1941–44; South Vietnam, alone in 1956–66, not the United States, whose row holds it to 2005
+   * when South Vietnam's rows are gone. Each place's land is its main rows' (MAIN_ROW, NOT_REFERENCE): Cabinda is
+   * Angola's, not Portugal's. Null if neither ever holds it alone.
+   */
+  function whose(a, b, poly, y) {
+    const smp = samples(poly, polyArea(poly), 8);
+    for (let z = to; z >= from; z--) {
+      if (z === y || !(areaIn(a, z) > 0 && areaIn(b, z) > 0)) continue;
+      const ha = shareOf(smp, landOf(a, z, true)) >= SHARE_IN, hb = shareOf(smp, landOf(b, z, true)) >= SHARE_IN;
+      if (ha !== hb) return ha ? a : b;
+    }
+    return null;
+  }
   const sampleCache = new Map();
   const samplesOf = (r, i) => { const k = r.p.id + '#' + i; if (!sampleCache.has(k)) sampleCache.set(k, samples(r.polys[i], r.area[i], 10)); return sampleCache.get(k); };
 
@@ -130,23 +185,55 @@ export function makeLands(files, placeOf, drawn, { from = 1900, to = 2024, fileF
    * inside }: the states drawn only as a fragment; [row id, [polygon indexes], Q, reference year] drawn uncoloured; and
    * [Q, the place (or row:<id>) whose coloured polygon holds a quarter or more of its land, that row's id].
    */
+  // The share of a row's polygon that lies inside a reference land.
+  const shareIn = (r, i, rf) => samplesOf(r, i).reduce((s, [pt, w]) => s + (inRef(pt, rf) ? w : 0), 0) / r.area[i];
+  const boxMeets = (b, rf) => meets(b, rf.box) && rf.boxes.some(x => meets(b, x));
   function year(y, qs, theatre = []) {
     const b = at(y), rows = rowsByYear.get(b) || [];
+    qs = new Set(qs);
     const parts = [...qs].filter(q => fragment(q, b)).sort((p, q) => +p.slice(1) - +q.slice(1));
-    const left = new Map(); // row id → { idx: Set, q, ry }
-    const mark = (r, i, q, ry) => { const e = left.get(r.p.id) || left.set(r.p.id, { idx: new Set(), q, ry }).get(r.p.id); e.idx.add(i); };
+    // Each polygon left uncoloured keeps its own holder and reference year (a row can hold Libya, Norway and Yugoslavia
+    // at once): entries by row, holder and year; `marked` the polygons of each row already left.
+    const left = new Map(), marked = new Map(); // `${row id} ${Q} ${year}` → { id, idx: Set, q, ry }; row id → Set
+    const isMarked = (r, i) => !!marked.get(r.p.id)?.has(i);
+    const mark = (r, i, q, ry) => {
+      const k = `${r.p.id} ${q} ${ry}`, e = left.get(k) || left.set(k, { id: r.p.id, idx: new Set(), q, ry }).get(k);
+      e.idx.add(i); (marked.get(r.p.id) || marked.set(r.p.id, new Set()).get(r.p.id)).add(i);
+    };
     for (const q of parts) for (const { r, q: p } of rows) if (p === q) r.polys.forEach((_, i) => mark(r, i, q, b));
     const refs = [...qs].map(q => [q, ref(q, b, theatre.includes(q))]).filter(([, rf]) => rf);
     for (const { r, q: x } of rows) {
       if (parts.includes(x)) continue;
       const own = x ? areaIn(x, b) : r.area.reduce((s, a) => s + a, 0);
       r.polys.forEach((_, i) => {
-        if (left.get(r.p.id)?.idx.has(i)) return;
+        if (isMarked(r, i)) return;
         for (const [q, rf] of refs) {
           if (q === x || !meets(r.box[i], rf.box) || !(r.area[i] / rf.total > r.area[i] / own)) continue;
-          const pts = samplesOf(r, i);
-          const share = pts.reduce((s, [pt, w]) => s + (inRef(pt, rf) ? w : 0), 0) / r.area[i];
-          if (share >= SHARE_IN) { mark(r, i, q, rf.year); return; }
+          if (shareIn(r, i, rf) >= SHARE_IN) { mark(r, i, q, rf.year); return; }
+        }
+      });
+    }
+    // Rule 2 for a place taking no part (second review X1): a polygon of a war state's row (one drawn in a side's
+    // colour) that lies on another place's land is left uncoloured too, so no state that takes no part is coloured as
+    // a side. The land is the other's when the polygon lies mostly (SHARE_IN) inside its reference land both in the
+    // nearest year it is whole no later than this one and in the nearest no earlier (Tokyo, Japan's in 1945 and 1958,
+    // in the United States' row of 1946–51), and that land is smaller than the war state's own: a land a successor
+    // holds only later is not another's (East Pakistan in Pakistan's row of 1971, Bangladesh's from 1972; Taiwan in the
+    // Republic of China's of 1946–49, Japan's in 1945 and not after). Where the other place's own row draws the same
+    // land this year, it is the other's only if it keeps it (`whose`): Oman, not Britain; Canada, not the British
+    // Colonial Empire, over Newfoundland. The other place's land is its main rows' only (MAIN_ROW, NOT_REFERENCE), and a
+    // grouping of a state's dependencies is never the other place (NOT_HOLDER), so no land is named a holder's falsely.
+    const others = [...area.keys()].filter(q => !qs.has(q) && !NOT_HOLDER.has(q)).map(q => [q, ref(q, b, false, -1, true), ref(q, b, false, 1, true)]).filter(([, p, n]) => p && n);
+    for (const { r, q: x } of rows) {
+      if (!x || !qs.has(x) || parts.includes(x)) continue;
+      const own = areaIn(x, b);
+      r.polys.forEach((_, i) => {
+        if (isMarked(r, i)) return;
+        for (const [q, p, n] of others) {
+          if (q === x || !(p.total < own && n.total < own) || !boxMeets(r.box[i], p) || !boxMeets(r.box[i], n)) continue;
+          if (shareIn(r, i, p) < SHARE_IN || (n !== p && shareIn(r, i, n) < SHARE_IN)) continue;
+          if (p.year === b && whose(x, q, r.polys[i], b) !== q) continue;
+          mark(r, i, q, b - p.year <= n.year - b ? p.year : n.year); return;
         }
       });
     }
@@ -165,16 +252,17 @@ export function makeLands(files, placeOf, drawn, { from = 1900, to = 2024, fileF
       for (const [pt, w] of rf.points) {
         const hits = (cells.get(cell(...pt)) || []).filter(({ r, i }) => inBox(pt, r.box[i]) && inPoly(pt, r.polys[i]));
         if (!hits.length || hits.some(h => h.x === q)) continue;
-        const h = hits.find(({ r, i }) => !left.get(r.p.id)?.idx.has(i));
+        const h = hits.find(({ r, i }) => !isMarked(r, i));
         if (h) { const e = held.get(h.r.p.id) || held.set(h.r.p.id, { key: h.x || `row:${h.r.p.id}`, w: 0 }).get(h.r.p.id); e.w += w; }
       }
       for (const [id, e] of [...held].sort((m, n) => n[1].w - m[1].w)) if (e.w >= INSIDE * rf.total) inside.push([q, e.key, id]);
     }
     return {
       parts,
-      left: [...left].map(([id, e]) => [id, [...e.idx].sort((m, n) => m - n), e.q, e.ry]).sort((m, n) => (m[0] < n[0] ? -1 : 1)),
+      left: [...left.values()].map(e => [e.id, [...e.idx].sort((m, n) => m - n), e.q, e.ry])
+        .sort((m, n) => (m[0] !== n[0] ? (m[0] < n[0] ? -1 : 1) : m[1][0] - n[1][0])),
       inside: inside.sort((m, n) => +m[0].slice(1) - +n[0].slice(1)),
     };
   }
-  return { year, fragment, whole, ref, areaIn, near, bordersTo: to };
+  return { year, fragment, whole, ref, whose, areaIn, near, bordersTo: to };
 }

@@ -541,7 +541,10 @@ test('Retrospective: 1939 shows World War II; 2025 shows dozens of conflicts', p
   const y1939 = await page.locator('#panel').innerText();
   await page.evaluate(() => { location.hash = '#y=2025'; });
   await page.waitForFunction(() => document.querySelector('#year-big').textContent === '2025');
-  const n2025 = +(await page.locator('#panel .sub').innerText()).match(/^(\d+) armed/)[1];
+  // The panel is redrawn a moment after the header's figures: wait until its count is the header's before reading it
+  // (on a loaded machine the test once read 1939's count here).
+  await page.waitForFunction(() => (document.querySelector('#panel .sub')?.textContent || '').startsWith(document.querySelector('#k-conflicts').textContent + ' armed'));
+  const n2025 =+(await page.locator('#panel .sub').innerText()).match(/^(\d+) armed/)[1];
   const red = await page.locator('path.shape[fill="var(--c-war)"]').count();
   const caption = await page.locator('#caption').innerText();
   // A long list shows its first items and opens the rest in a pop-out.

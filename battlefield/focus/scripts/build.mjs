@@ -705,7 +705,7 @@ for (const w of wars) {
   pending.push([join(WAR_DIR, w.id + '.json'), JSON.stringify(data)]);
   index.push({ id: w.id, name: w.name, qid, wiki: w.wiki, bf, start: w.start, end: w.end, ongoing: !w.end, totalDeaths: total, deathsSource: source,
     battles: battles.length, mappedBattles: battles.filter(b => b.lat != null).length, events: ev.length, sides: [w.sides.a.label, w.sides.b.label], bbox });
-  console.log(`${w.id}: ${qid} ${months.length} months, ${battles.length} battles (${battles.filter(b => b.lat != null).length} mapped), ${ev.length} events, ${total.toLocaleString('en-GB')} deaths; figures: ${tally.wp} from Wikipedia, ${tally.zero} zero, ${tally.unread} not read, ${tally.ucdp} UCDP nearby${tally.kept ? `, ${tally.kept} kept from the last build` : ''}`);
+  console.log(`${w.id}: ${qid} ${months.length} months, ${battles.length} battles (${battles.filter(b => b.lat != null).length} mapped), ${ev.length} events, ${total == null ? 'no figure for' : total.toLocaleString('en-GB')} deaths; figures: ${tally.wp} from Wikipedia, ${tally.zero} zero, ${tally.unread} not read, ${tally.ucdp} UCDP nearby${tally.kept ? `, ${tally.kept} kept from the last build` : ''}`);
 }
 const IDX = join(OUT, 'index.json');
 const old = existsSync(IDX) ? JSON.parse(readFileSync(IDX, 'utf8')) : { wars: [] };

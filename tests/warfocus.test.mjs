@@ -876,6 +876,13 @@ test('data: every battle has a figure with its kind and source, a recorded zero,
 // The review of 16 November 2026 (R3-03, R3-04): the scheduled refresh keeps the articles it read between runs, has the
 // time to read them, gives up on a source that is down instead of running out of time, and rebuilds the Master Index's
 // War Focus lines in its own commit, so the lake never states last month's figures.
+test('build: a war with no deaths figure does not stop the full build at its progress line', () => {
+  // Found by a trial of the full build on 22 November 2026: the nine wars before 1946 have no total, and the line
+  // that reports each war read total.toLocaleString, so the monthly job would have stopped at the first of them.
+  const build = readFileSync(new URL('../battlefield/focus/scripts/build.mjs', import.meta.url), 'utf8');
+  assert.ok(!/\$\{total\.toLocaleString/.test(build), 'no unguarded total in a line the build prints');
+  assert.match(build, /total == null \? 'no figure for' : total\.toLocaleString\('en-GB'\)/);
+});
 test('workflow: the refresh caches the articles, has an hour, stops asking a source that is down, and rebuilds the Master Index lines it commits', () => {
   const yml = readFileSync(new URL('../.github/workflows/warfocus-refresh.yml', import.meta.url), 'utf8');
   const build = readFileSync(new URL('../battlefield/focus/scripts/build.mjs', import.meta.url), 'utf8');

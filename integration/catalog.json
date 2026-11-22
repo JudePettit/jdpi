@@ -1,5 +1,5 @@
 {
-  "generated": "2026-11-22T08:51:43.834Z",
+  "generated": "2026-11-22T09:44:07.208Z",
   "name": "Vitruvian Manager data catalogue",
   "publisher": "JDP-Iq",
   "description": "Every public dataset in Vitruvian Manager (VM, by JDP-Iq), with its fields, size, licence and sources. Read-only; no keys. Files are static JSON on this site; the MCP server (/mcp) and the JSON API (/api/v1/) query them with row and size caps.",
@@ -1295,20 +1295,21 @@
           "description": "The story's written 5 Sided Analysis: published, refused, missing or not-eligible"
         }
       ],
-      "rows": 10,
+      "rows": 20,
       "licence": "Headlines and links © their publishers, quoted for reference; selection and counts © JDP-Iq.",
       "sources": [
         "The Political Briefing's publishers' RSS and Atom feeds (intelligence-briefing-stories)",
         "Political positions: AllSides Media Bias Ratings, otherwise Media Bias/Fact Check, adjusted to five steps"
       ],
-      "updated": "2026-11-21",
+      "updated": "2026-11-22",
       "refresh": "daily",
       "page": "daily-synopsis/index.html",
       "derivedFrom": [
         "daily-synopsis/data/index.json",
+        "daily-synopsis/data/days/2026-11-22.json",
         "daily-synopsis/data/days/2026-11-21.json"
       ],
-      "bytes": 4283
+      "bytes": 8536
     },
     {
       "id": "econ-briefing-stories",

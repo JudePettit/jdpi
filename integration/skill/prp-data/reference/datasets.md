@@ -122,7 +122,7 @@ Political Briefing: publishers. The Political Briefing's publishers with their p
 
 Daily Synopsis: the day's major stories. Each day's major political stories, picked by stated rules with no AI model: those that at least three of the Political Briefing's publishers, from at least two of its five positions, ran in the 24 hours to its morning refresh, at most ten a day, with the number of outlets on each side and the first headline. `authorship` says whether that day's short digest was written by an AI model (Claude) and passed VM's checks (model) or the day holds the outlets' headlines alone (rules); no person checked either.
 
-- Rows: 10 · refresh: daily · licence: Headlines and links © their publishers, quoted for reference; selection and counts © JDP-Iq.
+- Rows: 20 · refresh: daily · licence: Headlines and links © their publishers, quoted for reference; selection and counts © JDP-Iq.
 - File: https://jdpi.pages.dev/integration/data/daily-synopsis-stories.json (records at `records`)
 - Fields: `day` (date), `rank` (number), `story` (string), `outlets` (number), `far_left` (number), `left` (number), `centre` (number), `right` (number), `far_right` (number), `lead_headline` (string), `lead_outlet` (string), `lead_url` (string), `authorship` (string), `written` (string), `five` (string)
 

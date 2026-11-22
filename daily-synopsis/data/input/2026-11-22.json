@@ -1,0 +1,778 @@
+{
+ "format": "vm-daily-synopsis-input/1",
+ "day": "2026-11-22",
+ "id": "2026-11-22-1fda29dc7f5e",
+ "generated": "2026-11-22T09:06:01.451Z",
+ "window": {
+  "from": "2026-11-21T07:08:12.336Z",
+  "to": "2026-11-22T07:08:12.336Z"
+ },
+ "storeGenerated": "2026-11-22T07:08:12.336Z",
+ "rule": {
+  "minOutlets": 3,
+  "minSides": 2,
+  "cap": 10,
+  "fiveMinSides": 3,
+  "fiveNeedsLeftAndRight": true
+ },
+ "sides": [
+  {
+   "key": "far_left",
+   "label": "Far left"
+  },
+  {
+   "key": "left",
+   "label": "Left"
+  },
+  {
+   "key": "centre",
+   "label": "Centre"
+  },
+  {
+   "key": "right",
+   "label": "Right"
+  },
+  {
+   "key": "far_right",
+   "label": "Far right"
+  }
+ ],
+ "stories": [
+  {
+   "id": "s1",
+   "rank": 1,
+   "outlets": 9,
+   "sides": {
+    "far_left": 0,
+    "left": 3,
+    "centre": 5,
+    "right": 1,
+    "far_right": 0
+   },
+   "written5": true,
+   "lead": "s1-4",
+   "items": [
+    {
+     "id": "s1-1",
+     "side": "left",
+     "outlet": "The Independent",
+     "outletId": "independent",
+     "caution": true,
+     "access": "free",
+     "headline": "Top cartel boss El Chapo Isidro captured in Mexico with help from Trump admin",
+     "url": "https://www.independent.co.uk/news/world/americas/el-chapo-isidro-captured-fbi-sinaloa-trump-b3089155.html",
+     "published": "2026-11-21T14:46:50.000Z",
+     "summary": "His arrest set off a burst of violence that rattled civilians in Sinaloa, where the operation took place"
+    },
+    {
+     "id": "s1-2",
+     "side": "left",
+     "outlet": "The Guardian",
+     "outletId": "guardian",
+     "caution": false,
+     "access": "free",
+     "headline": "Alleged Mexican drug cartel boss ‘El Chapo Isidro’ arrested in special forces raid",
+     "url": "https://www.theguardian.com/world/2026/nov/21/alleged-mexican-drug-cartel-boss-el-chapo-isidro-meza-flores-arrested",
+     "published": "2026-11-21T17:46:55.000Z",
+     "summary": "Fausto Isidro Meza Flores was one of FBI’s most wanted fugitives and evaded capture for more than a decade The Mexican military captured one of the FBI’s top 10 most wanted fugitives during a special forces raid in the Mexican state of Sina"
+    },
+    {
+     "id": "s1-3",
+     "side": "left",
+     "outlet": "The New York Times",
+     "outletId": "nyt",
+     "caution": false,
+     "access": "paid",
+     "headline": "Who Is the Mexican Drug Kingpin Known as El Chapo Isidro?",
+     "url": "https://www.nytimes.com/2026/11/21/world/americas/mexico-el-chapo-isidro-drug-kingpin.html",
+     "published": "2026-11-21T16:30:35.000Z",
+     "summary": "The kingpin, Fausto Isidro Meza Flores, was captured in a violent operation in Mexico. He was one of the F.B.I.’s 10 most wanted fugitives."
+    },
+    {
+     "id": "s1-4",
+     "side": "centre",
+     "outlet": "Euronews",
+     "outletId": "euronews",
+     "caution": false,
+     "access": "free",
+     "headline": "Mexico captures FBI’s most-wanted cartel boss ‘El Chapo Isidro’, triggering violence",
+     "url": "https://www.euronews.com/2026/11/21/mexico-captures-fbis-most-wanted-cartel-boss-el-chapo-isidro-triggering-violence",
+     "published": "2026-11-21T14:20:35.000Z",
+     "summary": "Fausto Isidro Meza Flores, one of the FBI’s ten most-wanted fugitives, was arrested in a military operation involving US intelligence cooperation. Gunfire, burning vehicles and panic among civilians followed the raid in northern Mexico."
+    },
+    {
+     "id": "s1-5",
+     "side": "centre",
+     "outlet": "Euronews",
+     "outletId": "euronews",
+     "caution": false,
+     "access": "free",
+     "headline": "Video shows Mexican forces capturing 'El Chapo Isidro', FBI most-wanted cartel boss",
+     "url": "https://www.euronews.com/video/2026/11/21/video-shows-mexican-forces-capturing-el-chapo-isidro-fbi-most-wanted-cartel-boss",
+     "published": "2026-11-21T20:24:17.000Z",
+     "summary": "Mexican special forces captured drug kingpin Fausto Isidro Meza Flores, known as “Chapo Isidro”, during a raid in Sinaloa, with footage showing soldiers escorting him into an army vehicle."
+    },
+    {
+     "id": "s1-6",
+     "side": "centre",
+     "outlet": "France 24",
+     "outletId": "france24",
+     "caution": false,
+     "access": "free",
+     "headline": "Mexico captures drug cartel boss ‘El Chapo Isidro’ after deadly firefight",
+     "url": "https://www.france24.com/en/americas/20261121-mexico-captures-drug-cartel-boss-el-chapo-isidro-after-deadly-firefight",
+     "published": "2026-11-21T15:00:15.000Z",
+     "summary": "Mexico's military forces captured one of the most wanted suspected drug lords, Fausto Isidro Meza Flores, known as \"El Chapo Isidro,\" the military announced on Saturday, after a deadly firefight that killed seven suspected attackers and fo"
+    },
+    {
+     "id": "s1-7",
+     "side": "centre",
+     "outlet": "UPI",
+     "outletId": "upi",
+     "caution": false,
+     "access": "free",
+     "headline": "Drug cartel boss 'El Chapo Isidro' arrested; violence breaks out",
+     "url": "https://www.upi.com/Top_News/World-News/2026/11/21/latam-mexico-el-chapo-isidro-arrested/9781795278569/",
+     "published": "2026-11-21T16:39:04.000Z",
+     "summary": "A drug cartel kingpin was captured in Sinaloa, the Mexican government announced Saturday, after it kicked off a night of violence in the region."
+    },
+    {
+     "id": "s1-8",
+     "side": "centre",
+     "outlet": "Sky News",
+     "outletId": "skynews",
+     "caution": false,
+     "access": "unknown",
+     "headline": "Suspected cartel leader 'El Chapo Isidro' from FBI most-wanted list captured in Mexico",
+     "url": "https://news.sky.com/story/suspected-cartel-leader-el-chapo-isidro-from-fbi-most-wanted-list-captured-in-mexico-13614689",
+     "published": "2026-11-21T13:34:00.000Z",
+     "summary": "Suspected cartel leader Fausto Isidro Meza Flores, known as El Chapo Isidro, has been captured."
+    },
+    {
+     "id": "s1-9",
+     "side": "centre",
+     "outlet": "Deutsche Welle",
+     "outletId": "dw",
+     "caution": false,
+     "access": "free",
+     "headline": "Mexican special forces arrest drug kingpin 'Chapo Isidro'",
+     "url": "https://www.dw.com/en/mexican-special-forces-arrest-drug-kingpin-chapo-isidro/a-80010745?maca=en-rss-en-all-1573-rdf",
+     "published": "2026-11-21T18:30:00.000Z",
+     "summary": "The alleged leader of the Beltran Leyva gang and one of the FBI's most wanted fugitives, known as 'Chapo Isidro,' was captured by the Mexican military following a raid and a shootout in the coastal Sinaloa state."
+    },
+    {
+     "id": "s1-10",
+     "side": "right",
+     "outlet": "The Washington Times",
+     "outletId": "washingtontimes",
+     "caution": true,
+     "access": "unknown",
+     "headline": "Mexico detains top cartel boss 'El Chapo Isidro,' setting off a burst of violence in Sinaloa",
+     "url": "https://www.washingtontimes.com/news/2026/nov/21/mexico-detains-top-cartel-boss-el-chapo-isidro-setting-burst-violence/",
+     "published": "2026-11-21T17:53:16.000Z",
+     "summary": "Gunfire rang out, trucks burned and Mexican forces clashed with cartel gunmen in the state of Sinaloa overnight as Mexican authorities captured cartel boss Fausto Isidro Meza Flores, known as \"El Chapo Isidro.\""
+    }
+   ]
+  },
+  {
+   "id": "s2",
+   "rank": 2,
+   "outlets": 9,
+   "sides": {
+    "far_left": 0,
+    "left": 0,
+    "centre": 3,
+    "right": 3,
+    "far_right": 3
+   },
+   "written5": false,
+   "lead": "s2-1",
+   "items": [
+    {
+     "id": "s2-1",
+     "side": "centre",
+     "outlet": "France 24",
+     "outletId": "france24",
+     "caution": false,
+     "access": "free",
+     "headline": "FBI criminal database hacked",
+     "url": "https://www.france24.com/en/fbi-criminal-database-hacked",
+     "published": "2026-11-21T17:23:18.000Z",
+     "summary": "The FBI is investigating a reported major cyberattack targeting its national law enforcement database, the National Crime Information Center (NCIC), which holds sensitive criminal justice records, including information on fugitives, missing"
+    },
+    {
+     "id": "s2-2",
+     "side": "centre",
+     "outlet": "The Hill",
+     "outletId": "thehill",
+     "caution": false,
+     "access": "free",
+     "headline": "FBI looking into possible breach of its crime database: Report",
+     "url": "https://thehill.com/policy/technology/6235094-fbi-investigates-ncic-breach/",
+     "published": "2026-11-21T13:43:48.000Z",
+     "summary": "The Federal Bureau of Investigation (FBI) is looking into a potential breach of its nationwide criminal information database, a second breach in recent months coming on the heels of nationwide technology outages. The agency’s National Crime"
+    },
+    {
+     "id": "s2-3",
+     "side": "centre",
+     "outlet": "BBC News",
+     "outletId": "bbc",
+     "caution": false,
+     "access": "free",
+     "headline": "FBI reportedly investigating apparent hack of its criminal database",
+     "url": "https://www.bbc.co.uk/news/articles/cvze7de86pk3o",
+     "published": "2026-11-21T16:35:15.000Z",
+     "summary": "The National Crime Information Center database is used by federal and local law enforcement to share information."
+    },
+    {
+     "id": "s2-4",
+     "side": "right",
+     "outlet": "Fox News",
+     "outletId": "foxnews",
+     "caution": true,
+     "access": "free",
+     "headline": "FBI probes second cyberattack in months as hackers breach key crime database, sources say",
+     "url": "https://www.foxnews.com/politics/fbi-probes-second-cyberattack-months-hackers-breach-key-crime-database-sources-say",
+     "published": "2026-11-21T15:40:12.000Z",
+     "summary": "Hackers breached the FBI's National Crime Information Center, sources say, as the bureau probes the entry point and what data was compromised."
+    },
+    {
+     "id": "s2-5",
+     "side": "right",
+     "outlet": "The Daily Caller",
+     "outletId": "dailycaller",
+     "caution": true,
+     "access": "free",
+     "headline": "National Crime Database Reportedly Hacked, Prompting FBI Investigation Of Potential Cyberattack",
+     "url": "https://dailycaller.com/2026/11/21/national-crime-database-hack-federal-bureau-investigation-probe-cyberattack",
+     "published": "2026-11-21T18:34:32.000Z",
+     "summary": "‘I will say that it’s not good. I don’t like that’"
+    },
+    {
+     "id": "s2-6",
+     "side": "right",
+     "outlet": "The Washington Times",
+     "outletId": "washingtontimes",
+     "caution": true,
+     "access": "unknown",
+     "headline": "FBI investigating apparent hack of a key criminal justice information database, AP source says",
+     "url": "https://www.washingtontimes.com/news/2026/nov/21/fbi-looking-apparent-hack-key-criminal-justice-information-database/",
+     "published": "2026-11-21T16:41:58.000Z",
+     "summary": "The FBI is investigating an apparent hack of a national law enforcement database that it maintains, a person familiar with the matter said Saturday."
+    },
+    {
+     "id": "s2-7",
+     "side": "far_right",
+     "outlet": "Breitbart",
+     "outletId": "breitbart",
+     "caution": true,
+     "access": "free",
+     "headline": "Hacked: FBI Database Used for Firearm Background Checks",
+     "url": "https://www.breitbart.com/2nd-amendment/2026/11/21/hacked-fbi-database-used-firearm-background-checks/",
+     "published": "2026-11-21T16:20:46.000Z",
+     "summary": "The FBI's National Crime Information Center (NCIC) database, one of the data collections used to conduct background checks on would-be gun purchasers, has been hacked. The post Hacked: FBI Database Used for Firearm Background Checks appeare"
+    },
+    {
+     "id": "s2-8",
+     "side": "far_right",
+     "outlet": "One America News",
+     "outletId": "oann",
+     "caution": true,
+     "access": "unknown",
+     "headline": "Trump responds to reports of FBI database breach: ‘It’s not good’",
+     "url": "https://news.google.com/rss/articles/CBMilwFBVV95cUxPSXl4MHRNOERfVzgtdU9QbTIzbVNtS20yZ095OTI5MXZWdWxGdHd0OGplUDlSLTcxRkZPaFVHdUJRTG9qbHVNNkR6UzA1clJNdUUxRVcwbnpOVV9CYTdTeU10VEl5OEZUeEZXSW91TThyRFQxU2Qyb3hrc09Qd0hTWmdTRUkzRHpDNnduaUJ3UWw5dl90M1pZ?oc=5",
+     "published": "2026-11-22T04:12:21.000Z",
+     "summary": "Trump responds to reports of FBI database breach: ‘It’s not good’ One America News Network"
+    },
+    {
+     "id": "s2-9",
+     "side": "far_right",
+     "outlet": "ZeroHedge",
+     "outletId": "zerohedge",
+     "caution": true,
+     "access": "free",
+     "headline": "FBI Probes Suspected Hack Of Critical Nationwide Crime Database As 'Cyber Pandemic' Fears Mount",
+     "url": "https://www.zerohedge.com/technology/fbi-probes-suspected-hack-critical-nationwide-crime-database-cyber-pandemic-fears-mount",
+     "published": "2026-11-21T14:30:00.000Z",
+     "summary": "FBI Probes Suspected Hack Of Critical Nationwide Crime Database As 'Cyber Pandemic' Fears Mount Overnight news that the FBI is investigating a cyber incident involving its own critical database raises questions about the series of \"disrupti"
+    }
+   ]
+  },
+  {
+   "id": "s3",
+   "rank": 3,
+   "outlets": 5,
+   "sides": {
+    "far_left": 0,
+    "left": 1,
+    "centre": 2,
+    "right": 0,
+    "far_right": 2
+   },
+   "written5": true,
+   "lead": "s3-2",
+   "items": [
+    {
+     "id": "s3-1",
+     "side": "left",
+     "outlet": "The Independent",
+     "outletId": "independent",
+     "caution": true,
+     "access": "free",
+     "headline": "Man accused of starting deadly LA wildfire found guilty after original mistrial",
+     "url": "https://www.independent.co.uk/news/world/americas/crime/jonathan-rinderknecht-la-palisades-fires-b3089090.html",
+     "published": "2026-11-21T09:05:12.000Z",
+     "summary": "Jonathan Rinderknecht was described as ‘mad at everything, and frustrated’"
+    },
+    {
+     "id": "s3-2",
+     "side": "centre",
+     "outlet": "Deutsche Welle",
+     "outletId": "dw",
+     "caution": false,
+     "access": "free",
+     "headline": "Man convicted of arson over deadly 2025 Palisades fire in Los Angeles",
+     "url": "https://www.dw.com/en/man-convicted-of-arson-over-deadly-2025-palisades-fire-in-los-angeles/a-80007933?maca=en-rss-en-all-1573-rdf",
+     "published": "2026-11-21T07:10:00.000Z",
+     "summary": "A 30-year-old man has been convicted of causing one of the most destructive wildfires in the history of Los Angeles. The verdict came after the case was retried."
+    },
+    {
+     "id": "s3-3",
+     "side": "centre",
+     "outlet": "France 24",
+     "outletId": "france24",
+     "caution": false,
+     "access": "free",
+     "headline": "Man convicted of starting palisades fire",
+     "url": "https://www.france24.com/en/man-convicted-of-starting-palisades-fire",
+     "published": "2026-11-21T17:21:55.000Z",
+     "summary": "A Los Angeles County jury found former rideshare driver Jonathan Rinderknecht guilty on Friday of starting the 2025 Palisades fire, which caused widespread destruction and loss of life. He faces a prison sentence of between five and 40 year"
+    },
+    {
+     "id": "s3-4",
+     "side": "far_right",
+     "outlet": "American Greatness",
+     "outletId": "amgreatness",
+     "caution": true,
+     "access": "free",
+     "headline": "Jury Convicts California Man of Starting Palisades Fire",
+     "url": "https://amgreatness.com/2026/11/21/jury-convicts-california-man-of-starting-palisades-fire/",
+     "published": "2026-11-21T08:44:32.000Z",
+     "summary": "Jonathan Rinderknecht faces up to 40 years in federal prison after his retrial ended in a guilty verdict. Source"
+    },
+    {
+     "id": "s3-5",
+     "side": "far_right",
+     "outlet": "ZeroHedge",
+     "outletId": "zerohedge",
+     "caution": true,
+     "access": "free",
+     "headline": "\"Now We Have The Answer\": Retrial Jury Convicts Man Who Sparked Palisades Inferno",
+     "url": "https://www.zerohedge.com/political/now-we-have-answer-retrial-jury-convicts-man-who-sparked-palisades-inferno",
+     "published": "2026-11-21T17:05:00.000Z",
+     "summary": "\"Now We Have The Answer\": Retrial Jury Convicts Man Who Sparked Palisades Inferno Authored by Beige Luciano-Adams via The Epoch Times , LOS ANGELES - After deliberating for less than two days, a Los Angeles jury unanimously found a federal"
+    }
+   ]
+  },
+  {
+   "id": "s4",
+   "rank": 4,
+   "outlets": 4,
+   "sides": {
+    "far_left": 0,
+    "left": 1,
+    "centre": 3,
+    "right": 0,
+    "far_right": 0
+   },
+   "written5": false,
+   "lead": "s4-1",
+   "items": [
+    {
+     "id": "s4-1",
+     "side": "left",
+     "outlet": "The Independent",
+     "outletId": "independent",
+     "caution": true,
+     "access": "free",
+     "headline": "24 dead after boat carrying mourners to funeral capsizes in Nigeria",
+     "url": "https://www.independent.co.uk/news/world/africa/nigeria-funeral-boat-capsizes-victims-b3089271.html",
+     "published": "2026-11-21T21:23:44.000Z",
+     "summary": "The boat captain fled after the accident and the vessel's manager was taken into custody, police said"
+    },
+    {
+     "id": "s4-2",
+     "side": "centre",
+     "outlet": "UPI",
+     "outletId": "upi",
+     "caution": false,
+     "access": "free",
+     "headline": "At least 24 dead after boat carrying mourners capsizes in Nigeria",
+     "url": "https://www.upi.com/Top_News/World-News/2026/11/21/nigeria-boat-funeral-capsizes/8291795307056/",
+     "published": "2026-11-22T00:29:44.000Z",
+     "summary": "At least 24 people were killed and another 24 rescued after a boat carrying mourners to a funeral capsized in southern Nigeria, officials said."
+    },
+    {
+     "id": "s4-3",
+     "side": "centre",
+     "outlet": "Deutsche Welle",
+     "outletId": "dw",
+     "caution": false,
+     "access": "free",
+     "headline": "Nigeria: At least 24 dead after boat capsizes",
+     "url": "https://www.dw.com/en/nigeria-at-least-24-dead-after-boat-capsizes/a-80011248?maca=en-rss-en-all-1573-rdf",
+     "published": "2026-11-21T23:52:00.000Z",
+     "summary": "The boat carrying mourners for a funeral overturned in southern Nigeria. It was the latest in a series of deadly boat accidents in the country."
+    },
+    {
+     "id": "s4-4",
+     "side": "centre",
+     "outlet": "Sky News",
+     "outletId": "skynews",
+     "caution": false,
+     "access": "unknown",
+     "headline": "At least 24 dead after boat taking passengers to funeral capsizes in Nigeria",
+     "url": "https://news.sky.com/story/at-least-24-dead-after-boat-taking-passengers-to-funeral-capsizes-in-nigeria-13615057",
+     "published": "2026-11-21T21:32:00.000Z",
+     "summary": "At least 24 people have died after a boat capsized carrying people to a funeral in Nigeria, according to emergency services."
+    }
+   ]
+  },
+  {
+   "id": "s5",
+   "rank": 5,
+   "outlets": 4,
+   "sides": {
+    "far_left": 0,
+    "left": 0,
+    "centre": 2,
+    "right": 2,
+    "far_right": 0
+   },
+   "written5": false,
+   "lead": "s5-3",
+   "items": [
+    {
+     "id": "s5-1",
+     "side": "centre",
+     "outlet": "The Hill",
+     "outletId": "thehill",
+     "caution": false,
+     "access": "free",
+     "headline": "Trump wants to work with Democrats on placing 10 percent cap on credit card interest rates",
+     "url": "https://thehill.com/business/6235394-trump-calls-credit-card-cap/",
+     "published": "2026-11-21T20:28:45.000Z",
+     "summary": "President Trump reupped his call for a 10 percent cap on credit card interest rates, saying he would be willing to work with Democrats on the issue. “I didn’t even know they said it but they’ve been trying to get that for years. I would do"
+    },
+    {
+     "id": "s5-2",
+     "side": "centre",
+     "outlet": "Axios",
+     "outletId": "axios",
+     "caution": false,
+     "access": "unknown",
+     "headline": "Trump says he'd work with Dems to cap credit card interest, fees",
+     "url": "https://www.axios.com/2026/11/21/trump-credit-cards-rates-warren",
+     "published": "2026-11-21T16:48:20.000Z",
+     "summary": "President Trump said Saturday he'd gladly work with Democrats to cap interest and fees on credit cards , arguing that card companies simply make too much money now. Why it matters: Though some argue capping rates would save consumers billio"
+    },
+    {
+     "id": "s5-3",
+     "side": "right",
+     "outlet": "The Washington Times",
+     "outletId": "washingtontimes",
+     "caution": true,
+     "access": "unknown",
+     "headline": "Trump vows to work with Democrats to cap credit card interest rates at 10%",
+     "url": "https://www.washingtontimes.com/news/2026/nov/21/trump-vows-work-dems-cap-credit-card-interest-rates-10/",
+     "published": "2026-11-21T17:54:34.000Z",
+     "summary": "President Donald Trump said Saturday that he would work with the incoming Democratic Congress to cap credit card interest rates, hoping to fulfill a promise he made on the 2024 campaign trail but couldn't deliver on because of industry pres"
+    },
+    {
+     "id": "s5-4",
+     "side": "right",
+     "outlet": "Washington Examiner",
+     "outletId": "washingtonexaminer",
+     "caution": false,
+     "access": "paid",
+     "headline": "Trump on credit card interest rate cap: ‘I would do it’",
+     "url": "https://www.washingtonexaminer.com/policy/economy/4811339/trump-credit-card-interest-rate-cap/",
+     "published": "2026-11-21T23:36:28.000Z",
+     "summary": "President Donald Trump signaled support for a cap on credit card interest rates on Saturday, an initiative also supported by leading Democratic figures. “You’ve previously suggested perhaps a one-year cap on credit card interest rates at 10"
+    }
+   ]
+  },
+  {
+   "id": "s6",
+   "rank": 6,
+   "outlets": 3,
+   "sides": {
+    "far_left": 0,
+    "left": 1,
+    "centre": 1,
+    "right": 0,
+    "far_right": 1
+   },
+   "written5": true,
+   "lead": "s6-2",
+   "items": [
+    {
+     "id": "s6-1",
+     "side": "left",
+     "outlet": "The Independent",
+     "outletId": "independent",
+     "caution": true,
+     "access": "free",
+     "headline": "Trump hints at ‘four or five’ finalists for White House press secretary after telling Katie Zacharia ‘you don’t need this’",
+     "url": "https://www.independent.co.uk/news/world/americas/us-politics/trump-press-secretary-katie-zacharia-b3089289.html",
+     "published": "2026-11-22T00:02:20.000Z",
+     "summary": "‘I can tell you I have a hundred people that want that job as you can imagine,’ Trump told Fox News"
+    },
+    {
+     "id": "s6-2",
+     "side": "centre",
+     "outlet": "The Hill",
+     "outletId": "thehill",
+     "caution": false,
+     "access": "free",
+     "headline": "California State Bar places Katie Zacharia under investigation",
+     "url": "https://thehill.com/homenews/administration/6235105-california-bar-investigates-zacharia/",
+     "published": "2026-11-21T13:54:58.000Z",
+     "summary": "The California State Bar Association is investigating former White House Press Secretary Katie Zacharia, a newly released letter shows, after a watchdog group filed a complaint accusing her of violating the law. Zacharia served a brief five"
+    },
+    {
+     "id": "s6-3",
+     "side": "centre",
+     "outlet": "The Hill",
+     "outletId": "thehill",
+     "caution": false,
+     "access": "free",
+     "headline": "Trump praises Zacharia amid California state bar investigation",
+     "url": "https://thehill.com/homenews/administration/6235423-trump-defends-zacharia-departure/",
+     "published": "2026-11-21T21:07:46.000Z",
+     "summary": "President Trump heaped praise on former White House Press Secretary Katie Zacharia in a phone interview Saturday, defending her quick exit from the role earlier this fall. “I saw the way she was being treated and I said, ‘Katie, you don’t n"
+    },
+    {
+     "id": "s6-4",
+     "side": "far_right",
+     "outlet": "The Gateway Pundit",
+     "outletId": "gatewaypundit",
+     "caution": true,
+     "access": "free",
+     "headline": "California State Bar Launches Investigation Into Former Trump Press Secretary Katie Zacharia Following Soros-Linked Group’s Complaint — Zacharia BLASTS “Partisan Hit Operation”",
+     "url": "https://www.thegatewaypundit.com/2026/11/california-state-bar-launches-investigation-former-trump-press/",
+     "published": "2026-11-22T00:40:48.000Z",
+     "summary": "The California State Bar has opened a formal investigation into former White House Press Secretary Katie Zacharia after a left-wing watchdog group alleged she repeatedly presented herself as a lawyer despite never being licensed to practice"
+    }
+   ]
+  },
+  {
+   "id": "s7",
+   "rank": 7,
+   "outlets": 3,
+   "sides": {
+    "far_left": 0,
+    "left": 1,
+    "centre": 1,
+    "right": 1,
+    "far_right": 0
+   },
+   "written5": true,
+   "lead": "s7-2",
+   "items": [
+    {
+     "id": "s7-1",
+     "side": "left",
+     "outlet": "The Atlantic",
+     "outletId": "atlantic",
+     "caution": false,
+     "access": "metered",
+     "headline": "What Trump’s Summit in China Reveals",
+     "url": "https://www.theatlantic.com/national/2026/11/trump-summit-china-washington-week/689539/",
+     "published": "2026-11-21T16:18:16.000Z",
+     "summary": "Panelists on Washington Week With The Atlantic joined to discuss the president’s week in China with Xi Jinping and Vladimir Putin."
+    },
+    {
+     "id": "s7-2",
+     "side": "centre",
+     "outlet": "France 24",
+     "outletId": "france24",
+     "caution": false,
+     "access": "free",
+     "headline": "Was Vladimir Putin 'snubbed' by Xi Jinping? Viral handshake video is AI fake",
+     "url": "https://www.france24.com/en/tv-shows/truth-or-fake/20261121-was-vladimir-putin-snubbed-by-xi-jinping-viral-handshake-video-is-ai-fake",
+     "published": "2026-11-21T10:16:44.000Z",
+     "summary": "A viral video appearing to show China's Xi Jinping \"snubbing\" Vladimir Putin at the APEC summit has racked up millions of views, fuelling speculation about tensions between Beijing and Moscow. But the footage is fake. FRANCE 24 traced the o"
+    },
+    {
+     "id": "s7-3",
+     "side": "right",
+     "outlet": "Washington Examiner",
+     "outletId": "washingtonexaminer",
+     "caution": false,
+     "access": "paid",
+     "headline": "A lame-duck Trump was exactly what Xi and Putin wanted",
+     "url": "https://www.washingtonexaminer.com/in_focus/4810832/lame-duck-trump-what-xi-putin-wanted/",
+     "published": "2026-11-21T19:00:00.000Z",
+     "summary": "Xi Jinping welcomed Donald Trump to Shenzhen with the honors reserved for a great power. Vladimir Putin joined them for an unprecedented trilateral summit on Thursday. Three leaders representing the world’s largest nuclear powers emerged wi"
+    }
+   ]
+  },
+  {
+   "id": "s8",
+   "rank": 8,
+   "outlets": 3,
+   "sides": {
+    "far_left": 0,
+    "left": 0,
+    "centre": 2,
+    "right": 1,
+    "far_right": 0
+   },
+   "written5": false,
+   "lead": "s8-3",
+   "items": [
+    {
+     "id": "s8-1",
+     "side": "centre",
+     "outlet": "France 24",
+     "outletId": "france24",
+     "caution": false,
+     "access": "free",
+     "headline": "Endurance athlete swims in Hormuz Strait",
+     "url": "https://www.france24.com/en/endurance-athlete-swims-in-hormuz-strait",
+     "published": "2026-11-21T16:02:59.000Z",
+     "summary": "The Strait of Hormuz remains largely blocked, with Iran attacking vessels attempting to cross it. As concerns grow over the environmental impact of the war, with toxic chemicals spreading through the air and sea, one swimmer and ocean advoc"
+    },
+    {
+     "id": "s8-2",
+     "side": "centre",
+     "outlet": "Euronews",
+     "outletId": "euronews",
+     "caution": false,
+     "access": "free",
+     "headline": "Strait of Hormuz: Athlete swims through war zone to expose war's environmental toll",
+     "url": "https://www.euronews.com/video/2026/11/21/strait-of-hormuz-athlete-swims-through-war-zone-to-expose-wars-environmental-toll",
+     "published": "2026-11-21T12:18:40.000Z",
+     "summary": "British endurance swimmer Lewis Pugh completed a 15-kilometre swim through the Strait of Hormuz over three days in November 2026, braving explosions and burning tankers nearby. His three-day challenge aimed to expose the environmental damag"
+    },
+    {
+     "id": "s8-3",
+     "side": "right",
+     "outlet": "New York Post",
+     "outletId": "nypost",
+     "caution": true,
+     "access": "free",
+     "headline": "Endurance athlete Lewis Pugh braves Strait of Hormuz amid explosions to highlight Iran war’s impact on wildlife",
+     "url": "https://nypost.com/2026/11/22/world-news/british-swimmer-lewis-pugh-braves-strait-of-hormuz-amid-explosions-to-highlight-iran-wars-impact-on-wildlife/",
+     "published": "2026-11-22T06:46:36.000Z",
+     "summary": "Lewis Pugh swam parts of the dangerous waterway to highlight how the war with Iran threatens the area’s habitat and wildlife."
+    }
+   ]
+  },
+  {
+   "id": "s9",
+   "rank": 9,
+   "outlets": 3,
+   "sides": {
+    "far_left": 0,
+    "left": 0,
+    "centre": 2,
+    "right": 0,
+    "far_right": 1
+   },
+   "written5": false,
+   "lead": "s9-1",
+   "items": [
+    {
+     "id": "s9-1",
+     "side": "centre",
+     "outlet": "France 24",
+     "outletId": "france24",
+     "caution": false,
+     "access": "free",
+     "headline": "Russia launches ballistic missile attack on Zelensky's hometown in central Ukraine",
+     "url": "https://www.france24.com/en/russia-launches-ballistic-missile-attack-on-zelensky-s-hometown-in-central-ukraine",
+     "published": "2026-11-21T19:55:07.000Z",
+     "summary": "A Russian ballistic missile attack on President Volodymyr Zelensky’s hometown in central Ukraine on Saturday killed two people and wounded dozens. Hours later, Zelensky reiterated his country's determination to join NATO. FRANCE 24's Gulliv"
+    },
+    {
+     "id": "s9-2",
+     "side": "centre",
+     "outlet": "Euronews",
+     "outletId": "euronews",
+     "caution": false,
+     "access": "free",
+     "headline": "Ballistic missile attack on Zelenskyy's hometown kills two people",
+     "url": "https://www.euronews.com/2026/11/21/ballistic-missile-attack-on-zelenskyys-hometown-kills-two-people",
+     "published": "2026-11-21T13:57:15.000Z",
+     "summary": "The strike mainly targeted civilian infrastructure, Zelenskyy wrote on X. The attack comes after Russia vowed a 'painful' response to Ukraine's strike on the Crimean bridge."
+    },
+    {
+     "id": "s9-3",
+     "side": "far_right",
+     "outlet": "Breitbart",
+     "outletId": "breitbart",
+     "caution": true,
+     "access": "free",
+     "headline": "Russian Missile Attack on Zelensky's Hometown in Central Ukraine Kills Two, Wounds Dozens",
+     "url": "https://www.breitbart.com/europe/2026/11/21/russian-missile-attack-on-zelenskys-hometown-in-central-ukraine-kills-two-wounds-dozens/",
+     "published": "2026-11-21T16:37:58.000Z",
+     "summary": "A Russian strike on the center of Ukrainian President Volodymyr Zelenskyy's hometown, Kryvyi Rih, killed two people and wounded 60 others, local officials said Saturday. The post Russian Missile Attack on Zelensky’s Hometown in Central Ukra"
+    }
+   ]
+  },
+  {
+   "id": "s10",
+   "rank": 10,
+   "outlets": 3,
+   "sides": {
+    "far_left": 0,
+    "left": 2,
+    "centre": 0,
+    "right": 1,
+    "far_right": 0
+   },
+   "written5": false,
+   "lead": "s10-2",
+   "items": [
+    {
+     "id": "s10-1",
+     "side": "left",
+     "outlet": "Slate",
+     "outletId": "slate",
+     "caution": false,
+     "access": "metered",
+     "headline": "There’s a Myth About Grand Theft Auto That Started in 1997. This is What the Research Actually Says.",
+     "url": "https://slate.com/technology/2026/11/grand-theft-auto-violent-videogame-consequences-research.html?via=rss",
+     "published": "2026-11-21T15:00:00.000Z",
+     "summary": "Here's what the research says about violent video games."
+    },
+    {
+     "id": "s10-2",
+     "side": "left",
+     "outlet": "The Independent",
+     "outletId": "independent",
+     "caution": true,
+     "access": "free",
+     "headline": "MAGA rep says he believes adults are ‘bad parents’ if they let their kids play the new Grand Theft Auto",
+     "url": "https://www.independent.co.uk/news/world/americas/us-politics/gta-6-maga-parents-children-b3089213.html",
+     "published": "2026-11-21T17:45:20.000Z",
+     "summary": "American Psychological Association says there is not enough evidence to prove video games cause real-world violence"
+    },
+    {
+     "id": "s10-3",
+     "side": "right",
+     "outlet": "Daily Mail",
+     "outletId": "dailymail",
+     "caution": false,
+     "access": "free",
+     "headline": "The British public-school brothers behind Grand Theft Auto whose Coronation Street actress mother helped inspire the biggest video game in history... and make them multi-millionaires",
+     "url": "https://www.dailymail.com/news/article-16311189/Sam-Dan-Houser-Grand-Theft-Auto.html?ns_mchannel=rss&ns_campaign=1490",
+     "published": "2026-11-21T17:38:57.000Z",
+     "summary": "Many people will probably have never heard of them and those that have might, under the circumstances, be surprised to learn about their posh upbringing."
+    }
+   ]
+  }
+ ]
+}

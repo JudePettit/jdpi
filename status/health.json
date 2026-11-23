@@ -1,13 +1,7 @@
 {
-  "generated": "2026-11-22T10:13:43.637Z",
-  "ok": false,
-  "problems": 1,
-  "failing": [
-    {
-      "name": "Geopolitical Volatility refresh",
-      "what": "volatility-refresh.yml",
-      "detail": "last scheduled run failure on 2026-11-22 02:22 UTC: https://github.com/JudePettit/jdpi/actions/runs/44975810754"
-    }
-  ],
-  "run": "https://github.com/JudePettit/jdpi/actions/runs/45011379266"
+  "generated": "2026-11-23T10:35:08.285Z",
+  "ok": true,
+  "problems": 0,
+  "failing": [],
+  "run": "https://github.com/JudePettit/jdpi/actions/runs/45157394190"
 }

@@ -1,0 +1,1321 @@
+{
+ "format": "vm-daily-synopsis-day/1",
+ "day": "2026-11-23",
+ "input": "2026-11-23-43f4c9afe260",
+ "generated": "2026-11-23T09:43:09.654Z",
+ "updated": "2026-11-23T09:43:09.654Z",
+ "window": {
+  "from": "2026-11-22T07:34:19.723Z",
+  "to": "2026-11-23T07:34:19.723Z"
+ },
+ "storeGenerated": "2026-11-23T07:34:19.723Z",
+ "authorship": "rules",
+ "model": null,
+ "label": {
+  "text": "This digest was assembled by rules, with no AI model: Vitruvian Manager’s code picked the stories and grouped the outlets’ own headlines beneath them, and no person checked it. The linked reports are the sources.",
+  "five": "The 5 Sided Analysis under each story lays out the outlets’ own headlines by side, far left to far right, by rules alone.",
+  "notProof": "A side with no headline here was not found among Vitruvian Manager’s outlets, which is not proof that the side did not report it.",
+  "meta": "Assembled by rules, with no AI model; no person checked it"
+ },
+ "rule": {
+  "minOutlets": 3,
+  "minSides": 2,
+  "cap": 10,
+  "fiveMinSides": 3,
+  "fiveNeedsLeftAndRight": true
+ },
+ "sides": [
+  {
+   "key": "far_left",
+   "label": "Far left"
+  },
+  {
+   "key": "left",
+   "label": "Left"
+  },
+  {
+   "key": "centre",
+   "label": "Centre"
+  },
+  {
+   "key": "right",
+   "label": "Right"
+  },
+  {
+   "key": "far_right",
+   "label": "Far right"
+  }
+ ],
+ "written": {
+  "status": "missing",
+  "note": "The written digest is not available for this day.",
+  "attempts": []
+ },
+ "lead": null,
+ "stories": [
+  {
+   "id": "s1",
+   "rank": 1,
+   "outlets": 10,
+   "lead": "s1-4",
+   "headlines": [
+    {
+     "id": "s1-1",
+     "side": "left",
+     "outlet": "The Independent",
+     "outletId": "independent",
+     "caution": true,
+     "access": "free",
+     "headline": "Russian warship sinks at Libya port in suspected Ukrainian drone attack, officials say",
+     "url": "https://www.independent.co.uk/news/world/middle-east/benghazi-naval-base-russian-ship-fire-b3089494.html",
+     "published": "2026-11-22T20:20:01.000Z"
+    },
+    {
+     "id": "s1-2",
+     "side": "left",
+     "outlet": "The Guardian",
+     "outletId": "guardian",
+     "caution": false,
+     "access": "free",
+     "headline": "Blast on Russian ship in Benghazi a suspected drone attack, say Libyan authorities",
+     "url": "https://www.theguardian.com/world/2026/nov/22/blast-russian-ship-suspected-drone-attack-benghazi-libya",
+     "published": "2026-11-22T16:55:49.000Z"
+    },
+    {
+     "id": "s1-3",
+     "side": "left",
+     "outlet": "The Independent",
+     "outletId": "independent",
+     "caution": true,
+     "access": "free",
+     "headline": "Ukraine-Russia war latest: Satellite images show sunken Russian warship after suspected Ukrainian strike off Libya",
+     "url": "https://www.independent.co.uk/news/world/europe/ukraine-russia-war-live-libya-benghazi-warship-drone-attack-b3089568.html",
+     "published": "2026-11-23T04:58:25.000Z"
+    },
+    {
+     "id": "s1-4",
+     "side": "centre",
+     "outlet": "Deutsche Welle",
+     "outletId": "dw",
+     "caution": false,
+     "access": "free",
+     "headline": "Libya: Suspected drone attack hits Russian ship in Benghazi",
+     "url": "https://www.dw.com/en/libya-suspected-drone-attack-hits-russian-ship-in-benghazi/a-80014545?maca=en-rss-en-all-1573-rdf",
+     "published": "2026-11-22T16:50:00.000Z"
+    },
+    {
+     "id": "s1-5",
+     "side": "centre",
+     "outlet": "UPI",
+     "outletId": "upi",
+     "caution": false,
+     "access": "free",
+     "headline": "Russian warship struck in Libya by suspected Ukrainian drones",
+     "url": "https://www.upi.com/Top_News/World-News/2026/11/22/libya-russia-ukraine-naval-attack/3851795380483/",
+     "published": "2026-11-22T21:49:48.000Z"
+    },
+    {
+     "id": "s1-6",
+     "side": "centre",
+     "outlet": "The Hill",
+     "outletId": "thehill",
+     "caution": false,
+     "access": "free",
+     "headline": "Russian ship docked in Libya hit in suspected drone attack",
+     "url": "https://thehill.com/policy/international/6236346-russian-ship-docked-in-libya-hit-in-suspected-drone-attack/",
+     "published": "2026-11-22T22:03:52.000Z"
+    },
+    {
+     "id": "s1-7",
+     "side": "centre",
+     "outlet": "France 24",
+     "outletId": "france24",
+     "caution": false,
+     "access": "free",
+     "headline": "Russian warship hit by suspected Ukrainian drone at Benghazi naval base, Libyan officials say",
+     "url": "https://www.france24.com/en/africa/20261122-russian-warship-hit-by-suspected-ukrainian-drone-at-libya-s-benghazi-naval-base",
+     "published": "2026-11-22T19:41:23.000Z"
+    },
+    {
+     "id": "s1-8",
+     "side": "centre",
+     "outlet": "France 24",
+     "outletId": "france24",
+     "caution": false,
+     "access": "free",
+     "headline": "Russian ship attacked near Benghazi in suspected drone attack",
+     "url": "https://www.france24.com/en/video/20261122-russian-ship-attacked-near-benghazi-in-suspected-drone-attack-ukraine",
+     "published": "2026-11-22T22:37:45.000Z"
+    },
+    {
+     "id": "s1-9",
+     "side": "centre",
+     "outlet": "Euronews",
+     "outletId": "euronews",
+     "caution": false,
+     "access": "free",
+     "headline": "Suspected drone strike hits Russian ship at Libya’s Benghazi port, raising regional security concerns",
+     "url": "https://www.euronews.com/2026/11/22/suspected-drone-strike-hits-russian-ship-at-libyas-benghazi-port-raising-regional-security",
+     "published": "2026-11-22T17:11:34.000Z"
+    },
+    {
+     "id": "s1-10",
+     "side": "centre",
+     "outlet": "BBC News",
+     "outletId": "bbc",
+     "caution": false,
+     "access": "free",
+     "headline": "Explosion on Russian ship at Libya port caused by suspected drone attack, officials say",
+     "url": "https://www.bbc.co.uk/news/articles/cr894gjz0j0yo",
+     "published": "2026-11-22T17:16:47.000Z"
+    },
+    {
+     "id": "s1-11",
+     "side": "centre",
+     "outlet": "Euronews",
+     "outletId": "euronews",
+     "caution": false,
+     "access": "free",
+     "headline": "Satellite images show Russian warship capsized in Libya after suspected Ukrainian drone strike",
+     "url": "https://www.euronews.com/video/2026/11/23/satellite-images-show-russian-warship-capsized-in-libya-after-suspected-ukrainian-drone-st",
+     "published": "2026-11-23T07:00:06.000Z"
+    },
+    {
+     "id": "s1-12",
+     "side": "centre",
+     "outlet": "Euronews",
+     "outletId": "euronews",
+     "caution": false,
+     "access": "free",
+     "headline": "UN mission in Libya urges probe after Russian ship hit by drones off Benghazi",
+     "url": "https://www.euronews.com/2026/11/23/un-mission-in-libya-urges-probe-after-russian-ship-hit-by-drones-off-benghazi",
+     "published": "2026-11-23T05:58:22.000Z"
+    },
+    {
+     "id": "s1-13",
+     "side": "centre",
+     "outlet": "France 24",
+     "outletId": "france24",
+     "caution": false,
+     "access": "free",
+     "headline": "Live: Zelensky confirms Ukraine’s military struck Russian ships docked in Libya",
+     "url": "https://www.france24.com/en/europe/20261123-live-russian-strikes-kill-at-least-15-people-in-kyiv-region-ukraine-says",
+     "published": "2026-11-23T06:10:26.000Z"
+    },
+    {
+     "id": "s1-14",
+     "side": "far_right",
+     "outlet": "Breitbart",
+     "outletId": "breitbart",
+     "caution": true,
+     "access": "free",
+     "headline": "Suspected Ukrainian Sea Drones Hit Russian Warship at Benghazi Naval Base, Libyan Officials Say",
+     "url": "https://www.breitbart.com/europe/2026/11/22/suspected-ukrainian-sea-drones-hit-russian-warship-at-benghazi-naval-base-libyan-officials-say/",
+     "published": "2026-11-22T17:20:17.000Z"
+    },
+    {
+     "id": "s1-15",
+     "side": "far_right",
+     "outlet": "The Gateway Pundit",
+     "outletId": "gatewaypundit",
+     "caution": true,
+     "access": "free",
+     "headline": "Suspected Ukrainian Sea Drones Strike and Sink Russian Corvette Merkury at Benghazi Port",
+     "url": "https://www.thegatewaypundit.com/2026/11/suspected-ukrainian-sea-drones-strike-sink-russian-corvette/",
+     "published": "2026-11-23T00:00:36.000Z"
+    }
+   ],
+   "sentences": null,
+   "five": {
+    "sides": [
+     {
+      "key": "far_left",
+      "label": "Far left",
+      "outlets": 0,
+      "headlines": []
+     },
+     {
+      "key": "left",
+      "label": "Left",
+      "outlets": 2,
+      "headlines": [
+       "s1-1",
+       "s1-2",
+       "s1-3"
+      ]
+     },
+     {
+      "key": "centre",
+      "label": "Centre",
+      "outlets": 6,
+      "headlines": [
+       "s1-4",
+       "s1-5",
+       "s1-6",
+       "s1-7",
+       "s1-8",
+       "s1-9",
+       "s1-10",
+       "s1-11",
+       "s1-12",
+       "s1-13"
+      ]
+     },
+     {
+      "key": "right",
+      "label": "Right",
+      "outlets": 0,
+      "headlines": []
+     },
+     {
+      "key": "far_right",
+      "label": "Far right",
+      "outlets": 2,
+      "headlines": [
+       "s1-14",
+       "s1-15"
+      ]
+     }
+    ],
+    "eligible": true,
+    "written": null,
+    "status": "missing",
+    "note": "The written comparison is not available for this story."
+   }
+  },
+  {
+   "id": "s2",
+   "rank": 2,
+   "outlets": 8,
+   "lead": "s2-3",
+   "headlines": [
+    {
+     "id": "s2-1",
+     "side": "left",
+     "outlet": "The Guardian",
+     "outletId": "guardian",
+     "caution": false,
+     "access": "free",
+     "headline": "Cop31 climate talks break down as key deal rejected",
+     "url": "https://www.theguardian.com/environment/2026/nov/22/cop31-climate-talks-set-to-end-in-deep-division-as-key-deal-rejected",
+     "published": "2026-11-22T16:14:46.000Z"
+    },
+    {
+     "id": "s2-2",
+     "side": "left",
+     "outlet": "The New York Times",
+     "outletId": "nyt",
+     "caution": false,
+     "access": "paid",
+     "headline": "COP31 Talks Collapse in Turkey in a Clash Over Fossil Fuels",
+     "url": "https://www.nytimes.com/2026/11/22/climate/cop31-climate-summit-ends-climate.html",
+     "published": "2026-11-22T18:20:38.000Z"
+    },
+    {
+     "id": "s2-3",
+     "side": "centre",
+     "outlet": "BBC News",
+     "outletId": "bbc",
+     "caution": false,
+     "access": "free",
+     "headline": "What's next after no deal at COP31 climate talks?",
+     "url": "https://www.bbc.co.uk/news/videos/cr1ewge81q4qo",
+     "published": "2026-11-23T05:34:39.000Z"
+    },
+    {
+     "id": "s2-4",
+     "side": "centre",
+     "outlet": "Euronews",
+     "outletId": "euronews",
+     "caution": false,
+     "access": "free",
+     "headline": "COP31 climate deal in doubt after European Union rejects draft",
+     "url": "https://www.euronews.com/2026/11/22/new-cop31-draft-deal-tabled-as-countries-scramble-to-salvage-climate-talks",
+     "published": "2026-11-22T07:50:54.000Z"
+    },
+    {
+     "id": "s2-5",
+     "side": "centre",
+     "outlet": "Deutsche Welle",
+     "outletId": "dw",
+     "caution": false,
+     "access": "free",
+     "headline": "COP31: Climate deal 'not adopted,' summit president says",
+     "url": "https://www.dw.com/en/cop31-climate-deal-not-adopted-summit-president-says/live-79999516?maca=en-rss-en-all-1573-rdf",
+     "published": "2026-11-22T12:39:00.000Z"
+    },
+    {
+     "id": "s2-6",
+     "side": "centre",
+     "outlet": "Euronews",
+     "outletId": "euronews",
+     "caution": false,
+     "access": "free",
+     "headline": "COP31 climate talks fail after EU and others reject final deal proposal",
+     "url": "https://www.euronews.com/2026/11/22/cop31-climate-talks-fail-after-eu-and-others-reject-final-deal-proposal",
+     "published": "2026-11-22T14:23:49.000Z"
+    },
+    {
+     "id": "s2-7",
+     "side": "centre",
+     "outlet": "France 24",
+     "outletId": "france24",
+     "caution": false,
+     "access": "free",
+     "headline": "COP31 climate talks in Turkey collapse",
+     "url": "https://www.france24.com/en/video/20261123-cop31-climate-talks-collapse",
+     "published": "2026-11-23T00:44:47.000Z"
+    },
+    {
+     "id": "s2-8",
+     "side": "centre",
+     "outlet": "The Hill",
+     "outletId": "thehill",
+     "caution": false,
+     "access": "free",
+     "headline": "Governments fail to reach agreement at COP31 over fossil fuel clash",
+     "url": "https://thehill.com/policy/international/6235913-cop31-climate-talks-fail-consensus/",
+     "published": "2026-11-22T17:13:09.000Z"
+    },
+    {
+     "id": "s2-9",
+     "side": "far_right",
+     "outlet": "Breitbart",
+     "outletId": "breitbart",
+     "caution": true,
+     "access": "free",
+     "headline": "No Deal: COP31 Climate Doomer Talks End with Binding Agreement Rejected",
+     "url": "https://www.breitbart.com/europe/2026/11/22/no-deal-cop31-climate-doomer-talks-end-with-binding-agreement-rejected/",
+     "published": "2026-11-22T13:22:02.000Z"
+    }
+   ],
+   "sentences": null,
+   "five": {
+    "sides": [
+     {
+      "key": "far_left",
+      "label": "Far left",
+      "outlets": 0,
+      "headlines": []
+     },
+     {
+      "key": "left",
+      "label": "Left",
+      "outlets": 2,
+      "headlines": [
+       "s2-1",
+       "s2-2"
+      ]
+     },
+     {
+      "key": "centre",
+      "label": "Centre",
+      "outlets": 5,
+      "headlines": [
+       "s2-3",
+       "s2-4",
+       "s2-5",
+       "s2-6",
+       "s2-7",
+       "s2-8"
+      ]
+     },
+     {
+      "key": "right",
+      "label": "Right",
+      "outlets": 0,
+      "headlines": []
+     },
+     {
+      "key": "far_right",
+      "label": "Far right",
+      "outlets": 1,
+      "headlines": [
+       "s2-9"
+      ]
+     }
+    ],
+    "eligible": true,
+    "written": null,
+    "status": "missing",
+    "note": "The written comparison is not available for this story."
+   }
+  },
+  {
+   "id": "s3",
+   "rank": 3,
+   "outlets": 7,
+   "lead": "s3-4",
+   "headlines": [
+    {
+     "id": "s3-1",
+     "side": "left",
+     "outlet": "The Guardian",
+     "outletId": "guardian",
+     "caution": false,
+     "access": "free",
+     "headline": "Jensen Huang’s reported affair was ‘most expensive sex since Helen of Troy’, US senator says",
+     "url": "https://www.theguardian.com/us-news/2026/nov/22/jensen-huang-nvidia-john-kennedy",
+     "published": "2026-11-22T20:23:36.000Z"
+    },
+    {
+     "id": "s3-2",
+     "side": "left",
+     "outlet": "The Independent",
+     "outletId": "independent",
+     "caution": true,
+     "access": "free",
+     "headline": "Alice Huang stayed in contact with Chinese spy agency during her affair with Nvidia chief – NYT",
+     "url": "https://www.independent.co.uk/news/world/americas/alice-huang-china-spy-jensen-huang-affair-nvidia-nyt-b3089572.html",
+     "published": "2026-11-23T04:09:17.000Z"
+    },
+    {
+     "id": "s3-3",
+     "side": "centre",
+     "outlet": "CNBC",
+     "outletId": "cnbc",
+     "caution": false,
+     "access": "free",
+     "headline": "U.S. probes Megaspeed, Alice Huang as new figure emerges in Nvidia chip case",
+     "url": "https://www.cnbc.com/2026/11/23/nvidia-megaspeed-chipmaker-us.html",
+     "published": "2026-11-23T05:08:03.000Z"
+    },
+    {
+     "id": "s3-4",
+     "side": "right",
+     "outlet": "New York Post",
+     "outletId": "nypost",
+     "caution": true,
+     "access": "free",
+     "headline": "Trump says he hopes Nvidia rehires Jensen Huang: ‘Best thing for the USA’",
+     "url": "https://nypost.com/2026/11/23/us-news/trump-says-he-hopes-nvidia-rehires-jensen-huang-best-thing-for-the-usa/",
+     "published": "2026-11-23T05:44:29.000Z"
+    },
+    {
+     "id": "s3-5",
+     "side": "right",
+     "outlet": "Washington Examiner",
+     "outletId": "washingtonexaminer",
+     "caution": false,
+     "access": "paid",
+     "headline": "Sen. Kennedy calls Nvidia’s Huang scandal ‘the most expensive sex since Helen of Troy’",
+     "url": "https://www.washingtonexaminer.com/policy/defense/4811699/sen-kennedy-nvidia-scandal-cabinet-china/",
+     "published": "2026-11-22T20:05:21.000Z"
+    },
+    {
+     "id": "s3-6",
+     "side": "far_right",
+     "outlet": "ZeroHedge",
+     "outletId": "zerohedge",
+     "caution": true,
+     "access": "free",
+     "headline": "Watch: Bessent's Surprising Jensen Huang About-Face",
+     "url": "https://www.zerohedge.com/ai/watch-bessents-stunning-jensen-huang-about-face",
+     "published": "2026-11-22T20:15:00.000Z"
+    },
+    {
+     "id": "s3-7",
+     "side": "far_right",
+     "outlet": "The Gateway Pundit",
+     "outletId": "gatewaypundit",
+     "caution": true,
+     "access": "free",
+     "headline": "UNHINGED: Disgraced Former MSNBC Host Joy Reid Demands Jensen Huang, Elon Musk, and Tech Titans Be “DEPORTED” and Stranded on an Island in Profanity-Laced Meltdown",
+     "url": "https://www.thegatewaypundit.com/2026/11/unhinged-disgraced-former-msnbc-host-joy-reid-demands/",
+     "published": "2026-11-23T01:40:45.000Z"
+    }
+   ],
+   "sentences": null,
+   "five": {
+    "sides": [
+     {
+      "key": "far_left",
+      "label": "Far left",
+      "outlets": 0,
+      "headlines": []
+     },
+     {
+      "key": "left",
+      "label": "Left",
+      "outlets": 2,
+      "headlines": [
+       "s3-1",
+       "s3-2"
+      ]
+     },
+     {
+      "key": "centre",
+      "label": "Centre",
+      "outlets": 1,
+      "headlines": [
+       "s3-3"
+      ]
+     },
+     {
+      "key": "right",
+      "label": "Right",
+      "outlets": 2,
+      "headlines": [
+       "s3-4",
+       "s3-5"
+      ]
+     },
+     {
+      "key": "far_right",
+      "label": "Far right",
+      "outlets": 2,
+      "headlines": [
+       "s3-6",
+       "s3-7"
+      ]
+     }
+    ],
+    "eligible": true,
+    "written": null,
+    "status": "missing",
+    "note": "The written comparison is not available for this story."
+   }
+  },
+  {
+   "id": "s4",
+   "rank": 4,
+   "outlets": 5,
+   "lead": "s4-1",
+   "headlines": [
+    {
+     "id": "s4-1",
+     "side": "centre",
+     "outlet": "The Hill",
+     "outletId": "thehill",
+     "caution": false,
+     "access": "free",
+     "headline": "Flanagan says she ‘appreciates’ Schumer, but Van Hollen leads ‘like an organizer’",
+     "url": "https://thehill.com/homenews/senate/6235792-peggy-flanagan-van-hollen/",
+     "published": "2026-11-22T18:21:02.000Z"
+    },
+    {
+     "id": "s4-2",
+     "side": "centre",
+     "outlet": "The Hill",
+     "outletId": "thehill",
+     "caution": false,
+     "access": "free",
+     "headline": "Trump says it will be ‘very hard’ to work with Schumer as Senate majority leader",
+     "url": "https://thehill.com/homenews/administration/6235788-trump-critiques-schumer-senate/",
+     "published": "2026-11-22T15:19:09.000Z"
+    },
+    {
+     "id": "s4-3",
+     "side": "right",
+     "outlet": "Washington Examiner",
+     "outletId": "washingtonexaminer",
+     "caution": false,
+     "access": "paid",
+     "headline": "Trump: Will be ‘very hard’ to work with Schumer if elected majority leader",
+     "url": "https://www.washingtonexaminer.com/news/white-house/4811713/trump-very-hard-work-with-schumer-majority-leader/",
+     "published": "2026-11-22T22:40:23.000Z"
+    },
+    {
+     "id": "s4-4",
+     "side": "right",
+     "outlet": "Fox News",
+     "outletId": "foxnews",
+     "caution": true,
+     "access": "free",
+     "headline": "Trump says it would be 'hard' to work with Chuck Schumer: 'He will fail again'",
+     "url": "https://www.foxnews.com/politics/trump-says-hard-work-chuck-schumer-fail-again",
+     "published": "2026-11-22T17:18:57.000Z"
+    },
+    {
+     "id": "s4-5",
+     "side": "far_right",
+     "outlet": "Breitbart",
+     "outletId": "breitbart",
+     "caution": true,
+     "access": "free",
+     "headline": "Trump: 'It Is Going to Be Very Hard' to Work with Chuck Schumer as Senate Majority Leader",
+     "url": "https://www.breitbart.com/politics/2026/11/22/trump-it-will-be-very-hard-to-work-with-chuck-schumer-as-senate-majority-leader/",
+     "published": "2026-11-22T20:16:14.000Z"
+    },
+    {
+     "id": "s4-6",
+     "side": "far_right",
+     "outlet": "One America News",
+     "outletId": "oann",
+     "caution": true,
+     "access": "unknown",
+     "headline": "'He failed badly' before: Trump says working with Schumer as Senate majority leader would be 'very hard'",
+     "url": "https://news.google.com/rss/articles/CBMiygFBVV95cUxOX1NnSWVtWXhieW1IMUotbVp4bWszYnBEa0NNLXg1V1dTUWd0X2hNX3ZwWkpfU0RfSEZZeEwtUnBHdTRJSUt4VnpBREpGTkFvVHFoTmVvYnl5VzAzU2pScUtVSDYycGtwRktUbUFQc2pMWS0ycU5raGFZcUFUWDFVME9vS1I1bEFBTWEtYmhXN0VDMFF5VWgyRHhWdXphNXo1a1EzNFY0WV9uU1ZMLWxleTNwVmhTSGI0T09tVGlGZ0w2UnZVbnhmSEJB?oc=5",
+     "published": "2026-11-22T16:17:15.000Z"
+    }
+   ],
+   "sentences": null,
+   "five": {
+    "sides": [
+     {
+      "key": "far_left",
+      "label": "Far left",
+      "outlets": 0,
+      "headlines": []
+     },
+     {
+      "key": "left",
+      "label": "Left",
+      "outlets": 0,
+      "headlines": []
+     },
+     {
+      "key": "centre",
+      "label": "Centre",
+      "outlets": 1,
+      "headlines": [
+       "s4-1",
+       "s4-2"
+      ]
+     },
+     {
+      "key": "right",
+      "label": "Right",
+      "outlets": 2,
+      "headlines": [
+       "s4-3",
+       "s4-4"
+      ]
+     },
+     {
+      "key": "far_right",
+      "label": "Far right",
+      "outlets": 2,
+      "headlines": [
+       "s4-5",
+       "s4-6"
+      ]
+     }
+    ],
+    "eligible": false,
+    "written": null,
+    "status": "not-eligible",
+    "note": "No written comparison for this story: one is written only when at least three of the five sides carried it, one left of centre and one right of centre."
+   }
+  },
+  {
+   "id": "s5",
+   "rank": 5,
+   "outlets": 5,
+   "lead": "s5-3",
+   "headlines": [
+    {
+     "id": "s5-1",
+     "side": "left",
+     "outlet": "The New York Times",
+     "outletId": "nyt",
+     "caution": false,
+     "access": "paid",
+     "headline": "Israeli Political Leaders Denounce ‘Jewish Terrorism’ After West Bank Attacks",
+     "url": "https://www.nytimes.com/2026/11/22/world/middleeast/israeli-political-leaders-decry-jewish-terrorism-after-west-bank-attacks.html",
+     "published": "2026-11-23T01:32:02.000Z"
+    },
+    {
+     "id": "s5-2",
+     "side": "left",
+     "outlet": "The Guardian",
+     "outletId": "guardian",
+     "caution": false,
+     "access": "free",
+     "headline": "Netanyahu rival condemns ‘Jewish terrorism’ after settler attacks on Palestinian villages",
+     "url": "https://www.theguardian.com/world/2026/nov/22/netanyahu-rival-condemns-settler-arson-attacks-palestinian-villages-west-bank",
+     "published": "2026-11-22T15:22:38.000Z"
+    },
+    {
+     "id": "s5-3",
+     "side": "centre",
+     "outlet": "France 24",
+     "outletId": "france24",
+     "caution": false,
+     "access": "free",
+     "headline": "Israel’s Eisenkot slams ‘Jewish terrorism’ after attacks by settlers in West Bank",
+     "url": "https://www.france24.com/en/middle-east/20261122-israel-s-eisenkot-slams-jewish-terrorism-after-attacks-by-settlers-in-west-bank",
+     "published": "2026-11-22T21:29:16.000Z"
+    },
+    {
+     "id": "s5-4",
+     "side": "centre",
+     "outlet": "France 24",
+     "outletId": "france24",
+     "caution": false,
+     "access": "free",
+     "headline": "West Bank attacks: Opposition leader Eisenkot decries \"Jewish terrorism\"",
+     "url": "https://www.france24.com/en/west-bank-attacks-opposition-leader-eisenkot-decries-jewish-terrorism",
+     "published": "2026-11-22T16:25:09.000Z"
+    },
+    {
+     "id": "s5-5",
+     "side": "centre",
+     "outlet": "UPI",
+     "outletId": "upi",
+     "caution": false,
+     "access": "free",
+     "headline": "Opposition leader Gadi Eisenkot calls West Bank arson attacks 'Jewish terrorism'",
+     "url": "https://www.upi.com/Top_News/World-News/2026/11/22/violence-eisenkot/9051795365398/",
+     "published": "2026-11-22T16:55:26.000Z"
+    },
+    {
+     "id": "s5-6",
+     "side": "centre",
+     "outlet": "Deutsche Welle",
+     "outletId": "dw",
+     "caution": false,
+     "access": "free",
+     "headline": "Israel's Eisenkot condemns 'Jewish terrorism' in West Bank",
+     "url": "https://www.dw.com/en/israel-s-eisenkot-condemns-jewish-terrorism-in-west-bank/a-80013861?maca=en-rss-en-all-1573-rdf",
+     "published": "2026-11-22T15:09:00.000Z"
+    }
+   ],
+   "sentences": null,
+   "five": {
+    "sides": [
+     {
+      "key": "far_left",
+      "label": "Far left",
+      "outlets": 0,
+      "headlines": []
+     },
+     {
+      "key": "left",
+      "label": "Left",
+      "outlets": 2,
+      "headlines": [
+       "s5-1",
+       "s5-2"
+      ]
+     },
+     {
+      "key": "centre",
+      "label": "Centre",
+      "outlets": 3,
+      "headlines": [
+       "s5-3",
+       "s5-4",
+       "s5-5",
+       "s5-6"
+      ]
+     },
+     {
+      "key": "right",
+      "label": "Right",
+      "outlets": 0,
+      "headlines": []
+     },
+     {
+      "key": "far_right",
+      "label": "Far right",
+      "outlets": 0,
+      "headlines": []
+     }
+    ],
+    "eligible": false,
+    "written": null,
+    "status": "not-eligible",
+    "note": "No written comparison for this story: one is written only when at least three of the five sides carried it, one left of centre and one right of centre."
+   }
+  },
+  {
+   "id": "s6",
+   "rank": 6,
+   "outlets": 5,
+   "lead": "s6-2",
+   "headlines": [
+    {
+     "id": "s6-1",
+     "side": "centre",
+     "outlet": "The Christian Science Monitor",
+     "outletId": "csmonitor",
+     "caution": false,
+     "access": "paid",
+     "headline": "With 258 seats, Democrats clinch largest House majority since 1992",
+     "url": "https://www.csmonitor.com/USA/2026/1122/With-258-seats-Democrats-clinch-largest-House-majority-since-1992?icid=rss",
+     "published": "2026-11-22T20:10:48.000Z"
+    },
+    {
+     "id": "s6-2",
+     "side": "centre",
+     "outlet": "The Hill",
+     "outletId": "thehill",
+     "caution": false,
+     "access": "free",
+     "headline": "Democrats secure largest House majority in election in three decades",
+     "url": "https://thehill.com/homenews/house/6236301-democrats-secure-house-majority/",
+     "published": "2026-11-22T21:33:52.000Z"
+    },
+    {
+     "id": "s6-3",
+     "side": "centre",
+     "outlet": "BBC News",
+     "outletId": "bbc",
+     "caution": false,
+     "access": "free",
+     "headline": "Democrats win largest House majority since 1992 after flipping North Carolina seat",
+     "url": "https://www.bbc.co.uk/news/articles/c6vg29g7dlyno",
+     "published": "2026-11-23T01:23:43.000Z"
+    },
+    {
+     "id": "s6-4",
+     "side": "centre",
+     "outlet": "Euronews",
+     "outletId": "euronews",
+     "caution": false,
+     "access": "free",
+     "headline": "Midterms: US Democrats secure biggest House majority in decades",
+     "url": "https://www.euronews.com/2026/11/22/midterms-us-democrats-secure-biggest-house-majority-in-decades",
+     "published": "2026-11-22T21:29:39.000Z"
+    },
+    {
+     "id": "s6-5",
+     "side": "right",
+     "outlet": "Washington Examiner",
+     "outletId": "washingtonexaminer",
+     "caution": false,
+     "access": "paid",
+     "headline": "Democrats clinch 258 House seats to mark largest majority in over three decades",
+     "url": "https://www.washingtonexaminer.com/news/house/4811677/democrats-258-house-seats-largest-majority-three-decades/",
+     "published": "2026-11-22T19:03:31.000Z"
+    }
+   ],
+   "sentences": null,
+   "five": {
+    "sides": [
+     {
+      "key": "far_left",
+      "label": "Far left",
+      "outlets": 0,
+      "headlines": []
+     },
+     {
+      "key": "left",
+      "label": "Left",
+      "outlets": 0,
+      "headlines": []
+     },
+     {
+      "key": "centre",
+      "label": "Centre",
+      "outlets": 4,
+      "headlines": [
+       "s6-1",
+       "s6-2",
+       "s6-3",
+       "s6-4"
+      ]
+     },
+     {
+      "key": "right",
+      "label": "Right",
+      "outlets": 1,
+      "headlines": [
+       "s6-5"
+      ]
+     },
+     {
+      "key": "far_right",
+      "label": "Far right",
+      "outlets": 0,
+      "headlines": []
+     }
+    ],
+    "eligible": false,
+    "written": null,
+    "status": "not-eligible",
+    "note": "No written comparison for this story: one is written only when at least three of the five sides carried it, one left of centre and one right of centre."
+   }
+  },
+  {
+   "id": "s7",
+   "rank": 7,
+   "outlets": 4,
+   "lead": "s7-2",
+   "headlines": [
+    {
+     "id": "s7-1",
+     "side": "far_left",
+     "outlet": "Left Voice",
+     "outletId": "leftvoice",
+     "caution": true,
+     "access": "free",
+     "headline": "Shenzhen Summit: The Stakes of the Meeting Between Xi, Putin, and Trump Amid the Return of Class Struggle",
+     "url": "https://www.leftvoice.org/shenzhen-xi-putin-and-trump/",
+     "published": "2026-11-22T15:58:33.000Z"
+    },
+    {
+     "id": "s7-2",
+     "side": "centre",
+     "outlet": "The Hill",
+     "outletId": "thehill",
+     "caution": false,
+     "access": "free",
+     "headline": "Kennedy calls Trump, Putin and Xi meeting a ‘good thing’",
+     "url": "https://thehill.com/policy/international/6236521-kennedy-calls-trump-putin-and-xi-meeting-a-good-thing/",
+     "published": "2026-11-23T02:55:10.000Z"
+    },
+    {
+     "id": "s7-3",
+     "side": "centre",
+     "outlet": "France 24",
+     "outletId": "france24",
+     "caution": false,
+     "access": "free",
+     "headline": "The week in pictures: Xi hosts Trump and Putin, COP31 and new French protests",
+     "url": "https://www.france24.com/en/asia-pacific/20261122-the-week-in-pictures-xi-hosts-trump-and-putin-cop31-and-more-french-protests",
+     "published": "2026-11-22T14:22:56.000Z"
+    },
+    {
+     "id": "s7-4",
+     "side": "far_right",
+     "outlet": "ZeroHedge",
+     "outletId": "zerohedge",
+     "caution": true,
+     "access": "free",
+     "headline": "Bessent: Trump And Xi Agreed AI 'Should Not Be Allowed To Be Autonomous For Major Military Actions'",
+     "url": "https://www.zerohedge.com/political/bessent-trump-and-xi-agreed-ai-should-not-be-allowed-be-autonomous-major-military-actions",
+     "published": "2026-11-22T12:30:00.000Z"
+    }
+   ],
+   "sentences": null,
+   "five": {
+    "sides": [
+     {
+      "key": "far_left",
+      "label": "Far left",
+      "outlets": 1,
+      "headlines": [
+       "s7-1"
+      ]
+     },
+     {
+      "key": "left",
+      "label": "Left",
+      "outlets": 0,
+      "headlines": []
+     },
+     {
+      "key": "centre",
+      "label": "Centre",
+      "outlets": 2,
+      "headlines": [
+       "s7-2",
+       "s7-3"
+      ]
+     },
+     {
+      "key": "right",
+      "label": "Right",
+      "outlets": 0,
+      "headlines": []
+     },
+     {
+      "key": "far_right",
+      "label": "Far right",
+      "outlets": 1,
+      "headlines": [
+       "s7-4"
+      ]
+     }
+    ],
+    "eligible": true,
+    "written": null,
+    "status": "missing",
+    "note": "The written comparison is not available for this story."
+   }
+  },
+  {
+   "id": "s8",
+   "rank": 8,
+   "outlets": 4,
+   "lead": "s8-1",
+   "headlines": [
+    {
+     "id": "s8-1",
+     "side": "left",
+     "outlet": "The Independent",
+     "outletId": "independent",
+     "caution": true,
+     "access": "free",
+     "headline": "Masked ICE agents detain passengers boarding flight at Seattle airport in ‘chilling’ arrests",
+     "url": "https://www.independent.co.uk/tv/news/ice-seattle-airport-arrest-video-b3089423.html",
+     "published": "2026-11-22T15:36:18.000Z"
+    },
+    {
+     "id": "s8-2",
+     "side": "left",
+     "outlet": "The Independent",
+     "outletId": "independent",
+     "caution": true,
+     "access": "free",
+     "headline": "Washington governor slams ‘out of control’ ICE arrests on Seattle airport jetway",
+     "url": "https://www.independent.co.uk/news/world/americas/ice-arrest-seattle-flight-alaska-airlines-b3089427.html",
+     "published": "2026-11-22T16:50:18.000Z"
+    },
+    {
+     "id": "s8-3",
+     "side": "left",
+     "outlet": "The Independent",
+     "outletId": "independent",
+     "caution": true,
+     "access": "free",
+     "headline": "Father and daughter travelling to family baptism detained by ICE at Seattle airport",
+     "url": "https://www.independent.co.uk/news/world/americas/ice-seattle-airport-detained-arrest-b3089612.html",
+     "published": "2026-11-23T06:45:02.000Z"
+    },
+    {
+     "id": "s8-4",
+     "side": "left",
+     "outlet": "The Guardian",
+     "outletId": "guardian",
+     "caution": false,
+     "access": "free",
+     "headline": "Video of ICE detaining father and daughter while boarding flight sparks protests in Seattle",
+     "url": "https://www.theguardian.com/us-news/2026/nov/23/father-daughter-ice-arrests-video-sparks-protests-seattle-airport",
+     "published": "2026-11-23T02:38:16.000Z"
+    },
+    {
+     "id": "s8-5",
+     "side": "right",
+     "outlet": "Fox News",
+     "outletId": "foxnews",
+     "caution": true,
+     "access": "free",
+     "headline": "DHS, Dem officials clash after ICE arrest at Seattle airport",
+     "url": "https://www.foxnews.com/politics/dhs-dem-officials-clash-ice-arrest-seattle-airport",
+     "published": "2026-11-22T15:48:15.000Z"
+    },
+    {
+     "id": "s8-6",
+     "side": "right",
+     "outlet": "Washington Examiner",
+     "outletId": "washingtonexaminer",
+     "caution": false,
+     "access": "paid",
+     "headline": "Masked immigration officers cause ‘distressing’ scene after detaining two people at Seattle airport",
+     "url": "https://www.washingtonexaminer.com/policy/immigration/4811477/masked-immigration-officers-distressing-scene-seattle-airport/",
+     "published": "2026-11-22T14:39:46.000Z"
+    }
+   ],
+   "sentences": null,
+   "five": {
+    "sides": [
+     {
+      "key": "far_left",
+      "label": "Far left",
+      "outlets": 0,
+      "headlines": []
+     },
+     {
+      "key": "left",
+      "label": "Left",
+      "outlets": 2,
+      "headlines": [
+       "s8-1",
+       "s8-2",
+       "s8-3",
+       "s8-4"
+      ]
+     },
+     {
+      "key": "centre",
+      "label": "Centre",
+      "outlets": 0,
+      "headlines": []
+     },
+     {
+      "key": "right",
+      "label": "Right",
+      "outlets": 2,
+      "headlines": [
+       "s8-5",
+       "s8-6"
+      ]
+     },
+     {
+      "key": "far_right",
+      "label": "Far right",
+      "outlets": 0,
+      "headlines": []
+     }
+    ],
+    "eligible": false,
+    "written": null,
+    "status": "not-eligible",
+    "note": "No written comparison for this story: one is written only when at least three of the five sides carried it, one left of centre and one right of centre."
+   }
+  },
+  {
+   "id": "s9",
+   "rank": 9,
+   "outlets": 3,
+   "lead": "s9-1",
+   "headlines": [
+    {
+     "id": "s9-1",
+     "side": "left",
+     "outlet": "The Independent",
+     "outletId": "independent",
+     "caution": true,
+     "access": "free",
+     "headline": "Miley Cyrus marries rock drummer Maxx Morando in an intimate Palm Springs wedding",
+     "url": "https://www.independent.co.uk/news/world/americas/cyrus-miley-cyrus-palm-springs-california-saint-laurent-b3089561.html",
+     "published": "2026-11-23T01:53:55.000Z"
+    },
+    {
+     "id": "s9-2",
+     "side": "left",
+     "outlet": "The Guardian",
+     "outletId": "guardian",
+     "caution": false,
+     "access": "free",
+     "headline": "Miley Cyrus weds drummer Maxx Morando in California – reports",
+     "url": "https://www.theguardian.com/music/2026/nov/22/miley-cyrus-maxx-morando-wedding",
+     "published": "2026-11-22T13:49:58.000Z"
+    },
+    {
+     "id": "s9-3",
+     "side": "centre",
+     "outlet": "BBC News",
+     "outletId": "bbc",
+     "caution": false,
+     "access": "free",
+     "headline": "Miley Cyrus marries Maxx Morando in California ceremony",
+     "url": "https://www.bbc.co.uk/news/articles/cq8e0p87l89lo",
+     "published": "2026-11-22T21:22:40.000Z"
+    }
+   ],
+   "sentences": null,
+   "five": {
+    "sides": [
+     {
+      "key": "far_left",
+      "label": "Far left",
+      "outlets": 0,
+      "headlines": []
+     },
+     {
+      "key": "left",
+      "label": "Left",
+      "outlets": 2,
+      "headlines": [
+       "s9-1",
+       "s9-2"
+      ]
+     },
+     {
+      "key": "centre",
+      "label": "Centre",
+      "outlets": 1,
+      "headlines": [
+       "s9-3"
+      ]
+     },
+     {
+      "key": "right",
+      "label": "Right",
+      "outlets": 0,
+      "headlines": []
+     },
+     {
+      "key": "far_right",
+      "label": "Far right",
+      "outlets": 0,
+      "headlines": []
+     }
+    ],
+    "eligible": false,
+    "written": null,
+    "status": "not-eligible",
+    "note": "No written comparison for this story: one is written only when at least three of the five sides carried it, one left of centre and one right of centre."
+   }
+  },
+  {
+   "id": "s10",
+   "rank": 10,
+   "outlets": 3,
+   "lead": "s10-3",
+   "headlines": [
+    {
+     "id": "s10-1",
+     "side": "centre",
+     "outlet": "The Hill",
+     "outletId": "thehill",
+     "caution": false,
+     "access": "free",
+     "headline": "Clayton: Americans should prepare for system upgrades, warns of ‘bumps in the road’",
+     "url": "https://thehill.com/homenews/administration/6235770-clayton-warns-infrastructure-upgrades/",
+     "published": "2026-11-22T17:00:07.000Z"
+    },
+    {
+     "id": "s10-2",
+     "side": "centre",
+     "outlet": "CNBC",
+     "outletId": "cnbc",
+     "caution": false,
+     "access": "free",
+     "headline": "Director of National Intelligence Jay Clayton warns Americans of 'bumps in the road' after tech outages",
+     "url": "https://www.cnbc.com/2026/11/22/jay-clayton-tech-outages-faa-microsoft-thanksgiving.html",
+     "published": "2026-11-22T17:14:03.000Z"
+    },
+    {
+     "id": "s10-3",
+     "side": "far_right",
+     "outlet": "The Gateway Pundit",
+     "outletId": "gatewaypundit",
+     "caution": true,
+     "access": "free",
+     "headline": "DNI Jay Clayton Warns Americans to Prepare for More Technology Outages — Says There Will Be “Bumps in the Road” as Government and Corporations “Upgrade Their Systems”",
+     "url": "https://www.thegatewaypundit.com/2026/11/dni-jay-clayton-warns-americans-prepare-more-technology/",
+     "published": "2026-11-23T00:20:26.000Z"
+    }
+   ],
+   "sentences": null,
+   "five": {
+    "sides": [
+     {
+      "key": "far_left",
+      "label": "Far left",
+      "outlets": 0,
+      "headlines": []
+     },
+     {
+      "key": "left",
+      "label": "Left",
+      "outlets": 0,
+      "headlines": []
+     },
+     {
+      "key": "centre",
+      "label": "Centre",
+      "outlets": 2,
+      "headlines": [
+       "s10-1",
+       "s10-2"
+      ]
+     },
+     {
+      "key": "right",
+      "label": "Right",
+      "outlets": 0,
+      "headlines": []
+     },
+     {
+      "key": "far_right",
+      "label": "Far right",
+      "outlets": 1,
+      "headlines": [
+       "s10-3"
+      ]
+     }
+    ],
+    "eligible": false,
+    "written": null,
+    "status": "not-eligible",
+    "note": "No written comparison for this story: one is written only when at least three of the five sides carried it, one left of centre and one right of centre."
+   }
+  }
+ ]
+}

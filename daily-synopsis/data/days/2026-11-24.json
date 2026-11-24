@@ -1,0 +1,1492 @@
+{
+ "format": "vm-daily-synopsis-day/1",
+ "day": "2026-11-24",
+ "input": "2026-11-24-7c5286a79bd2",
+ "generated": "2026-11-24T19:34:09.107Z",
+ "updated": "2026-11-24T19:34:09.107Z",
+ "window": {
+  "from": "2026-11-23T17:30:17.256Z",
+  "to": "2026-11-24T17:30:17.256Z"
+ },
+ "storeGenerated": "2026-11-24T17:30:17.256Z",
+ "authorship": "rules",
+ "model": null,
+ "label": {
+  "text": "This digest was assembled by rules, with no AI model: Vitruvian Manager’s code picked the stories and grouped the outlets’ own headlines beneath them, and no person checked it. The linked reports are the sources.",
+  "five": "The 5 Sided Analysis under each story lays out the outlets’ own headlines by side, far left to far right, by rules alone.",
+  "notProof": "A side with no headline here was not found among Vitruvian Manager’s outlets, which is not proof that the side did not report it.",
+  "meta": "Assembled by rules, with no AI model; no person checked it"
+ },
+ "rule": {
+  "minOutlets": 3,
+  "minSides": 2,
+  "cap": 10,
+  "fiveMinSides": 3,
+  "fiveNeedsLeftAndRight": true
+ },
+ "sides": [
+  {
+   "key": "far_left",
+   "label": "Far left"
+  },
+  {
+   "key": "left",
+   "label": "Left"
+  },
+  {
+   "key": "centre",
+   "label": "Centre"
+  },
+  {
+   "key": "right",
+   "label": "Right"
+  },
+  {
+   "key": "far_right",
+   "label": "Far right"
+  }
+ ],
+ "written": {
+  "status": "missing",
+  "note": "The written digest is not available for this day.",
+  "attempts": []
+ },
+ "lead": null,
+ "stories": [
+  {
+   "id": "s1",
+   "rank": 1,
+   "outlets": 17,
+   "lead": "s1-7",
+   "headlines": [
+    {
+     "id": "s1-1",
+     "side": "left",
+     "outlet": "The Independent",
+     "outletId": "independent",
+     "caution": true,
+     "access": "free",
+     "headline": "Nvidia re-appoints Jensen Huang as CEO after affair scandal",
+     "url": "https://www.independent.co.uk/tech/nvidia-jensen-huang-ceo-b3089946.html",
+     "published": "2026-11-23T19:04:54.000Z"
+    },
+    {
+     "id": "s1-2",
+     "side": "left",
+     "outlet": "The Independent",
+     "outletId": "independent",
+     "caution": true,
+     "access": "free",
+     "headline": "Jensen Huang revealed even more affairs to Nvidia before Trump got him reinstated: report",
+     "url": "https://www.independent.co.uk/news/world/americas/us-politics/jensen-huang-additional-affairs-nvidia-b3090693.html",
+     "published": "2026-11-24T15:03:21.000Z"
+    },
+    {
+     "id": "s1-3",
+     "side": "left",
+     "outlet": "The New York Times",
+     "outletId": "nyt",
+     "caution": false,
+     "access": "paid",
+     "headline": "The Return of Jensen Huang",
+     "url": "https://www.nytimes.com/2026/11/23/world/jensen-huang-return-nvidia-ukraine.html",
+     "published": "2026-11-23T20:39:04.000Z"
+    },
+    {
+     "id": "s1-4",
+     "side": "left",
+     "outlet": "The Independent",
+     "outletId": "independent",
+     "caution": true,
+     "access": "free",
+     "headline": "Trump made up to $15m after ousted Nvidia boss Jensen Huang reinstated: report",
+     "url": "https://www.independent.co.uk/news/world/americas/us-politics/trump-jensen-huang-nvidia-shares-b3090466.html",
+     "published": "2026-11-24T14:40:02.000Z"
+    },
+    {
+     "id": "s1-5",
+     "side": "left",
+     "outlet": "The Independent",
+     "outletId": "independent",
+     "caution": true,
+     "access": "free",
+     "headline": "Trump says Nvidia CEO has ‘worked it out’ with his wife after affair scandal: ‘She’s a fantastic woman’",
+     "url": "https://www.independent.co.uk/news/world/americas/us-politics/trump-jensen-huang-wife-lori-nvidia-b3090617.html",
+     "published": "2026-11-24T15:22:23.000Z"
+    },
+    {
+     "id": "s1-6",
+     "side": "left",
+     "outlet": "The Independent",
+     "outletId": "independent",
+     "caution": true,
+     "access": "free",
+     "headline": "Inside the extraordinary push to get Nvidia CEO back in power with Trump’s support",
+     "url": "https://www.independent.co.uk/news/world/americas/us-politics/jensen-huang-nvidia-trump-scandal-b3090450.html",
+     "published": "2026-11-24T12:50:09.000Z"
+    },
+    {
+     "id": "s1-7",
+     "side": "centre",
+     "outlet": "France 24",
+     "outletId": "france24",
+     "caution": false,
+     "access": "free",
+     "headline": "Jensen Huang reinstated as Nvidia CEO",
+     "url": "https://www.france24.com/en/tv-shows/business/20261123-jensen-huang-reinstated-as-nvidia-ceo",
+     "published": "2026-11-23T22:10:10.000Z"
+    },
+    {
+     "id": "s1-8",
+     "side": "centre",
+     "outlet": "BBC News",
+     "outletId": "bbc",
+     "caution": false,
+     "access": "free",
+     "headline": "How Nvidia is reacting to Jensen Huang's return as CEO",
+     "url": "https://www.bbc.co.uk/news/videos/ckedq2edqegzo",
+     "published": "2026-11-24T01:21:41.000Z"
+    },
+    {
+     "id": "s1-9",
+     "side": "centre",
+     "outlet": "UPI",
+     "outletId": "upi",
+     "caution": false,
+     "access": "free",
+     "headline": "Nvidia reinstates Jensen Huang as CEO, president, board director",
+     "url": "https://www.upi.com/Top_News/US/2026/11/23/nvidia-reinstates-jensen-huang/4571795444724/",
+     "published": "2026-11-24T03:04:04.000Z"
+    },
+    {
+     "id": "s1-10",
+     "side": "centre",
+     "outlet": "CNBC",
+     "outletId": "cnbc",
+     "caution": false,
+     "access": "free",
+     "headline": "Tech stocks see monster rally after Jensen Huang returns as Nvidia CEO",
+     "url": "https://www.cnbc.com/2026/11/23/anthropic-nvidia-shares.html",
+     "published": "2026-11-23T21:22:13.000Z"
+    },
+    {
+     "id": "s1-11",
+     "side": "centre",
+     "outlet": "BBC News",
+     "outletId": "bbc",
+     "caution": false,
+     "access": "free",
+     "headline": "Nvidia reinstates CEO Jensen Huang after affair with alleged spy as Trump says 'I made the deal'",
+     "url": "https://www.bbc.co.uk/news/articles/cq5y1k8ez407o",
+     "published": "2026-11-24T01:11:54.000Z"
+    },
+    {
+     "id": "s1-12",
+     "side": "centre",
+     "outlet": "France 24",
+     "outletId": "france24",
+     "caution": false,
+     "access": "free",
+     "headline": "Nvidia reinstates Huang as CEO after Trump intervention",
+     "url": "https://www.france24.com/en/nvidia-reinstates-huang-as-ceo-after-trump-intervention",
+     "published": "2026-11-23T19:34:49.000Z"
+    },
+    {
+     "id": "s1-13",
+     "side": "centre",
+     "outlet": "The Hill",
+     "outletId": "thehill",
+     "caution": false,
+     "access": "free",
+     "headline": "Jensen Huang’s dramatic return to Nvidia: 5 takeaways",
+     "url": "https://thehill.com/homenews/analysis/6238763-trump-drives-nvidia-ceo-return/",
+     "published": "2026-11-23T23:16:19.000Z"
+    },
+    {
+     "id": "s1-14",
+     "side": "centre",
+     "outlet": "Euronews",
+     "outletId": "euronews",
+     "caution": false,
+     "access": "free",
+     "headline": "How Jensen Huang's return to Nvidia made the world trillions richer",
+     "url": "https://www.euronews.com/2026/11/24/how-jensen-huangs-return-to-nvidia-made-the-world-trillions-richer",
+     "published": "2026-11-24T11:37:15.000Z"
+    },
+    {
+     "id": "s1-15",
+     "side": "centre",
+     "outlet": "RealClearPolitics",
+     "outletId": "realclear",
+     "caution": false,
+     "access": "free",
+     "headline": "Are Investors Right To Celebrate Nvidia CEO's Return?",
+     "url": "https://www.realclearpolitics.com/markets/links/are-investors-right-to-celebrate-nvidia-ceos-return-2026-11-23",
+     "published": "2026-11-24T03:43:08.000Z"
+    },
+    {
+     "id": "s1-16",
+     "side": "centre",
+     "outlet": "Deutsche Welle",
+     "outletId": "dw",
+     "caution": false,
+     "access": "free",
+     "headline": "US adds Megaspeed, at center of Nvidia scandal, to a trade blacklist",
+     "url": "https://www.dw.com/en/us-adds-megaspeed-at-center-of-nvidia-scandal-to-a-trade-blacklist/a-80026849?maca=en-rss-en-all-1573-rdf",
+     "published": "2026-11-23T22:35:00.000Z"
+    },
+    {
+     "id": "s1-17",
+     "side": "right",
+     "outlet": "The Daily Caller",
+     "outletId": "dailycaller",
+     "caution": true,
+     "access": "free",
+     "headline": "Both Sides Of Congress Upset Trump Put Thumb On Scale To Reinstate Jensen Huang As Nvidia CEO",
+     "url": "https://dailycaller.com/2026/11/23/jensen-huang-congress-reinstated-nvidia",
+     "published": "2026-11-23T19:06:12.000Z"
+    },
+    {
+     "id": "s1-18",
+     "side": "right",
+     "outlet": "The Telegraph",
+     "outletId": "telegraph",
+     "caution": true,
+     "access": "paid",
+     "headline": "Wall Street stocks soar as Jensen Huang returns to Nvidia",
+     "url": "https://www.telegraph.co.uk/business/2026/11/23/us-stocks-poised-to-rebound-after-global-tech-sell-off/",
+     "published": "2026-11-23T21:18:07.000Z"
+    },
+    {
+     "id": "s1-19",
+     "side": "right",
+     "outlet": "Daily Mail",
+     "outletId": "dailymail",
+     "caution": false,
+     "access": "free",
+     "headline": "Jensen Huang reinstated as Nvidia CEO just days after he was ousted over affairs with at least three women including suspected Chinese spy",
+     "url": "https://www.dailymail.com/news/article-16315341/Jensen-Huang-reinstated-Nvidia-CEO.html?ns_mchannel=rss&ns_campaign=1490",
+     "published": "2026-11-23T22:38:55.000Z"
+    },
+    {
+     "id": "s1-20",
+     "side": "right",
+     "outlet": "The Daily Caller",
+     "outletId": "dailycaller",
+     "caution": true,
+     "access": "free",
+     "headline": "Investment Firm Controlled By Trump Commerce Sec’s Sons Celebrates Jensen Huang’s Reinstatement As Nvidia CEO",
+     "url": "https://dailycaller.com/2026/11/23/howard-lutnick-cantor-fitzgerald-jensen-huang-nvidia",
+     "published": "2026-11-23T20:01:46.000Z"
+    },
+    {
+     "id": "s1-21",
+     "side": "right",
+     "outlet": "Daily Mail",
+     "outletId": "dailymail",
+     "caution": false,
+     "access": "free",
+     "headline": "MAGA senator calls Nvidia scandal 'tip of the iceberg' and says Congress has much to investigate after Huang returns as CEO with boost from Trump",
+     "url": "https://www.dailymail.com/news/article-16316817/MAGA-Senator-Tom-Cotton-Congress-investigate-Nvidia-Huang-return.html?ns_mchannel=rss&ns_campaign=1490",
+     "published": "2026-11-24T03:03:59.000Z"
+    },
+    {
+     "id": "s1-22",
+     "side": "right",
+     "outlet": "Daily Mail",
+     "outletId": "dailymail",
+     "caution": false,
+     "access": "free",
+     "headline": "Trump's secret phone call to Nvidia boss and the promise he demanded before extraordinary intervention to reinstate him as CEO after Chinese 'spy' sex scandal",
+     "url": "https://www.dailymail.com/news/article-16315397/Trump-hails-Nvidias-U-turn-Jensen-Huang-declares-no-risk-national-security-China-spy-affair.html?ns_mchannel=rss&ns_campaign=1490",
+     "published": "2026-11-24T13:24:52.000Z"
+    },
+    {
+     "id": "s1-23",
+     "side": "right",
+     "outlet": "Fox News",
+     "outletId": "foxnews",
+     "caution": true,
+     "access": "free",
+     "headline": "Trump accused of 'socialism, communism' after helping scandal-plagued Nvidia CEO reclaim top job",
+     "url": "https://www.foxnews.com/politics/trump-accused-socialism-communism-after-helping-scandal-plagued-nvidia-ceo-reclaim-top-job",
+     "published": "2026-11-23T19:11:29.000Z"
+    },
+    {
+     "id": "s1-24",
+     "side": "far_right",
+     "outlet": "Breitbart",
+     "outletId": "breitbart",
+     "caution": true,
+     "access": "free",
+     "headline": "VIDEO: Jensen Huang Tells Nvidia Staff He Will Be a 'Better CEO' This Time",
+     "url": "https://www.breitbart.com/tech/2026/11/23/video-jensen-huang-tells-nvidia-staff-he-will-be-a-better-ceo-this-time/",
+     "published": "2026-11-23T22:19:23.000Z"
+    },
+    {
+     "id": "s1-25",
+     "side": "far_right",
+     "outlet": "American Greatness",
+     "outletId": "amgreatness",
+     "caution": true,
+     "access": "free",
+     "headline": "Trump Says He Convinced Nvidia’s Board to Reinstate Jensen Huang",
+     "url": "https://amgreatness.com/2026/11/23/trump-says-he-convinced-nvidias-board-to-reinstate-jensen-huang/",
+     "published": "2026-11-23T17:46:37.000Z"
+    },
+    {
+     "id": "s1-26",
+     "side": "far_right",
+     "outlet": "Breitbart",
+     "outletId": "breitbart",
+     "caution": true,
+     "access": "free",
+     "headline": "Trump: 'I Convinced' Nvidia Board to Reinstate Jensen Huang",
+     "url": "https://www.breitbart.com/clips/2026/11/23/trump-i-convinced-nvidia-board-to-reinstate-jensen-huang/",
+     "published": "2026-11-23T18:35:27.000Z"
+    },
+    {
+     "id": "s1-27",
+     "side": "far_right",
+     "outlet": "One America News",
+     "outletId": "oann",
+     "caution": true,
+     "access": "unknown",
+     "headline": "Nvidia shares surge more than 30% following Jensen Huang’s reinstatement as CEO",
+     "url": "https://news.google.com/rss/articles/CBMirAFBVV95cUxNVzJWNFByVnZaWGhzYl83OUFkSmtOMk5abm5HZDRzT0lEWWxNMHUyaUlkZ29TeDVLbGNlSzQyd09BU013eERwMUNTNXJoMHo2aDlZdHA1SU5UT3hJS21JNXF5a05TeUxURFhaRm04dHZlbG00X2FRZDAxUmM4QW9ITmViWUJnNGRfY0RsQWNPVUlibjRjMTZyb2xmZEphTlQwQkJkVDlndDE0WnhW?oc=5",
+     "published": "2026-11-23T17:43:33.000Z"
+    },
+    {
+     "id": "s1-28",
+     "side": "far_right",
+     "outlet": "One America News",
+     "outletId": "oann",
+     "caution": true,
+     "access": "unknown",
+     "headline": "Nvidia board reinstates Jensen Huang as CEO, 'confident' that 'no national security risk' is posed",
+     "url": "https://news.google.com/rss/articles/CBMiwgFBVV95cUxNcmtOelVRTldHRkhQQUNyVC14Ylg2T0I0YUljQWlXUVN3ZTlndi1IX053emdheE1lRmdneEhvRjVlRkNxZFBzVHhnY0RteEVTemwtUFF0VDk3X1diQTBvc0NUUmEzUS1OcE50SzVIVU5ZdW9wMWVWTnlrUFdMNXM5Y2pBZGlJaWZIQXM3MkQzMjJ4eGN1VGQ1Z3g3T3ZnTjJYU1BqVk1QYzBfbUllR2lpSW0xcG1DdDBvNHJlUlVJV2NuUQ?oc=5",
+     "published": "2026-11-23T19:38:34.000Z"
+    },
+    {
+     "id": "s1-29",
+     "side": "far_right",
+     "outlet": "Breitbart",
+     "outletId": "breitbart",
+     "caution": true,
+     "access": "free",
+     "headline": "Trump Lauds Nvidia for Bringing Jensen Huang Back as CEO: 'Sex Sells, Fellas'",
+     "url": "https://www.breitbart.com/politics/2026/11/23/trump-lauds-nvidia-for-bringing-jensen-huang-back-as-ceo-sex-sells-fellas/",
+     "published": "2026-11-23T19:33:33.000Z"
+    },
+    {
+     "id": "s1-30",
+     "side": "far_right",
+     "outlet": "One America News",
+     "outletId": "oann",
+     "caution": true,
+     "access": "unknown",
+     "headline": "Dems criticize Jensen Huang's return as Nvidia CEO, accuse Trump admin. of acting for 'personal financial gain'",
+     "url": "https://news.google.com/rss/articles/CBMi0wFBVV95cUxQN0phejNuY09TVEViN2dsR3NaQ01Pd2l4b3JtYzRRNi1YakRIM01taFhHTEtxZS1MRXJkV0NJME1KU3ZZWUJvYzYxQ0lrdE5tdFpNeU1kOXptZDZNcTNULTZDY19QTHlQUmd1VlQwN3RmaklBUjZVYnBBNHRQbEdBOWVxOXBPSEVwUzZCbEZWQUJlU185djdHSHZScDM0dWt6VjBkV29teHJrY3l0ZHR0MnFNN3NQdENuTmxtOGZqM3JRWkd0aWRUNVJ3d3FNcWdtYkVV?oc=5",
+     "published": "2026-11-23T22:49:48.000Z"
+    }
+   ],
+   "sentences": null,
+   "five": {
+    "sides": [
+     {
+      "key": "far_left",
+      "label": "Far left",
+      "outlets": 0,
+      "headlines": []
+     },
+     {
+      "key": "left",
+      "label": "Left",
+      "outlets": 2,
+      "headlines": [
+       "s1-1",
+       "s1-2",
+       "s1-3",
+       "s1-4",
+       "s1-5",
+       "s1-6"
+      ]
+     },
+     {
+      "key": "centre",
+      "label": "Centre",
+      "outlets": 8,
+      "headlines": [
+       "s1-7",
+       "s1-8",
+       "s1-9",
+       "s1-10",
+       "s1-11",
+       "s1-12",
+       "s1-13",
+       "s1-14",
+       "s1-15",
+       "s1-16"
+      ]
+     },
+     {
+      "key": "right",
+      "label": "Right",
+      "outlets": 4,
+      "headlines": [
+       "s1-17",
+       "s1-18",
+       "s1-19",
+       "s1-20",
+       "s1-21",
+       "s1-22",
+       "s1-23"
+      ]
+     },
+     {
+      "key": "far_right",
+      "label": "Far right",
+      "outlets": 3,
+      "headlines": [
+       "s1-24",
+       "s1-25",
+       "s1-26",
+       "s1-27",
+       "s1-28",
+       "s1-29",
+       "s1-30"
+      ]
+     }
+    ],
+    "eligible": true,
+    "written": null,
+    "status": "missing",
+    "note": "The written comparison is not available for this story."
+   }
+  },
+  {
+   "id": "s2",
+   "rank": 2,
+   "outlets": 8,
+   "lead": "s2-5",
+   "headlines": [
+    {
+     "id": "s2-1",
+     "side": "centre",
+     "outlet": "UPI",
+     "outletId": "upi",
+     "caution": false,
+     "access": "free",
+     "headline": "Judge who issued search warrant against Ilhan Omar demanded safeguards",
+     "url": "https://www.upi.com/Top_News/US/2026/11/24/judge-demanded-safeguards-ilhan-Omar/7651795529303/",
+     "published": "2026-11-24T14:26:27.000Z"
+    },
+    {
+     "id": "s2-2",
+     "side": "right",
+     "outlet": "Daily Mail",
+     "outletId": "dailymail",
+     "caution": false,
+     "access": "free",
+     "headline": "Ilhan Omar search warrant unsealed as documents reveal decades-long 'target offenses' by Somali-born politician sparked raid on DC home",
+     "url": "https://www.dailymail.com/news/us-politics/article-16316985/Ilhan-Omar-search-warrant-unsealed.html?ns_mchannel=rss&ns_campaign=1490",
+     "published": "2026-11-24T03:30:57.000Z"
+    },
+    {
+     "id": "s2-3",
+     "side": "right",
+     "outlet": "Fox News",
+     "outletId": "foxnews",
+     "caution": true,
+     "access": "free",
+     "headline": "Unsealed warrant documents for Ilhan Omar's DC home raid reveal decades-long scope of investigation",
+     "url": "https://www.foxnews.com/politics/unsealed-warrant-documents-for-ilhan-omars-dc-home-raid-reveal-decades-long-scope-of-investigation",
+     "published": "2026-11-24T00:56:59.000Z"
+    },
+    {
+     "id": "s2-4",
+     "side": "right",
+     "outlet": "Washington Examiner",
+     "outletId": "washingtonexaminer",
+     "caution": false,
+     "access": "paid",
+     "headline": "Ilhan Omar investigation examining crimes dating back decades: Search warrant records",
+     "url": "https://www.washingtonexaminer.com/news/investigations/4813260/ilhan-omar-investigation-crimes-dating-back-decades-search-warrant/",
+     "published": "2026-11-24T02:16:53.000Z"
+    },
+    {
+     "id": "s2-5",
+     "side": "far_right",
+     "outlet": "The Gateway Pundit",
+     "outletId": "gatewaypundit",
+     "caution": true,
+     "access": "free",
+     "headline": "“Crimes Over Decades” – BREAKING: Ilhan Omar Search Warrant Unsealed…. With Redactions",
+     "url": "https://www.thegatewaypundit.com/2026/11/crimes-decades-ilhan-omar-search-warrant-unsealed-redactions/",
+     "published": "2026-11-24T02:00:08.000Z"
+    },
+    {
+     "id": "s2-6",
+     "side": "far_right",
+     "outlet": "American Greatness",
+     "outletId": "amgreatness",
+     "caution": true,
+     "access": "free",
+     "headline": "Unsealed Warrant Papers in Ilhan Omar Raid Point to Probe Spanning Decades",
+     "url": "https://amgreatness.com/2026/11/24/unsealed-warrant-papers-in-ilhan-omar-raid-point-to-probe-spanning-decades/",
+     "published": "2026-11-24T09:32:52.000Z"
+    },
+    {
+     "id": "s2-7",
+     "side": "far_right",
+     "outlet": "ZeroHedge",
+     "outletId": "zerohedge",
+     "caution": true,
+     "access": "free",
+     "headline": "\"Crimes Over Decades\": Unsealed Ilhan Omar Warrant Reaches Back To Before She Was Born",
+     "url": "https://www.zerohedge.com/political/crimes-over-decades-unsealed-ilhan-omar-warrant-reaches-back-she-was-born",
+     "published": "2026-11-24T03:35:00.000Z"
+    },
+    {
+     "id": "s2-8",
+     "side": "far_right",
+     "outlet": "One America News",
+     "outletId": "oann",
+     "caution": true,
+     "access": "unknown",
+     "headline": "Unsealed redacted search warrant reveals details in ongoing Ilhan Omar alleged immigration probe, purported offenses spanning 'decades'",
+     "url": "https://news.google.com/rss/articles/CBMi9gFBVV95cUxON1J5TXpaQ2ZRSTVGZnJaaEptUHdqTVhXa0pCa2R5SEZleFVzeHFTYkRrei1qVzdfNjVmYW81bUpZbUhPa3dTd210QlY5bFdXSnBwbEpBd01yQ2ZBbVA1QjNSaS0wbjlocGVjMVgwM2dHQTVSb2NFVHJORDkwWGc1d2g2N2JnMkhsMU45RkVYUS1NdG9iVm1vV01xV24wYmZ5c09CbTJOSnhGa2xaR3o0NFczSk9kZWtnNndVa2FFOFFJOW44VE1GT2VxWkY4c094eUp4WWRodHR4MHlqVVR3SndrMEFSNzI0X1UyUzRSZmwyQWFmTEE?oc=5",
+     "published": "2026-11-24T17:05:14.000Z"
+    }
+   ],
+   "sentences": null,
+   "five": {
+    "sides": [
+     {
+      "key": "far_left",
+      "label": "Far left",
+      "outlets": 0,
+      "headlines": []
+     },
+     {
+      "key": "left",
+      "label": "Left",
+      "outlets": 0,
+      "headlines": []
+     },
+     {
+      "key": "centre",
+      "label": "Centre",
+      "outlets": 1,
+      "headlines": [
+       "s2-1"
+      ]
+     },
+     {
+      "key": "right",
+      "label": "Right",
+      "outlets": 3,
+      "headlines": [
+       "s2-2",
+       "s2-3",
+       "s2-4"
+      ]
+     },
+     {
+      "key": "far_right",
+      "label": "Far right",
+      "outlets": 4,
+      "headlines": [
+       "s2-5",
+       "s2-6",
+       "s2-7",
+       "s2-8"
+      ]
+     }
+    ],
+    "eligible": false,
+    "written": null,
+    "status": "not-eligible",
+    "note": "No written comparison for this story: one is written only when at least three of the five sides carried it, one left of centre and one right of centre."
+   }
+  },
+  {
+   "id": "s3",
+   "rank": 3,
+   "outlets": 7,
+   "lead": "s3-2",
+   "headlines": [
+    {
+     "id": "s3-1",
+     "side": "left",
+     "outlet": "The New York Times",
+     "outletId": "nyt",
+     "caution": false,
+     "access": "paid",
+     "headline": "Over 700,000 Russian Soldiers Have Died in Ukraine, Analysis Indicates",
+     "url": "https://www.nytimes.com/2026/11/23/world/europe/russia-ukraine-war-deaths.html",
+     "published": "2026-11-23T19:19:23.000Z"
+    },
+    {
+     "id": "s3-2",
+     "side": "centre",
+     "outlet": "The Hill",
+     "outletId": "thehill",
+     "caution": false,
+     "access": "free",
+     "headline": "More than 700,000 Russian soldiers have been killed in Ukraine: Analysis",
+     "url": "https://thehill.com/policy/defense/6238400-russian-casualties-ukraine-war-putin-zelensky/",
+     "published": "2026-11-23T21:16:55.000Z"
+    },
+    {
+     "id": "s3-3",
+     "side": "centre",
+     "outlet": "UPI",
+     "outletId": "upi",
+     "caution": false,
+     "access": "free",
+     "headline": "More than 700,000 Russian soldiers estimated killed in war on Ukraine",
+     "url": "https://www.upi.com/Top_News/World-News/2026/11/23/more-than-700000-soldiers-estimated-killed-in-ukraine-war/5711795475749/",
+     "published": "2026-11-23T23:22:38.000Z"
+    },
+    {
+     "id": "s3-4",
+     "side": "centre",
+     "outlet": "Euronews",
+     "outletId": "euronews",
+     "caution": false,
+     "access": "free",
+     "headline": "At least 490,000 Russian soldiers killed in Ukraine, Rosstat data leak reveals",
+     "url": "https://www.euronews.com/2026/11/24/at-least-490000-russian-soldiers-killed-in-ukraine-rosstat-data-leak-reveals",
+     "published": "2026-11-24T14:25:03.000Z"
+    },
+    {
+     "id": "s3-5",
+     "side": "centre",
+     "outlet": "France 24",
+     "outletId": "france24",
+     "caution": false,
+     "access": "free",
+     "headline": "Leaked data suggests 500,000 Russian soldiers killed since start of Ukraine invasion",
+     "url": "https://www.france24.com/en/video/20261124-leaked-data-suggests-500-000-russian-soldiers-killed-since-start-of-ukraine-invasion",
+     "published": "2026-11-24T15:53:03.000Z"
+    },
+    {
+     "id": "s3-6",
+     "side": "right",
+     "outlet": "Daily Mail",
+     "outletId": "dailymail",
+     "caution": false,
+     "access": "free",
+     "headline": "720,000 Russian soldiers have been killed in Ukraine war, it is claimed following Kremlin data hack",
+     "url": "https://www.dailymail.com/news/article-16317411/russian-soldiers-deaths-720000-ukraine-new-data.html?ns_mchannel=rss&ns_campaign=1490",
+     "published": "2026-11-24T12:39:40.000Z"
+    },
+    {
+     "id": "s3-7",
+     "side": "right",
+     "outlet": "Washington Examiner",
+     "outletId": "washingtonexaminer",
+     "caution": false,
+     "access": "paid",
+     "headline": "More than 700,000 Russian troops have been killed during Ukraine war",
+     "url": "https://www.washingtonexaminer.com/policy/defense/4813713/new-estimate-russian-troops-killed-ukraine-war/",
+     "published": "2026-11-24T17:13:15.000Z"
+    }
+   ],
+   "sentences": null,
+   "five": {
+    "sides": [
+     {
+      "key": "far_left",
+      "label": "Far left",
+      "outlets": 0,
+      "headlines": []
+     },
+     {
+      "key": "left",
+      "label": "Left",
+      "outlets": 1,
+      "headlines": [
+       "s3-1"
+      ]
+     },
+     {
+      "key": "centre",
+      "label": "Centre",
+      "outlets": 4,
+      "headlines": [
+       "s3-2",
+       "s3-3",
+       "s3-4",
+       "s3-5"
+      ]
+     },
+     {
+      "key": "right",
+      "label": "Right",
+      "outlets": 2,
+      "headlines": [
+       "s3-6",
+       "s3-7"
+      ]
+     },
+     {
+      "key": "far_right",
+      "label": "Far right",
+      "outlets": 0,
+      "headlines": []
+     }
+    ],
+    "eligible": true,
+    "written": null,
+    "status": "missing",
+    "note": "The written comparison is not available for this story."
+   }
+  },
+  {
+   "id": "s4",
+   "rank": 4,
+   "outlets": 7,
+   "lead": "s4-4",
+   "headlines": [
+    {
+     "id": "s4-1",
+     "side": "centre",
+     "outlet": "UPI",
+     "outletId": "upi",
+     "caution": false,
+     "access": "free",
+     "headline": "Rep. Jimmy Gomez resigns after House Ethics Committee report",
+     "url": "https://www.upi.com/Top_News/US/2026/11/23/rep-gomez-resigns-after-ethics-committee-report/1181795469821/",
+     "published": "2026-11-23T21:50:26.000Z"
+    },
+    {
+     "id": "s4-2",
+     "side": "centre",
+     "outlet": "The Hill",
+     "outletId": "thehill",
+     "caution": false,
+     "access": "free",
+     "headline": "Democrat Gomez resigns from House after sexual misconduct report",
+     "url": "https://thehill.com/homenews/house/6238399-jimmy-gomez-congress-resignation/",
+     "published": "2026-11-23T21:13:55.000Z"
+    },
+    {
+     "id": "s4-3",
+     "side": "right",
+     "outlet": "The Daily Caller",
+     "outletId": "dailycaller",
+     "caution": true,
+     "access": "free",
+     "headline": "Democrat Jimmy Gomez Announces Resignation After House Ethics Committee Finds He Made ‘Unwelcome Sexual Advances’ Toward Former Staffer",
+     "url": "https://dailycaller.com/2026/11/23/house-ethics-committee-jimmy-gomez-sexual-advances",
+     "published": "2026-11-23T22:09:21.000Z"
+    },
+    {
+     "id": "s4-4",
+     "side": "far_right",
+     "outlet": "One America News",
+     "outletId": "oann",
+     "caution": true,
+     "access": "unknown",
+     "headline": "Democrat Rep. Jimmy Gomez to resign following House ethics report on sexual assault allegations",
+     "url": "https://news.google.com/rss/articles/CBMiwwFBVV95cUxORFZhaC01WmE1OE1rZXMtNlo5OXJHYngtS0pCbnNISF9NWko1ZXF5aC05TVJHRlE1VjNmR1NWSnhVOVBwMDVBNDRsa3RtMFAwOGVRWVU2LWxZY0tTSURWX2hIeFd1N3hoZWwyRFVMbnlqOFFiNDJRQnJHVTNiRllqTkRUclRYSjdxWi1hOTdzcV9yT0s3UVdBcXN2OG9NTXZpQmhTSE1XME1fVWp3UXVIU1h0WVJMQUNXYnU5d3NZQWU2MUE?oc=5",
+     "published": "2026-11-24T01:05:52.000Z"
+    },
+    {
+     "id": "s4-5",
+     "side": "far_right",
+     "outlet": "Breitbart",
+     "outletId": "breitbart",
+     "caution": true,
+     "access": "free",
+     "headline": "Democrat California Rep. Jimmy Gomez Resigning After House Ethics Report Says He Engaged in Sexual Misconduct",
+     "url": "https://www.breitbart.com/politics/2026/11/23/democrat-california-rep-jimmy-gomez-resigning-after-house-ethics-report-says-he-engaged-in-sexual-misconduct/",
+     "published": "2026-11-23T23:55:56.000Z"
+    },
+    {
+     "id": "s4-6",
+     "side": "far_right",
+     "outlet": "The Gateway Pundit",
+     "outletId": "gatewaypundit",
+     "caution": true,
+     "access": "free",
+     "headline": "Democrat Rep. Jimmy Gomez, a Swalwell Pal, Resigns After House Panel Finds “Substantial Evidence” of Sexual Misconduct",
+     "url": "https://www.thegatewaypundit.com/2026/11/just-democrat-rep-jimmy-gomez-resigns-after-house/",
+     "published": "2026-11-23T21:40:45.000Z"
+    },
+    {
+     "id": "s4-7",
+     "side": "far_right",
+     "outlet": "ZeroHedge",
+     "outletId": "zerohedge",
+     "caution": true,
+     "access": "free",
+     "headline": "\"This Is Not 1990\": Swalwell Ally Jimmy Gomez Quits After Ethics Panel Finds Bar Encounter With Staffer Could Be Sexual Assault",
+     "url": "https://www.zerohedge.com/political/not-1990-swalwell-ally-jimmy-gomez-quits-after-ethics-panel-finds-bar-encounter-staffer",
+     "published": "2026-11-24T01:55:00.000Z"
+    }
+   ],
+   "sentences": null,
+   "five": {
+    "sides": [
+     {
+      "key": "far_left",
+      "label": "Far left",
+      "outlets": 0,
+      "headlines": []
+     },
+     {
+      "key": "left",
+      "label": "Left",
+      "outlets": 0,
+      "headlines": []
+     },
+     {
+      "key": "centre",
+      "label": "Centre",
+      "outlets": 2,
+      "headlines": [
+       "s4-1",
+       "s4-2"
+      ]
+     },
+     {
+      "key": "right",
+      "label": "Right",
+      "outlets": 1,
+      "headlines": [
+       "s4-3"
+      ]
+     },
+     {
+      "key": "far_right",
+      "label": "Far right",
+      "outlets": 4,
+      "headlines": [
+       "s4-4",
+       "s4-5",
+       "s4-6",
+       "s4-7"
+      ]
+     }
+    ],
+    "eligible": false,
+    "written": null,
+    "status": "not-eligible",
+    "note": "No written comparison for this story: one is written only when at least three of the five sides carried it, one left of centre and one right of centre."
+   }
+  },
+  {
+   "id": "s5",
+   "rank": 5,
+   "outlets": 6,
+   "lead": "s5-2",
+   "headlines": [
+    {
+     "id": "s5-1",
+     "side": "left",
+     "outlet": "The Independent",
+     "outletId": "independent",
+     "caution": true,
+     "access": "free",
+     "headline": "Pope Francis describes encounters with the Devil in private diary entries: ‘I can’t forget his eyes’",
+     "url": "https://www.independent.co.uk/news/world/europe/pope-francis-diary-devil-book-death-b3090736.html",
+     "published": "2026-11-24T14:56:12.000Z"
+    },
+    {
+     "id": "s5-2",
+     "side": "centre",
+     "outlet": "BBC News",
+     "outletId": "bbc",
+     "caution": false,
+     "access": "free",
+     "headline": "Pope Francis' diary reveals claims he saw the devil three times",
+     "url": "https://www.bbc.co.uk/news/articles/cm78270l4z7no",
+     "published": "2026-11-24T11:10:57.000Z"
+    },
+    {
+     "id": "s5-3",
+     "side": "centre",
+     "outlet": "Deutsche Welle",
+     "outletId": "dw",
+     "caution": false,
+     "access": "free",
+     "headline": "Pope Francis diaries recount spiritual crisis, him seeing the 'Devil'",
+     "url": "https://www.dw.com/en/pope-francis-diaries-recount-spiritual-crisis-him-seeing-the-devil/a-80033224?maca=en-rss-en-all-1573-rdf",
+     "published": "2026-11-24T15:21:00.000Z"
+    },
+    {
+     "id": "s5-4",
+     "side": "centre",
+     "outlet": "Euronews",
+     "outletId": "euronews",
+     "caution": false,
+     "access": "free",
+     "headline": "Pope Francis' private notes reveal visions of the devil and a plan to allow married men to be priests",
+     "url": "https://www.euronews.com/2026/11/24/pope-francis-private-notes-reveal-visions-of-the-devil-and-a-plan-to-allow-married-men-to-",
+     "published": "2026-11-24T17:06:57.000Z"
+    },
+    {
+     "id": "s5-5",
+     "side": "right",
+     "outlet": "Daily Mail",
+     "outletId": "dailymail",
+     "caution": false,
+     "access": "free",
+     "headline": "Pope Francis saw the 'flame-eyed' Devil three times and even the 'gates of Hell' once, his diary reveals",
+     "url": "https://www.dailymail.com/news/article-16318109/Pope-Francis-saw-flame-eyed-Devil-gates-Hell-died-diary-reveals.html?ns_mchannel=rss&ns_campaign=1490",
+     "published": "2026-11-24T17:15:40.000Z"
+    },
+    {
+     "id": "s5-6",
+     "side": "far_right",
+     "outlet": "Breitbart",
+     "outletId": "breitbart",
+     "caution": true,
+     "access": "free",
+     "headline": "Pope Francis Revealed in Personal Diary He Saw the Devil Three Times",
+     "url": "https://www.breitbart.com/europe/2026/11/24/pope-francis-revealed-in-personal-diary-he-saw-the-devil-three-times/",
+     "published": "2026-11-24T14:13:15.000Z"
+    }
+   ],
+   "sentences": null,
+   "five": {
+    "sides": [
+     {
+      "key": "far_left",
+      "label": "Far left",
+      "outlets": 0,
+      "headlines": []
+     },
+     {
+      "key": "left",
+      "label": "Left",
+      "outlets": 1,
+      "headlines": [
+       "s5-1"
+      ]
+     },
+     {
+      "key": "centre",
+      "label": "Centre",
+      "outlets": 3,
+      "headlines": [
+       "s5-2",
+       "s5-3",
+       "s5-4"
+      ]
+     },
+     {
+      "key": "right",
+      "label": "Right",
+      "outlets": 1,
+      "headlines": [
+       "s5-5"
+      ]
+     },
+     {
+      "key": "far_right",
+      "label": "Far right",
+      "outlets": 1,
+      "headlines": [
+       "s5-6"
+      ]
+     }
+    ],
+    "eligible": true,
+    "written": null,
+    "status": "missing",
+    "note": "The written comparison is not available for this story."
+   }
+  },
+  {
+   "id": "s6",
+   "rank": 6,
+   "outlets": 4,
+   "lead": "s6-1",
+   "headlines": [
+    {
+     "id": "s6-1",
+     "side": "centre",
+     "outlet": "UPI",
+     "outletId": "upi",
+     "caution": false,
+     "access": "free",
+     "headline": "Trump to award Rudy Giuliani Presidential Medal of Freedom",
+     "url": "https://www.upi.com/Top_News/US/2026/11/24/trump-giuliani-medal-of-freedom/1291795538036/",
+     "published": "2026-11-24T17:10:26.000Z"
+    },
+    {
+     "id": "s6-2",
+     "side": "centre",
+     "outlet": "The Hill",
+     "outletId": "thehill",
+     "caution": false,
+     "access": "free",
+     "headline": "Giuliani ‘very, very humbled’ to be getting Presidential Medal of Freedom",
+     "url": "https://thehill.com/homenews/administration/6240011-trump-to-award-giuliani-medal/",
+     "published": "2026-11-24T16:28:55.000Z"
+    },
+    {
+     "id": "s6-3",
+     "side": "right",
+     "outlet": "Fox News",
+     "outletId": "foxnews",
+     "caution": true,
+     "access": "free",
+     "headline": "Trump to award Giuliani Presidential Medal of Freedom",
+     "url": "https://www.foxnews.com/politics/trump-award-giuliani-presidential-medal-freedom",
+     "published": "2026-11-24T14:47:59.000Z"
+    },
+    {
+     "id": "s6-4",
+     "side": "far_right",
+     "outlet": "Breitbart",
+     "outletId": "breitbart",
+     "caution": true,
+     "access": "free",
+     "headline": "'America's Mayor' Rudy Giuliani to Receive Medal of Freedom from Trump",
+     "url": "https://www.breitbart.com/politics/2026/11/23/americas-mayor-rudy-giuliani-to-receive-medal-of-freedom-from-trump/",
+     "published": "2026-11-24T00:47:01.000Z"
+    }
+   ],
+   "sentences": null,
+   "five": {
+    "sides": [
+     {
+      "key": "far_left",
+      "label": "Far left",
+      "outlets": 0,
+      "headlines": []
+     },
+     {
+      "key": "left",
+      "label": "Left",
+      "outlets": 0,
+      "headlines": []
+     },
+     {
+      "key": "centre",
+      "label": "Centre",
+      "outlets": 2,
+      "headlines": [
+       "s6-1",
+       "s6-2"
+      ]
+     },
+     {
+      "key": "right",
+      "label": "Right",
+      "outlets": 1,
+      "headlines": [
+       "s6-3"
+      ]
+     },
+     {
+      "key": "far_right",
+      "label": "Far right",
+      "outlets": 1,
+      "headlines": [
+       "s6-4"
+      ]
+     }
+    ],
+    "eligible": false,
+    "written": null,
+    "status": "not-eligible",
+    "note": "No written comparison for this story: one is written only when at least three of the five sides carried it, one left of centre and one right of centre."
+   }
+  },
+  {
+   "id": "s7",
+   "rank": 7,
+   "outlets": 4,
+   "lead": "s7-2",
+   "headlines": [
+    {
+     "id": "s7-1",
+     "side": "far_left",
+     "outlet": "Truthout",
+     "outletId": "truthout",
+     "caution": false,
+     "access": "free",
+     "headline": "Court Allows Army to Go Ahead With Detonation of Toxic Lead Explosives in Iowa",
+     "url": "https://truthout.org/articles/court-allows-army-to-go-ahead-with-detonation-of-toxic-lead-explosives-in-iowa/",
+     "published": "2026-11-24T16:08:56.000Z"
+    },
+    {
+     "id": "s7-2",
+     "side": "left",
+     "outlet": "The Independent",
+     "outletId": "independent",
+     "caution": true,
+     "access": "free",
+     "headline": "Court allows Army to detonate dangerous Iowa explosives after Trump intervention",
+     "url": "https://www.independent.co.uk/news/world/americas/trump-iowa-bomb-detonation-rob-sand-b3090185.html",
+     "published": "2026-11-23T23:00:53.000Z"
+    },
+    {
+     "id": "s7-3",
+     "side": "right",
+     "outlet": "Washington Examiner",
+     "outletId": "washingtonexaminer",
+     "caution": false,
+     "access": "paid",
+     "headline": "Appeals court clears way for Army to detonate unstable lead explosives in Iowa",
+     "url": "https://www.washingtonexaminer.com/news/justice/4813213/appeals-court-army-lead-explosion-iowa/",
+     "published": "2026-11-24T00:15:38.000Z"
+    },
+    {
+     "id": "s7-4",
+     "side": "right",
+     "outlet": "Fox News",
+     "outletId": "foxnews",
+     "caution": true,
+     "access": "free",
+     "headline": "Federal appeals court clears Army to detonate volatile Iowa explosives as Dem gov-elect refuses to sign off",
+     "url": "https://www.foxnews.com/politics/federal-appeals-court-clears-army-detonate-volatile-iowa-explosives-dem-gov-elect-refuses-sign-off",
+     "published": "2026-11-23T18:05:55.000Z"
+    }
+   ],
+   "sentences": null,
+   "five": {
+    "sides": [
+     {
+      "key": "far_left",
+      "label": "Far left",
+      "outlets": 1,
+      "headlines": [
+       "s7-1"
+      ]
+     },
+     {
+      "key": "left",
+      "label": "Left",
+      "outlets": 1,
+      "headlines": [
+       "s7-2"
+      ]
+     },
+     {
+      "key": "centre",
+      "label": "Centre",
+      "outlets": 0,
+      "headlines": []
+     },
+     {
+      "key": "right",
+      "label": "Right",
+      "outlets": 2,
+      "headlines": [
+       "s7-3",
+       "s7-4"
+      ]
+     },
+     {
+      "key": "far_right",
+      "label": "Far right",
+      "outlets": 0,
+      "headlines": []
+     }
+    ],
+    "eligible": true,
+    "written": null,
+    "status": "missing",
+    "note": "The written comparison is not available for this story."
+   }
+  },
+  {
+   "id": "s8",
+   "rank": 8,
+   "outlets": 4,
+   "lead": "s8-3",
+   "headlines": [
+    {
+     "id": "s8-1",
+     "side": "left",
+     "outlet": "The Independent",
+     "outletId": "independent",
+     "caution": true,
+     "access": "free",
+     "headline": "Malaysia to repatriate another 6,803 Myanmar nationals despite ICJ genocide ruling",
+     "url": "https://www.independent.co.uk/news/world/europe/myanmar-anwar-ibrahim-malaysia-kuala-lumpur-min-aung-hlaing-b3090485.html",
+     "published": "2026-11-24T09:45:44.000Z"
+    },
+    {
+     "id": "s8-2",
+     "side": "left",
+     "outlet": "The New York Times",
+     "outletId": "nyt",
+     "caution": false,
+     "access": "paid",
+     "headline": "The Woman Who Took Canada to Court Over Genocide",
+     "url": "https://www.nytimes.com/2026/11/23/world/canada/nakuset-montreal.html",
+     "published": "2026-11-23T21:21:53.000Z"
+    },
+    {
+     "id": "s8-3",
+     "side": "centre",
+     "outlet": "BBC News",
+     "outletId": "bbc",
+     "caution": false,
+     "access": "free",
+     "headline": "UK sanctions top Myanmar military leaders after Rohingya genocide ruling",
+     "url": "https://www.bbc.co.uk/news/articles/c6wy4ng1rznxo",
+     "published": "2026-11-23T21:03:34.000Z"
+    },
+    {
+     "id": "s8-4",
+     "side": "centre",
+     "outlet": "France 24",
+     "outletId": "france24",
+     "caution": false,
+     "access": "free",
+     "headline": "14 countries acknowledge ICJ ruling of genocide against Rohingya",
+     "url": "https://www.france24.com/en/asia-pacific/20261123-14-countries-acknowledge-icj-ruling-of-genocide-against-rohingya",
+     "published": "2026-11-23T23:10:22.000Z"
+    }
+   ],
+   "sentences": null,
+   "five": {
+    "sides": [
+     {
+      "key": "far_left",
+      "label": "Far left",
+      "outlets": 0,
+      "headlines": []
+     },
+     {
+      "key": "left",
+      "label": "Left",
+      "outlets": 2,
+      "headlines": [
+       "s8-1",
+       "s8-2"
+      ]
+     },
+     {
+      "key": "centre",
+      "label": "Centre",
+      "outlets": 2,
+      "headlines": [
+       "s8-3",
+       "s8-4"
+      ]
+     },
+     {
+      "key": "right",
+      "label": "Right",
+      "outlets": 0,
+      "headlines": []
+     },
+     {
+      "key": "far_right",
+      "label": "Far right",
+      "outlets": 0,
+      "headlines": []
+     }
+    ],
+    "eligible": false,
+    "written": null,
+    "status": "not-eligible",
+    "note": "No written comparison for this story: one is written only when at least three of the five sides carried it, one left of centre and one right of centre."
+   }
+  },
+  {
+   "id": "s9",
+   "rank": 9,
+   "outlets": 4,
+   "lead": "s9-1",
+   "headlines": [
+    {
+     "id": "s9-1",
+     "side": "left",
+     "outlet": "The Independent",
+     "outletId": "independent",
+     "caution": true,
+     "access": "free",
+     "headline": "Gisèle Pelicot ‘deeply shocked’ after nude photos of her used to promote book",
+     "url": "https://www.independent.co.uk/news/world/europe/gisele-pelicot-shocked-nude-photos-promote-book-b3090415.html",
+     "published": "2026-11-24T08:51:44.000Z"
+    },
+    {
+     "id": "s9-2",
+     "side": "centre",
+     "outlet": "Sky News",
+     "outletId": "skynews",
+     "caution": false,
+     "access": "unknown",
+     "headline": "Gisele Pelicot 'deeply shocked' as nude photos of her sent to media",
+     "url": "https://news.sky.com/story/gisele-pelicot-deeply-shocked-after-nude-photos-used-to-promote-book-13615849",
+     "published": "2026-11-24T02:54:00.000Z"
+    },
+    {
+     "id": "s9-3",
+     "side": "centre",
+     "outlet": "France 24",
+     "outletId": "france24",
+     "caution": false,
+     "access": "free",
+     "headline": "'Deeply shocked': Gisèle Pelicot to sue publisher after nude photos used in book campaign",
+     "url": "https://www.france24.com/en/france/20261123-deeply-shocked-gis%C3%A8le-pelicot-sue-publisher-nude-photos-used-book-campaign",
+     "published": "2026-11-23T17:52:50.000Z"
+    },
+    {
+     "id": "s9-4",
+     "side": "centre",
+     "outlet": "BBC News",
+     "outletId": "bbc",
+     "caution": false,
+     "access": "free",
+     "headline": "Gisèle Pelicot 'humiliated' after nude photos sent to media to promote book",
+     "url": "https://www.bbc.co.uk/news/articles/cm3eg502nxw2o",
+     "published": "2026-11-23T21:24:47.000Z"
+    }
+   ],
+   "sentences": null,
+   "five": {
+    "sides": [
+     {
+      "key": "far_left",
+      "label": "Far left",
+      "outlets": 0,
+      "headlines": []
+     },
+     {
+      "key": "left",
+      "label": "Left",
+      "outlets": 1,
+      "headlines": [
+       "s9-1"
+      ]
+     },
+     {
+      "key": "centre",
+      "label": "Centre",
+      "outlets": 3,
+      "headlines": [
+       "s9-2",
+       "s9-3",
+       "s9-4"
+      ]
+     },
+     {
+      "key": "right",
+      "label": "Right",
+      "outlets": 0,
+      "headlines": []
+     },
+     {
+      "key": "far_right",
+      "label": "Far right",
+      "outlets": 0,
+      "headlines": []
+     }
+    ],
+    "eligible": false,
+    "written": null,
+    "status": "not-eligible",
+    "note": "No written comparison for this story: one is written only when at least three of the five sides carried it, one left of centre and one right of centre."
+   }
+  },
+  {
+   "id": "s10",
+   "rank": 10,
+   "outlets": 4,
+   "lead": "s10-2",
+   "headlines": [
+    {
+     "id": "s10-1",
+     "side": "centre",
+     "outlet": "RealClearPolitics",
+     "outletId": "realclear",
+     "caution": false,
+     "access": "free",
+     "headline": "Here We Go Again: Dems Plan a Dozen Primary Debates",
+     "url": "https://www.realclearpolitics.com/presidential/links/here-we-go-again-dems-plan-a-dozen-primary-debates-2026-11-23",
+     "published": "2026-11-24T03:43:09.000Z"
+    },
+    {
+     "id": "s10-2",
+     "side": "far_right",
+     "outlet": "Breitbart",
+     "outletId": "breitbart",
+     "caution": true,
+     "access": "free",
+     "headline": "Democrats Announce 12 Debates for 2028 Presidential Primary, Starting in June of Next Year",
+     "url": "https://www.breitbart.com/politics/2026/11/23/democrats-announce-12-debates-for-2028-presidential-primary-starting-in-june-of-next-year/",
+     "published": "2026-11-23T19:41:11.000Z"
+    },
+    {
+     "id": "s10-3",
+     "side": "far_right",
+     "outlet": "One America News",
+     "outletId": "oann",
+     "caution": true,
+     "access": "unknown",
+     "headline": "DNC announces 12 primary debates for 2028 presidential race",
+     "url": "https://news.google.com/rss/articles/CBMilAFBVV95cUxOWVMzdWljeXdpOGp4UERmSE9nVEFBZXkxUVlnc0JhV1lYRUFESVlMUktaWjhDak1faVVOdkljYXRPUVowZUFzYklubnlwdm1IT2RTQmN3czVvOTQxSk9PQ3Zfb2p6N0tHSDhaNk1YYkstZTV4TEFZVGl0ME9hSnJJdnZZczg2MHVjWnRyb3dmZTZKd2I3?oc=5",
+     "published": "2026-11-23T22:14:35.000Z"
+    },
+    {
+     "id": "s10-4",
+     "side": "far_right",
+     "outlet": "The Gateway Pundit",
+     "outletId": "gatewaypundit",
+     "caution": true,
+     "access": "free",
+     "headline": "Democrats Already Creating Ridiculous Rules for Their 2028 Presidential Primary Debates",
+     "url": "https://www.thegatewaypundit.com/2026/11/democrats-already-creating-ridiculous-rules-their-2028-presidential/",
+     "published": "2026-11-24T04:00:21.000Z"
+    }
+   ],
+   "sentences": null,
+   "five": {
+    "sides": [
+     {
+      "key": "far_left",
+      "label": "Far left",
+      "outlets": 0,
+      "headlines": []
+     },
+     {
+      "key": "left",
+      "label": "Left",
+      "outlets": 0,
+      "headlines": []
+     },
+     {
+      "key": "centre",
+      "label": "Centre",
+      "outlets": 1,
+      "headlines": [
+       "s10-1"
+      ]
+     },
+     {
+      "key": "right",
+      "label": "Right",
+      "outlets": 0,
+      "headlines": []
+     },
+     {
+      "key": "far_right",
+      "label": "Far right",
+      "outlets": 3,
+      "headlines": [
+       "s10-2",
+       "s10-3",
+       "s10-4"
+      ]
+     }
+    ],
+    "eligible": false,
+    "written": null,
+    "status": "not-eligible",
+    "note": "No written comparison for this story: one is written only when at least three of the five sides carried it, one left of centre and one right of centre."
+   }
+  }
+ ]
+}

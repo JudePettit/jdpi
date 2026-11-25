@@ -15,19 +15,29 @@ app (feeds, calendars, the API, the MCP server, `llms.txt`). Use **VM** only whe
 tight: page titles (`<Submodule> · VM`), the sidebar's brand chip, the breadcrumb's first step, the standalone page bar
 (`← VM / Module / Submodule`) and a diagram box too narrow for the full name. Keep "by JDP-Iq" where the maker is named.
 
-**The mark.** `design/brand-vm.svg` (the Vitruvian figure in a hard hat, with the Antikythera mechanism, a book, a
-wrench and a mouse; for 40 px and up) and `design/brand-vm-icon.svg` (the favicon, drawn for 16 and 32 px). The shell
-plays `design/vm-loading.svg` while a page loads. `design/brand-prp.svg` stays in place only for old external links.
+**The mark.** `design/brand-vm.svg` (Vitruvius, VM's mascot, in an amber hard hat inside a circle, on the dark tile;
+for 40 px and up) and `design/brand-vm-icon.svg` (the favicon: his head and hat only, so that it reads at 16 and 32 px).
+The shell plays `design/vm-loading.svg` (Vitruvius running) while a page loads. Each SVG embeds its picture as data, so
+it draws as an `<img>`. `design/brand-prp.svg` stays in place only for old external links.
 
-**A module's own figure.** A module may have its variant of the figure, on the mark's geometry and in the design
-system's colours, on the mark's dark tile so that it reads in both themes. The registry names it on the module:
-`"figure"` (the full drawing, for 72 px and up) and `"mark"` (its reduction, for 16 to 40 px). The shell shows the mark
-beside the module's code in the sidebar, in its box on the Home page and on the Dashboard, and the figure at the head of
-the module's overview; the module's landing page shows the figure in its header, as its `<img>` with alt text. So far
-there is one: **Omni News**, `design/brand-hb.svg` (the figure peering over a broadsheet he holds open, headed ACTA
-DIURNA over NOVA VERITATIS, one eyebrow raised and a monocle in that eye) and `design/brand-hb-icon.svg`. Keep a
-figure's type in `<text>` held by `textLength`, and no double hyphen inside its comments (an SVG with one is not XML,
-and does not draw).
+**Vitruvius.** The mascot's pictures are in `design/vitruvius/`, listed with their words in `index.json` and shown on
+`design/vitruvius/index.html`. Each suite's `"mark"` in the registry is its picture of him (64 px WebP, with 128 and
+256 px ones beside it); each submodule's `"art"` sits beside its `"icon"`. **A picture is drawn only at 40 px or more**
+(shell.js `ART_MIN`): smaller, every one is the same figure in the same circle and only the tool he holds differs, by
+a few pixels, so they cannot be told apart. So the sidebar, the rows of a Home box and the Dashboard button keep the
+glyphs, and no mark stands beside a module's code; the module's mark is in its box on the Home page (40 px) and at the
+head of its overview (104 px, 72 on a phone), and a submodule's picture is on its Dashboard tile and its overview row
+(44 px). Each has `width` and `height`, a `srcset` of the 64, 128 and 256 px files (`sizes` the drawn size, so a 40 to
+64 px place never fetches the 256 px file), `decoding="async"`, `loading="lazy"` when it may be off screen, an empty
+`alt` because the name is beside it, and the glyph behind it, which shows if the picture fails. A submodule with no
+picture shows its glyph in the same round off-white medallion. Omni News's landing page shows its suite's 256 px
+picture in its header, with alt text. Every place that shows him
+can reach the credit: "Vitruvius, VM's mascot, was drawn by an AI image model (ChatGPT) from VM's own description; no
+person drew or retouched the pictures. He is a new character, not a copy of Leonardo's drawing." New pictures go
+through `design/scripts/vitruvius-art.mjs` (backgrounds removed, trimmed, size limits of 12 KB at 64 px, 20 KB at
+128 px and 40 KB at 256 px; nothing inside a picture is redrawn or moved, so the credit stays true) and then
+`design/scripts/render-icons.mjs`. Kino's module card credits the picture with a short "Drawn by AI" link under it
+(the sentence as its title), not in the stage's floating credit box.
 
 | Old | New | id (registry) | Code |
 |---|---|---|---|
@@ -114,7 +124,7 @@ Read a token in JS with `getComputedStyle(document.documentElement).getPropertyV
 The shell keeps one frame per submodule (and view). A deep link (`#/<module>/<submodule>?at=<url>`) moves that frame:
 when only the hash differs the page stays loaded and its address changes in place, so **a page that can be linked to
 by hash must re-render on `hashchange`**; a different query loads in the same frame. While a frame loads a new page,
-the shell plays the Vitruvian Manager figure (`design/vm-loading.svg`, about 160 px) in the middle of the workspace, on
+the shell plays Vitruvius running (`design/vm-loading.svg`, about 160 px; still under `prefers-reduced-motion`) in the middle of the workspace, on
 top of the page but letting clicks through, until the frame's load event (or until 600 ms after it when the page came
 in under 300 ms, so that a quick page does not flash it); a hash-only move shows nothing. A page therefore needs no
 loading screen of its own for its first paint. While a Kino film follows along,

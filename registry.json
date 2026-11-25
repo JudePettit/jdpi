@@ -20,6 +20,7 @@
       "code": "HM",
       "name": "Home",
       "title": "Home",
+      "mark": "design/vitruvius/module-home-64.webp",
       "summary": "Start here: every module on one page, and what changed today on the Dashboard.",
       "description": "Where Vitruvian Manager starts: the Home page shows every module, and the Dashboard what changed today across them.",
       "modules": [
@@ -31,6 +32,7 @@
           "name": "Dashboard",
           "kind": "realtime",
           "icon": "⊞",
+          "art": "design/vitruvius/submodule-dashboard-64.webp",
           "status": "live",
           "data": {
             "class": "combined",
@@ -50,6 +52,7 @@
       "code": "RT",
       "name": "Realtime Geopolitics",
       "title": "Realtime Geopolitics",
+      "mark": "design/vitruvius/module-rt-64.webp",
       "summary": "Follow today's politics, conflicts and country risk: headlines, volatility, wars, leaders and coming votes.",
       "description": "What is happening now: every country's headlines, country conditions and volatility, armed conflict, who holds power, and the political calendar. The news across the political spectrum is in Omni News.",
       "modules": [
@@ -58,6 +61,7 @@
           "name": "Global Headline Tracker",
           "kind": "realtime",
           "icon": "◎",
+          "art": "design/vitruvius/submodule-headlines-64.webp",
           "status": "live",
           "data": {
             "class": "rhythm",
@@ -99,6 +103,7 @@
           "name": "Geopolitical Volatility",
           "kind": "realtime",
           "icon": "⌁",
+          "art": "design/vitruvius/submodule-volatility-64.webp",
           "status": "live",
           "data": {
             "class": "data-to",
@@ -121,6 +126,7 @@
           "name": "Realtime Battlefield",
           "kind": "realtime",
           "icon": "✕",
+          "art": "design/vitruvius/submodule-battlefield-64.webp",
           "status": "live",
           "data": {
             "class": "data-to",
@@ -158,6 +164,7 @@
           "name": "National Analysis",
           "kind": "realtime",
           "icon": "◉",
+          "art": "design/vitruvius/submodule-pestle-64.webp",
           "status": "live",
           "data": {
             "class": "updated",
@@ -190,6 +197,7 @@
           "name": "Month by Month",
           "kind": "realtime",
           "icon": "▥",
+          "art": "design/vitruvius/submodule-monthly-64.webp",
           "status": "live",
           "data": {
             "class": "data-to",
@@ -236,6 +244,7 @@
           "name": "Political Atlas",
           "kind": "realtime",
           "icon": "◍",
+          "art": "design/vitruvius/submodule-atlas-64.webp",
           "status": "live",
           "data": {
             "class": "reviewed",
@@ -256,6 +265,7 @@
           "name": "Realtime Calendar",
           "kind": "realtime",
           "icon": "▦",
+          "art": "design/vitruvius/submodule-calendar-64.webp",
           "status": "live",
           "data": {
             "class": "updated",
@@ -278,8 +288,7 @@
       "code": "ON",
       "name": "Omni News",
       "title": "Omni News",
-      "mark": "design/brand-hb-icon.svg",
-      "figure": "design/brand-hb.svg",
+      "mark": "design/vitruvius/module-hb-64.webp",
       "summary": "Read the news worth reading: politics from far left to far right, plus science, economics and tech.",
       "description": "The news worth reading, from four briefings: politics from fifty publishers, far left to far right, science, economics and the digital world, each on its own page, and an analysis of what they all cover today and this week, with one search across the four.",
       "modules": [
@@ -288,6 +297,7 @@
           "name": "Highbrowse",
           "kind": "realtime",
           "icon": "❦",
+          "art": "design/vitruvius/submodule-highbrowse-64.webp",
           "status": "live",
           "data": {
             "class": "combined",
@@ -350,6 +360,7 @@
           "name": "Political Briefing",
           "kind": "realtime",
           "icon": "↗",
+          "art": "design/vitruvius/submodule-briefing-64.webp",
           "status": "live",
           "data": {
             "class": "updated",
@@ -370,6 +381,7 @@
           "name": "Scientific Briefing",
           "kind": "realtime",
           "icon": "◬",
+          "art": "design/vitruvius/submodule-science-briefing-64.webp",
           "status": "live",
           "data": {
             "class": "updated",
@@ -390,6 +402,7 @@
           "name": "Economics Briefing",
           "kind": "realtime",
           "icon": "⊿",
+          "art": "design/vitruvius/submodule-econ-briefing-64.webp",
           "status": "live",
           "data": {
             "class": "updated",
@@ -410,6 +423,7 @@
           "name": "Digital Briefing",
           "kind": "realtime",
           "icon": "⌬",
+          "art": "design/vitruvius/submodule-digital-briefing-64.webp",
           "status": "live",
           "data": {
             "class": "updated",
@@ -430,6 +444,7 @@
           "name": "Daily Synopsis",
           "kind": "realtime",
           "icon": "§",
+          "art": "design/vitruvius/submodule-daily-synopsis-64.webp",
           "status": "live",
           "data": {
             "class": "data-to",
@@ -458,6 +473,7 @@
       "code": "RS",
       "name": "Retrospective Geopolitics",
       "title": "Retrospective Geopolitics",
+      "mark": "design/vitruvius/module-rs-64.webp",
       "summary": "Explore a century of borders, leaders and wars, and look up anyone or anything in the Master Index.",
       "description": "What happened and why: a Master Index of everyone and everything in Vitruvian Manager, a century of borders, leaders, wars and political events, humanity's energy capture, and the ideas behind the political spectrum.",
       "modules": [
@@ -466,6 +482,7 @@
           "name": "Master Index",
           "kind": "reference",
           "icon": "◈",
+          "art": "design/vitruvius/submodule-encyclopedia-64.webp",
           "status": "live",
           "data": {
             "class": "updated",
@@ -486,6 +503,7 @@
           "name": "Political Retrospective",
           "kind": "retrospective",
           "icon": "◷",
+          "art": "design/vitruvius/submodule-retrospective-64.webp",
           "status": "live",
           "data": {
             "class": "reference"
@@ -499,6 +517,7 @@
           "name": "Retrospective Battlefield",
           "kind": "retrospective",
           "icon": "⚔",
+          "art": "design/vitruvius/submodule-battlefield-history-64.webp",
           "status": "live",
           "data": {
             "class": "reference",
@@ -521,6 +540,7 @@
           "name": "War Focus",
           "kind": "retrospective",
           "icon": "⌖",
+          "art": "design/vitruvius/submodule-war-focus-64.webp",
           "status": "live",
           "data": {
             "class": "data-to",
@@ -584,6 +604,7 @@
           "name": "Learning · Politics",
           "kind": "learning",
           "icon": "✎",
+          "art": "design/vitruvius/submodule-learning-politics-64.webp",
           "status": "live",
           "data": {
             "class": "course"
@@ -599,6 +620,7 @@
       "code": "IC",
       "name": "Intelligence Collection",
       "title": "Intelligence Collection",
+      "mark": "design/vitruvius/module-oi-64.webp",
       "summary": "Learn lawful intelligence tradecraft: open-source research, receive-only signals and satellite imagery.",
       "description": "Hands-on intelligence tradecraft with public sources and your own receivers: an OSINT workbench, receive-only signals monitoring, satellite imagery and geolocation tools, and courses that teach each discipline, all within the law.",
       "modules": [
@@ -607,6 +629,7 @@
           "name": "OSINT Dashboard",
           "kind": "realtime",
           "icon": "⌕",
+          "art": "design/vitruvius/submodule-osint-64.webp",
           "status": "live",
           "data": {
             "class": "on-demand",
@@ -678,6 +701,7 @@
           "name": "SIGINT Dashboard",
           "kind": "realtime",
           "icon": "⌇",
+          "art": "design/vitruvius/submodule-sigint-64.webp",
           "status": "live",
           "data": {
             "class": "on-demand",
@@ -749,6 +773,7 @@
           "name": "GEOINT & IMINT Dashboard",
           "kind": "realtime",
           "icon": "◫",
+          "art": "design/vitruvius/submodule-geoint-64.webp",
           "status": "live",
           "data": {
             "class": "on-demand",
@@ -805,6 +830,7 @@
           "name": "Intel Training",
           "kind": "learning",
           "icon": "✎",
+          "art": "design/vitruvius/submodule-osint-training-64.webp",
           "status": "live",
           "data": {
             "class": "course"
@@ -844,6 +870,7 @@
       "code": "WA",
       "name": "Wealth Automation",
       "title": "Wealth Automation",
+      "mark": "design/vitruvius/module-mm-64.webp",
       "summary": "Watch the markets and famous investors' trades, run trading agents, and keep every account in one ledger.",
       "description": "Your money end to end: markets and the Hype Tracker, every brokerage account in one ledger, trading agents that follow rules you choose or mirror famous investors, all drawing on one shared pool under one set of risk limits.",
       "modules": [
@@ -855,6 +882,7 @@
           "name": "Market Monitor",
           "kind": "realtime",
           "icon": "↯",
+          "art": "design/vitruvius/submodule-markets-64.webp",
           "status": "live",
           "data": {
             "class": "available",
@@ -877,6 +905,7 @@
           "name": "Auto Trader",
           "kind": "realtime",
           "icon": "⇄",
+          "art": "design/vitruvius/submodule-traders-64.webp",
           "status": "live",
           "data": {
             "class": "data-to",
@@ -953,6 +982,7 @@
           "name": "Learning · Finance & Economics",
           "kind": "learning",
           "icon": "✎",
+          "art": "design/vitruvius/submodule-learning-64.webp",
           "status": "live",
           "data": {
             "class": "course"
@@ -980,6 +1010,7 @@
       "code": "NS",
       "name": "Natural Science",
       "title": "Natural Science",
+      "mark": "design/vitruvius/module-ns-64.webp",
       "summary": "Trace humanity's scientific breakthroughs through history, on a map and a timeline.",
       "description": "The natural sciences through history: a map-and-slider timeline of humanity's key breakthroughs and the people and institutions behind them. The week's major papers and science news are in Omni News.",
       "modules": [
@@ -988,6 +1019,7 @@
           "name": "Invention Timeline",
           "kind": "retrospective",
           "icon": "⟡",
+          "art": "design/vitruvius/submodule-progress-64.webp",
           "status": "live",
           "data": {
             "class": "updated",
@@ -1010,6 +1042,7 @@
       "code": "DS",
       "name": "Digital Science",
       "title": "Digital Science",
+      "mark": "design/vitruvius/module-ds-64.webp",
       "summary": "Chart Vitruvian Manager's data, connect it to AI assistants, and run your own devices.",
       "description": "Computing, AI and the digital world: a Data Analytics workbench for exploring and charting Vitruvian Manager’s own data, the Omni-Map, which draws dated borders and the battles VM holds for a name clicked in Neo Book, an Integration Hub that opens Vitruvian Manager to AI assistants and plugins, and IoT Connect for commanding your own smart devices through the Vitruvian Manager bridge. The week’s papers and technology news are in Omni News.",
       "modules": [
@@ -1018,6 +1051,7 @@
           "name": "Data Analytics",
           "kind": "operations",
           "icon": "▤",
+          "art": "design/vitruvius/submodule-data-analytics-64.webp",
           "status": "live",
           "data": {
             "class": "updated",
@@ -1039,6 +1073,7 @@
           "name": "Omni-Map",
           "kind": "reference",
           "icon": "⊛",
+          "art": "design/vitruvius/submodule-omni-map-64.webp",
           "status": "live",
           "data": {
             "class": "reference",
@@ -1057,6 +1092,7 @@
           "name": "Integration Hub",
           "kind": "reference",
           "icon": "⇄",
+          "art": "design/vitruvius/submodule-integration-hub-64.webp",
           "status": "live",
           "data": {
             "class": "updated",
@@ -1120,6 +1156,7 @@
           "name": "IoT Connect",
           "kind": "operations",
           "icon": "⊶",
+          "art": "design/vitruvius/submodule-iot-connect-64.webp",
           "status": "live",
           "data": {
             "class": "on-demand",
@@ -1168,6 +1205,7 @@
       "code": "KN",
       "name": "Kino",
       "title": "Kino",
+      "mark": "design/vitruvius/module-kino-64.webp",
       "summary": "Watch narrated documentaries on wars, leaders and turning points, and take short courses on great thinkers.",
       "description": "Documentaries that play across Vitruvian Manager: wars, political events, figures, parties and geopolitical turning points, and courses on great thinkers, narrated with simple animated maps, timelines and portraits, each scene linked to the submodule it draws on.",
       "modules": [
@@ -1176,6 +1214,7 @@
           "name": "Political Events",
           "kind": "retrospective",
           "icon": "◉",
+          "art": "design/vitruvius/submodule-kino-political-events-64.webp",
           "status": "live",
           "data": {
             "class": "checked",
@@ -1197,6 +1236,7 @@
           "name": "Political Figures",
           "kind": "retrospective",
           "icon": "☺",
+          "art": "design/vitruvius/submodule-kino-political-figures-64.webp",
           "status": "live",
           "data": {
             "class": "checked",
@@ -1218,6 +1258,7 @@
           "name": "Political Parties",
           "kind": "retrospective",
           "icon": "◧",
+          "art": "design/vitruvius/submodule-kino-political-parties-64.webp",
           "status": "live",
           "data": {
             "class": "checked",
@@ -1239,6 +1280,7 @@
           "name": "Wars",
           "kind": "retrospective",
           "icon": "⚔",
+          "art": "design/vitruvius/submodule-kino-wars-64.webp",
           "status": "live",
           "data": {
             "class": "checked",
@@ -1260,6 +1302,7 @@
           "name": "Geopolitical Events",
           "kind": "retrospective",
           "icon": "⊕",
+          "art": "design/vitruvius/submodule-kino-geopolitical-events-64.webp",
           "status": "live",
           "data": {
             "class": "checked",
@@ -1281,6 +1324,7 @@
           "name": "Great Thinkers",
           "kind": "learning",
           "icon": "✎",
+          "art": "design/vitruvius/submodule-kino-great-thinkers-64.webp",
           "status": "live",
           "data": {
             "class": "checked",
@@ -1304,6 +1348,7 @@
       "code": "BT",
       "name": "Bibliotheca",
       "title": "Bibliotheca",
+      "mark": "design/vitruvius/module-bibliotheca-64.webp",
       "summary": "Read public-domain classics of history, politics and economics, with the Master Index beside the text.",
       "description": "The reading room: public-domain books of history, war, politics, economics and natural science, read on screen with the Master Index's terms marked through the text and the rest of Vitruvian Manager beside it.",
       "modules": [
@@ -1315,6 +1360,7 @@
           "name": "Neo Book",
           "kind": "learning",
           "icon": "¶",
+          "art": "design/vitruvius/submodule-neo-classic-64.webp",
           "status": "live",
           "data": {
             "class": "updated",

@@ -40,11 +40,20 @@ const S = {
 };
 
 /* ---------- the registry: names, icons and codes for links ---------- */
+// A submodule's picture that fails to load gives way to its glyph (error events do not bubble: caught on the way down).
+document.addEventListener('error', e => { const img = e.target; if (img?.tagName === 'IMG' && img.classList.contains('art')) { img.parentElement?.classList.remove('has-art'); img.remove(); } }, true);
 function moduleInfo(link) {
-  if (/^kino-/.test(link.module)) { const c = categoryOf(link.module.replace(/^kino-/, '')); return { name: `Kino · ${c?.name || ''}`, icon: '▶', code: 'KN', suite: 'kino', suiteName: 'Kino' }; }
+  // A submodule's picture of Vitruvius, VM's mascot (registry "art", a path from the site's root, as the registry is),
+  // and the page that credits the pictures (stage.js moduleHtml links to it under the picture).
+  const root = new URL('../', location.href);
+  const art = m => ({ art: m?.art ? new URL(m.art, root).href : null, artPage: new URL('design/vitruvius/index.html', root).href });
+  if (/^kino-/.test(link.module)) {
+    const c = categoryOf(link.module.replace(/^kino-/, '')), m = S.registry?.suites.find(s => s.id === 'kino')?.modules.find(x => x.id === link.module);
+    return { name: `Kino · ${c?.name || ''}`, icon: '▶', ...art(m), code: 'KN', suite: 'kino', suiteName: 'Kino' };
+  }
   const suite = S.registry?.suites.find(s => s.id === link.suite || s.aliases?.includes(link.suite));
   const m = suite?.modules.find(x => x.id === link.module || x.aliases?.includes(link.module));
-  return m ? { name: m.name, icon: m.icon, code: suite.code, suite: suite.id, suiteName: suite.name, url: m.url } : { name: link.label.split(' · ')[0], code: link.suite.toUpperCase(), suite: link.suite };
+  return m ? { name: m.name, icon: m.icon, ...art(m), code: suite.code, suite: suite.id, suiteName: suite.name, url: m.url } : { name: link.label.split(' · ')[0], code: link.suite.toUpperCase(), suite: link.suite };
 }
 // Kino's submodules are "kino-<category>" in registry.json. Once one is live (it has a url), links between categories
 // go through the shell so its sidebar and breadcrumb follow; until then they open the page directly. They are plain

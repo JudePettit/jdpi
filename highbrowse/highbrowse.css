@@ -20,9 +20,9 @@ button, input, select { font: inherit; }
 
 /* ---- Front matter: the figure beside the masthead ---- */
 .front { display: flex; align-items: center; gap: 22px; }
-/* The figure (design/brand-hb.svg) carries its own dark tile, so it reads on both themes; the ring follows the tile's
-   corner (rx 48 of 256). */
-.front .figure { flex: none; width: 136px; height: 136px; border-radius: 25.5px; box-shadow: 0 0 0 1px var(--prp-line-strong); }
+/* The figure (design/vitruvius/module-hb-256.webp: Vitruvius, VM's mascot, with a handbell and a broadsheet) is a round
+   medallion with its own dark ring, so it reads on both themes and needs no frame. */
+.front .figure { flex: none; width: 136px; height: 136px; border-radius: 50%; }
 .front-text { min-width: 0; }
 .front .prp-meta { gap: 4px 10px; }
 .front .prp-meta span + span::before { content: "·"; margin-right: 10px; color: var(--prp-faint); }
@@ -238,7 +238,7 @@ button, input, select { font: inherit; }
 @media (max-width: 600px) {
   .hb { padding: 16px 16px 32px; }
   .front { gap: 14px; align-items: flex-start; }
-  .front .figure { width: 76px; height: 76px; border-radius: 14.25px; }
+  .front .figure { width: 76px; height: 76px; }
   .prp-title { font-size: 26px; }
   .front .prp-meta span + span::before { display: none; }
   .story.lead h3 { font-size: 19px; }

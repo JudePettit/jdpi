@@ -3,8 +3,10 @@
 **Vitruvian Manager** (short **VM**) is a product of **JDP-Iq**. Vitruvian Manager's modules allow you to learn, earn,
 create, and control. It opens on the Home page, where every module is a box that turns over to what you can do with it,
 with a button to the Dashboard of what changed today. You pick a submodule in the sidebar, it opens in the main area,
-and every submodule shares one design system, one Master Index and one light/dark theme. Its mark is Leonardo's
-Vitruvian figure in a hard hat (`design/brand-vm.svg`).
+and every submodule shares one design system, one Master Index and one light/dark theme. Its mark is Vitruvius,
+VM's mascot, in an amber hard hat inside a circle (`design/brand-vm.svg`); each module and most submodules have their
+own picture of him (`design/vitruvius/`, every one listed with its words at `design/vitruvius/index.html`).
+Vitruvius, VM's mascot, was drawn by an AI image model (ChatGPT) from VM's own description; no person drew or retouched the pictures. He is a new character, not a copy of Leonardo's drawing.
 
 Live at **https://jdpi.pages.dev** (Cloudflare Pages, deployed from this repo by GitHub Actions once the tests pass). Formerly PRP, and before that "JDP-I".
 "prp" is still the internal name: file names (`design/prp.css`, `design/PRP-STYLE.md`), tokens (`--prp-*`), classes,
@@ -48,8 +50,8 @@ The Global Headline Tracker's filter of celebrity gossip, horoscopes, clickbait 
 **Highbrowse** (wordmark `design/highbrowse-wordmark.svg`); the code and the database still call it `lowbrow`. The
 Omni News module (called Highbrowse until 14 November 2026) has a landing page of that name, Highbrowse (`highbrowse/`), which analyses the four briefings' own stores in the
 browser, with no timed job of its own (its Trends tab reads each briefing's `trends.json`, which the briefing's own
-build writes with its store), and its figure is the first module variant of the Vitruvian figure
-(`design/brand-hb.svg`, and `design/brand-hb-icon.svg` for the sidebar).
+build writes with its store), and its figure is Omni News's picture of Vitruvius, with a handbell and a folded
+broadsheet (`design/vitruvius/module-hb-256.webp`).
 
 **Summaries in step with their stores.** A page that reads a small summary in place of a large store (the Dashboard,
 Highbrowse's Trends tab) reads one written by the same build, in the same commit, as the store: each builder calls
@@ -104,7 +106,8 @@ yet: the free series found cover Europe only. `omni/scripts/build-standins.mjs` 
 | Shell | `index.html`, `shell.js`, `shell.css` | Navigation, routing (`#/<module>/<submodule>[/<view>][?at=<url>]`), redirects for old addresses, search (press `/`), theme switch, persistent frames; the Home page (every module as a box that turns over to its `summary`) and the Dashboard (the Today panel over every module and submodule). |
 | Design system | `design/prp.css`, guide in `design/PRP-STYLE.md` | Tokens (light and dark), type (Source Serif 4, IBM Plex Sans and Mono), components, validated data-viz palettes. `design/jdpi.css` imports it for older links. |
 | Connector | `design/prp-bar.js` (`design/jdpi-bar.js`, its old name, now just loads it) | Runs on every page: theme, module accent, Master Index links, documentary mode inside the shell, and a slim "VM / Module / Submodule" bar when a page is opened on its own. |
-| Brand | `design/brand-vm.svg`, `design/brand-vm-icon.svg`, `design/vm-loading.svg` | The mark (sidebar), the favicon (every page), and the figure the shell plays while a page loads. `design/brand-prp.svg`, the old mark, stays for external links. A module may have its own variant of the figure (registry `mark` and `figure`): Highbrowse's is `design/brand-hb.svg` and `design/brand-hb-icon.svg`. |
+| Brand | `design/brand-vm.svg`, `design/brand-vm-icon.svg`, `design/vm-loading.svg` | The mark (sidebar), the favicon (every page: Vitruvius's head and hat, which reads at 16 px), and Vitruvius running while a page loads (still when the device asks for less movement). Each embeds its picture, so it works as an `<img>`. `design/brand-prp.svg`, the old mark, stays for external links. |
+| Vitruvius | `design/vitruvius/` (`index.json`, `index.html`), `design/scripts/vitruvius-art.mjs` | The mascot's pictures, made by an AI image model (ChatGPT) and labelled so: each suite's `mark` and each submodule's `art` in the registry (WebP, 64, 128 and 256 px), drawn only where they are 40 px or more (Home boxes, overview heads and rows, Dashboard tiles, Kino's module card; the sidebar keeps the glyphs), with the glyph as the fallback. `vitruvius-art.mjs <folder>` takes the chosen pictures, removes their backgrounds, trims and saves them and writes `index.json`; `render-icons.mjs` then rebuilds the mark, the favicon, the loader and the app icons. `future/` holds four pictures kept for modules not built yet, shown nowhere. |
 | Entity layer | `lake/` | See `lake/README.md`. |
 | Documentary mode | `design/jdpi-documentary.js`, `design/jdpi-narrator.js` | Reads a page aloud as a documentary, with quiet classical music. |
 | Voice | `design/prp-voice.js`, `functions/api/voice/v1/[[path]].js`, `functions/voice/[[path]].js` | One narration layer for the Documentary reader, Kino and Bibliotheca's narrator (the Reader, which reads with the text alone, and the AR Reader, which reads with the pane following it; both use an online voice only when the reader chooses it, after it shows the cost in characters): this device's voice, or an online Azure voice through the site's own proxy (key, quota and cache on the server; set-up in `OPERATIONS.md`, section 4), falling back to the device voice whenever the online one cannot carry on. |

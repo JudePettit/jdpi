@@ -3,7 +3,8 @@
 // the start of a word, short words whole, plurals, phrases, the briefing, date and topic filters, one result per
 // article) and its speed on the four real stores; the links into the briefings, read back by each briefing's own code
 // (its view.js, or the Political Briefing's page), so a story opens where it is; the Political Briefing's topics, held
-// to its page's own defaults and matching; the module's figure (design/brand-hb.svg and its icon); and the page itself:
+// to its page's own defaults and matching; the module's figure (Omni News's picture of Vitruvius, design/vitruvius/, since
+// 25 November 2026; the old design/brand-hb.svg and its icon are kept, shown nowhere); and the page itself:
 // the analysis renders, the search finds a known story, the links open the right pages in the shell and on their own,
 // with no console errors, in light, dark and at phone width.
 //   npm run test:unit -- tests/highbrowse.test.mjs      (no browser, no network)
@@ -396,14 +397,15 @@ test('module: Highbrowse holds its landing page and the four briefings; the page
   assert.deepEqual(hb.modules.map(m => m.id), ['highbrowse', 'briefing', 'science-briefing', 'econ-briefing', 'digital-briefing', 'daily-synopsis']);
   assert.deepEqual(hb.modules.slice(1, 5).map(m => m.url), BRIEFINGS.map(b => b.page), 'the briefings keep their pages, in analysis.js\'s order');
   assert.deepEqual(BRIEFINGS.map(b => b.id), hb.modules.slice(1, 5).map(m => m.id));
-  assert.deepEqual([hb.mark, hb.figure], ['design/brand-hb-icon.svg', 'design/brand-hb.svg']);
+  // Its picture of Vitruvius (the landing page below shows the 256 px copy; the shell draws it from "mark").
+  assert.deepEqual([hb.mark, hb.figure], ['design/vitruvius/module-hb-64.webp', undefined]);
   const html = read('highbrowse/index.html');
   assert.match(html, /<html lang="en" data-suite="hb" class="prp">/);
   assert.match(html, /<title>Highbrowse · VM<\/title>/);
   assert.match(html, /<link rel="icon" href="\.\.\/design\/brand-vm-icon\.svg"/);
   assert.match(html, /<script src="\.\.\/design\/prp-bar\.js" data-suite="hb" data-module="highbrowse" data-shell="\.\.\/" defer><\/script>/);
   assert.match(html, /<div class="prp-eyebrow">Highbrowse <span class="sep">·<\/span>/);
-  assert.match(html, /<img class="figure" src="\.\.\/design\/brand-hb\.svg"[^>]+alt="[^"]{20,}"/);
+  assert.match(html, /<img class="figure" src="\.\.\/design\/vitruvius\/module-hb-256\.webp" width="136" height="136"[^>]+alt="[^"]{20,}"/);
   for (const [page, id] of [['q/briefing.html', 'briefing'], ['science/briefing/index.html', 'science-briefing'], ['econ/briefing/index.html', 'econ-briefing'], ['digital/briefing/index.html', 'digital-briefing']]) {
     const p = read(page);
     assert.match(p, /<html lang="en" (class="prp" )?data-suite="hb"/, page);
@@ -418,7 +420,9 @@ test('module: Highbrowse holds its landing page and the four briefings; the page
   assert.deepEqual(css.match(/#[0-9a-fA-F]{3,8}\b/g), null);
 });
 
-test('figure: the Omni News module\'s figure and its icon (Highbrowse until 14 November 2026), well formed, in the design system\'s colours', () => {
+// Omni News's old drawn figure and its icon, kept in design/ (shown nowhere since Vitruvius took their place on
+// 25 November 2026) until the owner decides whether to delete them.
+test('figure: the Omni News module\'s old figure and its icon (Highbrowse until 14 November 2026), well formed, in the design system\'s colours', () => {
   const tokens = new Set(read('design/prp.css').match(/#[0-9a-f]{6}\b/gi).map(c => c.toLowerCase()));
   for (const [file, box] of [['design/brand-hb.svg', '0 0 256 256'], ['design/brand-hb-icon.svg', '0 0 32 32']]) {
     const svg = read(file);

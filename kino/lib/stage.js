@@ -23,6 +23,8 @@ const CDN = {
 const NS = 'http://www.w3.org/2000/svg';
 export const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 export const reduced = () => window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+// The credit for the pictures of Vitruvius, VM's mascot, as the shell gives it (shell.js VITRUVIUS_CREDIT).
+const VITRUVIUS_CREDIT = "Vitruvius, VM's mascot, was drawn by an AI image model (ChatGPT) from VM's own description; no person drew or retouched the pictures. He is a new character, not a copy of Leonardo's drawing.";
 const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
 /* ---------- geography (loaded once, only when a map is needed) ---------- */
@@ -391,7 +393,15 @@ export class Stage {
   moduleHtml(scene) {
     const l = scene.link, info = this.opts.moduleInfo?.(l) || {}, [name, place] = l.label.split(' · ');
     const inShell = this.opts.embedded;
-    return `<div class="card"><div class="icon" aria-hidden="true">${esc(info.icon || '↗')}</div>
+    // The submodule's picture of Vitruvius, VM's mascot, where it has one (the glyph behind it, shown if it fails to
+    // load: kino.js). It is drawn about 72 px wide (8cqw, 40 px at least), so the 128 px file on an ordinary screen and
+    // the 256 px one on a sharp one. Its credit is a short link under it, in the card (the floating credit box covered
+    // the card's words and button on a phone, and sat under the Play button): "Drawn by AI", the full sentence as its
+    // title, opening the pictures' own page, where the sentence is in full.
+    const at = px => esc(info.art.replace(/-64\.webp$/, `-${px}.webp`));
+    const art = info.art ? `<img class="art" src="${at(128)}" srcset="${at(64)} 64w, ${at(128)} 128w, ${at(256)} 256w" sizes="72px" alt="" width="64" height="64" decoding="async">` : '';
+    const vit = art ? `<a class="vit" href="${esc(info.artPage)}" target="_blank" rel="noopener" title="${esc(VITRUVIUS_CREDIT)}">Drawn by AI</a>` : '';
+    return `<div class="card"><div class="pic"><div class="icon${art ? ' has-art' : ''}" aria-hidden="true">${art}<span class="glyph">${esc(info.icon || '↗')}</span></div>${vit}</div>
       <div><div class="where"><span class="prp-code" data-suite="${esc(info.suite || l.suite)}">${esc(info.code || l.suite.toUpperCase())}</span>${esc(info.suiteName || '')}</div>
       <h3>${esc(info.name || name)}</h3>${place ? `<p class="at">${esc(place)}</p>` : ''}</div>
       ${scene.visual.blurb ? `<p class="blurb">${esc(scene.visual.blurb)}</p>` : ''}

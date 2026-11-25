@@ -44,9 +44,11 @@ test('registry is well formed', () => {
   // Home holds the Dashboard, which the shell draws itself ("shell" in place of a url), under the old Workspace's name
   // too.
   assert.deepEqual(registry.suites[0].modules.map(m => [m.id, m.name, m.status, m.shell, m.url, m.aliases]), [['dashboard', 'Dashboard', 'live', 'dashboard', undefined, ['workspace']]]);
-  // A module's own figure: the small one for the sidebar ("mark") and the large one for its overview ("figure"), files here.
-  for (const s of registry.suites) for (const f of [s.mark, s.figure].filter(Boolean)) assert.ok(existsSync(new URL('../' + f, import.meta.url)), `${s.id}: ${f}`);
-  assert.deepEqual(registry.suites.filter(s => s.mark).map(s => [s.id, s.mark, s.figure]), [['hb', 'design/brand-hb-icon.svg', 'design/brand-hb.svg']]);
+  // A module's own picture ("mark"), a file here. Since 25 November 2026 every suite's mark is its picture of
+  // Vitruvius; the shell draws its 128 and 256 px copies at the head of its overview, so no suite names a "figure".
+  for (const s of registry.suites) assert.ok(existsSync(new URL('../' + s.mark, import.meta.url)), `${s.id}: ${s.mark}`);
+  assert.deepEqual(registry.suites.map(s => [s.id, s.mark]), registry.suites.map(s => [s.id, `design/vitruvius/module-${s.id}-64.webp`]));
+  assert.deepEqual(registry.suites.filter(s => s.figure).map(s => s.id), []);
   assert.ok(!/\bPRP\b|Personal Resource Planner|Realtime Intelligence|Retrospective Intelligence|i-Spy/.test(JSON.stringify(registry)), 'no old product or module name in the registry');
   assert.ok(!/\bERP\b/.test(JSON.stringify(registry)), 'no ERP framing in the registry');
   const ids = modules.map(x => x.m.id);
@@ -448,26 +450,24 @@ test('old addresses of Auto Trader\'s three parts land on the matching part', pa
     [['Omni Trade ↗', `${TD}/tally/`, '_blank', null], ['Investor Impersonator', null, null, 'page'], ['Algo Trader ↗', `${TD}/tally/algo/`, '_blank', null]]);
 });
 
-test('a module with its own figure shows it in the sidebar, on the Home page, on the Dashboard and on its overview', pageTest, async () => {
+test('each module\'s picture of Vitruvius shows in its box on the Home page and at the head of its overview', pageTest, async () => {
   const p = await browser.newPage({ viewport: { width: 1280, height: 860 } });
   try {
     const errors = [];
     p.on('pageerror', e => errors.push(e.message));
     await p.goto(`${BASE}/#/`, { waitUntil: 'networkidle' });
-    // Highbrowse's mark beside its code (decorative: the name is beside it), and no other module's.
-    assert.deepEqual(await p.$$eval('#nav details > summary img.suite-mark', imgs => imgs.map(i => [i.closest('details').dataset.suite, i.getAttribute('src'), i.alt, i.naturalWidth > 0])),
-      [['hb', 'design/brand-hb-icon.svg', '', true]]);
+    // Not beside the codes in the sidebar: at 20 px the ten pictures could not be told apart (the review of 25 November
+    // 2026), so the code alone, as before them.
+    assert.equal(await p.locator('#nav details > summary img').count(), 0);
     assert.match(await p.textContent('#nav details[data-suite="hb"] > summary'), /^ONOmni News/);
-    // In its box on the Home page, and no other box has one; and beside its heading on the Dashboard.
+    // In its box on the Home page (Home has no box), decorative: the name is beside it.
     assert.deepEqual(await p.$$eval('#view .mod img.suite-mark', imgs => imgs.map(i => [i.closest('.mod').dataset.suite, i.getAttribute('src'), i.alt, i.naturalWidth > 0])),
-      [['hb', 'design/brand-hb-icon.svg', '', true]]);
-    await p.goto(`${BASE}/#/home/dashboard`, { waitUntil: 'networkidle' });
-    assert.equal(await p.getAttribute('.group[data-suite="hb"] .group-head img.suite-mark', 'src'), 'design/brand-hb-icon.svg');
+      registry.suites.filter(s => s.id !== 'home').map(s => [s.id, s.mark, '', true]));
     await p.goto(`${BASE}/#/hb`, { waitUntil: 'networkidle' });
-    assert.deepEqual(await p.$eval('#view .head img.suite-figure', i => [i.getAttribute('src'), i.naturalWidth > 0]), ['design/brand-hb.svg', true]);
+    assert.deepEqual(await p.$eval('#view .head img.suite-figure', i => [i.getAttribute('src'), i.naturalWidth > 0]), ['design/vitruvius/module-hb-128.webp', true]);
     assert.equal(await p.textContent('#view h1'), 'Omni News');
     await p.goto(`${BASE}/#/rs`, { waitUntil: 'networkidle' });
-    assert.equal(await p.locator('#view .head img').count(), 0, 'a module without one shows none');
+    assert.equal(await p.getAttribute('#view .head img.suite-figure', 'src'), 'design/vitruvius/module-rs-128.webp');
     assert.deepEqual(errors, []);
   } finally { await p.close(); }
 });

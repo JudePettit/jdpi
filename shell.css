@@ -14,8 +14,8 @@ button { font: inherit; }
 /* --- Sidebar --------------------------------------------------------------- */
 .side { display: flex; flex-direction: column; min-height: 0; background: var(--prp-surface); border-right: 1px solid var(--prp-line); }
 .brand { display: flex; align-items: center; gap: 11px; padding: 14px 16px 12px; text-decoration: none; color: var(--prp-text); }
-/* The Vitruvian Manager mark (design/brand-vm.svg) at 40 px, where the figure and his four objects still read; the ring
-   follows the mark's own tile corner (rx 48 of 256 = 7.5 px at this size). */
+/* The Vitruvian Manager mark (design/brand-vm.svg: Vitruvius in his hard hat, in his circle, on the dark tile) at
+   40 px; the ring follows the mark's own tile corner (rx 48 of 256 = 7.5 px at this size). */
 .brand img { flex: none; border-radius: 7.5px; box-shadow: 0 0 0 1px var(--prp-line-strong); }
 .brand b { display: block; font: 700 19px/1 var(--prp-font-serif); letter-spacing: .02em; }
 .brand small { display: block; margin-top: 3px; color: var(--prp-muted); font: 500 11px var(--prp-font-ui); }
@@ -28,7 +28,13 @@ button { font: inherit; }
 .nav-item { display: flex; align-items: center; gap: 9px; min-height: 32px; padding: 5px 9px; border-radius: var(--prp-radius-sm); color: var(--prp-text-2); text-decoration: none; font: 13px/1.3 var(--prp-font-ui); }
 .nav-item:hover { background: var(--prp-surface-3); color: var(--prp-text); }
 .nav-item[aria-current="page"] { background: var(--prp-accent-soft); color: var(--prp-text); font-weight: 600; box-shadow: inset 3px 0 var(--prp-accent); }
-.nav-item .icon { width: 18px; flex: none; text-align: center; color: var(--prp-muted); font-size: 13px; }
+.nav-item .icon { width: 18px; height: 18px; flex: none; display: grid; place-items: center; color: var(--prp-muted); font-size: 13px; }
+/* Vitruvius's pictures (shell.js artIcon): each submodule's in place of its glyph where the box is 40 px or more (not
+   here in the sidebar, at 18 px), at the box's own fixed size, round (each is a light medallion inside his circle,
+   which reads on light and dark alike). The glyph stays behind it, hidden, and shows where there is no picture or the
+   picture failed to load. */
+.has-art > .glyph { display: none; }
+.has-art > img.art { display: block; width: 100%; height: 100%; border-radius: 50%; }
 .nav-item .grow { flex: 1; min-width: 0; }
 .nav-item .flag { color: var(--prp-warn); font: 500 10px var(--prp-font-mono); text-transform: uppercase; letter-spacing: .04em; }
 .nav-item .flag + .flag { margin-left: 4px; }
@@ -42,14 +48,14 @@ button { font: inherit; }
 .suite[open] > summary .chev { transform: rotate(90deg); }
 .suite .suite-link { display: block; margin: 0 0 2px 36px; padding: 2px 9px; color: var(--prp-muted); font: 12px var(--prp-font-ui); text-decoration: none; }
 .suite .suite-link:hover, .suite .suite-link[aria-current="page"] { color: var(--prp-text); text-decoration: underline; }
-/* A module's own figure (registry "mark": Highbrowse's design/brand-hb-icon.svg), beside its code in the sidebar and on
-   the home page; and its large figure ("figure") at the head of its overview page. Each carries its own dark tile, so
-   it reads on both themes; the ring follows the tile's corner (6 of 32, 48 of 256). */
-.suite-mark { flex: none; border-radius: 3.75px; box-shadow: 0 0 0 1px var(--prp-line-strong); }
-.group-head .suite-mark { align-self: center; border-radius: 4.1px; }
+/* A module's own picture of Vitruvius (registry "mark"), in its box on the Home page (40 px) and at the head of its
+   overview page (104 px; 72 on a phone). Each is a round medallion with its own dark ring, so it reads on both themes
+   and needs no frame. (Not beside the codes in the sidebar or the Dashboard's headings: at 20 px the ten could not be
+   told apart.) */
+.suite-mark { flex: none; border-radius: 50%; }
 .head.has-figure { display: flex; align-items: center; gap: 20px; }
-.suite-figure { flex: none; border-radius: 19.5px; box-shadow: 0 0 0 1px var(--prp-line-strong); }
-@media (max-width: 600px) { .suite-figure { width: 72px; height: 72px; border-radius: 13.5px; } .head.has-figure { align-items: flex-start; gap: 14px; } }
+.suite-figure { flex: none; border-radius: 50%; }
+@media (max-width: 600px) { .suite-figure { width: 72px; height: 72px; } .head.has-figure { align-items: flex-start; gap: 14px; } }
 
 .side-foot { padding: 10px 12px 12px; border-top: 1px solid var(--prp-line); }
 .theme { display: grid; grid-template-columns: repeat(3, 1fr); border: 1px solid var(--prp-line-strong); border-radius: var(--prp-radius-sm); overflow: hidden; }
@@ -58,6 +64,11 @@ button { font: inherit; }
 .theme button[aria-pressed="true"] { background: var(--prp-text); color: var(--prp-surface); }
 .legal { margin-top: 9px; color: var(--prp-muted); font: 11px/1.5 var(--prp-font-ui); }
 .legal b { color: var(--prp-text-2); font-weight: 600; }
+/* The credit for the pictures of Vitruvius (shell.js VITRUVIUS_CREDIT): a link in the sidebar's foot, the sentence in
+   full at the foot of the Home page and the Dashboard. */
+.legal a.credit { color: inherit; }
+.footer .credit { flex-basis: 100%; max-width: var(--prp-measure); line-height: 1.5; }
+.footer .credit a { color: var(--prp-link); }
 
 /* --- Main column ----------------------------------------------------------- */
 .main { display: flex; flex-direction: column; min-width: 0; min-height: 0; }
@@ -181,7 +192,6 @@ html.np-on .frames { margin-bottom: calc(var(--np-h, 54px) + 12px); }
   backface-visibility: hidden; -webkit-backface-visibility: hidden; }
 .mod-front { box-shadow: inset 0 3px var(--prp-accent), var(--prp-shadow-1); }
 .mod-id { display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; }
-.mod-id .suite-mark { border-radius: 7.5px; } /* the mark's tile corner, 48 of 256, at 40 px */
 .mod-name { margin-top: auto; overflow-wrap: anywhere; font: 600 20px/1.25 var(--prp-font-serif); letter-spacing: -.005em; }
 .mod-subs { display: flex; flex-wrap: wrap; gap: 2px 9px; margin-top: -4px; color: var(--prp-muted); font: 13px/1.4 var(--prp-font-ui); }
 .mod-back { transform: rotateY(180deg); border-color: var(--prp-accent); background: var(--prp-accent-soft); }
@@ -212,7 +222,11 @@ html.np-on .frames { margin-bottom: calc(var(--np-h, 54px) + 12px); }
   background: var(--prp-surface); border: 1px solid var(--prp-line); border-radius: var(--prp-radius); box-shadow: var(--prp-shadow-1); transition: border-color .12s, box-shadow .12s; }
 .tile:hover { border-color: var(--prp-accent); box-shadow: var(--prp-shadow-2); }
 .tile .row { display: flex; align-items: center; gap: 8px; }
-.tile .icon { width: 28px; height: 28px; display: grid; place-items: center; flex: none; border-radius: var(--prp-radius-sm); background: var(--prp-accent-soft); color: var(--prp-accent); font-size: 14px; }
+/* A tile's and an overview row's picture of Vitruvius, 44 px (shell.js artIcon: smaller, the pictures cannot be told
+   apart). A submodule without a usable picture, or whose picture failed, shows its glyph in the same round medallion,
+   the pictures' own off-white inside a dark ring, in both themes, so a row of them matches. */
+.tile .icon, .list td .row-icon { width: 44px; height: 44px; display: grid; place-items: center; flex: none; border-radius: 50%; background: #faf7f0; box-shadow: inset 0 0 0 1.5px #14181f; color: #14181f; font-size: 20px; line-height: 1; }
+.tile .icon.has-art, .list td .row-icon.has-art { background: none; box-shadow: none; }
 .tile h3 { margin: 2px 0 0; font: 600 15px/1.3 var(--prp-font-ui); }
 .tile p { margin: 0; color: var(--prp-muted); font-size: 12.5px; line-height: 1.5; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
 .tile .foot { margin-top: auto; display: flex; flex-wrap: wrap; gap: 2px 10px; align-items: center; color: var(--prp-muted); font: 11px var(--prp-font-ui); }
@@ -226,6 +240,9 @@ html.np-on .frames { margin-bottom: calc(var(--np-h, 54px) + 12px); }
 .about p { margin: 0 0 8px; max-width: var(--prp-measure); color: var(--prp-text-2); font-size: 13.5px; line-height: 1.55; }
 .about p:last-child { margin-bottom: 0; }
 .list td .name { font-weight: 600; color: var(--prp-text); text-decoration: none; }
+.list td .sub-row { display: flex; align-items: flex-start; gap: 12px; }
+.list td .sub-row > div { min-width: 0; }
+.home-dash .dash-icon { width: 18px; height: 18px; display: grid; place-items: center; flex: none; }
 .list td .name:hover { text-decoration: underline; }
 .list td p { margin: 2px 0 0; color: var(--prp-muted); max-width: 70ch; }
 .launch { max-width: 720px; margin: 40px auto; padding: 26px 28px; }

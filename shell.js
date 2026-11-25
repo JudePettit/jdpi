@@ -4,9 +4,9 @@
    registry.json, and hosts each submodule page in a persistent workspace frame. A module has a short name (registry
    "name", for the sidebar, the breadcrumb and search) and a full title (registry "title", for its overview page, its
    box on the Home page, the Dashboard's headings, page eyebrows and the tab title); they differ only where the full
-   title is too long for the sidebar. A module with its own variant of the Vitruvian figure (Highbrowse's, so far) names
-   it in the registry: "mark", the small one, beside its code in the sidebar, in its box on the Home page and on the
-   Dashboard, and "figure" at the head of its overview page.
+   title is too long for the sidebar. Each module names its picture of Vitruvius, VM's mascot, in the registry: "mark",
+   shown in its box on the Home page and, larger, at the head of its overview page. Each submodule's own picture is its
+   "art" ("Vitruvius, VM's mascot" below).
    The Home module (registry id "home", first in the sidebar) is where VM starts. Its overview is the Home page (#/):
    every other module as a box that turns over to what you can do with it (registry "summary"), and a small button to
    its one submodule, the Dashboard (#/home/dashboard), which was the home page until November 2026: the Today panel
@@ -137,20 +137,58 @@ function setupTheme() {
   applyTheme(saved);
 }
 
+/* --- Vitruvius, VM's mascot (25 November 2026) ------------------------------------------------------------------------
+   Each submodule's picture (registry "art": Vitruvius holding old tools of its field, a 64 px WebP, with 128 and 256 px
+   ones beside it) and each module's ("mark") is drawn only where it is ART_MIN px or more: the Dashboard's tiles and a
+   module's overview (44 px), the Home page's boxes (the module's, 40 px) and the head of a module's overview (104 px).
+   Smaller, every picture is the same figure in the same circle and only the tool he holds differs, by a few pixels, so
+   a reader could not tell the items apart (the review of 25 November 2026): there the glyph (registry "icon") stays,
+   as in the sidebar, the rows of the Home page's boxes and its Dashboard button. A picture has a fixed width and
+   height, so nothing moves when it arrives; it loads lazily, decodes off the main thread, and has an empty alt, as the
+   name is always beside it. The glyph stays in the markup behind it (hidden while there is a picture): it is what shows
+   where a submodule has no usable picture, in the same round medallion, and it takes the picture's place if the picture
+   fails to load (the error listener in init).
+   The pictures were drawn by an AI image model, and every page that shows them says so (VITRUVIUS_CREDIT: the Home
+   page's and the Dashboard's footers, a module overview's About panel, and the sidebar's foot, which links to
+   design/vitruvius/index.html). */
+const VITRUVIUS_CREDIT = "Vitruvius, VM's mascot, was drawn by an AI image model (ChatGPT) from VM's own description; no person drew or retouched the pictures. He is a new character, not a copy of Leonardo's drawing.";
+const VITRUVIUS_PAGE = 'design/vitruvius/index.html';
+const ART_MIN = 40;
+// A picture's file at another of its sizes (64, 128 or 256 px).
+const artAt = (src, px) => String(src).replace(/-64\.webp$/, `-${px}.webp`);
+// The browser picks the smallest file that is sharp at the size drawn: 64 px on an ordinary screen and 128 on a sharp one
+// for the 40 to 64 px places (never the 256 px one, twice the weight again), 128 and 256 px for the larger ones.
+const artImg = (src, size, cls, lazy = true) => {
+  const set = size <= 64 ? [64, 128] : [128, 256];
+  return `<img class="${cls}" src="${esc(artAt(src, set[0]))}" srcset="${set.map(px => `${esc(artAt(src, px))} ${px}w`).join(', ')}" sizes="${size}px" alt="" width="${size}" height="${size}"${lazy ? ' loading="lazy"' : ''} decoding="async">`;
+};
+const artIcon = (m, size, cls = 'icon') => {
+  const art = m.art && size >= ART_MIN;
+  return `<span class="${cls}${art ? ' has-art' : ''}" aria-hidden="true">${art ? artImg(m.art, size, 'art') : ''}<span class="glyph">${esc(m.icon)}</span></span>`;
+};
+// A picture that fails to load gives way: a submodule's to its glyph, a module's mark to nothing (its code is beside it).
+function artFallback(e) {
+  const img = e.target;
+  if (img?.tagName !== 'IMG' || !(img.classList.contains('art') || img.classList.contains('suite-mark'))) return;
+  img.parentElement?.classList.remove('has-art');
+  img.remove();
+}
+const creditLine = () => `<span class="credit">${esc(VITRUVIUS_CREDIT)} <a href="${VITRUVIUS_PAGE}">See every picture</a>.</span>`;
+
 /* --- Navigation ------------------------------------------------------------ */
-// Each item: its name, a flag while it is in build or planned, and a "Late" flag while its data is late; its freshness
-// line is its title (paintFreshness keeps both up to date as the lines are read).
+// Each item: its picture, its name, a flag while it is in build or planned, and a "Late" flag while its data is late;
+// its freshness line is its title (paintFreshness keeps both up to date as the lines are read).
 function navItem(suite, m) {
   const flag = STATUS[m.status] ? `<span class="flag">${esc(STATUS[m.status])}</span>` : '';
   const l = lineOf(m);
   // Its views' names too, so a merged submodule is found by its parts' (Omni Trade, Investor Impersonator: Auto Trader).
   const search = [m.name, suite.name, suite.title, suite.code, kindLabel(m.kind), ...(m.aliases || []), ...views(m).map(v => v.name)].join(' ').toLowerCase();
   return `<a class="nav-item" href="${href(suite, m)}" data-route="${suite.id}/${m.id}" data-search="${esc(search)}" data-suite="${suite.id}"${l ? ` title="${esc(l.text)}"` : ''}>
-    <span class="icon" aria-hidden="true">${esc(m.icon)}</span><span class="grow">${esc(m.name)}</span>${flag}${l?.late ? LATE_FLAG : ''}</a>`;
+    ${artIcon(m, 18)}<span class="grow">${esc(m.name)}</span>${flag}${l?.late ? LATE_FLAG : ''}</a>`;
 }
 const LATE_FLAG = '<span class="flag late">Late</span>';
-// A module's own figure, small, beside its code (decorative: the module's name is beside it).
-const suiteMark = (suite, size) => (suite.mark ? `<img class="suite-mark" src="${esc(suite.mark)}" alt="" width="${size}" height="${size}">` : '');
+// A module's own picture beside its code in its box on the Home page (decorative: the module's name is beside it).
+const suiteMark = (suite, size) => (suite.mark && size >= ART_MIN ? artImg(suite.mark, size, 'suite-mark', false) : '');
 // Each module's link to its overview. The Home module's is the Home page, an item of its own with the ⌂ the sidebar
 // always opened with; every other module's is a quiet "Module overview" under its name.
 const overviewName = suite => (suite.id === HOME ? 'Home page' : 'Module overview');
@@ -161,12 +199,12 @@ function renderNav() {
   const P = state.registry.platform;
   $('#nav').innerHTML = state.registry.suites.map(suite => `
       <details class="suite" data-suite="${suite.id}" open>
-        <summary${suite.title && suite.title !== suite.name ? ` title="${esc(suite.title)}"` : ''}><span class="prp-code" data-suite="${suite.id}">${esc(suite.code)}</span>${suiteMark(suite, 20)}${esc(suite.name)}<span class="chev" aria-hidden="true">›</span></summary>
+        <summary${suite.title && suite.title !== suite.name ? ` title="${esc(suite.title)}"` : ''}><span class="prp-code" data-suite="${suite.id}">${esc(suite.code)}</span>${esc(suite.name)}<span class="chev" aria-hidden="true">›</span></summary>
         ${overviewLink(suite)}
         ${suite.modules.map(m => navItem(suite, m)).join('')}
       </details>`).join('') +
     `<div class="search-results" id="search-results" hidden></div>`;
-  $('#legal').innerHTML = `<b>${esc(P.name)} ${esc(P.version)}</b> · <span id="count">${esc(countText())}</span><br>© ${new Date().getFullYear()} ${esc(P.company)}`;
+  $('#legal').innerHTML = `<b>${esc(P.name)} ${esc(P.version)}</b> · <span id="count">${esc(countText())}</span><br>© ${new Date().getFullYear()} ${esc(P.company)} · <a class="credit" href="${VITRUVIUS_PAGE}" title="${esc(VITRUVIUS_CREDIT)}">Vitruvius, drawn by AI</a>`;
 }
 // The one count of modules, worded the same wherever it shows (design/prp-freshness.js countWords): Home is a module
 // and the count says so.
@@ -328,7 +366,7 @@ function paintFreshness() {
 // A Dashboard tile: its foot says how fresh its data is (and whether it is in build, or opens in its own tab); where it
 // is hosted is in its module's "About this module".
 const tile = (suite, m) => `<a class="tile" href="${href(suite, m)}" data-suite="${suite.id}">
-    <div class="row"><span class="icon" aria-hidden="true">${esc(m.icon)}</span></div>
+    <div class="row">${artIcon(m, 44)}</div>
     <h3>${esc(m.name)}</h3><p>${esc(m.description)}</p>
     <div class="foot">${statusFlag(m)}${freshHtml(m, 'line')}${m.opensInNewTab ? '<span>Opens in a new tab</span>' : ''}</div>
   </a>`;
@@ -348,7 +386,7 @@ const modBox = s => {
   return `<li class="mod" data-suite="${esc(s.id)}">
     <a class="mod-card" href="${href(s)}" aria-labelledby="${id}-name" aria-describedby="${id}-does ${id}-fresh">
       <span class="mod-turn">
-        <span class="mod-face mod-front"><span class="mod-id"><span class="prp-code">${esc(s.code)}</span>${suiteMark(s, 40)}</span><span class="mod-name" id="${id}-name">${esc(s.title || s.name)}</span><span class="mod-subs" aria-hidden="true">${s.modules.map(m => `<span>${esc(m.icon)}</span>`).join('')}</span></span>
+        <span class="mod-face mod-front"><span class="mod-id"><span class="prp-code">${esc(s.code)}</span>${suiteMark(s, 40)}</span><span class="mod-name" id="${id}-name">${esc(s.title || s.name)}</span><span class="mod-subs" aria-hidden="true">${s.modules.map(m => artIcon(m, 20, 'sub')).join('')}</span></span>
         <span class="mod-face mod-back"><span class="mod-does" id="${id}-does">${esc(s.summary || s.description)}</span><span class="mod-fresh" id="${id}-fresh" data-fresh-suite="${esc(s.id)}">${esc(suiteFresh(s))}</span><span class="mod-go" aria-hidden="true">Module overview →</span></span>
       </span>
     </a>
@@ -367,10 +405,10 @@ function renderHome() {
       <div class="prp-eyebrow">${esc(P.fullName)} <span class="sep">·</span> by ${esc(P.company)}</div>
       <h1 class="prp-title">${esc(home?.title || 'Home')}</h1>
       <p class="prp-dek">${esc(P.tagline)}</p></div>
-      ${dash ? `<a class="prp-btn sm home-dash" href="${href(home, dash)}" title="${esc(dash.description)}"><span aria-hidden="true">${esc(dash.icon)}</span>${esc(dash.name)}</a>` : ''}
+      ${dash ? `<a class="prp-btn sm home-dash" href="${href(home, dash)}" title="${esc(dash.description)}">${artIcon(dash, 18, 'dash-icon')}${esc(dash.name)}</a>` : ''}
     </header>
     <ul class="mods" role="list" aria-label="Modules">${state.registry.suites.filter(s => s.id !== HOME).map(modBox).join('')}</ul>
-    <footer class="footer"><span>${esc(P.fullName)} (${esc(P.name)}), by ${esc(P.company)}.</span><span>Registry v${esc(P.version)}</span></footer>
+    <footer class="footer"><span>${esc(P.fullName)} (${esc(P.name)}), by ${esc(P.company)}.</span><span>Registry v${esc(P.version)}</span>${creditLine()}</footer>
   </div>`;
 }
 // A tap turns a box over and a second tap on it opens its module; a tap anywhere else in the view turns it back (one on
@@ -417,11 +455,11 @@ function renderDashboard(suite, module) {
       <div class="prp-kpi" data-kpi="late"><span>Late</span><b>${esc(freshCounts().late)}</b><small>${esc(kpiSmall(freshCounts().unread))}</small></div>
     </div>
     ${state.registry.suites.map((s, i) => `<section class="group" data-suite="${s.id}">
-      <div class="group-head"><span class="prp-code">${esc(s.code)}</span>${suiteMark(s, 22)}<h2 class="prp-h2"><span class="prp-section-no">${i + 1}.</span>${esc(s.title || s.name)}</h2><a class="more" href="${href(s)}">${overviewName(s)} →</a></div>
+      <div class="group-head"><span class="prp-code">${esc(s.code)}</span><h2 class="prp-h2"><span class="prp-section-no">${i + 1}.</span>${esc(s.title || s.name)}</h2><a class="more" href="${href(s)}">${overviewName(s)} →</a></div>
       <p>${esc(s.description)}</p>
       <div class="tiles">${s.modules.map(m => tile(s, m)).join('')}</div>
     </section>`).join('')}
-    <footer class="footer"><span>${esc(P.fullName)} (${esc(P.name)}), by ${esc(P.company)}.</span><span>Registry v${esc(P.version)}</span></footer>
+    <footer class="footer"><span>${esc(P.fullName)} (${esc(P.name)}), by ${esc(P.company)}.</span><span>Registry v${esc(P.version)}</span>${creditLine()}</footer>
   </div>`;
   // The cards have painted. Fill the panel when the browser is idle (never on the first-paint path): a cache miss fetches
   // through the highlights module, a hit renders at once. It never throws into route().
@@ -475,9 +513,9 @@ const SHELL_PAGES = new Map([['dashboard', renderDashboard]]);
 // A module's overview: its submodules, each with its freshness line (where the Kind, Status and Host columns were), and
 // "About this module" at its foot, which says where they are hosted.
 function renderSuite(suite) {
-  // A module with its own figure shows it at the head of its overview, as its landing page does; here it is decorative
-  // (no alt text), since the module's name is the heading beside it.
-  const figure = suite.figure ? `<img class="suite-figure" src="${esc(suite.figure)}" alt="" width="104" height="104">` : '';
+  // The module's picture of Vitruvius at the head of its overview, large enough to see what he holds; decorative (no
+  // alt text), since the module's name is the heading beside it. Each submodule's picture beside its name and words.
+  const figure = suiteMark(suite, 104).replace('class="suite-mark"', 'class="suite-figure"');
   $('#view').innerHTML = `<div class="page" data-suite="${suite.id}">
     <header class="head${figure ? ' has-figure' : ''}">${figure}<div>
       <div class="prp-eyebrow">${esc(state.registry.platform.name)} <span class="sep">/</span> Module ${esc(suite.code)}</div>
@@ -487,7 +525,7 @@ function renderSuite(suite) {
     <div class="list prp-panel"><table class="prp-table">
       <thead><tr><th scope="col">Submodule</th><th scope="col">Last update</th><th scope="col"><span class="sr-only">Open</span></th></tr></thead>
       <tbody>${suite.modules.map(m => `<tr>
-        <td><a class="name" href="${href(suite, m)}">${esc(m.icon)}&nbsp; ${esc(m.name)}</a>${statusFlag(m) ? ` ${statusFlag(m)}` : ''}<p>${esc(m.description)}</p></td>
+        <td><div class="sub-row">${artIcon(m, 44, 'row-icon')}<div><a class="name" href="${href(suite, m)}">${esc(m.name)}</a>${statusFlag(m) ? ` ${statusFlag(m)}` : ''}<p>${esc(m.description)}</p></div></div></td>
         <td class="fresh-cell">${freshHtml(m, 'line')}</td>
         <td><a class="prp-btn sm" href="${href(suite, m)}">Open</a></td></tr>`).join('')}</tbody></table></div>
     <section class="prp-panel about" aria-labelledby="about-${esc(suite.id)}">
@@ -495,6 +533,7 @@ function renderSuite(suite) {
       <div class="prp-panel-body">
         <p><b>Hosting.</b> ${esc(fresh.mod ? fresh.mod.hostingAbout(suite) : '')}</p>
         <p><b>Last update.</b> Each line is worked out from the data's own time and its refresh's schedule, never written by hand; times are UTC. A line says Late when its data is older than twice its schedule plus three hours, or when the daily data check found its store failing. A page with no timed data says what it is instead: on demand, a course, reference data, or private.</p>
+        <p><b>Pictures.</b> ${creditLine()}</p>
       </div>
     </section>
   </div>`;
@@ -672,8 +711,8 @@ function frameAddress(frame) {
   try { const u = frame.contentWindow.location.href; if (u && u !== 'about:blank') return u; } catch { /* another origin */ }
   return new URL(frame.dataset.url || frame.src, location.href).href;
 }
-/* Loading. While the frame in view loads a new page, a thin bar runs along the top of the workspace and the Vitruvian
-   Manager figure (design/vm-loading.svg: he runs on all fours, then rolls off in his wheel) plays in its middle. Both
+/* Loading. While the frame in view loads a new page, a thin bar runs along the top of the workspace and Vitruvius, VM's
+   mascot (design/vm-loading.svg: he runs on the spot in his circle), plays in its middle. Both
    start where a frame starts a new document (createFrame, moveFrame to another page, reloadFrame) and end at the frame's
    load event, or after a safety timeout in case none comes. A hash-only move never calls setLoading, so neither shows
    for one; nor do switches to a frame that has already loaded. The figure waits LOADER_DELAY_MS before it goes up, so a
@@ -1001,6 +1040,8 @@ function setupApp() {
 
 (async function init() {
   setupApp();
+  // A picture of Vitruvius that fails to load gives way to the glyph (error events do not bubble: caught on the way down).
+  document.addEventListener('error', artFallback, true);
   setupTheme();
   setupSkip();
   setupMenu();

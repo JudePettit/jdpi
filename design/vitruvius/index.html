@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="en" data-suite="home" class="prp">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#f3f4f6" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0f1318" media="(prefers-color-scheme: dark)">
+<link rel="icon" href="../brand-vm-icon.svg" type="image/svg+xml">
+<title>Vitruvius, VM's mascot · VM</title>
+<meta name="description" content="Every picture of Vitruvius, Vitruvian Manager's mascot, with the words that describe it and how it was made: by an AI image model (ChatGPT), from VM's own description.">
+<script>/* Apply the saved theme before first paint */try{var t=localStorage.getItem('prp.theme');if(t==='light'||t==='dark')document.documentElement.dataset.theme=t}catch(e){}</script>
+<link rel="stylesheet" href="../prp.css">
+<style>
+*{box-sizing:border-box}
+main{max-width:1080px;margin:0 auto;padding:28px 16px 48px}
+.top{display:flex;gap:18px;align-items:center;flex-wrap:wrap}
+.top .mark{flex:none;border-radius:50%}
+.top>div{flex:1 1 260px;min-width:0}
+.back{display:inline-block;margin-bottom:14px;font:var(--prp-fs-sm) var(--prp-font-ui)}
+.made{margin:18px 0 0;max-width:var(--prp-measure);padding:12px 14px;border:1px solid var(--prp-line);border-left:3px solid var(--prp-accent);border-radius:var(--prp-radius-sm);background:var(--prp-surface);color:var(--prp-text);font:15px/1.6 var(--prp-font-ui)}
+.made p{margin:0}.made p+p{margin-top:8px;color:var(--prp-text-2)}
+.run{display:flex;gap:14px;align-items:center;margin:18px 0 0;color:var(--prp-text-2);font:var(--prp-fs-sm)/1.5 var(--prp-font-ui)}
+.run img{flex:none}
+section{margin-top:30px}
+section>p{margin:6px 0 0;max-width:var(--prp-measure);color:var(--prp-text-2)}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px;margin-top:14px;padding:0;list-style:none}
+figure{margin:0;padding:12px;background:var(--prp-surface);border:1px solid var(--prp-line);border-radius:var(--prp-radius);display:flex;flex-direction:column;gap:8px;min-width:0}
+figure img{display:block;width:112px;height:112px;margin:0 auto;border-radius:50%}
+figure.sheet img{border-radius:var(--prp-radius-sm)}
+figcaption{font:var(--prp-fs-xs)/1.45 var(--prp-font-ui);color:var(--prp-text-2);overflow-wrap:anywhere}
+figcaption b{display:block;color:var(--prp-text);font-weight:600;font-size:var(--prp-fs-sm)}
+.files{display:block;margin-top:4px;color:var(--prp-muted);font-family:var(--prp-font-mono)}
+.wait{color:var(--prp-muted)}
+@media (max-width:480px){.grid{grid-template-columns:repeat(2,minmax(0,1fr))}figure img{width:96px;height:96px}.prp-title{font-size:25px}}
+</style>
+</head>
+<body>
+<main>
+  <a class="back" href="../../">&larr; Back to Vitruvian Manager</a>
+  <div class="top">
+    <img class="mark" src="mark-256.webp" width="96" height="96" decoding="async" alt="Vitruvius in an amber hard hat, arms and legs spread inside a circle: Vitruvian Manager's mark">
+    <div>
+      <div class="prp-eyebrow">Vitruvian Manager <span class="sep">/</span> the mascot</div>
+      <h1 class="prp-title">Vitruvius, VM's mascot</h1>
+      <p class="prp-dek">Vitruvius stands for VM in its mark, its app icon and the loading picture, and he holds something different for each part of VM. Every picture of him is on this page, with the words that describe it to people who cannot see it.</p>
+    </div>
+  </div>
+  <div class="made">
+    <p>Vitruvius, VM's mascot, was drawn by an AI image model (ChatGPT) from VM's own description; no person drew or retouched the pictures. He is a new character, not a copy of Leonardo's drawing.</p>
+    <p>The pictures were made in November 2026. A program in VM's own code then took away their backgrounds, cut them to size and saved them small, without changing what they show. Each one is labelled below as made by AI.</p>
+    <p>The AI model's own files carried a machine-readable label saying an AI made them (Content Credentials). The smaller files VM shows are new files cut from those, and they do not keep that label; the list of every picture, <a href="index.json">index.json</a>, is the machine-readable record that each was made by AI.</p>
+  </div>
+  <p class="run"><img src="../vm-loading.svg" width="96" height="96" alt="Vitruvius running: the picture VM shows while a page loads">While a page loads, VM shows Vitruvius running. If your device asks for less movement, he stands still.</p>
+  <div id="sections"><p class="wait">Loading the pictures&hellip;</p></div>
+  <noscript><p>This list needs JavaScript. The pictures and their words are also in <a href="index.json">index.json</a>.</p></noscript>
+</main>
+<script>
+(async () => {
+  const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
+  const at = document.getElementById('sections');
+  try {
+    const [index, registry] = await Promise.all([
+      fetch('index.json').then(r => r.json()),
+      fetch('../../registry.json').then(r => r.json()).catch(() => ({ suites: [] }))
+    ]);
+    const names = {};
+    for (const s of registry.suites || []) { names[s.id] = s.title || s.name; for (const m of s.modules || []) names[m.id] = m.name; }
+    // Pictures kept for modules VM does not have yet, and the runner's strip of frames, are not shown here.
+    const shown = index.pictures.filter(p => !['future', 'strip'].includes(p.kind));
+    const groups = [
+      ['The mark', 'The pictures in the corner of every page and in the app icon.', p => p.kind === 'mark'],
+      ['The parts of VM', 'One Vitruvius for each part of VM, in its box on the Home page and at the head of its overview.', p => p.kind === 'module'],
+      ['Each page', 'Vitruvius for each page, on the Dashboard and on the overview of its part of VM. The menus keep a small symbol, as the pictures are too small to tell apart there. Two pages have a plain symbol instead.', p => p.kind === 'submodule'],
+      ['Drawing sheets', 'The first drawings of Vitruvius, which the others follow.', p => p.kind === 'sheet']
+    ];
+    const root = new URL('../../', location.href);
+    let first = 0;
+    at.innerHTML = groups.map(([title, dek, keep]) => {
+      const list = shown.filter(keep);
+      if (!list.length) return '';
+      return `<section><h2 class="prp-h2">${esc(title)}</h2><p>${esc(dek)}</p><ul class="grid">${list.map(p => {
+        const small = new URL(p.files['256'] || p.files['64'], root).href;
+        const name = p.for ? names[p.for] || p.for : p.id.replace(/-/g, ' ');
+        const lazy = first++ >= 8 ? ' loading="lazy"' : '';
+        return `<li><figure class="${esc(p.kind)}"><img src="${esc(small)}" width="112" height="112"${lazy} decoding="async" alt="${esc(p.alt)}">` +
+          `<figcaption><b>${esc(name)}</b>${esc(p.alt)}<span class="files">Made by AI</span></figcaption></figure></li>`;
+      }).join('')}</ul></section>`;
+    }).join('');
+  } catch (e) {
+    at.innerHTML = '<p>The list of pictures could not be read. They are in <a href="index.json">index.json</a>.</p>';
+  }
+})();
+</script>
+</body>
+</html>

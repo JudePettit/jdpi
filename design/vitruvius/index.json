@@ -1,0 +1,1091 @@
+{
+ "about": "Vitruvius, VM's mascot, was drawn by an AI image model (ChatGPT) from VM's own description; no person drew or retouched the pictures. He is a new character, not a copy of Leonardo's drawing.",
+ "madeBy": "An AI image model (ChatGPT) drew it from VM's own description in words. No person drew or retouched it.",
+ "model": "ChatGPT (OpenAI image model)",
+ "made": "2026-11-22",
+ "processed": "design/scripts/vitruvius-art.mjs",
+ "provenance": "The AI model's own PNG files carried a Content Credentials (C2PA) label saying an AI made them; the WebP files here do not keep it, as they are new files cut from those. This file is the machine-readable record that every picture listed was made by AI.",
+ "pictures": [
+  {
+   "id": "master",
+   "kind": "sheet",
+   "alt": "Vitruvius, VM's mascot: a curly-haired man in an amber tunic, four arms and four legs spread inside a circle and a square",
+   "files": {
+    "64": "design/vitruvius/master-64.webp",
+    "256": "design/vitruvius/master-256.webp"
+   },
+   "bytes": {
+    "64": 2856,
+    "256": 15634
+   },
+   "background": "#fbf6ee",
+   "source": "master-2.png",
+   "madeBy": "An AI image model (ChatGPT) drew it from VM's own description in words. No person drew or retouched it."
+  },
+  {
+   "id": "mark",
+   "kind": "mark",
+   "alt": "Vitruvius in an amber hard hat, arms and legs spread inside a circle: Vitruvian Manager's mark",
+   "files": {
+    "64": "design/vitruvius/mark-64.webp",
+    "256": "design/vitruvius/mark-256.webp",
+    "512": "design/vitruvius/mark-512.webp"
+   },
+   "bytes": {
+    "64": 3328,
+    "256": 17960,
+    "512": 42664
+   },
+   "background": "#fbf6ef",
+   "source": "mark-1.png",
+   "madeBy": "An AI image model (ChatGPT) drew it from VM's own description in words. No person drew or retouched it."
+  },
+  {
+   "id": "mark-head",
+   "kind": "mark",
+   "alt": "Vitruvius's head in an amber hard hat: Vitruvian Manager's icon",
+   "files": {
+    "64": "design/vitruvius/mark-head-64.webp",
+    "256": "design/vitruvius/mark-head-256.webp",
+    "64png": "design/vitruvius/mark-head-64.png"
+   },
+   "bytes": {
+    "64": 3160,
+    "256": 14228,
+    "64png": 8178
+   },
+   "background": "#fbf6ef",
+   "source": "mark-1.png",
+   "madeBy": "An AI image model (ChatGPT) drew it from VM's own description in words. No person drew or retouched it."
+  },
+  {
+   "id": "runner-side",
+   "kind": "sheet",
+   "alt": "Vitruvius running to the right",
+   "files": {
+    "64": "design/vitruvius/runner-side-64.webp",
+    "256": "design/vitruvius/runner-side-256.webp"
+   },
+   "bytes": {
+    "64": 3414,
+    "256": 19362
+   },
+   "background": "#fcf7ee",
+   "source": "runner-side-1.png",
+   "madeBy": "An AI image model (ChatGPT) drew it from VM's own description in words. No person drew or retouched it."
+  },
+  {
+   "id": "runner-wheel",
+   "kind": "sheet",
+   "alt": "Vitruvius running inside a circle",
+   "files": {
+    "64": "design/vitruvius/runner-wheel-64.webp",
+    "256": "design/vitruvius/runner-wheel-256.webp"
+   },
+   "bytes": {
+    "64": 3160,
+    "256": 17196
+   },
+   "background": "#fcf8f0",
+   "source": "runner-wheel-1.png",
+   "madeBy": "An AI image model (ChatGPT) drew it from VM's own description in words. No person drew or retouched it."
+  },
+  {
+   "id": "runner-frames",
+   "kind": "strip",
+   "alt": "Vitruvius running to the right, in eight frames",
+   "files": {
+    "strip": "design/vitruvius/runner-frames-112.webp"
+   },
+   "bytes": {
+    "strip": 38172
+   },
+   "frames": 8,
+   "frameWidth": 93,
+   "height": 112,
+   "background": "#fbf7ee",
+   "source": "runner-frames-1.png",
+   "madeBy": "An AI image model (ChatGPT) drew it from VM's own description in words. No person drew or retouched it."
+  },
+  {
+   "id": "module-home",
+   "kind": "module",
+   "for": "home",
+   "alt": "Vitruvius, VM's mascot, holding an oil lantern and a large key",
+   "files": {
+    "64": "design/vitruvius/module-home-64.webp",
+    "128": "design/vitruvius/module-home-128.webp",
+    "256": "design/vitruvius/module-home-256.webp"
+   },
+   "bytes": {
+    "64": 3498,
+    "128": 8472,
+    "256": 21142
+   },
+   "background": "#fcf7ee",
+   "source": "module-home-2.png",
+   "madeBy": "An AI image model (ChatGPT) drew it from VM's own description in words. No person drew or retouched it."
+  },
+  {
+   "id": "module-rt",
+   "kind": "module",
+   "for": "rt",
+   "alt": "Vitruvius, VM's mascot, holding a brass spyglass and a globe on a stand",
+   "files": {
+    "64": "design/vitruvius/module-rt-64.webp",
+    "128": "design/vitruvius/module-rt-128.webp",
+    "256": "design/vitruvius/module-rt-256.webp"
+   },
+   "bytes": {
+    "64": 3506,
+    "128": 8484,
+    "256": 21030
+   },
+   "background": "#fbf6ed",
+   "source": "module-rt-2.png",
+   "madeBy": "An AI image model (ChatGPT) drew it from VM's own description in words. No person drew or retouched it."
+  },
+  {
+   "id": "module-hb",
+   "kind": "module",
+   "for": "hb",
+   "alt": "Vitruvius, VM's mascot, holding a handbell and a folded broadsheet",
+   "files": {
+    "64": "design/vitruvius/module-hb-64.webp",
+    "128": "design/vitruvius/module-hb-128.webp",
+    "256": "design/vitruvius/module-hb-256.webp"
+   },
+   "bytes": {
+    "64": 3686,
+    "128": 8770,
+    "256": 21930
+   },
+   "background": "#fdf7ee",
+   "source": "module-hb-2.png",
+   "madeBy": "An AI image model (ChatGPT) drew it from VM's own description in words. No person drew or retouched it."
+  },
+  {
+   "id": "module-rs",
+   "kind": "module",
+   "for": "rs",
+   "alt": "Vitruvius, VM's mascot, holding an hourglass and a parchment scroll",
+   "files": {
+    "64": "design/vitruvius/module-rs-64.webp",
+    "128": "design/vitruvius/module-rs-128.webp",
+    "256": "design/vitruvius/module-rs-256.webp"
+   },
+   "bytes": {
+    "64": 3474,
+    "128": 8510,
+    "256": 21628
+   },
+   "background": "#fcf7ee",
+   "source": "module-rs-1.png",
+   "madeBy": "An AI image model (ChatGPT) drew it from VM's own description in words. No person drew or retouched it."
+  },
+  {
+   "id": "module-oi",
+   "kind": "module",
+   "for": "oi",
+   "alt": "Vitruvius, VM's mascot, holding a dark lantern and a brass cipher disc",
+   "files": {
+    "64": "design/vitruvius/module-oi-64.webp",
+    "128": "design/vitruvius/module-oi-128.webp",
+    "256": "design/vitruvius/module-oi-256.webp"
+   },
+   "bytes": {
+    "64": 3480,
+    "128": 8254,
+    "256": 20774
+   },
+   "background": "#fbf6ee",
+   "source": "module-oi-2.png",
+   "madeBy": "An AI image model (ChatGPT) drew it from VM's own description in words. No person drew or retouched it."
+  },
+  {
+   "id": "module-mm",
+   "kind": "module",
+   "for": "mm",
+   "alt": "Vitruvius, VM's mascot, holding balance scales and an abacus",
+   "files": {
+    "64": "design/vitruvius/module-mm-64.webp",
+    "128": "design/vitruvius/module-mm-128.webp",
+    "256": "design/vitruvius/module-mm-256.webp"
+   },
+   "bytes": {
+    "64": 3546,
+    "128": 8290,
+    "256": 20868
+   },
+   "background": "#fcf7f0",
+   "source": "module-mm-1.png",
+   "madeBy": "An AI image model (ChatGPT) drew it from VM's own description in words. No person drew or retouched it."
+  },
+  {
+   "id": "module-ns",
+   "kind": "module",
+   "for": "ns",
+   "alt": "Vitruvius, VM's mascot, holding an astrolabe and a glass alembic",
+   "files": {
+    "64": "design/vitruvius/module-ns-64.webp",
+    "128": "design/vitruvius/module-ns-128.webp",
+    "256": "design/vitruvius/module-ns-256.webp"
+   },
+   "bytes": {
+    "64": 3566,
+    "128": 8458,
+    "256": 20664
+   },
+   "background": "#fcf7ee",
+   "source": "module-ns-2.png",
+   "madeBy": "An AI image model (ChatGPT) drew it from VM's own description in words. No person drew or retouched it."
+  },
+  {
+   "id": "module-ds",
+   "kind": "module",
+   "for": "ds",
+   "alt": "Vitruvius, VM's mascot, holding a slide rule and a punched card",
+   "files": {
+    "64": "design/vitruvius/module-ds-64.webp",
+    "128": "design/vitruvius/module-ds-128.webp",
+    "256": "design/vitruvius/module-ds-256.webp"
+   },
+   "bytes": {
+    "64": 3550,
+    "128": 8690,
+    "256": 22706
+   },
+   "background": "#fbf6ee",
+   "source": "module-ds-1.png",
+   "madeBy": "An AI image model (ChatGPT) drew it from VM's own description in words. No person drew or retouched it."
+  },
+  {
+   "id": "module-kino",
+   "kind": "module",
+   "for": "kino",
+   "alt": "Vitruvius, VM's mascot, holding a magic lantern projector and a film reel",
+   "files": {
+    "64": "design/vitruvius/module-kino-64.webp",
+    "128": "design/vitruvius/module-kino-128.webp",
+    "256": "design/vitruvius/module-kino-256.webp"
+   },
+   "bytes": {
+    "64": 3574,
+    "128": 8606,
+    "256": 21402
+   },
+   "background": "#fbf6ed",
+   "source": "module-kino-1.png",
+   "madeBy": "An AI image model (ChatGPT) drew it from VM's own description in words. No person drew or retouched it."
+  },
+  {
+   "id": "module-bibliotheca",
+   "kind": "module",
+   "for": "bibliotheca",
+   "alt": "Vitruvius, VM's mascot, holding an open book and a goose quill",
+   "files": {
+    "64": "design/vitruvius/module-bibliotheca-64.webp",
+    "128": "design/vitruvius/module-bibliotheca-128.webp",
+    "256": "design/vitruvius/module-bibliotheca-256.webp"
+   },
+   "bytes": {
+    "64": 3586,
+    "128": 8844,
+    "256": 22772
+   },
+   "background": "#fbf6ee",
+   "source": "module-bibliotheca-1.png",
+   "madeBy": "An AI image model (ChatGPT) drew it from VM's own description in words. No person drew or retouched it."
+  },
+  {
+   "id": "future-politics",
+   "kind": "future",
+   "for": "politics",
+   "alt": "Vitruvius, VM's mascot, holding a voting urn of pebbles and a decree with a wax seal",
+   "files": {
+    "64": "design/vitruvius/future/future-politics-64.webp",
+    "256": "design/vitruvius/future/future-politics-256.webp"
+   },
+   "bytes": {
+    "64": 3500,
+    "256": 22472
+   },
+   "background": "#fcf7ee",
+   "source": "future-politics-2.png",
+   "madeBy": "An AI image model (ChatGPT) drew it from VM's own description in words. No person drew or retouched it."
+  },
+  {
+   "id": "future-history",
+   "kind": "future",
+   "for": "history",
+   "alt": "Vitruvius, VM's mascot, holding an hourglass and a stone tablet with a chisel",
+   "files": {
+    "64": "design/vitruvius/future/future-history-64.webp",
+    "256": "design/vitruvius/future/future-history-256.webp"
+   },
+   "bytes": {
+    "64": 3712,
+    "256": 22974
+   },
+   "background": "#fcf7ee",
+   "source": "future-history-1.png",
+   "madeBy": "An AI image model (ChatGPT) drew it from VM's own description in words. No person drew or retouched it."
+  },
+  {
+   "id": "future-military",
+   "kind": "future",
+   "for": "military",
+   "alt": "Vitruvius, VM's mascot, holding a crested bronze helmet and a round shield and a campaign map",
+   "files": {
+    "64": "design/vitruvius/future/future-military-64.webp",
+    "256": "design/vitruvius/future/future-military-256.webp"
+   },
+   "bytes": {
+    "64": 3570,
+    "256": 23140
+   },
+   "background": "#fcf7ee",
+   "source": "future-military-1.png",
+   "madeBy": "An AI image model (ChatGPT) drew it from VM's own description in words. No person drew or retouched it."
+  },
+  {
+   "id": "future-master-index",
+   "kind": "future",
+   "for": "master-index",
+   "alt": "Vitruvius, VM's mascot, holding a card-index drawer and a magnifying glass",
+   "files": {
+    "64": "design/vitruvius/future/future-master-index-64.webp",
+    "256": "design/vitruvius/future/future-master-index-256.webp"
+   },
+   "bytes": {
+    "64": 3466,
+    "256": 20740
+   },
+   "background": "#fcf7ed",
+   "source": "future-master-index-1.png",
+   "madeBy": "An AI image model (ChatGPT) drew it from VM's own description in words. No person drew or retouched it."
+  },
+  {
+   "id": "submodule-atlas",
+   "kind": "submodule",
+   "for": "atlas",
+   "alt": "Vitruvius, VM's mascot, holding a rolled world map and a pair of dividers",
+   "files": {
+    "64": "design/vitruvius/submodule-atlas-64.webp",
+    "128": "design/vitruvius/submodule-atlas-128.webp",
+    "256": "design/vitruvius/submodule-atlas-256.webp"
+   },
+   "bytes": {
+    "64": 3466,
+    "128": 8342,
+    "256": 21556
+   },
+   "background": "#fcf7ef",
+   "source": "submodule-atlas-1.png",
+   "madeBy": "An AI image model (ChatGPT) drew it from VM's own description in words. No person drew or retouched it."
+  },
+  {
+   "id": "submodule-battlefield",
+   "kind": "submodule",
+   "for": "battlefield",
+   "alt": "Vitruvius, VM's mascot, holding a pair of dividers and a spyglass",
+   "files": {
+    "64": "design/vitruvius/submodule-battlefield-64.webp",
+    "128": "design/vitruvius/submodule-battlefield-128.webp",
+    "256": "design/vitruvius/submodule-battlefield-256.webp"
+   },
+   "bytes": {
+    "64": 3634,
+    "128": 8694,
+    "256": 21766
+   },
+   "background": "#fbf6ed",
+   "source": "submodule-battlefield-2.png",
+   "madeBy": "An AI image model (ChatGPT) drew it from VM's own description in words. No person drew or retouched it."
+  },
+  {
+   "id": "submodule-battlefield-history",
+   "kind": "submodule",
+   "for": "battlefield-history",
+   "alt": "Vitruvius, VM's mascot, holding a crested helmet and a campaign map",
+   "files": {
+    "64": "design/vitruvius/submodule-battlefield-history-64.webp",
+    "128": "design/vitruvius/submodule-battlefield-history-128.webp",
+    "256": "design/vitruvius/submodule-battlefield-history-256.webp"
+   },
+   "bytes": {
+    "64": 3800,
+    "128": 9398,
+    "256": 24130
+   },
+   "background": "#fbf6ee",
+   "source": "submodule-battlefield-history-1.png",
+   "madeBy": "An AI image model (ChatGPT) drew it from VM's own description in words. No person drew or retouched it."
+  },
+  {
+   "id": "submodule-briefing",
+   "kind": "submodule",
+   "for": "briefing",
+   "alt": "Vitruvius, VM's mascot, holding a sealed letter and a speaking trumpet",
+   "files": {
+    "64": "design/vitruvius/submodule-briefing-64.webp",
+    "128": "design/vitruvius/submodule-briefing-128.webp",
+    "256": "design/vitruvius/submodule-briefing-256.webp"
+   },
+   "bytes": {
+    "64": 3458,
+    "128": 8292,
+    "256": 20514
+   },
+   "background": "#fcf7ef",
+   "source": "submodule-briefing-1.png",
+   "madeBy": "An AI image model (ChatGPT) drew it from VM's own description in words. No person drew or retouched it."
+  },
+  {
+   "id": "submodule-calendar",
+   "kind": "submodule",
+   "for": "calendar",
+   "alt": "Vitruvius, VM's mascot, holding a sundial and a knotted tally cord",
+   "files": {
+    "64": "design/vitruvius/submodule-calendar-64.webp",
+    "128": "design/vitruvius/submodule-calendar-128.webp",
+    "256": "design/vitruvius/submodule-calendar-256.webp"
+   },
+   "bytes": {
+    "64": 3508,
+    "128": 8472,
+    "256": 21104
+   },
+   "background": "#fcf7ee",
+   "source": "submodule-calendar-1.png",
+   "madeBy": "An AI image model (ChatGPT) drew it from VM's own description in words. No person drew or retouched it."
+  },
+  {
+   "id": "submodule-daily-synopsis",
+   "kind": "submodule",
+   "for": "daily-synopsis",
+   "alt": "Vitruvius, VM's mascot, holding a handbell and a tied scroll",
+   "files": {
+    "64": "design/vitruvius/submodule-daily-synopsis-64.webp",
+    "128": "design/vitruvius/submodule-daily-synopsis-128.webp",
+    "256": "design/vitruvius/submodule-daily-synopsis-256.webp"
+   },
+   "bytes": {
+    "64": 3548,
+    "128": 8508,
+    "256": 21170
+   },
+   "background": "#fcf7ee",
+   "source": "submodule-daily-synopsis-1.png",
+   "madeBy": "An AI image model (ChatGPT) drew it from VM's own description in words. No person drew or retouched it."
+  },
+  {
+   "id": "submodule-dashboard",
+   "kind": "submodule",
+   "for": "dashboard",
+   "alt": "Vitruvius, VM's mascot, holding an oil lantern and a framed tablet",
+   "files": {
+    "64": "design/vitruvius/submodule-dashboard-64.webp",
+    "128": "design/vitruvius/submodule-dashboard-128.webp",
+    "256": "design/vitruvius/submodule-dashboard-256.webp"
+   },
+   "bytes": {
+    "64": 3494,
+    "128": 8558,
+    "256": 21792
+   },
+   "background": "#fcf7ef",
+   "source": "submodule-dashboard-1.png",
+   "madeBy": "An AI image model (ChatGPT) drew it from VM's own description in words. No person drew or retouched it."
+  },
+  {
+   "id": "submodule-data-analytics",
+   "kind": "submodule",
+   "for": "data-analytics",
+   "alt": "Vitruvius, VM's mascot, holding a slide rule and knotted cords for counting",
+   "files": {
+    "64": "design/vitruvius/submodule-data-analytics-64.webp",
+    "128": "design/vitruvius/submodule-data-analytics-128.webp",
+    "256": "design/vitruvius/submodule-data-analytics-256.webp"
+   },
+   "bytes": {
+    "64": 3426,
+    "128": 8352,
+    "256": 21876
+   },
+   "background": "#fdf7ef",
+   "source": "submodule-data-analytics-1.png",
+   "madeBy": "An AI image model (ChatGPT) drew it from VM's own description in words. No person drew or retouched it."
+  },
+  {
+   "id": "submodule-digital-briefing",
+   "kind": "submodule",
+   "for": "digital-briefing",
+   "alt": "Vitruvius, VM's mascot, holding a telegraph key and punched paper tape",
+   "files": {
+    "64": "design/vitruvius/submodule-digital-briefing-64.webp",
+    "128": "design/vitruvius/submodule-digital-briefing-128.webp",
+    "256": "design/vitruvius/submodule-digital-briefing-256.webp"
+   },
+   "bytes": {
+    "64": 3484,
+    "128": 8272,
+    "256": 21188
+   },
+   "background": "#fcf6ee",
+   "source": "submodule-digital-briefing-1.png",
+   "madeBy": "An AI image model (ChatGPT) drew it from VM's own description in words. No person drew or retouched it."
+  },
+  {
+   "id": "submodule-econ-briefing",
+   "kind": "submodule",
+   "for": "econ-briefing",
+   "alt": "Vitruvius, VM's mascot, holding a hanging balance and a thick ledger",
+   "files": {
+    "64": "design/vitruvius/submodule-econ-briefing-64.webp",
+    "128": "design/vitruvius/submodule-econ-briefing-128.webp",
+    "256": "design/vitruvius/submodule-econ-briefing-256.webp"
+   },
+   "bytes": {
+    "64": 3554,
+    "128": 8472,
+    "256": 21648
+   },
+   "background": "#fcf7ef",
+   "source": "submodule-econ-briefing-1.png",
+   "madeBy": "An AI image model (ChatGPT) drew it from VM's own description in words. No person drew or retouched it."
+  },
+  {
+   "id": "submodule-encyclopedia",
+   "kind": "submodule",
+   "for": "encyclopedia",
+   "alt": "Vitruvius, VM's mascot, holding a leather-bound book and a magnifying glass",
+   "files": {
+    "64": "design/vitruvius/submodule-encyclopedia-64.webp",
+    "128": "design/vitruvius/submodule-encyclopedia-128.webp",
+    "256": "design/vitruvius/submodule-encyclopedia-256.webp"
+   },
+   "bytes": {
+    "64": 3552,
+    "128": 8466,
+    "256": 21746
+   },
+   "background": "#fdf7ee",
+   "source": "submodule-encyclopedia-1.png",
+   "madeBy": "An AI image model (ChatGPT) drew it from VM's own description in words. No person drew or retouched it."
+  },
+  {
+   "id": "submodule-geoint",
+   "kind": "submodule",
+   "for": "geoint",
+   "alt": "Vitruvius, VM's mascot, holding a surveyor's theodolite and a map table, each on a tripod",
+   "files": {
+    "64": "design/vitruvius/submodule-geoint-64.webp",
+    "128": "design/vitruvius/submodule-geoint-128.webp",
+    "256": "design/vitruvius/submodule-geoint-256.webp"
+   },
+   "bytes": {
+    "64": 3694,
+    "128": 9254,
+    "256": 24158
+   },
+   "background": "#fcf7ee",
+   "source": "submodule-geoint-1.png",
+   "madeBy": "An AI image model (ChatGPT) drew it from VM's own description in words. No person drew or retouched it."
+  },
+  {
+   "id": "submodule-headlines",
+   "kind": "submodule",
+   "for": "headlines",
+   "alt": "Vitruvius, VM's mascot, holding a world map and a herald's trumpet",
+   "files": {
+    "64": "design/vitruvius/submodule-headlines-64.webp",
+    "128": "design/vitruvius/submodule-headlines-128.webp",
+    "256": "design/vitruvius/submodule-headlines-256.webp"
+   },
+   "bytes": {
+    "64": 3526,
+    "128": 8634,
+    "256": 22126
+   },
+   "background": "#fdf7ed",
+   "source": "submodule-headlines-2.png",
+   "madeBy": "An AI image model (ChatGPT) drew it from VM's own description in words. No person drew or retouched it."
+  },
+  {
+   "id": "submodule-highbrowse",
+   "kind": "submodule",
+   "for": "highbrowse",
+   "alt": "Vitruvius, VM's mascot, holding round spectacles and a stack of newspapers",
+   "files": {
+    "64": "design/vitruvius/submodule-highbrowse-64.webp",
+    "128": "design/vitruvius/submodule-highbrowse-128.webp",
+    "256": "design/vitruvius/submodule-highbrowse-256.webp"
+   },
+   "bytes": {
+    "64": 3478,
+    "128": 8306,
+    "256": 20190
+   },
+   "background": "#fdf7ef",
+   "source": "submodule-highbrowse-1.png",
+   "madeBy": "An AI image model (ChatGPT) drew it from VM's own description in words. No person drew or retouched it."
+  },
+  {
+   "id": "submodule-integration-hub",
+   "kind": "submodule",
+   "for": "integration-hub",
+   "alt": "Vitruvius, VM's mascot, holding a weaver's shuttle and a bound bundle of cords",
+   "files": {
+    "64": "design/vitruvius/submodule-integration-hub-64.webp",
+    "128": "design/vitruvius/submodule-integration-hub-128.webp",
+    "256": "design/vitruvius/submodule-integration-hub-256.webp"
+   },
+   "bytes": {
+    "64": 3488,
+    "128": 8506,
+    "256": 21894
+   },
+   "background": "#fcf7ee",
+   "source": "submodule-integration-hub-1.png",
+   "madeBy": "An AI image model (ChatGPT) drew it from VM's own description in words. No person drew or retouched it."
+  },
+  {
+   "id": "submodule-iot-connect",
+   "kind": "submodule",
+   "for": "iot-connect",
+   "alt": "Vitruvius, VM's mascot, holding a brass telegraph key and a coil of wire",
+   "files": {
+    "64": "design/vitruvius/submodule-iot-connect-64.webp",
+    "128": "design/vitruvius/submodule-iot-connect-128.webp",
+    "256": "design/vitruvius/submodule-iot-connect-256.webp"
+   },
+   "bytes": {
+    "64": 3530,
+    "128": 8354,
+    "256": 21724
+   },
+   "background": "#fcf6ed",
+   "source": "submodule-iot-connect-1.png",
+   "madeBy": "An AI image model (ChatGPT) drew it from VM's own description in words. No person drew or retouched it."
+  },
+  {
+   "id": "submodule-kino-geopolitical-events",
+   "kind": "submodule",
+   "for": "kino-geopolitical-events",
+   "alt": "Vitruvius, VM's mascot, holding a film reel and a globe on a stand",
+   "files": {
+    "64": "design/vitruvius/submodule-kino-geopolitical-events-64.webp",
+    "128": "design/vitruvius/submodule-kino-geopolitical-events-128.webp",
+    "256": "design/vitruvius/submodule-kino-geopolitical-events-256.webp"
+   },
+   "bytes": {
+    "64": 3560,
+    "128": 8412,
+    "256": 21554
+   },
+   "background": "#fcf7ed",
+   "source": "submodule-kino-geopolitical-events-1.png",
+   "madeBy": "An AI image model (ChatGPT) drew it from VM's own description in words. No person drew or retouched it."
+  },
+  {
+   "id": "submodule-kino-great-thinkers",
+   "kind": "submodule",
+   "for": "kino-great-thinkers",
+   "alt": "Vitruvius, VM's mascot, holding a film reel and an oil lamp",
+   "files": {
+    "64": "design/vitruvius/submodule-kino-great-thinkers-64.webp",
+    "128": "design/vitruvius/submodule-kino-great-thinkers-128.webp",
+    "256": "design/vitruvius/submodule-kino-great-thinkers-256.webp"
+   },
+   "bytes": {
+    "64": 3434,
+    "128": 8318,
+    "256": 20924
+   },
+   "background": "#fcf7ee",
+   "source": "submodule-kino-great-thinkers-1.png",
+   "madeBy": "An AI image model (ChatGPT) drew it from VM's own description in words. No person drew or retouched it."
+  },
+  {
+   "id": "submodule-kino-political-events",
+   "kind": "submodule",
+   "for": "kino-political-events",
+   "alt": "Vitruvius, VM's mascot, holding a magic lantern projector and a speaker's scroll",
+   "files": {
+    "64": "design/vitruvius/submodule-kino-political-events-64.webp",
+    "128": "design/vitruvius/submodule-kino-political-events-128.webp",
+    "256": "design/vitruvius/submodule-kino-political-events-256.webp"
+   },
+   "bytes": {
+    "64": 3536,
+    "128": 8320,
+    "256": 21154
+   },
+   "background": "#fcf7ee",
+   "source": "submodule-kino-political-events-1.png",
+   "madeBy": "An AI image model (ChatGPT) drew it from VM's own description in words. No person drew or retouched it."
+  },
+  {
+   "id": "submodule-kino-political-figures",
+   "kind": "submodule",
+   "for": "kino-political-figures",
+   "alt": "Vitruvius, VM's mascot, holding a film reel and a small classical bust",
+   "files": {
+    "64": "design/vitruvius/submodule-kino-political-figures-64.webp",
+    "128": "design/vitruvius/submodule-kino-political-figures-128.webp",
+    "256": "design/vitruvius/submodule-kino-political-figures-256.webp"
+   },
+   "bytes": {
+    "64": 3430,
+    "128": 8170,
+    "256": 20976
+   },
+   "background": "#fcf7ef",
+   "source": "submodule-kino-political-figures-1.png",
+   "madeBy": "An AI image model (ChatGPT) drew it from VM's own description in words. No person drew or retouched it."
+  },
+  {
+   "id": "submodule-kino-political-parties",
+   "kind": "submodule",
+   "for": "kino-political-parties",
+   "alt": "Vitruvius, VM's mascot, holding a film reel and a plain banner on a pole",
+   "files": {
+    "64": "design/vitruvius/submodule-kino-political-parties-64.webp",
+    "128": "design/vitruvius/submodule-kino-political-parties-128.webp",
+    "256": "design/vitruvius/submodule-kino-political-parties-256.webp"
+   },
+   "bytes": {
+    "64": 3588,
+    "128": 8484,
+    "256": 20526
+   },
+   "background": "#fcf7ef",
+   "source": "submodule-kino-political-parties-1.png",
+   "madeBy": "An AI image model (ChatGPT) drew it from VM's own description in words. No person drew or retouched it."
+  },
+  {
+   "id": "submodule-kino-wars",
+   "kind": "submodule",
+   "for": "kino-wars",
+   "alt": "Vitruvius, VM's mascot, holding a hand-cranked film camera on a tripod and a campaign map",
+   "files": {
+    "64": "design/vitruvius/submodule-kino-wars-64.webp",
+    "128": "design/vitruvius/submodule-kino-wars-128.webp",
+    "256": "design/vitruvius/submodule-kino-wars-256.webp"
+   },
+   "bytes": {
+    "64": 3520,
+    "128": 8558,
+    "256": 22820
+   },
+   "background": "#fcf7ee",
+   "source": "submodule-kino-wars-1.png",
+   "madeBy": "An AI image model (ChatGPT) drew it from VM's own description in words. No person drew or retouched it."
+  },
+  {
+   "id": "submodule-learning",
+   "kind": "submodule",
+   "for": "learning",
+   "alt": "Vitruvius, VM's mascot, holding an abacus and a coin purse",
+   "files": {
+    "64": "design/vitruvius/submodule-learning-64.webp",
+    "128": "design/vitruvius/submodule-learning-128.webp",
+    "256": "design/vitruvius/submodule-learning-256.webp"
+   },
+   "bytes": {
+    "64": 3600,
+    "128": 8552,
+    "256": 21584
+   },
+   "background": "#fcf7ee",
+   "source": "submodule-learning-1.png",
+   "madeBy": "An AI image model (ChatGPT) drew it from VM's own description in words. No person drew or retouched it."
+  },
+  {
+   "id": "submodule-learning-politics",
+   "kind": "submodule",
+   "for": "learning-politics",
+   "alt": "Vitruvius, VM's mascot, holding a laurel wreath and a wax tablet and stylus",
+   "files": {
+    "64": "design/vitruvius/submodule-learning-politics-64.webp",
+    "128": "design/vitruvius/submodule-learning-politics-128.webp",
+    "256": "design/vitruvius/submodule-learning-politics-256.webp"
+   },
+   "bytes": {
+    "64": 3468,
+    "128": 8190,
+    "256": 20650
+   },
+   "background": "#fbf6ee",
+   "source": "submodule-learning-politics-1.png",
+   "madeBy": "An AI image model (ChatGPT) drew it from VM's own description in words. No person drew or retouched it."
+  },
+  {
+   "id": "submodule-markets",
+   "kind": "submodule",
+   "for": "markets",
+   "alt": "Vitruvius, VM's mascot, holding a ticker machine under a glass dome and its paper tape",
+   "files": {
+    "64": "design/vitruvius/submodule-markets-64.webp",
+    "128": "design/vitruvius/submodule-markets-128.webp",
+    "256": "design/vitruvius/submodule-markets-256.webp"
+   },
+   "bytes": {
+    "64": 3652,
+    "128": 8728,
+    "256": 22894
+   },
+   "background": "#fdf7ed",
+   "source": "submodule-markets-1.png",
+   "madeBy": "An AI image model (ChatGPT) drew it from VM's own description in words. No person drew or retouched it."
+  },
+  {
+   "id": "submodule-monthly",
+   "kind": "submodule",
+   "for": "monthly",
+   "alt": "Vitruvius, VM's mascot, holding an almanac open at a month's grid and an hourglass",
+   "files": {
+    "64": "design/vitruvius/submodule-monthly-64.webp",
+    "128": "design/vitruvius/submodule-monthly-128.webp",
+    "256": "design/vitruvius/submodule-monthly-256.webp"
+   },
+   "bytes": {
+    "64": 3606,
+    "128": 8842,
+    "256": 22712
+   },
+   "background": "#fcf7ef",
+   "source": "submodule-monthly-1.png",
+   "madeBy": "An AI image model (ChatGPT) drew it from VM's own description in words. No person drew or retouched it."
+  },
+  {
+   "id": "submodule-neo-classic",
+   "kind": "submodule",
+   "for": "neo-classic",
+   "alt": "Vitruvius, VM's mascot, holding an open book and an oil reading lamp",
+   "files": {
+    "64": "design/vitruvius/submodule-neo-classic-64.webp",
+    "128": "design/vitruvius/submodule-neo-classic-128.webp",
+    "256": "design/vitruvius/submodule-neo-classic-256.webp"
+   },
+   "bytes": {
+    "64": 3574,
+    "128": 8284,
+    "256": 21312
+   },
+   "background": "#fcf7ef",
+   "source": "submodule-neo-classic-1.png",
+   "madeBy": "An AI image model (ChatGPT) drew it from VM's own description in words. No person drew or retouched it."
+  },
+  {
+   "id": "submodule-omni-map",
+   "kind": "submodule",
+   "for": "omni-map",
+   "alt": "Vitruvius, VM's mascot, holding an open compass and a rolled sea chart",
+   "files": {
+    "64": "design/vitruvius/submodule-omni-map-64.webp",
+    "128": "design/vitruvius/submodule-omni-map-128.webp",
+    "256": "design/vitruvius/submodule-omni-map-256.webp"
+   },
+   "bytes": {
+    "64": 3602,
+    "128": 8858,
+    "256": 22836
+   },
+   "background": "#fbf6ed",
+   "source": "submodule-omni-map-1.png",
+   "madeBy": "An AI image model (ChatGPT) drew it from VM's own description in words. No person drew or retouched it."
+  },
+  {
+   "id": "submodule-osint",
+   "kind": "submodule",
+   "for": "osint",
+   "alt": "Vitruvius, VM's mascot, holding a brass spyglass and a sheaf of newspaper cuttings",
+   "files": {
+    "64": "design/vitruvius/submodule-osint-64.webp",
+    "128": "design/vitruvius/submodule-osint-128.webp",
+    "256": "design/vitruvius/submodule-osint-256.webp"
+   },
+   "bytes": {
+    "64": 3526,
+    "128": 8418,
+    "256": 21182
+   },
+   "background": "#fcf7ee",
+   "source": "submodule-osint-1.png",
+   "madeBy": "An AI image model (ChatGPT) drew it from VM's own description in words. No person drew or retouched it."
+  },
+  {
+   "id": "submodule-osint-training",
+   "kind": "submodule",
+   "for": "osint-training",
+   "alt": "Vitruvius, VM's mascot, holding a slate and chalk and a magnifying glass",
+   "files": {
+    "64": "design/vitruvius/submodule-osint-training-64.webp",
+    "128": "design/vitruvius/submodule-osint-training-128.webp",
+    "256": "design/vitruvius/submodule-osint-training-256.webp"
+   },
+   "bytes": {
+    "64": 3542,
+    "128": 8662,
+    "256": 21412
+   },
+   "background": "#fcf7ee",
+   "source": "submodule-osint-training-1.png",
+   "madeBy": "An AI image model (ChatGPT) drew it from VM's own description in words. No person drew or retouched it."
+  },
+  {
+   "id": "submodule-pestle",
+   "kind": "submodule",
+   "for": "pestle",
+   "alt": "Vitruvius, VM's mascot, holding a surveyor's measuring chain and a ledger",
+   "files": {
+    "64": "design/vitruvius/submodule-pestle-64.webp",
+    "128": "design/vitruvius/submodule-pestle-128.webp",
+    "256": "design/vitruvius/submodule-pestle-256.webp"
+   },
+   "bytes": {
+    "64": 3452,
+    "128": 8510,
+    "256": 21550
+   },
+   "background": "#fcf7ee",
+   "source": "submodule-pestle-1.png",
+   "madeBy": "An AI image model (ChatGPT) drew it from VM's own description in words. No person drew or retouched it."
+  },
+  {
+   "id": "submodule-progress",
+   "kind": "submodule",
+   "for": "progress",
+   "alt": "Vitruvius, VM's mascot, holding a toothed gear and an Archimedes screw",
+   "files": {
+    "64": "design/vitruvius/submodule-progress-64.webp",
+    "128": "design/vitruvius/submodule-progress-128.webp",
+    "256": "design/vitruvius/submodule-progress-256.webp"
+   },
+   "bytes": {
+    "64": 3708,
+    "128": 9156,
+    "256": 23770
+   },
+   "background": "#fcf6ed",
+   "source": "submodule-progress-1.png",
+   "madeBy": "An AI image model (ChatGPT) drew it from VM's own description in words. No person drew or retouched it."
+  },
+  {
+   "id": "submodule-retrospective",
+   "kind": "submodule",
+   "for": "retrospective",
+   "alt": "Vitruvius, VM's mascot, holding a globe on a stand and an hourglass",
+   "files": {
+    "64": "design/vitruvius/submodule-retrospective-64.webp",
+    "128": "design/vitruvius/submodule-retrospective-128.webp",
+    "256": "design/vitruvius/submodule-retrospective-256.webp"
+   },
+   "bytes": {
+    "64": 3494,
+    "128": 8462,
+    "256": 22040
+   },
+   "background": "#fbf6ed",
+   "source": "submodule-retrospective-1.png",
+   "madeBy": "An AI image model (ChatGPT) drew it from VM's own description in words. No person drew or retouched it."
+  },
+  {
+   "id": "submodule-science-briefing",
+   "kind": "submodule",
+   "for": "science-briefing",
+   "alt": "Vitruvius, VM's mascot, holding a brass microscope and a round flask",
+   "files": {
+    "64": "design/vitruvius/submodule-science-briefing-64.webp",
+    "128": "design/vitruvius/submodule-science-briefing-128.webp",
+    "256": "design/vitruvius/submodule-science-briefing-256.webp"
+   },
+   "bytes": {
+    "64": 3590,
+    "128": 8984,
+    "256": 22550
+   },
+   "background": "#fcf6ed",
+   "source": "submodule-science-briefing-1.png",
+   "madeBy": "An AI image model (ChatGPT) drew it from VM's own description in words. No person drew or retouched it."
+  },
+  {
+   "id": "submodule-sigint",
+   "kind": "submodule",
+   "for": "sigint",
+   "alt": "Vitruvius, VM's mascot, holding a signal lamp and a pair of semaphore flags",
+   "files": {
+    "64": "design/vitruvius/submodule-sigint-64.webp",
+    "128": "design/vitruvius/submodule-sigint-128.webp",
+    "256": "design/vitruvius/submodule-sigint-256.webp"
+   },
+   "bytes": {
+    "64": 3590,
+    "128": 8512,
+    "256": 21092
+   },
+   "background": "#fbf6ee",
+   "source": "submodule-sigint-1.png",
+   "madeBy": "An AI image model (ChatGPT) drew it from VM's own description in words. No person drew or retouched it."
+  },
+  {
+   "id": "submodule-traders",
+   "kind": "submodule",
+   "for": "traders",
+   "alt": "Vitruvius, VM's mascot, holding a hanging balance and a notched tally stick",
+   "files": {
+    "64": "design/vitruvius/submodule-traders-64.webp",
+    "128": "design/vitruvius/submodule-traders-128.webp",
+    "256": "design/vitruvius/submodule-traders-256.webp"
+   },
+   "bytes": {
+    "64": 3450,
+    "128": 8088,
+    "256": 20504
+   },
+   "background": "#fcf7ef",
+   "source": "submodule-traders-1.png",
+   "madeBy": "An AI image model (ChatGPT) drew it from VM's own description in words. No person drew or retouched it."
+  },
+  {
+   "id": "submodule-volatility",
+   "kind": "submodule",
+   "for": "volatility",
+   "alt": "Vitruvius, VM's mascot, holding a barometer and a rooster weathervane",
+   "files": {
+    "64": "design/vitruvius/submodule-volatility-64.webp",
+    "128": "design/vitruvius/submodule-volatility-128.webp",
+    "256": "design/vitruvius/submodule-volatility-256.webp"
+   },
+   "bytes": {
+    "64": 3676,
+    "128": 8628,
+    "256": 21110
+   },
+   "background": "#fcf6ef",
+   "source": "submodule-volatility-2.png",
+   "madeBy": "An AI image model (ChatGPT) drew it from VM's own description in words. No person drew or retouched it."
+  },
+  {
+   "id": "submodule-war-focus",
+   "kind": "submodule",
+   "for": "war-focus",
+   "alt": "Vitruvius, VM's mascot, holding a large magnifying glass and a campaign map",
+   "files": {
+    "64": "design/vitruvius/submodule-war-focus-64.webp",
+    "128": "design/vitruvius/submodule-war-focus-128.webp",
+    "256": "design/vitruvius/submodule-war-focus-256.webp"
+   },
+   "bytes": {
+    "64": 3614,
+    "128": 8966,
+    "256": 22670
+   },
+   "background": "#fcf7ef",
+   "source": "submodule-war-focus-1.png",
+   "madeBy": "An AI image model (ChatGPT) drew it from VM's own description in words. No person drew or retouched it."
+  }
+ ]
+}

@@ -270,6 +270,13 @@
 .kn-v-module .icon { position: relative; display: grid; place-items: center; width: max(40px, 8cqw); height: max(40px, 8cqw); border-radius: 50%; background: var(--prp-accent-soft); color: var(--prp-accent);
   font: 600 max(18px, 3.6cqw)/1 var(--prp-font-ui); }
 .kn-v-module .icon::after { content: ""; position: absolute; inset: 0; border-radius: 50%; border: 2px solid var(--prp-accent); animation: kn-ripple 2.6s ease-out infinite; }
+/* The submodule's picture of Vitruvius, VM's mascot, filling the round (the glyph behind it, for a picture that fails). */
+.kn-v-module .icon.has-art { background: none; }
+.kn-v-module .icon > img.art { display: block; width: 100%; height: 100%; border-radius: 50%; }
+.kn-v-module .icon.has-art > .glyph { display: none; }
+/* Under the picture, its credit: a short link to the pictures' own page (stage.js moduleHtml). */
+.kn-v-module .pic { display: flex; flex-direction: column; align-items: center; gap: 4px; }
+.kn-v-module .vit { color: var(--prp-muted); font: max(10px, 1cqw)/1.2 var(--prp-font-ui); white-space: nowrap; }
 .kn-v-module .where { display: flex; align-items: center; gap: 8px; color: var(--prp-muted); font: 500 max(10px, 1.2cqw) var(--prp-font-mono); letter-spacing: .06em; text-transform: uppercase; }
 .kn-v-module h3 { margin: .3cqw 0 0; font: 600 clamp(18px, 3.4cqw, 44px)/1.12 var(--prp-font-serif); color: var(--prp-text); }
 .kn-v-module .at { margin: .5cqw 0 0; color: var(--prp-text-2); font: clamp(13px, 1.8cqw, 22px)/1.35 var(--prp-font-serif); }

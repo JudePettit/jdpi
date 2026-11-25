@@ -9,13 +9,14 @@
    and every conflict active in at least one of its years is shown, at its peak level then.
    Every polity of the year is drawn (design/PRP-STYLE.md §6) as its Cliopatria row (2025 on 2024's, the last year
    Cliopatria holds); from 1946 a small state no row holds is drawn as its point, and any other war place no row holds
-   that year is listed under the map ("VM cannot place this on a free border for <year>"), as "today’s …" where
-   Wikidata dates the place after that year.
+   that year is listed under the map ("VM cannot place this on a free border for <year>"). Every view names a place
+   by the year shown (names.js): its earlier state's name, or "today’s …" before the state of that name existed.
    URL: #y=<year, the end of the period>[&f=<first year of a period>]&c=<Q-id>&w=<war>&v=table. Addresses written
    before 20 November 2026 still open: c=<number> (a Gleditsch–Ward number UCDP's rows give a country) through
    places.json's oldCountries, c=<ISO3> through the places' ISO3, and w=c<number> (a Correlates of War war) through
    wars.json's oldIds; one VM can no longer show says so. */
 import { oldCountry } from './old-countries.js';
+import { placeName } from './names.js';
 import { OLD_NUMBERS } from '../focus/old-numbers.mjs';
 
 const W = 1000, H = 600, DOT_R = 3.2;
@@ -64,20 +65,19 @@ async function shapesOf(y) {
     .map(([q, id]) => ({ key: q, lonlat: state.small.get(id).at, id }));
   return { features: rows, points };
 }
-// A place named for a year before Wikidata dates it (its inception) is "today’s …": the land, not a state of then.
-// One that has an earlier state's name for the year (`was`) is that state, by its name.
-const unplacedName = (q, y) => (!earlierName(q, y) && placeOf(q)?.since > y ? `today’s ${nameOf(q, y)}` : nameOf(q, y));
 const placeOf = q => state.places.places[q] || null;
-// The earlier state's name a place has in year y (places.json `was`, oldest first, each to its last year: the build's,
-// from history-places.mjs NAMED_AS): Yugoslavia is the Kingdom of Serbs, Croats and Slovenes to 1929 and the Kingdom of
-// Yugoslavia to 1945.
-const earlierName = (q, y) => placeOf(q)?.was?.find(w => y <= w.to)?.n || null;
-// A place's name in year y (the year shown, where none is given): Wikidata's English label (the build's), or its
-// earlier state's for that year; a row VM holds no place for keeps Cliopatria's name.
+// A place's name in year y (the year shown, where none is given), the one name every view gives it: the table, a war's
+// panel, a country's heading, the pointer's sentence and the list under the map (names.js placeName, the build's rule
+// too). Its earlier state's name for the year (places.json `was`, from history-places.mjs NAMED_AS: the Republic of
+// China to 1949, the Kingdom of Yugoslavia to 1945); else Wikidata's English label, as "today’s …" in a year before
+// the state of that name existed (a colony then: today’s Algeria in 1955), never for a state that did (Kuwait in 1990,
+// `stateFrom`). A row VM holds no place for keeps Cliopatria's name.
 function nameOf(key, y = state.year) {
   if (key?.startsWith('row:')) return state.features.find(f => f.properties.key === key)?.properties.row || 'This polity';
-  return earlierName(key, y) || placeOf(key)?.n || key;
+  return placeName(placeOf(key), y) || key;
 }
+// A name at the start of a heading or a sentence ("Today’s India").
+const capFirst = s => (s ? s[0].toUpperCase() + s.slice(1) : s);
 const rowNameOf = key => state.features.find(f => f.properties.key === key && f.properties.kind === 'row')?.properties.row || null;
 
 /* ---------------------------------------------------------------- data helpers */
@@ -118,9 +118,8 @@ function activeSpan(w, a, b) {
   const first = ys[0], last = ys.at(-1), end = String(last).slice(0, 2) === String(first).slice(0, 2) ? String(last).slice(2) : last;
   return `${first === last ? first : `${first}–${end}`} · ${ys.length} yr${ys.length > 1 ? 's' : ''}`;
 }
-// The places a war was fought in during the period; `where` names places the map has no shape for.
-// (Not "today’s …" by Wikidata's inception here: that date is a change of regime for some states, Ethiopia 1974 and
-// Kuwait 1991, which would be mislabelled in every row; a place's earlier name comes from the NAMED_AS table.)
+// The places a war was fought in during the period, each by its name of the year; `where` names places the map has no
+// shape for.
 const placesIn = (w, a, b) => [...new Set([...yearsIn(w, a, b).flatMap(([y]) => locIn(w, y).map(q => nameOf(q, y))), ...(w.where || [])])];
 // "Costa Rica: no armed conflict of 25 or more battle deaths recorded by UCDP/PRIO in 1990." (design/prp-mapkit.js):
 // from 1946 UCDP/PRIO's record, before it VM's list from Wikidata, and a period across 1946 names both.
@@ -237,7 +236,7 @@ async function renderMap() {
   const involved = new Set(state.war ? (wys.length ? wys.flatMap(y => [...locIn(state.war, y), ...statesIn(state.war, y)]) : locIn(state.war, b)) : []);
   // Pointing at a place: the conflicts on its territory or with it as a party in the year or period, or one sentence.
   const hover = (ev, key) => {
-    const box = $('.map-wrap').getBoundingClientRect(), name = nameOf(key);
+    const box = $('.map-wrap').getBoundingClientRect(), name = capFirst(nameOf(key, b));
     const ws = key.startsWith('row:') ? [] : warsInPeriod(a, b).filter(w => onSoil(w, key, a, b) || partyIn(w, key, a, b));
     tip.classList.toggle('is-sentence', !ws.length);
     tip.innerHTML = ws.length ? `<strong>${esc(name)}</strong>${a === b ? '' : `<span class="tip-when">${a}–${b}</span>`}${ws.slice(0, 3).map(w => esc(w.name)).join('<br>') + (ws.length > 3 ? `<br>+${ws.length - 3} more` : '')}`
@@ -291,7 +290,7 @@ function unplacedLine(a, b, keep = () => true) {
   const rows = [];
   for (let y = a; y <= b; y++) {
     const qs = (state.places.unplaced[y] || []).filter(q => keep(q, y));
-    if (qs.length) rows.push(`${y}: ${qs.map(q => unplacedName(q, y)).sort((p, r) => p.localeCompare(r)).join(', ')}`);
+    if (qs.length) rows.push(`${y}: ${qs.map(q => nameOf(q, y)).sort((p, r) => p.localeCompare(r)).join(', ')}`);
   }
   return rows.length ? `<b>${cannotPlace('this', a === b ? b : `${a}–${b}`)}:</b> ${esc(rows.length === 1 && a === b ? rows[0].replace(/^\d+: /, '') : rows.join('; '))}.` : '';
 }
@@ -375,10 +374,11 @@ function warDetail(w) {
   const a = state.from, y = state.year, l = peakIn(w, a, y), ys = yearsIn(w, a, y);
   const activeYears = w.years.length;
   const warYears = w.years.filter(([, x]) => x === 2).length;
-  // The war's places and parties over all its years, by their names in the year it began.
-  const began = w.years[0][0];
-  const places = [...new Set([...w.loc.map(q => nameOf(q, began)), ...(w.where || [])])];
-  const parties = w.states.filter(q => !w.loc.includes(q)).map(q => nameOf(q, began));
+  // The war's places and parties over all its years, each by its name in the first year it is in the war (Serbia's war
+  // in Croatia: Yugoslavia in 1991, the Federal Republic of Yugoslavia in 1992).
+  const firstIn = (q, of) => w.years.find(([yy]) => of(w, yy).includes(q))?.[0] ?? w.years[0][0];
+  const places = [...new Set([...w.loc.map(q => nameOf(q, firstIn(q, locIn))), ...(w.where || [])])];
+  const parties = w.states.filter(q => !w.loc.includes(q)).map(q => nameOf(q, firstIn(q, statesIn)));
   const intro = w.src === 'wikidata'
     ? `Wikidata lists ${esc(w.name)} as ${/^[aeiou]/i.test(w.type) ? 'an' : 'a'} ${esc(w.type.toLowerCase())}, ${esc(wdDates(w))}${places.length ? `, fought in ${esc(places.join(', '))}` : ''}. No free source codes how intense it was, and VM gives no battle-death total for it.`
     : `UCDP records this ${esc(w.type.toLowerCase())} over ${esc(w.aim)}${places.length ? ` in ${esc(places.join(', '))}` : ''}, active in ${activeYears} year${activeYears > 1 ? 's' : ''} between ${w.years[0][0]} and ${w.years.at(-1)[0]}${warYears ? `, ${warYears} of them at war level (1,000+ battle deaths)` : ''}.`;
@@ -421,7 +421,7 @@ function renderPanel() {
     const cards = l => l.map(w => warCard(w));
     const byDecade = l => [...new Set(l.map(w => Math.floor(w.years[0][0] / 10) * 10))]
       .map(d => `<h3>${d}s</h3>${l.filter(w => Math.floor(w.years[0][0] / 10) * 10 === d).map(w => warCard(w)).join('')}`).join('');
-    const cname = nameOf(q), heading = a === y ? ` in ${y}` : `, ${a}–${y}`;
+    const cname = capFirst(nameOf(q, y)), heading = a === y ? ` in ${y}` : `, ${a}–${y}`;
     const drawnNow = state.features.some(f => f.properties.key === q) || state.points.some(p => p.key === q);
     const sub = here.length ? `${here.length} conflict${here.length > 1 ? 's' : ''} on its territory in ${when}${abroad.length ? ` · fighting in ${abroad.length} abroad` : ''}`
       : abroad.length ? `No conflict on its territory in ${when} · fighting in ${abroad.length} abroad`
@@ -429,7 +429,7 @@ function renderPanel() {
     // Where its shape comes from this year, in a line.
     const row = rowNameOf(q), pt = state.points.some(p => p.key === q);
     const border = row ? `Border: Cliopatria’s “${row}” for ${bordersYear(y)}.` : pt ? 'Drawn as a point (Natural Earth), since no free border holds it.'
-      : (state.places.unplaced[y] || []).includes(q) ? `${cannotPlace(unplacedName(q, y), y)}, so it is not drawn.` : '';
+      : (state.places.unplaced[y] || []).includes(q) ? `${cannotPlace(nameOf(q, y), y)}, so it is not drawn.` : '';
     const rowNote = rowOnly ? '<p class="note">VM holds no state for this Cliopatria polity, so no war is listed under it here.</p>' : '';
     html = `<button class="close" id="close" aria-label="Close">×</button><h2>${esc(cname)}</h2>
       <p class="sub">${esc(sub)}</p>${border ? `<p class="note border-note">${esc(border)}</p>` : ''}${rowNote}
@@ -602,7 +602,7 @@ function setupSearch() {
   for (const [q, p] of Object.entries(state.places.places)) {
     const was = p.was || [], after = was.length ? was.at(-1).to + 1 : null;
     index.push({ label: p.n, sub: `Country${p.iso3 ? ` · ${p.iso3}` : ''}`, key: `${p.n} ${p.iso3 || ''}`.toLowerCase(), q, year: (after ? firstFrom(q, after, state.data.lastYear) || after : firstYear.get(q)) || null, from: after });
-    was.forEach((w, i) => { const from = i ? was[i - 1].to + 1 : state.data.firstYear; index.push({ label: w.n, sub: `Country · to ${w.to}`, key: w.n.toLowerCase(), q, year: firstFrom(q, from, w.to) || w.to, from, to: w.to }); });
+    was.forEach((w, i) => { const from = w.from ?? (i ? was[i - 1].to + 1 : state.data.firstYear); index.push({ label: w.n, sub: `Country · ${w.from ? `${w.from}–${w.to}` : `to ${w.to}`}`, key: w.n.toLowerCase(), q, year: firstFrom(q, from, w.to) || w.to, from, to: w.to }); });
   }
   let results = [];
   const choose = r => {

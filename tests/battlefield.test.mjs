@@ -244,19 +244,20 @@ test('Retrospective data: a state with no row of its own is listed as unplaced, 
 // Serbs, Croats and Slovenes to 1929 and the Kingdom of Yugoslavia to 1945, the pair War Focus holds for its war
 // (focus/scripts/wars.mjs nameAs), and the page names the place by the year shown.
 test('Retrospective data: Yugoslavia carries its earlier states’ names to 1929 and to 1945, the last as War Focus has it', async () => {
-  const { NAMED_AS, CANONICAL } = await import('../battlefield/scripts/history-places.mjs');
-  assert.deepEqual(NAMED_AS, { Q83286: ['Q15102440', 'Q191077'] });
+  const { NAMED_AS } = await import('../battlefield/scripts/history-places.mjs');
+  assert.deepEqual(NAMED_AS.Q83286, ['Q15102440', 'Q191077']);
   const dated = Object.keys(PLACES.places).filter(q => PLACES.places[q].was);
-  assert.deepEqual(dated, Object.keys(NAMED_AS), 'a place carries earlier names only where the table gives them');
+  assert.deepEqual(dated, sortQ(Object.keys(NAMED_AS)), 'a place carries earlier names only where the table gives them');
   for (const [q, earlier] of Object.entries(NAMED_AS)) {
     const p = PLACES.places[q];
-    assert.ok(Object.values(CANONICAL).includes(q), `${q} is a place another item is folded into`);
     assert.equal(p.was.length, earlier.length, `${q}: one name for each earlier item`);
     for (const [i, w] of p.was.entries()) {
-      assert.ok(!PLACES.places[earlier[i]], `${earlier[i]} is not a place of its own`);
-      assert.deepEqual(Object.keys(w), ['n', 'to']);
+      const id = Array.isArray(earlier[i]) ? earlier[i][0] : earlier[i];
+      assert.ok(!PLACES.places[id], `${id} is not a place of its own`);
+      assert.ok(['n,to', 'n,from,to'].includes(Object.keys(w).join()), `${q}: ${Object.keys(w)}`);
       assert.ok(w.n && w.n !== p.n, `${q}: an earlier name is another name`);
       assert.ok(Number.isInteger(w.to) && w.to >= 1926 && w.to < 2025 && (!i || w.to > p.was[i - 1].to), `${q}: ${w.to} in order`);
+      if ('from' in w) assert.ok(w.from > (i ? p.was[i - 1].to + 1 : 1926) && w.from <= w.to, `${q}: from ${w.from} leaves a gap`);
     }
   }
   assert.deepEqual(PLACES.places.Q83286, { n: 'Socialist Federal Republic of Yugoslavia', iso3: 'YUG',
@@ -270,7 +271,152 @@ test('Retrospective data: Yugoslavia carries its earlier states’ names to 1929
   // The page says so in its Method, and reads the same field.
   const method = readFileSync(new URL('../battlefield/history/index.html', import.meta.url), 'utf8');
   for (const w of [...PLACES.places.Q83286.was.map(w => `${w.n} to ${w.to}`), PLACES.places.Q83286.n]) assert.ok(method.includes(w.replace(/^Kingdom/, 'the Kingdom')) || method.includes(w), `the Method names ${w}`);
-  assert.ok(readFileSync(new URL('../battlefield/history/app.js', import.meta.url), 'utf8').includes('placeOf(q)?.was?.find(w => y <= w.to)?.n'), 'the page reads `was` by the same rule');
+  const app = readFileSync(new URL('../battlefield/history/app.js', import.meta.url), 'utf8');
+  assert.match(app, /^import \{ placeName \} from '\.\/names\.js';$/m, 'the page reads `was` by the same rule (names.js)');
+});
+
+// Review of 22 November 2026 (checked by the main session; built 25 November 2026): the table's "Fought in", a war's
+// panel and a country's heading named places by states founded later (the People's Republic of China in 1926–1948,
+// Saudi Arabia in 1926–1932), and "today’s Ethiopia" stood under the map in years Ethiopia existed, since Wikidata's
+// inception (P571) is for some states a change of regime. NAMED_AS now names the earlier states, each from its own
+// Wikidata item (a pair where an item has two ends: the Republic of China's P576 of 1949 for mainland China, not 1971
+// for the United Nations); STATE_FROM says when Kuwait's state began; names.js is the one rule for every view.
+const DATED = {
+  Q115: [{ n: 'Ethiopian Empire', to: 1975 }],
+  Q148: [{ n: 'Republic of China', to: 1949 }],
+  Q796: [{ n: 'Kingdom of Iraq', to: 1958 }],
+  Q822: [{ n: 'State of Greater Lebanon', to: 1926 }, { n: 'Lebanese Republic under French mandate', to: 1943 }],
+  Q833: [{ n: 'Malayan Union', from: 1946, to: 1948 }, { n: 'Federation of Malaya', to: 1963 }],
+  Q842: [{ n: 'Muscat and Oman', to: 1970 }],
+  Q851: [{ n: 'Kingdom of Nejd and Hejaz', to: 1932 }],
+  Q854: [{ n: 'Dominion of Ceylon', from: 1948, to: 1972 }],
+  Q948: [{ n: 'French protectorate of Tunisia', to: 1956 }],
+  Q34754: [{ n: 'British Somaliland', to: 1960 }],
+  Q83286: [{ n: 'Kingdom of Serbs, Croats and Slovenes', to: 1929 }, { n: 'Kingdom of Yugoslavia', to: 1945 }],
+  Q199841: [{ n: 'Federation of South Arabia', from: 1962, to: 1967 }],
+  Q267584: [{ n: 'Kingdom of Yemen', to: 1962 }],
+};
+// The 28 places named a party to a war in a year before their `since` (the review's list), each decided: an earlier
+// state's name (DATED), a state from an earlier year (STATE_FROM), or "today’s …", right for a colony or territory.
+const TODAY_RIGHT = ['Q233', 'Q252', 'Q262', 'Q423', 'Q574', 'Q668', 'Q685', 'Q691', 'Q836', 'Q929', 'Q974', 'Q986', 'Q1000', 'Q1019', 'Q1041', 'Q1045', 'Q1049'];
+// Every place the page names "today’s …" in a year a war touches it or it stands under the map (second review, 25
+// November 2026): the land then was a colony, crown colony, condominium, overseas province, trust territory or a
+// protectorate Wikidata gives no state of its own, and each is a state today (none has an end, P576, on Wikidata).
+// TODAY_RIGHT; Malaysia and Sri Lanka before their earlier states began (1941–45; British Ceylon, Q918153, crown colony,
+// in 1942); and places named only as a war's location: Kenya (Kenya Colony), Cyprus (British Cyprus, Q15240466, crown
+// colony), Cambodia (French Protectorate of Cambodia, Q3173090, protectorate only), Laos (history-places.mjs PASSED_OVER),
+// Angola, Guinea-Bissau (Portuguese Guinea, Q2002279) and Mozambique (Portuguese overseas provinces), Cameroon (French
+// Cameroons) and Mauritania (French West Africa, Q210682). A state that is gone (South Yemen) is never "today’s".
+const TODAY_ALL = [...TODAY_RIGHT, 'Q833', 'Q854', 'Q114', 'Q229', 'Q424', 'Q819', 'Q916', 'Q1007', 'Q1009', 'Q1025', 'Q1029'];
+const REVIEWED = ['Q115', 'Q148', 'Q233', 'Q252', 'Q262', 'Q423', 'Q574', 'Q668', 'Q685', 'Q691', 'Q796', 'Q817', 'Q822', 'Q833', 'Q836', 'Q842', 'Q854', 'Q929', 'Q948', 'Q974', 'Q986', 'Q1000', 'Q1019', 'Q1041', 'Q1045', 'Q1049', 'Q34754', 'Q267584'];
+test('Retrospective data: places are named by the state of the year: the tables’ exact shape, each earlier name and its last year', async () => {
+  const { NAMED_AS, STATE_FROM, EARLIER_STATE, PASSED_OVER, isEarlierState, endOf, earlierNames } = await import('../battlefield/scripts/history-places.mjs');
+  assert.deepEqual(NAMED_AS, {
+    Q115: ['Q207521'], Q148: [['Q13426199', { P518: 'Q19188' }]], Q796: ['Q149805'], Q822: ['Q108865226', 'Q108865218'], Q833: ['Q976099', 'Q1479726'],
+    Q842: ['Q157734'], Q851: ['Q1756546'], Q854: ['Q2670092'], Q948: ['Q2017684'], Q34754: ['Q662653'], Q83286: ['Q15102440', 'Q191077'],
+    Q199841: ['Q834486'], Q267584: [['Q580188', { P31: 'Q3624078' }]],
+  });
+  assert.deepEqual(STATE_FROM, { Q817: 'Q3624078' });
+  // The rule for an earlier state, as Wikidata's classes (P31): a historical country or a sovereign state, and not a
+  // colony, crown colony, condominium, overseas province, League of Nations mandate or UN trust territory. A protectorate
+  // Wikidata also calls a historical country is a state (Muscat and Oman, the French protectorate of Tunisia).
+  assert.deepEqual(EARLIER_STATE, { is: ['Q3024240', 'Q3624078'], not: ['Q133156', 'Q1351282', 'Q734818', 'Q333542', 'Q426759', 'Q985073'] });
+  const p31 = (...qs) => ({ claims: { P31: qs.map(id => ({ rank: 'normal', mainsnak: { datavalue: { value: { id } } } })) } });
+  assert.equal(isEarlierState(p31('Q3024240', 'Q164142')), true, 'a protectorate that is a historical country (Tunisia, 1881–1956)');
+  assert.equal(isEarlierState(p31('Q3024240', 'Q133156')), false, 'a colony, though a historical country (British rule in Myanmar)');
+  assert.equal(isEarlierState(p31('Q164142')), false, 'a protectorate only (British Solomon Islands)');
+  // Items that meet the rule and were left out, each with its reason; none is in NAMED_AS.
+  assert.deepEqual(Object.keys(PASSED_OVER).sort(), ['Q1320058', 'Q1517772', 'Q704358']);
+  for (const [id, [q, why]] of Object.entries(PASSED_OVER)) {
+    assert.ok(PLACES.places[q] && why.length > 40, `${id}: its place and reason`);
+    assert.ok(!Object.values(NAMED_AS).flat().flat().includes(id), `${id} is not named`);
+  }
+  // The build stops where a state that is gone (its own item has an end, P576) would be named in a war's year before its
+  // inception with no earlier name, since "today’s South Yemen" names a state that is not there today.
+  const { goneUnnamed } = await import('../battlefield/scripts/history-places.mjs');
+  const yemenWar = [{ years: [[1964, 1], [1972, 1]], loc: ['Q199841'], states: [] }];
+  const gone = { claims: { P576: [{ rank: 'normal', mainsnak: { datavalue: { value: { time: '+1990-05-22T00:00:00Z' } } } }] } };
+  assert.deepEqual(goneUnnamed({ Q199841: { n: 'South Yemen', since: 1967 } }, yemenWar, () => gone), [['Q199841', 1964]]);
+  assert.deepEqual(goneUnnamed({ Q199841: PLACES.places.Q199841 }, yemenWar, () => gone), []);
+  assert.deepEqual(goneUnnamed({ Q199841: { n: 'South Yemen', since: 1967 } }, yemenWar, () => ({ claims: {} })), [], 'a state of today may be "today’s"');
+  // Every row of the table is a comment naming its item and property (VM's rule: no name or date without its source).
+  const src = readFileSync(new URL('../battlefield/scripts/history-places.mjs', import.meta.url), 'utf8');
+  for (const q of [...Object.keys(NAMED_AS), ...Object.keys(STATE_FROM)]) assert.match(src, new RegExp(`^\\s+${q}: .*// .*P(576|582|580)`, 'm'), `${q}: its row names its Wikidata statement`);
+  // The build wrote each, and nothing else.
+  for (const [q, was] of Object.entries(DATED)) assert.deepEqual(PLACES.places[q].was, was, `${q}: ${PLACES.places[q].n}`);
+  assert.deepEqual(Object.keys(PLACES.places).filter(q => 'stateFrom' in PLACES.places[q]), ['Q817']);
+  assert.equal(PLACES.places.Q817.stateFrom, 1961);
+  assert.equal(PLACES.places.Q817.since, 1991, 'Kuwait keeps its inception (old addresses read it)');
+  // The pair says which end is meant: the Republic of China has two, 1949 for mainland China and 1971 for the UN.
+  const roc = { labels: { en: { value: 'Republic of China' } }, claims: { P576: [
+    { rank: 'normal', mainsnak: { datavalue: { value: { time: '+1949-12-07T00:00:00Z' } } }, qualifiers: { P518: [{ datavalue: { value: { id: 'Q19188' } } }] } },
+    { rank: 'normal', mainsnak: { datavalue: { value: { time: '+1971-00-00T00:00:00Z' } } }, qualifiers: { P518: [{ datavalue: { value: { id: 'Q1065' } } }] } }] } };
+  assert.equal(endOf('Q13426199', roc), 1971, 'the latest end, which is not meant');
+  assert.equal(endOf(['Q13426199', { P518: 'Q19188' }], roc), 1949);
+  assert.deepEqual(earlierNames('Q148', { Q13426199: roc }), [{ n: 'Republic of China', to: 1949 }]);
+  assert.throws(() => earlierNames('Q148', { Q13426199: { labels: roc.labels, claims: {} } }), /no end/);
+  // Each of the 28 is decided once.
+  assert.deepEqual(sortQ([...TODAY_RIGHT, ...Object.keys(NAMED_AS).filter(q => q !== 'Q83286'), ...Object.keys(STATE_FROM)].filter(q => REVIEWED.includes(q))), sortQ(REVIEWED));
+  assert.equal(new Set([...TODAY_RIGHT, ...Object.keys(NAMED_AS), ...Object.keys(STATE_FROM)]).size, TODAY_RIGHT.length + Object.keys(NAMED_AS).length + Object.keys(STATE_FROM).length);
+});
+
+test('Retrospective data: a place’s name of the year: the Republic of China to 1949, Nejd and Hejaz to 1932, never “today’s” for a state that existed', async () => {
+  const { placeName } = await import('../battlefield/history/names.js');
+  const P = PLACES.places, name = (q, y) => placeName(P[q], y);
+  assert.equal(name('Q148', 1930), 'Republic of China');
+  for (let y = 1926; y <= 1949; y++) assert.equal(name('Q148', y), 'Republic of China', `${y}`);
+  assert.equal(name('Q148', 1950), "People's Republic of China");
+  assert.equal(name('Q851', 1927), 'Kingdom of Nejd and Hejaz', 'the Ikhwan Revolt’s first year');
+  assert.equal(name('Q851', 1932), 'Kingdom of Nejd and Hejaz');
+  assert.equal(name('Q851', 1933), 'Saudi Arabia');
+  assert.equal(name('Q115', 1960), 'Ethiopian Empire');
+  assert.equal(name('Q115', 1936), 'Ethiopian Empire', 'under the map in 1936, not “today’s Ethiopia”');
+  assert.equal(name('Q115', 1976), 'Ethiopia');
+  assert.equal(name('Q817', 1990), 'Kuwait');
+  assert.equal(name('Q833', 1941), 'today’s Malaysia', 'before the Malayan Union, the land of today');
+  assert.equal(name('Q833', 1945), 'today’s Malaysia');
+  assert.equal(name('Q833', 1948), 'Malayan Union', 'the year of a change keeps the earlier state’s name');
+  assert.equal(name('Q833', 1949), 'Federation of Malaya');
+  assert.equal(name('Q833', 1950), 'Federation of Malaya');
+  // Lebanon in 1926, the Great Syrian Revolt's year: the State of Greater Lebanon (to 1 September 1926), then the
+  // mandate republic.
+  assert.equal(name('Q822', 1926), 'State of Greater Lebanon');
+  assert.equal(name('Q822', 1927), 'Lebanese Republic under French mandate');
+  assert.equal(name('Q822', 1943), 'Lebanese Republic under French mandate');
+  assert.equal(name('Q822', 1948), 'Lebanon');
+  // A protectorate Wikidata calls a historical country, as Muscat and Oman is.
+  assert.equal(name('Q948', 1942), 'French protectorate of Tunisia');
+  assert.equal(name('Q948', 1956), 'French protectorate of Tunisia');
+  assert.equal(name('Q948', 1957), 'Tunisia');
+  assert.equal(name('Q842', 1957), 'Muscat and Oman');
+  assert.equal(name('Q34754', 1940), 'British Somaliland');
+  // South Yemen is gone (Wikidata ends it in 1990), so it is never "today’s": 1964–67 is the Federation of South Arabia.
+  for (const y of [1964, 1965, 1966, 1967]) assert.equal(name('Q199841', y), 'Federation of South Arabia', `${y}`);
+  assert.equal(name('Q199841', 1972), 'South Yemen');
+  assert.equal(name('Q854', 1942), 'today’s Sri Lanka');
+  assert.equal(name('Q854', 1971), 'Dominion of Ceylon');
+  assert.equal(name('Q267584', 1948), 'Kingdom of Yemen');
+  assert.equal(name('Q267584', 1963), 'Yemen Arab Republic', 'the Republic in its civil war, not the royalists’ Kingdom');
+  assert.equal(name('Q1049', 1940), 'today’s Sudan', 'a condominium then: the land of today');
+  assert.equal(name('Q83286', 1930), 'Kingdom of Yugoslavia');
+  // Every year each of the 28 is in a war before its inception: "today’s …" only where TODAY_RIGHT keeps it, or in a
+  // year before its earlier state began (Malaysia in 1941, Sri Lanka in 1942).
+  for (const w of HISTORY.wars) for (const [y] of w.years) for (const q of new Set([...locIn(w, y), ...statesIn(w, y)])) {
+    if (!REVIEWED.includes(q) || !(P[q].since > y)) continue;
+    const n = name(q, y), before = P[q].was?.[0]?.from > y;
+    if (TODAY_RIGHT.includes(q) || before) assert.equal(n, `today’s ${P[q].n}`, `${w.id} ${y} ${q}`);
+    else assert.doesNotMatch(n, /today’s/, `${w.id} ${y} ${q}: ${n}`);
+  }
+  // Under the map, by the page's rule: the names of 1936 and 1990.
+  const under = y => (PLACES.unplaced[y] || []).map(q => name(q, y));
+  assert.ok(under(1936).includes('Ethiopian Empire') && !under(1936).some(n => /Ethiopia$/.test(n)), under(1936).join(', '));
+  assert.ok(under(1990).includes('Kuwait') && !under(1990).includes('today’s Kuwait'), under(1990).join(', '));
+  // Every place called "today’s …" in any year a war touches it, or under the map, is one reviewed (TODAY_ALL).
+  const today = new Set();
+  for (const w of HISTORY.wars) for (const [y] of w.years) for (const q of new Set([...locIn(w, y), ...statesIn(w, y), ...(PLACES.unplaced[y] || [])])) {
+    if (/^today’s /.test(name(q, y) || '')) today.add(q);
+  }
+  assert.deepEqual(sortQ([...today]), sortQ(TODAY_ALL));
 });
 
 // AC-13 (Jude, 16 November 2026): a UCDP conflict's states were stored once for all its years, so Tonga stood in "Iraq:
@@ -774,9 +920,10 @@ test('Retrospective: places off Cliopatria’s rows are named, never drawn on to
     assert.equal(await page.locator('#panel .border-note').innerText(), 'VM cannot place Georgia on a free border for 1991, so it is not drawn.');
     assert.match(await page.locator('#unplaced').innerText(), /^VM cannot place this on a free border for 1991: .*Georgia/);
     // 1967: South Vietnam and South Yemen, which no free border holds that year, named under the map, and Angola, then
-    // a Portuguese colony, as today's Angola.
+    // a Portuguese colony, as today's Angola. South Yemen began 1967 as the Federation of South Arabia (Wikidata ends it
+    // on 30 November 1967), so the year keeps that name (second review, 25 November 2026).
     await go('#y=1967', () => !document.querySelector('#unplaced').hidden);
-    assert.match(await page.locator('#unplaced').innerText(), /^VM cannot place this on a free border for 1967: .*South Vietnam, South Yemen.*today’s Angola/);
+    assert.match(await page.locator('#unplaced').innerText(), /^VM cannot place this on a free border for 1967: Federation of South Arabia, South Vietnam,.*today’s Angola/);
     await go('#y=2000', () => document.querySelector('#unplaced').hidden);
     // 1938: the Arab revolt in Palestine is in Mandatory Palestine, named; nothing is drawn as Israel, which came in
     // 1948. The caption says the borders are one a year.
@@ -865,6 +1012,72 @@ test('Retrospective: Yugoslavia has its name of the year: two kingdoms to 1929 a
     await page.waitForFunction(() => document.querySelector('#panel h2')?.textContent === 'Socialist Federal Republic of Yugoslavia', null, { timeout: 10000 });
     assert.ok(+(await page.locator('#year-big').innerText()) > 1945);
     await page.waitForSelector('#map path.shape[data-key="Q83286"]', { timeout: 10000 });
+    assert.deepEqual(errors, []);
+  } finally { await browser.close(); }
+});
+
+// Review of 22 November 2026: the table's "Fought in", a war's panel and a country's heading named China by the People's
+// Republic in 1930 and Saudi Arabia before 1932, and "today’s Ethiopia" stood under the map in 1936. Every view names a
+// place by the year shown through one function (names.js placeName).
+test('Retrospective: every view names a place by the state of the year: the Republic of China in 1930 and 1949, Nejd and Hejaz to 1932, Ethiopia and Kuwait never “today’s”', pageTest, async () => {
+  const { browser, page, errors } = await open('battlefield/history/#y=1930&v=table');
+  try {
+    const go = async (h, done) => { await page.evaluate(h => { location.hash = h; }, h); await page.waitForFunction(done, null, { timeout: 10000 }); await page.waitForTimeout(200); };
+    const fought = id => page.locator(`#table-rows tr[data-id="${id}"] td.wrap`).textContent();
+    await page.waitForFunction(() => !!document.querySelector('#table-rows tr[data-id="Q717809"]'), null, { timeout: 20000 });
+    // The table, 1930: the Central Plains War in the Republic of China; the Ikhwan Revolt in the Kingdom of Nejd and Hejaz.
+    assert.equal(await fought('Q717809'), 'Republic of China');
+    assert.equal(await fought('Q3938020'), 'Kingdom of Nejd and Hejaz');
+    const all1930 = (await page.locator('#table-rows').textContent());
+    assert.doesNotMatch(all1930, /People's Republic of China|Saudi Arabia/);
+    // 1949 is the Republic of China's last year (Wikidata's end for mainland China); 1950 is the People's Republic's.
+    await go('#y=1949&v=table', () => /1949/.test(document.querySelector('#table-title').textContent) && !!document.querySelector('#table-rows tr[data-id="u202"]'));
+    assert.equal(await fought('u202'), 'Republic of China');
+    await go('#y=1950&v=table', () => /1950/.test(document.querySelector('#table-title').textContent) && !!document.querySelector('#table-rows tr[data-id="u232"]'));
+    assert.match(await fought('u232'), /^People's Republic of China, Taiwan$/);
+    // A war's panel: the Central Plains War, fought in the Republic of China.
+    await go('#y=1930&w=Q717809&v=map', () => document.querySelector('#panel h2')?.textContent === 'Central Plains War');
+    const panel = await page.locator('#panel').innerText();
+    assert.match(panel, /fought in Republic of China/);
+    assert.doesNotMatch(panel, /People's Republic/);
+    // A country's heading and the pointer's sentence.
+    await go('#y=1930&c=Q148', () => document.querySelector('#panel h2')?.textContent === 'Republic of China');
+    await page.waitForSelector('#map path.shape[data-key="Q148"]');
+    assert.match(await tipOf(page, 'Q148'), /^Republic of China/);
+    await go('#y=1932&c=Q851', () => document.querySelector('#year-big').textContent === '1932' && document.querySelector('#panel h2')?.textContent === 'Kingdom of Nejd and Hejaz');
+    assert.match(await tipOf(page, 'Q851'), /^Kingdom of Nejd and Hejaz: no war recorded/);
+    await go('#y=1933&c=Q851', () => document.querySelector('#year-big').textContent === '1933' && document.querySelector('#panel h2')?.textContent === 'Saudi Arabia');
+    // Ethiopia in 1960 and, occupied, in 1936: the Ethiopian Empire, under the map and in its panel; never "today’s".
+    await go('#y=1960&c=Q115', () => document.querySelector('#year-big').textContent === '1960' && document.querySelector('#panel h2')?.textContent === 'Ethiopian Empire');
+    await go('#y=1936&c=Q115', () => /1936/.test(document.querySelector('#unplaced').textContent) && document.querySelector('#panel .border-note'));
+    assert.match(await page.locator('#unplaced').innerText(), /Ethiopian Empire/);
+    assert.equal(await page.locator('#panel .border-note').innerText(), 'VM cannot place Ethiopian Empire on a free border for 1936, so it is not drawn.');
+    // Kuwait in 1990, a state since 1961 (Wikidata), though its item's inception is the liberation of 1991.
+    await go('#y=1990&c=Q817', () => /1990/.test(document.querySelector('#unplaced').textContent) && document.querySelector('#panel .border-note'));
+    assert.equal(await page.locator('#panel .border-note').innerText(), 'VM cannot place Kuwait on a free border for 1990, so it is not drawn.');
+    assert.match(await page.locator('#unplaced').innerText(), /Kuwait/);
+    // Nothing on the page says "today’s" of Ethiopia or Kuwait, in any of those years.
+    for (const h of ['#y=1936', '#y=1960&v=table', '#y=1990', '#y=1990&w=u371']) {
+      await go(h, () => !!document.querySelector('#panel h2'));
+      assert.doesNotMatch(await page.locator('body').innerText(), /today’s (Ethiopia|Kuwait)/, h);
+    }
+    // A colony is still the land of today: Algeria in 1955, in the table and under the map.
+    await go('#y=1955&v=table', () => /1955/.test(document.querySelector('#table-title').textContent) && !!document.querySelector('#table-rows tr[data-id="u246"]'));
+    assert.equal(await fought('u246'), 'today’s Algeria');
+    assert.match(await page.locator('#table-unplaced').innerText(), /today’s Algeria/);
+    // A war's panel names each place by the first year it is in the war (second review, 25 November 2026): Serbia's war
+    // in Croatia was in Yugoslavia in 1991 and in the Federal Republic of Yugoslavia in 1992, neither "today’s".
+    await go('#y=1991&w=u385', () => document.querySelector('#panel h2')?.textContent === 'Serbia (Yugoslavia): Croatia');
+    const u385 = await page.locator('#panel').innerText();
+    assert.match(u385, /in Socialist Federal Republic of Yugoslavia, Federal Republic of Yugoslavia, active/);
+    assert.doesNotMatch(u385, /today’s/);
+    await go('#y=1990&w=u230', () => document.querySelector('#panel h2')?.textContent === 'Yemen (North Yemen): government');
+    assert.match(await page.locator('#panel').innerText(), /in Kingdom of Yemen, Yemen, active/);
+    // South Yemen, a state that is gone, is never "today’s": 1964 is the Federation of South Arabia.
+    await go('#y=1964&w=u286', () => document.querySelector('#panel h2')?.textContent === 'South Yemen: Aden/South Yemen');
+    assert.match(await page.locator('#panel').innerText(), /in Federation of South Arabia, active/);
+    await go('#y=1964&c=Q199841', () => document.querySelector('#year-big').textContent === '1964' && document.querySelector('#panel h2')?.textContent === 'Federation of South Arabia');
+    assert.doesNotMatch(await page.locator('body').innerText(), /today’s South Yemen/i);
     assert.deepEqual(errors, []);
   } finally { await browser.close(); }
 });

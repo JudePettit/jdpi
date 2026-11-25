@@ -1,6 +1,8 @@
 // Builds the Retrospective Battlefield's data: battlefield/history/data/wars.json (every war and armed conflict,
 // 1926–2025) and battlefield/history/data/places.json (where the page draws each place, year by year).
 //   node --max-old-space-size=6000 battlefield/scripts/build-history.mjs <UcdpPrioConflict_v26_1.csv> [--cache <folder>]
+//   node battlefield/scripts/build-history.mjs --names-only [--cache <folder>]   (places.json's dated names only: below)
+//   Either may take --out <folder> to write there instead of battlefield/history/data.
 // Sources, all free (stage J1, 20 November 2026):
 //   · 1946–2025: UCDP/PRIO Armed Conflict Dataset v26.1 (CC BY 4.0), conflict-years with at least 25 battle deaths,
 //     downloaded by hand from https://ucdp.uu.se/downloads/ (ucdpprio/ucdp-prio-acd-261-csv.zip).
@@ -24,7 +26,11 @@
 //    standing in; empty since review X1, 21 November 2026).
 // 5. Every place's Q-id asked of Wikidata (wbgetentities): its English label is the page's name for it, its ISO3
 //    (P298) must agree with Natural Earth's, and its inception (P571, the earliest) is kept as `since` when it falls
-//    after 1926, so the page can call a place named for a year before it "today’s …".
+//    after 1926, so the page can call a place named for a year before it "today’s …"; a place history-places.mjs
+//    NAMED_AS names carries its earlier states' names by year (`was`), and one STATE_FROM names the year its state
+//    existed from (`stateFrom`), each read from Wikidata (datedNames, below; --names-only rewrites only these). The year
+//    of a change keeps the earlier name VM holds; a state's first year is its own where VM holds no earlier state for it
+//    (names.js). The build stops where a state that is gone would be named before its inception with no earlier name.
 // 6. Where the page draws each place each year (places.json): Cliopatria's rows of the year (2025 on 2024's rows, the
 //    last Cliopatria holds), each row's place by history-places.mjs; from 1946, a small state no row holds as Natural
 //    Earth's point (`points`); any other war place no row holds that year is listed as one VM cannot place
@@ -34,12 +40,13 @@
 // 8. Writes both files.
 import { readFileSync, writeFileSync, mkdirSync, existsSync } from 'node:fs';
 import { tmpdir } from 'node:os';
-import { join } from 'node:path';
+import { join, resolve } from 'node:path';
+import { pathToFileURL } from 'node:url';
 import { parseCsv } from './csv.mjs';
 import { COW_WIKI, UCDP_WIKI } from './history-wiki.mjs';
 import { FOUGHT_IN, CHECKED_THROUGH } from './history-fought.mjs';
 import { actors, interstateName } from './ucdp.mjs';
-import { rowQid, drawnRow, canonical, placeAt, CANONICAL, NAMED_AS } from './history-places.mjs';
+import { rowQid, drawnRow, canonical, placeAt, CANONICAL, NAMED_AS, STATE_FROM, earlierNames, stateFrom, placeEntry, isEarlierState, goneUnnamed } from './history-places.mjs';
 import { fetchWars, selectWars, THEN, FIRST as WD_FIRST, LAST as WD_LAST } from './wars-1926.mjs';
 import { placeResolver, governments, SPECIAL } from '../../omni/scripts/ucdp-places.mjs';
 import { entities, byTitles, sha256 } from '../../omni/scripts/history-common.mjs';
@@ -52,9 +59,62 @@ mkdirSync(CACHE, { recursive: true });
 const FIRST = 1926, UCDP_FROM = 1946, LAST = 2025, BORDERS_TO = 2024;
 const UCDP_VERSION = '26.1';
 const ROOT = new URL('../../', import.meta.url);
-const OUT = new URL('../history/data/', import.meta.url);
+// --out <folder>: write the two files there instead (to compare a build with the committed files); default the page's.
+const DATA = new URL('../history/data/', import.meta.url);
+const OUT = arg('--out') ? pathToFileURL(resolve(arg('--out')) + '/') : DATA;
 const J = p => JSON.parse(readFileSync(new URL(p, ROOT), 'utf8'));
 const M = globalThis.PRPMap;
+
+// ---- The places' dated names (step 5's, and the whole of --names-only): each place NAMED_AS names carries its
+// earlier states' names (`was`: each earlier item's English label, its last year and, where that leaves a gap, its
+// first: history-places.mjs earlierNames); each STATE_FROM names, the year Wikidata shows the state of its name
+// existed from (`stateFrom`); the build stops where that year is not before its inception (`since`). The year of a
+// change keeps the earlier name VM holds (the Kingdom of Serbs, Croats and Slovenes in 1929, the State of Greater
+// Lebanon in 1926); a state's first year is its own where VM holds no earlier state for it, since the land before was
+// a colony or a territory (Algeria in 1962, the Dominion of Ceylon in 1948, Kuwait from 1961): battlefield/history/names.js.
+// Every earlier item must be a state by history-places.mjs EARLIER_STATE and not a place of its own.
+// `isPlace`: the build's places; `own(q)`: a place's own Wikidata entity.
+async function datedNames(isPlace, own) {
+  const ids = Object.values(NAMED_AS).flat().map(x => (Array.isArray(x) ? x[0] : x));
+  const earlier = await entities(ids, { props: 'claims|labels', cache: CACHE, tag: 'bfwas' });
+  for (const q of [...Object.keys(NAMED_AS), ...Object.keys(STATE_FROM)]) if (!isPlace.has(q)) throw new Error(`history-places.mjs names ${q}, which is not a place`);
+  for (const id of ids) if (isPlace.has(id)) throw new Error(`NAMED_AS: ${id} is a place of its own, so it is not another place's earlier name`);
+  for (const id of ids) if (!isEarlierState(earlier[id])) throw new Error(`NAMED_AS: Wikidata's classes (P31) for ${id} do not make it a state by EARLIER_STATE`);
+  const was = Object.fromEntries(Object.keys(NAMED_AS).map(q => [q, earlierNames(q, earlier, FIRST)]));
+  return (q, since) => {
+    const s = stateFrom(q, own(q));
+    if (s != null && !(since > s)) throw new Error(`STATE_FROM: ${q}'s state from ${s} is not before its inception (${since})`);
+    return { stateFrom: s, was: was[q] || null };
+  };
+}
+// A state that is gone (its item has an end, P576) named in a war's year before its inception must have an earlier
+// name there (NAMED_AS): the page would otherwise call it "today’s …" (South Yemen in 1964, second review, 25 November 2026).
+function stopIfGone(places, warList, own) {
+  const bad = goneUnnamed(places, warList, own);
+  if (bad.length) throw new Error(`A state that is gone, named before its inception with no earlier name (add a NAMED_AS row): ${bad.map(([q, y]) => `${q} ${places[q].n} ${y}`).join('; ')}`);
+}
+const PLACES_ABOUT ='VM’s own work. Each Cliopatria row’s place by year (battlefield/scripts/history-places.mjs); from 1946, each small state that no row holds in a year, as Natural Earth’s point (points: year → Q-id → point id); and, each year, the war places VM cannot place on a free border (unplaced). No place is drawn on a border of today. A place’s `since` is its inception on Wikidata, where after 1926; `stateFrom`, where that inception is a later change of regime, the year Wikidata shows the state of its name existed from; `was`, its earlier states’ names, each to its last year (and from its first, where that leaves a gap), from their own Wikidata items (history-places.mjs NAMED_AS). The page names a place by the year shown (battlefield/history/names.js).';
+
+// ---- --names-only: the committed places.json with only its places' dated names (`was`, `stateFrom`) rewritten by the
+// functions step 5 uses, from Wikidata read now; nothing else in it, and nothing in wars.json, changes. For a change
+// to history-places.mjs NAMED_AS or STATE_FROM when the UCDP file is not to hand, or a full build would also bring in
+// Wikidata's other edits since the last one (25 November 2026):
+//   node battlefield/scripts/build-history.mjs --names-only [--cache <folder>]
+if (process.argv.includes('--names-only')) {
+  const doc = JSON.parse(readFileSync(new URL('places.json', DATA), 'utf8'));
+  const { wars: warList } = JSON.parse(readFileSync(new URL('wars.json', DATA), 'utf8'));
+  const qs = new Set(Object.keys(doc.places));
+  // The places' own items: STATE_FROM's, and every place with an inception after 1926 (goneUnnamed reads their ends).
+  const own = await entities([...Object.keys(STATE_FROM), ...[...qs].filter(q => doc.places[q].since)], { props: 'claims|labels', cache: CACHE, tag: 'bfst' });
+  const dated = await datedNames(qs, q => own[q]);
+  for (const q of qs) doc.places[q] = placeEntry(doc.places[q], dated(q, doc.places[q].since));
+  stopIfGone(doc.places, warList, q => own[q]);
+  doc.about = PLACES_ABOUT;
+  mkdirSync(OUT, { recursive: true });
+  writeFileSync(new URL('places.json', OUT), JSON.stringify(doc));
+  for (const q of qs) for (const k of ['was', 'stateFrom']) if (doc.places[q][k]) console.log(`${q} ${doc.places[q].n}: ${k} ${JSON.stringify(doc.places[q][k])}`);
+  process.exit(0);
+}
 if (!acdPath || !existsSync(acdPath)) { console.error('Give the UCDP/PRIO ACD v26.1 CSV, downloaded from https://ucdp.uu.se/downloads/'); process.exit(1); }
 
 // ---- 1. Inputs
@@ -176,18 +236,7 @@ for (let y = FIRST; y <= LAST; y++) {
   rowsOfYear.set(y, list);
 }
 const got = await entities([...allPlaces], { props: 'claims|labels', cache: CACHE, tag: 'bfpl' });
-// A place keyed by a later state's item carries its earlier states' names (history-places.mjs NAMED_AS): each earlier
-// item's English label and the year Wikidata ends it (P576), oldest first. A year takes the name it began with.
-const earlier = await entities(Object.values(NAMED_AS).flat(), { props: 'claims|labels', cache: CACHE, tag: 'bfwas' });
-const wasOf = q => (NAMED_AS[q] || []).map(id => {
-  const e = earlier[id], to = (e?.claims?.P576 || []).filter(c => c.rank !== 'deprecated').map(c => /^\+?(-?\d+)-/.exec(c.mainsnak?.datavalue?.value?.time || '')?.[1]).filter(Boolean).map(Number);
-  if (!e?.labels?.en?.value || !to.length) throw new Error(`Wikidata gives ${id} no English label or no end (P576), so ${q}'s earlier name has no last year`);
-  return { n: e.labels.en.value, to: Math.max(...to) };
-});
-for (const q of Object.keys(NAMED_AS)) {
-  if (!allPlaces.has(q)) throw new Error(`NAMED_AS names ${q}, which is not a place`);
-  if (wasOf(q).some((w, i, l) => i && w.to <= l[i - 1].to)) throw new Error(`${q}: its earlier names are not oldest first`);
-}
+const dated = await datedNames(allPlaces, q => got[q]);
 const neBy = new Map(ne.filter(p => p.q).map(p => [p.q, p])), smallBy = new Map(small.filter(p => p.q).map(p => [p.q, p]));
 const places = {};
 for (const q of [...allPlaces].sort((a, b) => +a.slice(1) - +b.slice(1))) {
@@ -198,9 +247,10 @@ for (const q of [...allPlaces].sort((a, b) => +a.slice(1) - +b.slice(1))) {
   // Kosovo has no ISO 3166 code: Natural Earth and Wikidata each use a user-assigned X code, so X codes are not compared.
   if (nat?.iso3 && iso.length && !iso.includes(nat.iso3) && !/^X/.test(nat.iso3)) throw new Error(`${q}: Wikidata's ISO3 ${iso.join(', ')} is not Natural Earth's ${nat.iso3}`);
   const since = (e.claims?.P571 || []).filter(c => c.rank !== 'deprecated').map(c => /^\+?(-?\d+)-/.exec(c.mainsnak?.datavalue?.value?.time || '')?.[1]).filter(Boolean).map(Number);
-  places[q] = { n: e.labels?.en?.value || nat?.n || q, ...(nat?.iso3 || iso[0] ? { iso3: nat?.iso3 || iso[0] } : {}),
-    ...(since.length && Math.min(...since) > FIRST ? { since: Math.min(...since) } : {}), ...(NAMED_AS[q] ? { was: wasOf(q) } : {}) };
+  const sinceY = since.length && Math.min(...since) > FIRST ? Math.min(...since) : null;
+  places[q] = placeEntry({ n: e.labels?.en?.value || nat?.n || q, iso3: nat?.iso3 || iso[0], since: sinceY }, dated(q, sinceY));
 }
+stopIfGone(places, wars, q => got[q]);
 
 // ---- 6. Where each war place is drawn each year: a Cliopatria row; from 1946 a small state's point; else unplaced
 const points = {}, unplaced = {};
@@ -270,8 +320,7 @@ const warsDoc = { generated: new Date().toISOString(), format: 'vm-battlefield-w
   levels: { 1: 'Minor conflict: 25 to 999 battle-related deaths in the year (UCDP)', 2: 'War: 1,000 or more battle-related deaths in the year (UCDP)', 3: 'A war Wikidata lists, 1926–1945; its intensity is not coded' },
   sources, oldIds, oldWithin, oldGone, wars };
 const placesDoc = { generated: warsDoc.generated, format: 'vm-battlefield-places/2', borders: BORDER_FILES, bordersTo: BORDERS_TO,
-  about: 'VM’s own work. Each Cliopatria row’s place by year (battlefield/scripts/history-places.mjs); from 1946, each small state that no row holds in a year, as Natural Earth’s point (points: year → Q-id → point id); and, each year, the war places VM cannot place on a free border (unplaced). No place is drawn on a border of today. A place’s `since` is its inception on Wikidata, where after 1926.',
-  places, rows: Object.fromEntries([...rowQs].map(([id, runs]) => [id, runs.length === 1 && runs[0][2] ? runs[0][2] : runs])), points, unplaced, oldCountries: oldC };
+  about: PLACES_ABOUT, places, rows: Object.fromEntries([...rowQs].map(([id, runs]) => [id, runs.length === 1 && runs[0][2] ? runs[0][2] : runs])), points, unplaced, oldCountries: oldC };
 mkdirSync(OUT, { recursive: true });
 writeFileSync(new URL('wars.json', OUT), JSON.stringify(warsDoc));
 writeFileSync(new URL('places.json', OUT), JSON.stringify(placesDoc));

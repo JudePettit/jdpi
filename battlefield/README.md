@@ -29,13 +29,31 @@ are Wikidata items; no Correlates of War value, CShapes border or Gleditsch–Wa
   Slovenes to 1929 and the Kingdom of Yugoslavia to 1945, the name War Focus gives it for the Second World War; the
   page names a place by the year shown, and the search finds it by each name, opening the first war year in which the
   place is drawn under that name (1945 for the Kingdom of Yugoslavia, which is on no border from 1941 to 1944).
+  Since 25 November 2026 the table also names the Republic of China (to 1949, its end for mainland China: an entry
+  can say which of an item's ends is meant), the Kingdom of Nejd and Hejaz (to 1932), the Ethiopian Empire, the
+  Kingdom of Iraq, the State of Greater Lebanon (to 1926) and the Lebanese Republic under French mandate, the Malayan
+  Union (from 1946) and the Federation of Malaya, Muscat and Oman, the Dominion of Ceylon (from 1948), the French
+  protectorate of Tunisia, British Somaliland, the Federation of South Arabia (South Yemen, from 1962) and the Kingdom
+  of Yemen; `STATE_FROM` gives Kuwait its statehood from 1961, as its item's inception is the liberation of 1991.
+  An earlier item must be a state by `EARLIER_STATE` (its Wikidata classes, P31: a historical country or a sovereign
+  state, and not a colony, crown colony, condominium, overseas province, mandate or trust territory); items that meet
+  it but are left out are in `PASSED_OVER` with the reason. The build stops where a `STATE_FROM` year is not before
+  the place's inception, where an earlier item is not a state by that rule, and where a state that is gone would be
+  named before its inception with no earlier name (`goneUnnamed`). Every view names a place through one function,
+  `history/names.js` (`placeName`): the year of a change keeps the earlier name VM holds; a state's first year is its
+  own where VM holds no earlier state for it; "today's …" only for years wholly before the state of that name
+  existed (a colony then), never for a state that is gone. A war's panel names each place by the first year it is in
+  that war.
 - **Unplaced:** a state with no Cliopatria row of its own in a year is named under the map, above the table and in a
   war's panel ("VM cannot place this on a free border for …"), never drawn on another state's row or on a part's
   (occupied Yugoslavia, 1941–44; Palestine, whose only row from 2014 is Gaza's).
 - **Rebuild:**
   ```
-  node --max-old-space-size=6000 battlefield/scripts/build-history.mjs <UcdpPrioConflict_v26_1.csv> [--cache <folder>]
+  node --max-old-space-size=6000 battlefield/scripts/build-history.mjs <UcdpPrioConflict_v26_1.csv> [--cache <folder>] [--out <folder>]
+  node battlefield/scripts/build-history.mjs --names-only [--cache <folder>] [--out <folder>]
   ```
+  `--names-only` rewrites only places.json's dated names (`was`, `stateFrom`) by the same functions, from Wikidata
+  read then, for a change to `NAMED_AS` or `STATE_FROM` without the UCDP file.
 - **Wikipedia links:** titles live in `scripts/history-wiki.mjs`. Wars without a title link to a Wikipedia search.
 
 ## War Focus (`battlefield/focus/`)

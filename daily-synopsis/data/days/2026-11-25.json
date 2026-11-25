@@ -1,0 +1,1557 @@
+{
+ "format": "vm-daily-synopsis-day/1",
+ "day": "2026-11-25",
+ "input": "2026-11-25-28ba7c52fd20",
+ "generated": "2026-11-25T03:35:18.304Z",
+ "updated": "2026-11-25T03:35:18.304Z",
+ "window": {
+  "from": "2026-11-24T02:17:09.528Z",
+  "to": "2026-11-25T02:17:09.528Z"
+ },
+ "storeGenerated": "2026-11-25T02:17:09.528Z",
+ "authorship": "rules",
+ "model": null,
+ "label": {
+  "text": "This digest was assembled by rules, with no AI model: Vitruvian Manager’s code picked the stories and grouped the outlets’ own headlines beneath them, and no person checked it. The linked reports are the sources.",
+  "five": "The 5 Sided Analysis under each story lays out the outlets’ own headlines by side, far left to far right, by rules alone.",
+  "notProof": "A side with no headline here was not found among Vitruvian Manager’s outlets, which is not proof that the side did not report it.",
+  "meta": "Assembled by rules, with no AI model; no person checked it"
+ },
+ "rule": {
+  "minOutlets": 3,
+  "minSides": 2,
+  "cap": 10,
+  "fiveMinSides": 3,
+  "fiveNeedsLeftAndRight": true
+ },
+ "sides": [
+  {
+   "key": "far_left",
+   "label": "Far left"
+  },
+  {
+   "key": "left",
+   "label": "Left"
+  },
+  {
+   "key": "centre",
+   "label": "Centre"
+  },
+  {
+   "key": "right",
+   "label": "Right"
+  },
+  {
+   "key": "far_right",
+   "label": "Far right"
+  }
+ ],
+ "written": {
+  "status": "missing",
+  "note": "The written digest is not available for this day.",
+  "attempts": []
+ },
+ "lead": null,
+ "stories": [
+  {
+   "id": "s1",
+   "rank": 1,
+   "outlets": 13,
+   "lead": "s1-4",
+   "headlines": [
+    {
+     "id": "s1-1",
+     "side": "left",
+     "outlet": "HuffPost",
+     "outletId": "huffpost",
+     "caution": false,
+     "access": "free",
+     "headline": "Pope Francis' Private Diary Describes A Profound Spiritual Crisis, Encounters With The Devil",
+     "url": "https://www.huffpost.com/entry/vatican-pope-francis-diary_n_6b0593c5e4b0e97a940ab67a",
+     "published": "2026-11-24T13:53:32.000Z"
+    },
+    {
+     "id": "s1-2",
+     "side": "left",
+     "outlet": "The Independent",
+     "outletId": "independent",
+     "caution": true,
+     "access": "free",
+     "headline": "Pope Francis describes encounters with the Devil in private diary entries: ‘I can’t forget his eyes’",
+     "url": "https://www.independent.co.uk/news/world/europe/pope-francis-diary-devil-book-death-b3090736.html",
+     "published": "2026-11-24T14:56:12.000Z"
+    },
+    {
+     "id": "s1-3",
+     "side": "left",
+     "outlet": "The New York Times",
+     "outletId": "nyt",
+     "caution": false,
+     "access": "paid",
+     "headline": "Pope Francis Diary Excerpts Published in New Book",
+     "url": "https://www.nytimes.com/2026/11/24/world/europe/pope-francis-diary.html",
+     "published": "2026-11-24T06:00:06.000Z"
+    },
+    {
+     "id": "s1-4",
+     "side": "centre",
+     "outlet": "BBC News",
+     "outletId": "bbc",
+     "caution": false,
+     "access": "free",
+     "headline": "Pope Francis' diary reveals claims he saw the devil three times",
+     "url": "https://www.bbc.co.uk/news/articles/cm78270l4z7no",
+     "published": "2026-11-24T11:10:57.000Z"
+    },
+    {
+     "id": "s1-5",
+     "side": "centre",
+     "outlet": "The Hill",
+     "outletId": "thehill",
+     "caution": false,
+     "access": "free",
+     "headline": "Pope Francis’ private diary reveals visions of the devil",
+     "url": "https://thehill.com/policy/international/6240210-pope-francis-private-diary-reveals-visions-of-the-devil/",
+     "published": "2026-11-24T19:41:47.000Z"
+    },
+    {
+     "id": "s1-6",
+     "side": "centre",
+     "outlet": "Deutsche Welle",
+     "outletId": "dw",
+     "caution": false,
+     "access": "free",
+     "headline": "Pope Francis diaries recount spiritual crisis, him seeing the 'Devil'",
+     "url": "https://www.dw.com/en/pope-francis-diaries-recount-spiritual-crisis-him-seeing-the-devil/a-80033224?maca=en-rss-en-all-1573-rdf",
+     "published": "2026-11-24T15:21:00.000Z"
+    },
+    {
+     "id": "s1-7",
+     "side": "centre",
+     "outlet": "UPI",
+     "outletId": "upi",
+     "caution": false,
+     "access": "free",
+     "headline": "Pope Francis described profound spiritual crisis in private diary",
+     "url": "https://www.upi.com/Top_News/World-News/2026/11/24/vatican-pope-francis-private-diary-published/4321795549639/",
+     "published": "2026-11-24T20:42:23.000Z"
+    },
+    {
+     "id": "s1-8",
+     "side": "centre",
+     "outlet": "Euronews",
+     "outletId": "euronews",
+     "caution": false,
+     "access": "free",
+     "headline": "Pope Francis' private notes reveal visions of the devil and a plan to allow married men to be priests",
+     "url": "https://www.euronews.com/2026/11/24/pope-francis-private-notes-reveal-visions-of-the-devil-and-a-plan-to-allow-married-men-to-",
+     "published": "2026-11-24T17:06:57.000Z"
+    },
+    {
+     "id": "s1-9",
+     "side": "right",
+     "outlet": "The Daily Caller",
+     "outletId": "dailycaller",
+     "caution": true,
+     "access": "free",
+     "headline": "Diary Entries Of Pope Francis Detail Encounters With Devil",
+     "url": "https://dailycaller.com/2026/11/24/pope-francis-demonic-attacks-devil-diary",
+     "published": "2026-11-24T18:49:27.000Z"
+    },
+    {
+     "id": "s1-10",
+     "side": "right",
+     "outlet": "Daily Mail",
+     "outletId": "dailymail",
+     "caution": false,
+     "access": "free",
+     "headline": "Pope Francis saw the 'flame-eyed' Devil three times and even the 'gates of Hell' once, his diary reveals",
+     "url": "https://www.dailymail.com/news/article-16318109/Pope-Francis-saw-flame-eyed-Devil-gates-Hell-died-diary-reveals.html?ns_mchannel=rss&ns_campaign=1490",
+     "published": "2026-11-24T17:15:40.000Z"
+    },
+    {
+     "id": "s1-11",
+     "side": "right",
+     "outlet": "Washington Examiner",
+     "outletId": "washingtonexaminer",
+     "caution": false,
+     "access": "paid",
+     "headline": "Pope Francis’s diaries recount visions of hell, attacks by Satan throughout later life",
+     "url": "https://www.washingtonexaminer.com/news/world/4814431/pope-francis-diaries-hell-visions-satan-attacks/",
+     "published": "2026-11-24T23:02:45.000Z"
+    },
+    {
+     "id": "s1-12",
+     "side": "far_right",
+     "outlet": "Breitbart",
+     "outletId": "breitbart",
+     "caution": true,
+     "access": "free",
+     "headline": "Pope Francis Revealed in Personal Diary He Saw the Devil Three Times",
+     "url": "https://www.breitbart.com/europe/2026/11/24/pope-francis-revealed-in-personal-diary-he-saw-the-devil-three-times/",
+     "published": "2026-11-24T14:13:15.000Z"
+    },
+    {
+     "id": "s1-13",
+     "side": "far_right",
+     "outlet": "TheBlaze",
+     "outletId": "blaze",
+     "caution": true,
+     "access": "unknown",
+     "headline": "Pope Francis met the devil, according to newly published diary",
+     "url": "https://www.theblaze.com/news/pope-francis-devil-hell-catholic",
+     "published": "2026-11-24T21:35:00.000Z"
+    }
+   ],
+   "sentences": null,
+   "five": {
+    "sides": [
+     {
+      "key": "far_left",
+      "label": "Far left",
+      "outlets": 0,
+      "headlines": []
+     },
+     {
+      "key": "left",
+      "label": "Left",
+      "outlets": 3,
+      "headlines": [
+       "s1-1",
+       "s1-2",
+       "s1-3"
+      ]
+     },
+     {
+      "key": "centre",
+      "label": "Centre",
+      "outlets": 5,
+      "headlines": [
+       "s1-4",
+       "s1-5",
+       "s1-6",
+       "s1-7",
+       "s1-8"
+      ]
+     },
+     {
+      "key": "right",
+      "label": "Right",
+      "outlets": 3,
+      "headlines": [
+       "s1-9",
+       "s1-10",
+       "s1-11"
+      ]
+     },
+     {
+      "key": "far_right",
+      "label": "Far right",
+      "outlets": 2,
+      "headlines": [
+       "s1-12",
+       "s1-13"
+      ]
+     }
+    ],
+    "eligible": true,
+    "written": null,
+    "status": "missing",
+    "note": "The written comparison is not available for this story."
+   }
+  },
+  {
+   "id": "s2",
+   "rank": 2,
+   "outlets": 8,
+   "lead": "s2-5",
+   "headlines": [
+    {
+     "id": "s2-1",
+     "side": "left",
+     "outlet": "The Independent",
+     "outletId": "independent",
+     "caution": true,
+     "access": "free",
+     "headline": "Jensen Huang revealed even more affairs to Nvidia before Trump got him reinstated: report",
+     "url": "https://www.independent.co.uk/news/world/americas/us-politics/jensen-huang-additional-affairs-nvidia-b3090693.html",
+     "published": "2026-11-24T15:03:21.000Z"
+    },
+    {
+     "id": "s2-2",
+     "side": "left",
+     "outlet": "The Independent",
+     "outletId": "independent",
+     "caution": true,
+     "access": "free",
+     "headline": "Trump made up to $15m after ousted Nvidia boss Jensen Huang reinstated: report",
+     "url": "https://www.independent.co.uk/news/world/americas/us-politics/trump-jensen-huang-nvidia-shares-b3090466.html",
+     "published": "2026-11-24T14:40:02.000Z"
+    },
+    {
+     "id": "s2-3",
+     "side": "left",
+     "outlet": "The Independent",
+     "outletId": "independent",
+     "caution": true,
+     "access": "free",
+     "headline": "Trump says Nvidia CEO has ‘worked it out’ with his wife after affair scandal: ‘She’s a fantastic woman’",
+     "url": "https://www.independent.co.uk/news/world/americas/us-politics/trump-jensen-huang-wife-lori-nvidia-b3090617.html",
+     "published": "2026-11-24T15:22:23.000Z"
+    },
+    {
+     "id": "s2-4",
+     "side": "left",
+     "outlet": "The Independent",
+     "outletId": "independent",
+     "caution": true,
+     "access": "free",
+     "headline": "Inside the extraordinary push to get Nvidia CEO back in power with Trump’s support",
+     "url": "https://www.independent.co.uk/news/world/americas/us-politics/jensen-huang-nvidia-trump-scandal-b3090450.html",
+     "published": "2026-11-24T12:50:09.000Z"
+    },
+    {
+     "id": "s2-5",
+     "side": "centre",
+     "outlet": "UPI",
+     "outletId": "upi",
+     "caution": false,
+     "access": "free",
+     "headline": "Nvidia reinstates Jensen Huang as CEO, president, board director",
+     "url": "https://www.upi.com/Top_News/US/2026/11/23/nvidia-reinstates-jensen-huang/4571795444724/",
+     "published": "2026-11-24T03:04:04.000Z"
+    },
+    {
+     "id": "s2-6",
+     "side": "centre",
+     "outlet": "Euronews",
+     "outletId": "euronews",
+     "caution": false,
+     "access": "free",
+     "headline": "How Trump and Silicon Valley got Nvidia to bring back Jensen Huang",
+     "url": "https://www.euronews.com/2026/11/24/why-trump-and-silicon-valley-wanted-nvidias-jensen-huang-back",
+     "published": "2026-11-24T14:29:21.000Z"
+    },
+    {
+     "id": "s2-7",
+     "side": "centre",
+     "outlet": "CNBC",
+     "outletId": "cnbc",
+     "caution": false,
+     "access": "free",
+     "headline": "Six key questions raised by Jensen Huang's return to Nvidia",
+     "url": "https://www.cnbc.com/2026/11/24/nvidia-jensen-huang-politics-market.html",
+     "published": "2026-11-24T03:05:49.000Z"
+    },
+    {
+     "id": "s2-8",
+     "side": "centre",
+     "outlet": "CNBC",
+     "outletId": "cnbc",
+     "caution": false,
+     "access": "free",
+     "headline": "Jensen Huang tells staff that Nvidia doesn't need a succession plan",
+     "url": "https://www.cnbc.com/2026/11/24/jensen-huang-nvidia-employee-meeting.html",
+     "published": "2026-11-24T23:13:49.000Z"
+    },
+    {
+     "id": "s2-9",
+     "side": "centre",
+     "outlet": "France 24",
+     "outletId": "france24",
+     "caution": false,
+     "access": "free",
+     "headline": "Huang returns as Nvidia CEO in sudden reversal after Trump intervention",
+     "url": "https://www.france24.com/en/video/20261124-huang-returns-as-nvidia-ceo-in-sudden-reversal-after-trump-intervention",
+     "published": "2026-11-24T12:19:55.000Z"
+    },
+    {
+     "id": "s2-10",
+     "side": "centre",
+     "outlet": "Euronews",
+     "outletId": "euronews",
+     "caution": false,
+     "access": "free",
+     "headline": "How Jensen Huang's return to Nvidia made the world trillions richer",
+     "url": "https://www.euronews.com/2026/11/24/how-jensen-huangs-return-to-nvidia-made-the-world-trillions-richer",
+     "published": "2026-11-24T11:37:15.000Z"
+    },
+    {
+     "id": "s2-11",
+     "side": "centre",
+     "outlet": "CNBC",
+     "outletId": "cnbc",
+     "caution": false,
+     "access": "free",
+     "headline": "Jensen Huang's Nvidia return shows the U.S.-China AI race is about more than chips",
+     "url": "https://www.cnbc.com/2026/11/25/jensen-huang-nvidia-ai-talent-race.html",
+     "published": "2026-11-25T01:13:56.000Z"
+    },
+    {
+     "id": "s2-12",
+     "side": "centre",
+     "outlet": "The Hill",
+     "outletId": "thehill",
+     "caution": false,
+     "access": "free",
+     "headline": "Nvidia stock surges as Jensen Huang rehired. Thank you, Trump!",
+     "url": "https://thehill.com/opinion/robbys-radar/6240628-jensen-huang-nvidia-return/",
+     "published": "2026-11-24T19:35:20.000Z"
+    },
+    {
+     "id": "s2-13",
+     "side": "centre",
+     "outlet": "France 24",
+     "outletId": "france24",
+     "caution": false,
+     "access": "free",
+     "headline": "Trump's role in Huang's Nvidia return under scrutiny",
+     "url": "https://www.france24.com/en/video/20261124-trump-s-role-in-huang-s-nvidia-return-under-scrutiny",
+     "published": "2026-11-24T13:48:17.000Z"
+    },
+    {
+     "id": "s2-14",
+     "side": "centre",
+     "outlet": "The Hill",
+     "outletId": "thehill",
+     "caution": false,
+     "access": "free",
+     "headline": "Huang apologizes to Nvidia employees, says he’s in therapy: Reports",
+     "url": "https://thehill.com/policy/technology/6241274-nvidia-ceo-jensen-huang-reinstated/",
+     "published": "2026-11-24T22:13:51.000Z"
+    },
+    {
+     "id": "s2-15",
+     "side": "centre",
+     "outlet": "RealClearPolitics",
+     "outletId": "realclear",
+     "caution": false,
+     "access": "free",
+     "headline": "Are Investors Right To Celebrate Nvidia CEO's Return?",
+     "url": "https://www.realclearpolitics.com/markets/links/are-investors-right-to-celebrate-nvidia-ceos-return-2026-11-23",
+     "published": "2026-11-24T03:43:08.000Z"
+    },
+    {
+     "id": "s2-16",
+     "side": "centre",
+     "outlet": "The Hill",
+     "outletId": "thehill",
+     "caution": false,
+     "access": "free",
+     "headline": "How much did Trump stand to make from Huang return?",
+     "url": "https://thehill.com/homenews/administration/6241139-trump-nvidia-huang-return-profits/",
+     "published": "2026-11-24T22:26:48.000Z"
+    },
+    {
+     "id": "s2-17",
+     "side": "centre",
+     "outlet": "CNBC",
+     "outletId": "cnbc",
+     "caution": false,
+     "access": "free",
+     "headline": "U.S. adds Megaspeed to trade blacklist over export control concerns amid Nvidia controversy",
+     "url": "https://www.cnbc.com/2026/11/24/us-adds-megaspeed-to-trade-blacklist-over-export-control-concerns-.html",
+     "published": "2026-11-24T02:37:39.000Z"
+    },
+    {
+     "id": "s2-18",
+     "side": "right",
+     "outlet": "Daily Mail",
+     "outletId": "dailymail",
+     "caution": false,
+     "access": "free",
+     "headline": "MAGA senator calls Nvidia scandal 'tip of the iceberg' and says Congress has much to investigate after Huang returns as CEO with boost from Trump",
+     "url": "https://www.dailymail.com/news/article-16316817/MAGA-Senator-Tom-Cotton-Congress-investigate-Nvidia-Huang-return.html?ns_mchannel=rss&ns_campaign=1490",
+     "published": "2026-11-24T03:03:59.000Z"
+    },
+    {
+     "id": "s2-19",
+     "side": "right",
+     "outlet": "Daily Mail",
+     "outletId": "dailymail",
+     "caution": false,
+     "access": "free",
+     "headline": "Trump's secret phone call to Nvidia boss and the promise he demanded before extraordinary intervention to reinstate him as CEO after Chinese 'spy' sex scandal",
+     "url": "https://www.dailymail.com/news/article-16315397/Trump-hails-Nvidias-U-turn-Jensen-Huang-declares-no-risk-national-security-China-spy-affair.html?ns_mchannel=rss&ns_campaign=1490",
+     "published": "2026-11-24T13:24:52.000Z"
+    }
+   ],
+   "sentences": null,
+   "five": {
+    "sides": [
+     {
+      "key": "far_left",
+      "label": "Far left",
+      "outlets": 0,
+      "headlines": []
+     },
+     {
+      "key": "left",
+      "label": "Left",
+      "outlets": 1,
+      "headlines": [
+       "s2-1",
+       "s2-2",
+       "s2-3",
+       "s2-4"
+      ]
+     },
+     {
+      "key": "centre",
+      "label": "Centre",
+      "outlets": 6,
+      "headlines": [
+       "s2-5",
+       "s2-6",
+       "s2-7",
+       "s2-8",
+       "s2-9",
+       "s2-10",
+       "s2-11",
+       "s2-12",
+       "s2-13",
+       "s2-14",
+       "s2-15",
+       "s2-16",
+       "s2-17"
+      ]
+     },
+     {
+      "key": "right",
+      "label": "Right",
+      "outlets": 1,
+      "headlines": [
+       "s2-18",
+       "s2-19"
+      ]
+     },
+     {
+      "key": "far_right",
+      "label": "Far right",
+      "outlets": 0,
+      "headlines": []
+     }
+    ],
+    "eligible": true,
+    "written": null,
+    "status": "missing",
+    "note": "The written comparison is not available for this story."
+   }
+  },
+  {
+   "id": "s3",
+   "rank": 3,
+   "outlets": 7,
+   "lead": "s3-2",
+   "headlines": [
+    {
+     "id": "s3-1",
+     "side": "left",
+     "outlet": "The Independent",
+     "outletId": "independent",
+     "caution": true,
+     "access": "free",
+     "headline": "Trump gives Rudy Giuliani nation’s highest civilian honor — hidden behind closed doors",
+     "url": "https://www.independent.co.uk/news/world/americas/us-politics/trump-rudy-giuliani-medal-of-freedom-ceremony-b3090970.html",
+     "published": "2026-11-24T22:20:31.000Z"
+    },
+    {
+     "id": "s3-2",
+     "side": "centre",
+     "outlet": "UPI",
+     "outletId": "upi",
+     "caution": false,
+     "access": "free",
+     "headline": "Trump to award Rudy Giuliani Presidential Medal of Freedom",
+     "url": "https://www.upi.com/Top_News/US/2026/11/24/trump-giuliani-medal-of-freedom/1291795538036/",
+     "published": "2026-11-24T17:10:26.000Z"
+    },
+    {
+     "id": "s3-3",
+     "side": "centre",
+     "outlet": "The Hill",
+     "outletId": "thehill",
+     "caution": false,
+     "access": "free",
+     "headline": "Giuliani ‘very, very humbled’ to be getting Presidential Medal of Freedom",
+     "url": "https://thehill.com/homenews/administration/6240011-trump-to-award-giuliani-medal/",
+     "published": "2026-11-24T16:28:55.000Z"
+    },
+    {
+     "id": "s3-4",
+     "side": "right",
+     "outlet": "Fox News",
+     "outletId": "foxnews",
+     "caution": true,
+     "access": "free",
+     "headline": "Trump to award Giuliani Presidential Medal of Freedom",
+     "url": "https://www.foxnews.com/politics/trump-award-giuliani-presidential-medal-freedom",
+     "published": "2026-11-24T14:47:59.000Z"
+    },
+    {
+     "id": "s3-5",
+     "side": "far_right",
+     "outlet": "American Greatness",
+     "outletId": "amgreatness",
+     "caution": true,
+     "access": "free",
+     "headline": "America’s Mayor Rudy Giuliani Receives Presidential Medal of Freedom",
+     "url": "https://amgreatness.com/2026/11/24/americas-mayor-rudy-giuliani-receives-presidential-medal-of-freedom/",
+     "published": "2026-11-24T17:31:43.000Z"
+    },
+    {
+     "id": "s3-6",
+     "side": "far_right",
+     "outlet": "One America News",
+     "outletId": "oann",
+     "caution": true,
+     "access": "unknown",
+     "headline": "Trump awards fmr NYC Mayor Rudy Giuliani the Presidential Medal of Freedom",
+     "url": "https://news.google.com/rss/articles/CBMiqAFBVV95cUxQUjRtZjlzcHpBNVpXWFpPTUJkUUhSYUdNanZLVm9EM3ZmODI1WThhQjFERGhXdWNvNC03UWJia1pkLUVGSnhRQUxBVk1GZWQxSnFXaF9lcXUwWlJjaXRUUkpwanQ5UXd4V1gwNFBocE43WnVWdEt4eGc0bFhWT2lTd3FxQkhZTHk0RUoyRlVER1J0S3VtUHR2dWJEWGF1MnloX0hIVUVBNXo?oc=5",
+     "published": "2026-11-25T00:53:26.000Z"
+    },
+    {
+     "id": "s3-7",
+     "side": "far_right",
+     "outlet": "The Gateway Pundit",
+     "outletId": "gatewaypundit",
+     "caution": true,
+     "access": "free",
+     "headline": "Rudy Giuliani Speaks Out After Receiving the Presidential Medal of Freedom",
+     "url": "https://www.thegatewaypundit.com/2026/11/rudy-giuliani-speaks-after-receiving-presidential-medal-freedom/",
+     "published": "2026-11-25T01:00:51.000Z"
+    }
+   ],
+   "sentences": null,
+   "five": {
+    "sides": [
+     {
+      "key": "far_left",
+      "label": "Far left",
+      "outlets": 0,
+      "headlines": []
+     },
+     {
+      "key": "left",
+      "label": "Left",
+      "outlets": 1,
+      "headlines": [
+       "s3-1"
+      ]
+     },
+     {
+      "key": "centre",
+      "label": "Centre",
+      "outlets": 2,
+      "headlines": [
+       "s3-2",
+       "s3-3"
+      ]
+     },
+     {
+      "key": "right",
+      "label": "Right",
+      "outlets": 1,
+      "headlines": [
+       "s3-4"
+      ]
+     },
+     {
+      "key": "far_right",
+      "label": "Far right",
+      "outlets": 3,
+      "headlines": [
+       "s3-5",
+       "s3-6",
+       "s3-7"
+      ]
+     }
+    ],
+    "eligible": true,
+    "written": null,
+    "status": "missing",
+    "note": "The written comparison is not available for this story."
+   }
+  },
+  {
+   "id": "s4",
+   "rank": 4,
+   "outlets": 7,
+   "lead": "s4-1",
+   "headlines": [
+    {
+     "id": "s4-1",
+     "side": "centre",
+     "outlet": "BBC News",
+     "outletId": "bbc",
+     "caution": false,
+     "access": "free",
+     "headline": "Huawei found guilty of stealing trade secrets but acquitted of racketeering",
+     "url": "https://www.bbc.co.uk/news/articles/cmy49ngydqzpo",
+     "published": "2026-11-25T01:11:57.000Z"
+    },
+    {
+     "id": "s4-2",
+     "side": "centre",
+     "outlet": "Euronews",
+     "outletId": "euronews",
+     "caution": false,
+     "access": "free",
+     "headline": "Tech giant Huawei found guilty of stealing trade secrets but acquitted of racketeering",
+     "url": "https://www.euronews.com/2026/11/24/tech-giant-huawei-found-guilty-of-stealing-trade-secrets-but-acquitted-of-racketeering",
+     "published": "2026-11-24T21:51:47.000Z"
+    },
+    {
+     "id": "s4-3",
+     "side": "centre",
+     "outlet": "Sky News",
+     "outletId": "skynews",
+     "caution": false,
+     "access": "unknown",
+     "headline": "Huawei guilty of plotting to steal trade secrets and bank fraud",
+     "url": "https://news.sky.com/story/chinese-tech-giant-guilty-of-plotting-to-steal-trade-secrets-and-bank-fraud-13616130",
+     "published": "2026-11-24T21:05:00.000Z"
+    },
+    {
+     "id": "s4-4",
+     "side": "centre",
+     "outlet": "France 24",
+     "outletId": "france24",
+     "caution": false,
+     "access": "free",
+     "headline": "New York jury convicts Huawei of stealing trade secrets",
+     "url": "https://www.france24.com/en/americas/20261124-new-york-jury-convicts-huawei-of-stealing-trade-secrets",
+     "published": "2026-11-24T23:31:22.000Z"
+    },
+    {
+     "id": "s4-5",
+     "side": "centre",
+     "outlet": "Deutsche Welle",
+     "outletId": "dw",
+     "caution": false,
+     "access": "free",
+     "headline": "US jury convicts Huawei of violating sanctions, stealing trade secrets",
+     "url": "https://www.dw.com/en/us-jury-convicts-huawei-of-violating-sanctions-stealing-trade-secrets/a-80042172?maca=en-rss-en-all-1573-rdf",
+     "published": "2026-11-25T02:01:00.000Z"
+    },
+    {
+     "id": "s4-6",
+     "side": "right",
+     "outlet": "The Daily Caller",
+     "outletId": "dailycaller",
+     "caution": true,
+     "access": "free",
+     "headline": "Chinese Telecom Giant Huawei Found Guilty Of Stealing US Trade Secrets, Bank Fraud",
+     "url": "https://dailycaller.com/2026/11/24/chinese-telecom-giant-huawei-guilty-of-stealing-us-trade-secrets-bank-fraud",
+     "published": "2026-11-24T21:32:41.000Z"
+    },
+    {
+     "id": "s4-7",
+     "side": "far_right",
+     "outlet": "ZeroHedge",
+     "outletId": "zerohedge",
+     "caution": true,
+     "access": "free",
+     "headline": "Huawei Found Guilty Of Plotting To Steal US Trade Secrets And Lying To Banks Over Iran",
+     "url": "https://www.zerohedge.com/geopolitical/huawei-found-guilty-plotting-steal-us-trade-secrets-and-lying-banks-over-iran",
+     "published": "2026-11-24T22:20:00.000Z"
+    }
+   ],
+   "sentences": null,
+   "five": {
+    "sides": [
+     {
+      "key": "far_left",
+      "label": "Far left",
+      "outlets": 0,
+      "headlines": []
+     },
+     {
+      "key": "left",
+      "label": "Left",
+      "outlets": 0,
+      "headlines": []
+     },
+     {
+      "key": "centre",
+      "label": "Centre",
+      "outlets": 5,
+      "headlines": [
+       "s4-1",
+       "s4-2",
+       "s4-3",
+       "s4-4",
+       "s4-5"
+      ]
+     },
+     {
+      "key": "right",
+      "label": "Right",
+      "outlets": 1,
+      "headlines": [
+       "s4-6"
+      ]
+     },
+     {
+      "key": "far_right",
+      "label": "Far right",
+      "outlets": 1,
+      "headlines": [
+       "s4-7"
+      ]
+     }
+    ],
+    "eligible": false,
+    "written": null,
+    "status": "not-eligible",
+    "note": "No written comparison for this story: one is written only when at least three of the five sides carried it, one left of centre and one right of centre."
+   }
+  },
+  {
+   "id": "s5",
+   "rank": 5,
+   "outlets": 6,
+   "lead": "s5-2",
+   "headlines": [
+    {
+     "id": "s5-1",
+     "side": "left",
+     "outlet": "The Independent",
+     "outletId": "independent",
+     "caution": true,
+     "access": "free",
+     "headline": "Trump-era deportation saga comes to close with Kilmar Abrego Garcia leaving US voluntarily",
+     "url": "https://www.independent.co.uk/news/world/americas/us-politics/kilmar-abrego-garcia-deported-trump-usa-b3091064.html",
+     "published": "2026-11-24T23:19:14.000Z"
+    },
+    {
+     "id": "s5-2",
+     "side": "centre",
+     "outlet": "The Hill",
+     "outletId": "thehill",
+     "caution": false,
+     "access": "free",
+     "headline": "Kilmar Abrego Garcia self-deports to Spain: Reports",
+     "url": "https://thehill.com/policy/international/6241572-kilmar-abrego-garcia-self-deports/",
+     "published": "2026-11-25T01:42:16.000Z"
+    },
+    {
+     "id": "s5-3",
+     "side": "right",
+     "outlet": "Washington Examiner",
+     "outletId": "washingtonexaminer",
+     "caution": false,
+     "access": "paid",
+     "headline": "Kilmar Abrego Garcia to leave US immediately for Spain",
+     "url": "https://www.washingtonexaminer.com/policy/immigration/4814596/kilmar-abrego-garcia-leave-us-spain/",
+     "published": "2026-11-24T23:38:33.000Z"
+    },
+    {
+     "id": "s5-4",
+     "side": "right",
+     "outlet": "Fox News",
+     "outletId": "foxnews",
+     "caution": true,
+     "access": "free",
+     "headline": "Kilmar Ábrego García to leave US voluntarily for Europe, avoiding forced deportation",
+     "url": "https://www.foxnews.com/politics/kilmar-abrego-garcia-leave-us-voluntarily-europe-avoiding-forced-deportation",
+     "published": "2026-11-25T00:06:23.000Z"
+    },
+    {
+     "id": "s5-5",
+     "side": "far_right",
+     "outlet": "The Gateway Pundit",
+     "outletId": "gatewaypundit",
+     "caution": true,
+     "access": "free",
+     "headline": "MS-13 Gang Member Kilmar Abrego Garcia is Leaving the US Today on a Commercial Flight…to Europe",
+     "url": "https://www.thegatewaypundit.com/2026/11/ms-13-gang-member-kilmar-abrego-garcia-is/",
+     "published": "2026-11-24T23:40:15.000Z"
+    },
+    {
+     "id": "s5-6",
+     "side": "far_right",
+     "outlet": "The National Pulse",
+     "outletId": "nationalpulse",
+     "caution": true,
+     "access": "free",
+     "headline": "Illegal Alien and Alleged MS-13 Member Kilmar Abrego Garcia Has Self-Deported to Spain.",
+     "url": "https://thenationalpulse.com/2026/11/24/kilmar-abrego-garcia-self-deported-spain/",
+     "published": "2026-11-25T01:25:15.000Z"
+    }
+   ],
+   "sentences": null,
+   "five": {
+    "sides": [
+     {
+      "key": "far_left",
+      "label": "Far left",
+      "outlets": 0,
+      "headlines": []
+     },
+     {
+      "key": "left",
+      "label": "Left",
+      "outlets": 1,
+      "headlines": [
+       "s5-1"
+      ]
+     },
+     {
+      "key": "centre",
+      "label": "Centre",
+      "outlets": 1,
+      "headlines": [
+       "s5-2"
+      ]
+     },
+     {
+      "key": "right",
+      "label": "Right",
+      "outlets": 2,
+      "headlines": [
+       "s5-3",
+       "s5-4"
+      ]
+     },
+     {
+      "key": "far_right",
+      "label": "Far right",
+      "outlets": 2,
+      "headlines": [
+       "s5-5",
+       "s5-6"
+      ]
+     }
+    ],
+    "eligible": true,
+    "written": null,
+    "status": "missing",
+    "note": "The written comparison is not available for this story."
+   }
+  },
+  {
+   "id": "s6",
+   "rank": 6,
+   "outlets": 6,
+   "lead": "s6-3",
+   "headlines": [
+    {
+     "id": "s6-1",
+     "side": "far_left",
+     "outlet": "Truthout",
+     "outletId": "truthout",
+     "caution": false,
+     "access": "free",
+     "headline": "Court Allows Army to Go Ahead With Detonation of Toxic Lead Explosives in Iowa",
+     "url": "https://truthout.org/articles/court-allows-army-to-go-ahead-with-detonation-of-toxic-lead-explosives-in-iowa/",
+     "published": "2026-11-24T16:08:56.000Z"
+    },
+    {
+     "id": "s6-2",
+     "side": "left",
+     "outlet": "Vox",
+     "outletId": "vox",
+     "caution": false,
+     "access": "paid",
+     "headline": "Why the Army wants to detonate toxic explosives in Iowa",
+     "url": "https://www.vox.com/today-explained-newsletter/511830/iowa-lead-azide-explosives-detonation-plume",
+     "published": "2026-11-24T21:05:00.000Z"
+    },
+    {
+     "id": "s6-3",
+     "side": "centre",
+     "outlet": "The Hill",
+     "outletId": "thehill",
+     "caution": false,
+     "access": "free",
+     "headline": "Army set to detonate lead munitions in Iowa: What to know",
+     "url": "https://thehill.com/policy/energy-environment/6240870-army-iowa-lead-munitions-detonations-evacuations/",
+     "published": "2026-11-24T20:32:00.000Z"
+    },
+    {
+     "id": "s6-4",
+     "side": "far_right",
+     "outlet": "ZeroHedge",
+     "outletId": "zerohedge",
+     "caution": true,
+     "access": "free",
+     "headline": "Army Will Blow Up 5 Tons Of Lead Explosive In Iowa Tomorrow After Governor-Elect Refuses To Sign Off",
+     "url": "https://www.zerohedge.com/political/army-will-blow-5-tons-lead-explosive-iowa-tomorrow-after-governor-elect-refuses-sign",
+     "published": "2026-11-24T20:45:00.000Z"
+    },
+    {
+     "id": "s6-5",
+     "side": "far_right",
+     "outlet": "TheBlaze",
+     "outletId": "blaze",
+     "caution": true,
+     "access": "unknown",
+     "headline": "Army gets green light to blow up explosive stockpile, send plume of lead dust over Iowa",
+     "url": "https://www.theblaze.com/news/army-gets-green-light-to-blow-up-explosive-stockpile-send-plume-of-lead-dust-over-iowa",
+     "published": "2026-11-24T17:40:42.000Z"
+    },
+    {
+     "id": "s6-6",
+     "side": "far_right",
+     "outlet": "The Gateway Pundit",
+     "outletId": "gatewaypundit",
+     "caution": true,
+     "access": "free",
+     "headline": "Trump Says He Ordered the Army to Pause Plans to Detonate 10,000 lbs of Degrading Lead Azide at Iowa Ammunition Facility",
+     "url": "https://www.thegatewaypundit.com/2026/11/trump-comments-us-armys-plans-detonate-10000-lbs/",
+     "published": "2026-11-24T02:30:38.000Z"
+    }
+   ],
+   "sentences": null,
+   "five": {
+    "sides": [
+     {
+      "key": "far_left",
+      "label": "Far left",
+      "outlets": 1,
+      "headlines": [
+       "s6-1"
+      ]
+     },
+     {
+      "key": "left",
+      "label": "Left",
+      "outlets": 1,
+      "headlines": [
+       "s6-2"
+      ]
+     },
+     {
+      "key": "centre",
+      "label": "Centre",
+      "outlets": 1,
+      "headlines": [
+       "s6-3"
+      ]
+     },
+     {
+      "key": "right",
+      "label": "Right",
+      "outlets": 0,
+      "headlines": []
+     },
+     {
+      "key": "far_right",
+      "label": "Far right",
+      "outlets": 3,
+      "headlines": [
+       "s6-4",
+       "s6-5",
+       "s6-6"
+      ]
+     }
+    ],
+    "eligible": true,
+    "written": null,
+    "status": "missing",
+    "note": "The written comparison is not available for this story."
+   }
+  },
+  {
+   "id": "s7",
+   "rank": 7,
+   "outlets": 6,
+   "lead": "s7-4",
+   "headlines": [
+    {
+     "id": "s7-1",
+     "side": "centre",
+     "outlet": "UPI",
+     "outletId": "upi",
+     "caution": false,
+     "access": "free",
+     "headline": "Judge who issued search warrant against Ilhan Omar demanded safeguards",
+     "url": "https://www.upi.com/Top_News/US/2026/11/24/judge-demanded-safeguards-ilhan-Omar/7651795529303/",
+     "published": "2026-11-24T14:26:27.000Z"
+    },
+    {
+     "id": "s7-2",
+     "side": "right",
+     "outlet": "Daily Mail",
+     "outletId": "dailymail",
+     "caution": false,
+     "access": "free",
+     "headline": "Ilhan Omar search warrant unsealed as documents reveal decades-long 'target offenses' by Somali-born politician sparked raid on DC home",
+     "url": "https://www.dailymail.com/news/us-politics/article-16316985/Ilhan-Omar-search-warrant-unsealed.html?ns_mchannel=rss&ns_campaign=1490",
+     "published": "2026-11-24T03:30:57.000Z"
+    },
+    {
+     "id": "s7-3",
+     "side": "right",
+     "outlet": "Fox News",
+     "outletId": "foxnews",
+     "caution": true,
+     "access": "free",
+     "headline": "Obama judge's Omar warrant unsealing directly contradicts his own decision in Trump case, DOJ says",
+     "url": "https://www.foxnews.com/politics/obama-judges-omar-warrant-unsealing-directly-contradicts-his-own-decision-trump-case",
+     "published": "2026-11-24T21:45:21.000Z"
+    },
+    {
+     "id": "s7-4",
+     "side": "far_right",
+     "outlet": "American Greatness",
+     "outletId": "amgreatness",
+     "caution": true,
+     "access": "free",
+     "headline": "Unsealed Warrant Papers in Ilhan Omar Raid Point to Probe Spanning Decades",
+     "url": "https://amgreatness.com/2026/11/24/unsealed-warrant-papers-in-ilhan-omar-raid-point-to-probe-spanning-decades/",
+     "published": "2026-11-24T09:32:52.000Z"
+    },
+    {
+     "id": "s7-5",
+     "side": "far_right",
+     "outlet": "ZeroHedge",
+     "outletId": "zerohedge",
+     "caution": true,
+     "access": "free",
+     "headline": "\"Crimes Over Decades\": Unsealed Ilhan Omar Warrant Reaches Back To Before She Was Born",
+     "url": "https://www.zerohedge.com/political/crimes-over-decades-unsealed-ilhan-omar-warrant-reaches-back-she-was-born",
+     "published": "2026-11-24T03:35:00.000Z"
+    },
+    {
+     "id": "s7-6",
+     "side": "far_right",
+     "outlet": "One America News",
+     "outletId": "oann",
+     "caution": true,
+     "access": "unknown",
+     "headline": "Unsealed redacted search warrant reveals details in ongoing Ilhan Omar alleged immigration probe, purported offenses spanning 'decades'",
+     "url": "https://news.google.com/rss/articles/CBMi9gFBVV95cUxON1J5TXpaQ2ZRSTVGZnJaaEptUHdqTVhXa0pCa2R5SEZleFVzeHFTYkRrei1qVzdfNjVmYW81bUpZbUhPa3dTd210QlY5bFdXSnBwbEpBd01yQ2ZBbVA1QjNSaS0wbjlocGVjMVgwM2dHQTVSb2NFVHJORDkwWGc1d2g2N2JnMkhsMU45RkVYUS1NdG9iVm1vV01xV24wYmZ5c09CbTJOSnhGa2xaR3o0NFczSk9kZWtnNndVa2FFOFFJOW44VE1GT2VxWkY4c094eUp4WWRodHR4MHlqVVR3SndrMEFSNzI0X1UyUzRSZmwyQWFmTEE?oc=5",
+     "published": "2026-11-24T17:05:14.000Z"
+    }
+   ],
+   "sentences": null,
+   "five": {
+    "sides": [
+     {
+      "key": "far_left",
+      "label": "Far left",
+      "outlets": 0,
+      "headlines": []
+     },
+     {
+      "key": "left",
+      "label": "Left",
+      "outlets": 0,
+      "headlines": []
+     },
+     {
+      "key": "centre",
+      "label": "Centre",
+      "outlets": 1,
+      "headlines": [
+       "s7-1"
+      ]
+     },
+     {
+      "key": "right",
+      "label": "Right",
+      "outlets": 2,
+      "headlines": [
+       "s7-2",
+       "s7-3"
+      ]
+     },
+     {
+      "key": "far_right",
+      "label": "Far right",
+      "outlets": 3,
+      "headlines": [
+       "s7-4",
+       "s7-5",
+       "s7-6"
+      ]
+     }
+    ],
+    "eligible": false,
+    "written": null,
+    "status": "not-eligible",
+    "note": "No written comparison for this story: one is written only when at least three of the five sides carried it, one left of centre and one right of centre."
+   }
+  },
+  {
+   "id": "s8",
+   "rank": 8,
+   "outlets": 5,
+   "lead": "s8-5",
+   "headlines": [
+    {
+     "id": "s8-1",
+     "side": "left",
+     "outlet": "The New York Times",
+     "outletId": "nyt",
+     "caution": false,
+     "access": "paid",
+     "headline": "2 Men Arrested on Suspicion of Breaking Into Prince William and Kate’s Country Home",
+     "url": "https://www.nytimes.com/2026/11/24/world/europe/prince-william-kate-home-break-in-anmer-hall-uk.html",
+     "published": "2026-11-24T16:31:07.000Z"
+    },
+    {
+     "id": "s8-2",
+     "side": "centre",
+     "outlet": "Euronews",
+     "outletId": "euronews",
+     "caution": false,
+     "access": "free",
+     "headline": "Two arrested on suspicion of burglary at Prince and Princess of Wales' UK country home",
+     "url": "https://www.euronews.com/2026/11/24/two-arrested-on-suspicion-of-burglary-at-prince-and-princess-of-wales-uk-country-home",
+     "published": "2026-11-24T15:37:34.000Z"
+    },
+    {
+     "id": "s8-3",
+     "side": "centre",
+     "outlet": "UPI",
+     "outletId": "upi",
+     "caution": false,
+     "access": "free",
+     "headline": "Two men arrested after break-in at prince and princess of Wales' country home",
+     "url": "https://www.upi.com/Top_News/World-News/2026/11/24/two-arrested-in-break-in-at-royal-residence/1671795546676/",
+     "published": "2026-11-24T19:47:30.000Z"
+    },
+    {
+     "id": "s8-4",
+     "side": "right",
+     "outlet": "Daily Mail",
+     "outletId": "dailymail",
+     "caution": false,
+     "access": "free",
+     "headline": "Kate and William's Anmer Hall country estate in Norfolk is broken into by intruders - as two men are arrested on suspicion of burglary and trespass",
+     "url": "https://www.dailymail.com/news/article-16317903/Kate-Williams-Anmer-Hall-country-estate-broken-intruders.html?ns_mchannel=rss&ns_campaign=1490",
+     "published": "2026-11-24T17:09:39.000Z"
+    },
+    {
+     "id": "s8-5",
+     "side": "far_right",
+     "outlet": "Breitbart",
+     "outletId": "breitbart",
+     "caution": true,
+     "access": "free",
+     "headline": "Men Arrested After Alleged Burglary of Prince William and Princess Kate's Country Home",
+     "url": "https://www.breitbart.com/europe/2026/11/24/men-arrested-after-alleged-burglary-of-prince-william-and-princess-kates-country-home/",
+     "published": "2026-11-24T15:31:46.000Z"
+    }
+   ],
+   "sentences": null,
+   "five": {
+    "sides": [
+     {
+      "key": "far_left",
+      "label": "Far left",
+      "outlets": 0,
+      "headlines": []
+     },
+     {
+      "key": "left",
+      "label": "Left",
+      "outlets": 1,
+      "headlines": [
+       "s8-1"
+      ]
+     },
+     {
+      "key": "centre",
+      "label": "Centre",
+      "outlets": 2,
+      "headlines": [
+       "s8-2",
+       "s8-3"
+      ]
+     },
+     {
+      "key": "right",
+      "label": "Right",
+      "outlets": 1,
+      "headlines": [
+       "s8-4"
+      ]
+     },
+     {
+      "key": "far_right",
+      "label": "Far right",
+      "outlets": 1,
+      "headlines": [
+       "s8-5"
+      ]
+     }
+    ],
+    "eligible": true,
+    "written": null,
+    "status": "missing",
+    "note": "The written comparison is not available for this story."
+   }
+  },
+  {
+   "id": "s9",
+   "rank": 9,
+   "outlets": 5,
+   "lead": "s9-3",
+   "headlines": [
+    {
+     "id": "s9-1",
+     "side": "left",
+     "outlet": "Vox",
+     "outletId": "vox",
+     "caution": false,
+     "access": "paid",
+     "headline": "Chris Van Hollen wants to replace Chuck Schumer. We asked him why.",
+     "url": "https://www.vox.com/america-actually/511777/chris-van-hollen-chuck-schumer-senate-democrats-leader-election",
+     "published": "2026-11-24T17:30:00.000Z"
+    },
+    {
+     "id": "s9-2",
+     "side": "left",
+     "outlet": "The New Republic",
+     "outletId": "newrepublic",
+     "caution": false,
+     "access": "paid",
+     "headline": "Chris Van Hollen Gets Huge Push From Major Celebrities",
+     "url": "https://newrepublic.com/post/218327/chris-van-hollen-gets-huge-push-major-celebrities",
+     "published": "2026-11-24T15:39:42.000Z"
+    },
+    {
+     "id": "s9-3",
+     "side": "centre",
+     "outlet": "RealClearPolitics",
+     "outletId": "realclear",
+     "caution": false,
+     "access": "free",
+     "headline": "Van Hollen and Schumer Are the Best Democrats Can Do?",
+     "url": "https://www.realclearpolitics.com/congress/links/van-hollen-and-schumer-are-the-best-democrats-can-do-2026-11-23",
+     "published": "2026-11-24T03:43:09.000Z"
+    },
+    {
+     "id": "s9-4",
+     "side": "centre",
+     "outlet": "The Hill",
+     "outletId": "thehill",
+     "caution": false,
+     "access": "free",
+     "headline": "Jane Fonda, De Niro join celebrities backing Van Hollen as next Senate leader",
+     "url": "https://thehill.com/homenews/senate/6240220-celebs-endorse-van-hollen-majority-leader/",
+     "published": "2026-11-24T17:59:57.000Z"
+    },
+    {
+     "id": "s9-5",
+     "side": "far_right",
+     "outlet": "Breitbart",
+     "outletId": "breitbart",
+     "caution": true,
+     "access": "free",
+     "headline": "Poll: Democrats Prefer Chris Van Hollen over Chuck Schumer for Senate Majority Leader by 21 Points",
+     "url": "https://www.breitbart.com/politics/2026/11/24/poll-democrats-prefer-chris-van-hollen-over-chuck-schumer-for-senate-majority-leader-by-21-points/",
+     "published": "2026-11-24T22:17:31.000Z"
+    }
+   ],
+   "sentences": null,
+   "five": {
+    "sides": [
+     {
+      "key": "far_left",
+      "label": "Far left",
+      "outlets": 0,
+      "headlines": []
+     },
+     {
+      "key": "left",
+      "label": "Left",
+      "outlets": 2,
+      "headlines": [
+       "s9-1",
+       "s9-2"
+      ]
+     },
+     {
+      "key": "centre",
+      "label": "Centre",
+      "outlets": 2,
+      "headlines": [
+       "s9-3",
+       "s9-4"
+      ]
+     },
+     {
+      "key": "right",
+      "label": "Right",
+      "outlets": 0,
+      "headlines": []
+     },
+     {
+      "key": "far_right",
+      "label": "Far right",
+      "outlets": 1,
+      "headlines": [
+       "s9-5"
+      ]
+     }
+    ],
+    "eligible": true,
+    "written": null,
+    "status": "missing",
+    "note": "The written comparison is not available for this story."
+   }
+  },
+  {
+   "id": "s10",
+   "rank": 10,
+   "outlets": 5,
+   "lead": "s10-2",
+   "headlines": [
+    {
+     "id": "s10-1",
+     "side": "far_left",
+     "outlet": "Morning Star",
+     "outletId": "morningstar",
+     "caution": false,
+     "access": "metered",
+     "headline": "Senegal reinstated as Afcon champions",
+     "url": "https://morningstaronline.co.uk/article/cas-reinstates-senegal-afcon-champions",
+     "published": "2026-11-24T14:58:18.000Z"
+    },
+    {
+     "id": "s10-2",
+     "side": "centre",
+     "outlet": "Euronews",
+     "outletId": "euronews",
+     "caution": false,
+     "access": "free",
+     "headline": "Senegal reinstated as AFCON champions as Morocco vows to fight on",
+     "url": "https://www.euronews.com/2026/11/24/cas-awards-senegal-afcon-title-after-successful-appeal",
+     "published": "2026-11-24T14:51:39.000Z"
+    },
+    {
+     "id": "s10-3",
+     "side": "centre",
+     "outlet": "France 24",
+     "outletId": "france24",
+     "caution": false,
+     "access": "free",
+     "headline": "Senegal reinstated as AFCON 2025 winners",
+     "url": "https://www.france24.com/en/senegal-reinstated-as-afcon-2025-winners",
+     "published": "2026-11-24T21:14:42.000Z"
+    },
+    {
+     "id": "s10-4",
+     "side": "centre",
+     "outlet": "Deutsche Welle",
+     "outletId": "dw",
+     "caution": false,
+     "access": "free",
+     "headline": "CAS reinstates Senegal as 2025 AFCON champions",
+     "url": "https://www.dw.com/en/cas-reinstates-senegal-as-2025-afcon-champions/a-80021027?maca=en-rss-en-all-1573-rdf",
+     "published": "2026-11-24T14:42:00.000Z"
+    },
+    {
+     "id": "s10-5",
+     "side": "centre",
+     "outlet": "France 24",
+     "outletId": "france24",
+     "caution": false,
+     "access": "free",
+     "headline": "Senegal regain AFCON title on appeal at Morocco's expense",
+     "url": "https://www.france24.com/en/senegal-regain-afcon-title-on-appeal-at-morocco-s-expense",
+     "published": "2026-11-24T19:52:29.000Z"
+    },
+    {
+     "id": "s10-6",
+     "side": "centre",
+     "outlet": "France 24",
+     "outletId": "france24",
+     "caution": false,
+     "access": "free",
+     "headline": "🔴Senegal regain AFCON title after successful appeal at sport arbitration court",
+     "url": "https://www.france24.com/en/sport/20261124-sports-court-verdict-senegal-appeal-africa-cup-of-nations-title-tuesday",
+     "published": "2026-11-24T14:25:06.000Z"
+    },
+    {
+     "id": "s10-7",
+     "side": "centre",
+     "outlet": "France 24",
+     "outletId": "france24",
+     "caution": false,
+     "access": "free",
+     "headline": "Senegal reinstated as 2025 Africa Cup of Nations winners",
+     "url": "https://www.france24.com/en/video/20261124-senegal-reinstated-as-2025-africa-cup-of-nations-winners",
+     "published": "2026-11-24T16:16:03.000Z"
+    },
+    {
+     "id": "s10-8",
+     "side": "centre",
+     "outlet": "France 24",
+     "outletId": "france24",
+     "caution": false,
+     "access": "free",
+     "headline": "Senegal AFCON ruling 'good in the books of sports law', expert says",
+     "url": "https://www.france24.com/en/senegal-afcon-ruling-good-in-the-books-of-sports-law-expert-says",
+     "published": "2026-11-24T19:54:12.000Z"
+    },
+    {
+     "id": "s10-9",
+     "side": "centre",
+     "outlet": "Sky News",
+     "outletId": "skynews",
+     "caution": false,
+     "access": "unknown",
+     "headline": "Senegal restored as Africa Cup of Nations champions",
+     "url": "https://news.sky.com/story/senegal-awarded-africa-cup-of-nations-after-winning-appeal-over-title-being-stripped-13615900",
+     "published": "2026-11-24T08:06:00.000Z"
+    }
+   ],
+   "sentences": null,
+   "five": {
+    "sides": [
+     {
+      "key": "far_left",
+      "label": "Far left",
+      "outlets": 1,
+      "headlines": [
+       "s10-1"
+      ]
+     },
+     {
+      "key": "left",
+      "label": "Left",
+      "outlets": 0,
+      "headlines": []
+     },
+     {
+      "key": "centre",
+      "label": "Centre",
+      "outlets": 4,
+      "headlines": [
+       "s10-2",
+       "s10-3",
+       "s10-4",
+       "s10-5",
+       "s10-6",
+       "s10-7",
+       "s10-8",
+       "s10-9"
+      ]
+     },
+     {
+      "key": "right",
+      "label": "Right",
+      "outlets": 0,
+      "headlines": []
+     },
+     {
+      "key": "far_right",
+      "label": "Far right",
+      "outlets": 0,
+      "headlines": []
+     }
+    ],
+    "eligible": false,
+    "written": null,
+    "status": "not-eligible",
+    "note": "No written comparison for this story: one is written only when at least three of the five sides carried it, one left of centre and one right of centre."
+   }
+  }
+ ]
+}

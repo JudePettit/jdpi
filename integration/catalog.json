@@ -1,5 +1,5 @@
 {
-  "generated": "2026-11-24T15:59:26.406Z",
+  "generated": "2026-11-25T15:46:25.439Z",
   "name": "Vitruvian Manager data catalogue",
   "publisher": "JDP-Iq",
   "description": "Every public dataset in Vitruvian Manager (VM, by JDP-Iq), with its fields, size, licence and sources. Read-only; no keys. Files are static JSON on this site; the MCP server (/mcp) and the JSON API (/api/v1/) query them with row and size caps.",
@@ -56,7 +56,7 @@
       "sources": [
         "The outlets' own RSS feeds, or Google News restricted to the outlet's site"
       ],
-      "updated": "2026-11-24",
+      "updated": "2026-11-25",
       "refresh": "static",
       "page": "q/headlines.html?view=current",
       "derivedFrom": [
@@ -69,7 +69,7 @@
       "title": "Geopolitical Volatility: latest scores",
       "module": "rt",
       "submodule": "volatility",
-      "description": "The Geopolitical Volatility Index (0–100) for every country on the latest day (2026-11-23), with its five components: conflict & security (35%), political/diplomatic escalation (20%), civil unrest (20%), economic disruption (10%) and cross-border spread (15%). It measures news coverage of events, not events on the ground.",
+      "description": "The Geopolitical Volatility Index (0–100) for every country on the latest day (2026-11-24), with its five components: conflict & security (35%), political/diplomatic escalation (20%), civil unrest (20%), economic disruption (10%) and cross-border spread (15%). It measures news coverage of events, not events on the ground.",
       "url": "integration/data/volatility-latest.json",
       "format": "json",
       "records": "records",
@@ -155,20 +155,20 @@
       "sources": [
         "GDELT 2.0 event exports, all 96 quarter-hour files a day (the GDELT Project)"
       ],
-      "updated": "2026-11-24",
+      "updated": "2026-11-25",
       "refresh": "daily",
       "page": "q/volatility.html",
       "derivedFrom": [
         "volatility/data/index.json"
       ],
-      "bytes": 63529
+      "bytes": 63990
     },
     {
       "id": "volatility-daily",
       "title": "Geopolitical Volatility: daily scores",
       "module": "rt",
       "submodule": "volatility",
-      "description": "Daily Geopolitical Volatility Index scores and components for every country over the last 59 days, for trends and comparisons.",
+      "description": "Daily Geopolitical Volatility Index scores and components for every country over the last 60 days, for trends and comparisons.",
       "urls": [
         "integration/data/volatility-daily/0.json",
         "integration/data/volatility-daily/1.json",
@@ -181,7 +181,8 @@
         "integration/data/volatility-daily/8.json",
         "integration/data/volatility-daily/9.json",
         "integration/data/volatility-daily/10.json",
-        "integration/data/volatility-daily/11.json"
+        "integration/data/volatility-daily/11.json",
+        "integration/data/volatility-daily/12.json"
       ],
       "format": "json",
       "records": "records",
@@ -247,18 +248,18 @@
           "description": "Coverage level: high, medium or low"
         }
       ],
-      "rows": 12468,
+      "rows": 12686,
       "licence": "Index © JDP-Iq (method gvi-1.2-q96); GDELT data free to use with attribution to the GDELT Project.",
       "sources": [
         "GDELT 2.0 event exports (the GDELT Project)"
       ],
-      "updated": "2026-11-24",
+      "updated": "2026-11-25",
       "refresh": "daily",
       "page": "q/volatility.html",
       "derivedFrom": [
         "volatility/data/index.json"
       ],
-      "bytes": 2290710
+      "bytes": 2331047
     },
     {
       "id": "volatility-global",
@@ -291,18 +292,18 @@
           "description": "Quarter-hour GDELT files processed (96 is a full day)"
         }
       ],
-      "rows": 59,
+      "rows": 60,
       "licence": "Index © JDP-Iq; GDELT data free to use with attribution to the GDELT Project.",
       "sources": [
         "GDELT 2.0 event exports (the GDELT Project)"
       ],
-      "updated": "2026-11-24",
+      "updated": "2026-11-25",
       "refresh": "daily",
       "page": "q/volatility.html",
       "derivedFrom": [
         "volatility/data/index.json"
       ],
-      "bytes": 4099
+      "bytes": 4165
     },
     {
       "id": "realtime-wars",
@@ -996,7 +997,7 @@
       "title": "Realtime Calendar: recent and upcoming events",
       "module": "rt",
       "submodule": "calendar",
-      "description": "The Realtime Calendar's window: political events from six months ago to eighteen months ahead (2026-05-24 to 2028-05-24 at the last build): elections, referendums, summits, new leaders, coups, ceasefires, protests, court rulings and more.",
+      "description": "The Realtime Calendar's window: political events from six months ago to eighteen months ahead (2026-05-25 to 2028-05-25 at the last build): elections, referendums, summits, new leaders, coups, ceasefires, protests, court rulings and more.",
       "url": "integration/data/upcoming-political-events.json",
       "format": "json",
       "records": "records",
@@ -1067,7 +1068,7 @@
           "description": "month, when the date is known only to the month; absent when the day is known"
         }
       ],
-      "rows": 325,
+      "rows": 320,
       "licence": "Summaries from Wikipedia, CC BY-SA 4.0 (credit Wikipedia); facts from Wikidata (CC0) and UCDP/PRIO (CC BY 4.0); compilation © JDP-Iq. Leaders to 2015 after Archigos 4.1 (Goemans, Gleditsch and Chiozza), whose page states no licence: kept with its citation until VM’s owner decides.",
       "sources": [
         "Wikipedia national electoral calendars and lists of summits",
@@ -1077,7 +1078,7 @@
         "Wikidata (CC0)",
         "Wikipedia Current events portal (CC BY-SA), from January 2026"
       ],
-      "updated": "2026-11-24",
+      "updated": "2026-11-25",
       "refresh": "daily",
       "page": "q/calendar.html?period=contemporary",
       "derivedFrom": [
@@ -1087,7 +1088,7 @@
         "calendar/data/2010s.json",
         "calendar/data/2020s.json"
       ],
-      "bytes": 174094
+      "bytes": 171521
     },
     {
       "id": "intelligence-briefing-stories",
@@ -1130,16 +1131,16 @@
           "description": "Soft-news class when the story is not hard news: s sport, e entertainment, l lifestyle; absent for news"
         }
       ],
-      "rows": 6819,
+      "rows": 6686,
       "licence": "Headlines, standfirsts and links © their publishers, quoted for reference; selection and metadata © JDP-Iq.",
       "sources": [
         "RSS and Atom feeds of the publishers listed in intelligence-briefing-sources",
         "Political positions: AllSides Media Bias Ratings, otherwise Media Bias/Fact Check, adjusted to five steps"
       ],
-      "updated": "2026-11-24",
+      "updated": "2026-11-25",
       "refresh": "twice daily",
       "page": "q/briefing.html",
-      "bytes": 2979625
+      "bytes": 2921384
     },
     {
       "id": "intelligence-briefing-sources",
@@ -1204,10 +1205,10 @@
         "Media Bias/Fact Check",
         "The publishers' own feeds"
       ],
-      "updated": "2026-11-24",
+      "updated": "2026-11-25",
       "refresh": "twice daily",
       "page": "q/briefing.html",
-      "bytes": 2979625
+      "bytes": 2921384
     },
     {
       "id": "daily-synopsis-stories",
@@ -1295,22 +1296,24 @@
           "description": "The story's written 5 Sided Analysis: published, refused, missing or not-eligible"
         }
       ],
-      "rows": 30,
+      "rows": 50,
       "licence": "Headlines and links © their publishers, quoted for reference; selection and counts © JDP-Iq.",
       "sources": [
         "The Political Briefing's publishers' RSS and Atom feeds (intelligence-briefing-stories)",
         "Political positions: AllSides Media Bias Ratings, otherwise Media Bias/Fact Check, adjusted to five steps"
       ],
-      "updated": "2026-11-23",
+      "updated": "2026-11-25",
       "refresh": "daily",
       "page": "daily-synopsis/index.html",
       "derivedFrom": [
         "daily-synopsis/data/index.json",
+        "daily-synopsis/data/days/2026-11-25.json",
+        "daily-synopsis/data/days/2026-11-24.json",
         "daily-synopsis/data/days/2026-11-23.json",
         "daily-synopsis/data/days/2026-11-22.json",
         "daily-synopsis/data/days/2026-11-21.json"
       ],
-      "bytes": 12721
+      "bytes": 20872
     },
     {
       "id": "econ-briefing-stories",
@@ -1408,15 +1411,15 @@
           "description": "The same item at the other outlets that carried it, each { source, url, title, access }"
         }
       ],
-      "rows": 524,
+      "rows": 502,
       "licence": "Titles, links and short summaries © their publishers, quoted for reference; classification and metadata © JDP-Iq.",
       "sources": [
         "RSS and Atom feeds of the journals, working-paper series, central banks, think tanks and economics desks listed in econ-briefing-sources"
       ],
-      "updated": "2026-11-24",
+      "updated": "2026-11-25",
       "refresh": "6-hourly",
       "page": "econ/briefing/index.html",
-      "bytes": 305033
+      "bytes": 294282
     },
     {
       "id": "econ-briefing-sources",
@@ -1549,10 +1552,10 @@
       "sources": [
         "RSS and Atom feeds of the journals, working-paper series, central banks, think tanks and economics desks listed in econ-briefing-sources"
       ],
-      "updated": "2026-11-24",
+      "updated": "2026-11-25",
       "refresh": "6-hourly",
       "page": "econ/briefing/index.html",
-      "bytes": 305033
+      "bytes": 294282
     },
     {
       "id": "science-briefing-stories",
@@ -1645,15 +1648,15 @@
           "description": "The same item at the other outlets that carried it, each { source, url, title, access }"
         }
       ],
-      "rows": 1254,
+      "rows": 1241,
       "licence": "Titles, links and short summaries © their publishers, quoted for reference; classification and metadata © JDP-Iq.",
       "sources": [
         "RSS and Atom feeds of the journals and science desks listed in science-briefing-sources (Springer Nature, AAAS, Cell Press, PNAS, APS, Wiley, IOP, AAS, PLOS, NASA, ESA and others)"
       ],
-      "updated": "2026-11-24",
+      "updated": "2026-11-25",
       "refresh": "6-hourly",
       "page": "science/briefing/index.html",
-      "bytes": 724298
+      "bytes": 721659
     },
     {
       "id": "science-briefing-sources",
@@ -1776,10 +1779,10 @@
       "sources": [
         "RSS and Atom feeds of the journals and science desks listed in science-briefing-sources (Springer Nature, AAAS, Cell Press, PNAS, APS, Wiley, IOP, AAS, PLOS, NASA, ESA and others)"
       ],
-      "updated": "2026-11-24",
+      "updated": "2026-11-25",
       "refresh": "6-hourly",
       "page": "science/briefing/index.html",
-      "bytes": 724298
+      "bytes": 721659
     },
     {
       "id": "digital-briefing-stories",
@@ -1882,15 +1885,15 @@
           "description": "The same item at the other outlets that carried it, each { source, url, title, access }"
         }
       ],
-      "rows": 1244,
+      "rows": 1183,
       "licence": "Titles, links and short summaries © their publishers, quoted for reference; classification and metadata © JDP-Iq.",
       "sources": [
         "RSS and Atom feeds of the journals, preprint servers, labs and technology desks listed in digital-briefing-sources"
       ],
-      "updated": "2026-11-24",
+      "updated": "2026-11-25",
       "refresh": "6-hourly",
       "page": "digital/briefing/index.html",
-      "bytes": 735422
+      "bytes": 702243
     },
     {
       "id": "digital-briefing-sources",
@@ -2033,10 +2036,10 @@
       "sources": [
         "RSS and Atom feeds of the journals, preprint servers, labs and technology desks listed in digital-briefing-sources"
       ],
-      "updated": "2026-11-24",
+      "updated": "2026-11-25",
       "refresh": "6-hourly",
       "page": "digital/briefing/index.html",
-      "bytes": 735422
+      "bytes": 702243
     },
     {
       "id": "political-calendar",
@@ -2120,7 +2123,7 @@
           "description": "month, when the date is known only to the month; absent when the day is known"
         }
       ],
-      "rows": 5999,
+      "rows": 6000,
       "licence": "Summaries from Wikipedia, CC BY-SA 4.0 (credit Wikipedia); facts from Wikidata (CC0) and UCDP/PRIO (CC BY 4.0); compilation © JDP-Iq. Leaders to 2015 after Archigos 4.1 (Goemans, Gleditsch and Chiozza), whose page states no licence: kept with its citation until VM’s owner decides.",
       "sources": [
         "Wikipedia national electoral calendars and lists of summits",
@@ -2130,10 +2133,10 @@
         "Wikidata (CC0)",
         "Wikipedia Current events portal (CC BY-SA), from January 2026"
       ],
-      "updated": "2026-11-24",
+      "updated": "2026-11-25",
       "refresh": "daily",
       "page": "q/calendar.html?period=history",
-      "bytes": 2940480
+      "bytes": 2941043
     },
     {
       "id": "encyclopaedia-entities",
@@ -3617,7 +3620,7 @@
       "sources": [
         "registry.json"
       ],
-      "updated": "2026-11-24",
+      "updated": "2026-11-25",
       "refresh": "on change",
       "page": "index.html",
       "derivedFrom": [

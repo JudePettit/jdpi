@@ -188,7 +188,7 @@ Historical Calendar: political events since 1980. Political history from 1980 to
 
 Master Index: entities. Every person, place, polity (a state that no longer exists), party, election, war, event, period, site, series, idea and organisation in the Vitruvian Manager Master Index, keyed by Wikidata id, with its main dates, country, how often Vitruvian Manager mentions it and which submodules it appears in. One shard per type. Full records (facts, relations, tags, every mention, Wikipedia summary) are one get_entity call away, or at lake/data/e/<qid number % 512>.json.
 
-- Rows: 14,342 · refresh: monthly · licence: Wikidata facts, labels and descriptions CC0; tags and links © JDP-Iq. (Wikipedia summaries, CC BY-SA 4.0, are only in the full entity records.)
+- Rows: 14,560 · refresh: monthly · licence: Wikidata facts, labels and descriptions CC0; tags and links © JDP-Iq. (Wikipedia summaries, CC BY-SA 4.0, are only in the full entity records.)
 - Files: https://jdpi.pages.dev/integration/data/encyclopaedia-entities/0.json, https://jdpi.pages.dev/integration/data/encyclopaedia-entities/1.json, https://jdpi.pages.dev/integration/data/encyclopaedia-entities/2.json (+18 more) (records at `records`)
 - Fields: `qid` (string), `label` (string), `type` (string), `description` (string), `start` (string), `end` (string), `country` (string), `mentions` (number), `appears_in` (array), `wikipedia` (string)
 

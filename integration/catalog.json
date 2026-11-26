@@ -1,5 +1,5 @@
 {
-  "generated": "2026-11-26T08:33:43.456Z",
+  "generated": "2026-11-26T09:33:10.989Z",
   "name": "Vitruvian Manager data catalogue",
   "publisher": "JDP-Iq",
   "description": "Every public dataset in Vitruvian Manager (VM, by JDP-Iq), with its fields, size, licence and sources. Read-only; no keys. Files are static JSON on this site; the MCP server (/mcp) and the JSON API (/api/v1/) query them with row and size caps.",
@@ -2222,20 +2222,20 @@
           "description": "English Wikipedia article"
         }
       ],
-      "rows": 14342,
+      "rows": 14560,
       "licence": "Wikidata facts, labels and descriptions CC0; tags and links © JDP-Iq. (Wikipedia summaries, CC BY-SA 4.0, are only in the full entity records.)",
       "sources": [
         "Wikidata (CC0)",
         "Every Vitruvian Manager submodule that mentions the entity"
       ],
-      "updated": "2026-11-22",
+      "updated": "2026-11-26",
       "refresh": "monthly",
       "page": "encyclopedia/index.html",
       "derivedFrom": [
         "lake/data/index.json",
         "lake/data/e/*.json"
       ],
-      "bytes": 4263860
+      "bytes": 4332246
     },
     {
       "id": "retrospective-wars",
@@ -3895,7 +3895,7 @@
         "bibliotheca/data/index.json",
         "lake/data/index.json"
       ],
-      "bytes": 85624
+      "bytes": 85760
     }
   ]
 }

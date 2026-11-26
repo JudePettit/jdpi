@@ -7,6 +7,7 @@
 // one of the types below; ongoing stories are thinned so one protest wave or one round of talks doesn't fill a month.
 // Text: Wikipedia contributors, CC BY-SA. Every event keeps the news report the item cites (`ref`).
 import { countryOf, countryOfLink, isCountryName } from './countries.mjs';
+import { applyCorrections } from './corrections.mjs';
 
 const UA = { 'User-Agent': 'JDP-Iq Political Calendar (https://jdpi.pages.dev)' };
 const MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
@@ -175,6 +176,12 @@ const BIG = /\b(?:tens of thousands|hundreds of thousands|thousands of|millions 
 
 const CEASEFIRE = /\b(?:agree(?:s|d)? (?:to|on|upon) (?:a |an |the )?(?:[\w-]+ ){0,2}(?:ceasefire|cease-fire|truce|armistice|peace (?:deal|agreement|plan|framework|accord))|announces? (?:a |an |the )?(?:[\w-]+ ){0,2}(?:ceasefire|truce)|declares? (?:a |an )?(?:[\w-]+ ){0,2}(?:ceasefire|truce)|(?:ceasefire|cease-fire|truce|armistice) (?:takes|took|goes|comes|came) into (?:force|effect)|(?:ceasefire|truce) (?:begins|starts)|sign(?:s|ed)? (?:a |an |the )?(?:[\w-]+ ){0,3}(?:peace|ceasefire|truce|armistice) (?:deal|agreement|accord|treaty|declaration|memorandum|framework)|extends? (?:the |their )?(?:[\w-]+ )?(?:ceasefire|truce)|(?:ceasefire|truce) (?:is|has been) extended|(?:ceasefire|truce) (?:collapses|ends|expires|breaks down)|(?:peace|ceasefire) (?:talks|negotiations) (?:begin|open|start|resume|conclude|end|collapse|break down)|(?:first|second|third|fourth|fifth|new|next|another) round of (?:peace |ceasefire |direct )?(?:talks|negotiations)|holds? (?:direct |indirect |the first )?(?:peace|ceasefire) (?:talks|negotiations)|peace (?:summit|conference) (?:is held|opens|begins)|accept(?:s|ed)? (?:a |an |the )?(?:[\w-]+ ){0,3}(?:ceasefire|truce))\b/i;
 const NOT_YET = /\b(?:amid(?:st)?|ahead of|before|prior to|potential|possible|planned|proposed|expected|unconfirmed|prepare for|preparation for)\b[^.;]{0,25}$/i;
+// An earlier deal named in passing, not a new one: a relative clause ("former FARC commanders who signed the 2016 peace
+// deal") or an earlier year before the deal ("the 2016 peace deal" in 2026's news). Indepaz's report of killings in
+// Colombia, 15 November 2026, was typed a ceasefire by that clause (ChatGPT's page reviews, front-pages-15). A deal named
+// by the news item's own year ("sign the 2026 peace treaty") is a new one; with no date, any year is an earlier one.
+const EARLIER_DEAL = (t, h, date) => /\b(?:who|that|which)\s+(?:had\s+)?$/i.test(t.slice(Math.max(0, h.at - 20), h.at))
+  || (m => !!m && +m[1] < (+String(date || '').slice(0, 4) || Infinity))(/\b((?:1[89]|20)\d{2})\s+(?:peace|ceasefire|cease-fire|truce|armistice)\b/i.exec(t.slice(h.at, h.end)));
 
 const PARTY = /\b(?:is|are) (?:re-?)?elected (?:as )?(?:the )?(?:new )?(?:leader|chair(?:man|woman|person)?|president|secretary[- ]general|head|presidential candidate|candidate) (?:of|for) (?:the )?[^.;]{0,80}\b(?:Party|Union|Alliance|Front|Movement|Rally|League|Democrats|Republicans|Labour|Conservatives|Greens|Socialists|primary)\b|\bleadership (?:election|contest|race|spill|vote|ballot)\b|\bparty (?:congress|conference|convention|primary|primaries)\b|\bnational (?:party )?(?:convention|conference)\b|\bNational Congress of the [^.;]{0,40}Party\b|\bholds? (?:the |its |a )?[^.;]{0,50}\b(?:party )?(?:congress|convention|party conference)\b|\bwins? (?:the |a )?[^.;]{0,40}\b(?:primary|primaries|leadership (?:election|contest|race|ballot|vote))\b|\b(?:confidence vote|vote of confidence) (?:on|in) (?:his|her|their) leadership\b/i;
 const PARTY_STORY = /\b(?:leadership (?:election|contest|spill|race)|Congress of the [^,]*Party|party congress|National Convention|party conference|primary|primaries)\b/i;
@@ -271,7 +278,7 @@ export function classify(item) {
     return { type: 'sanctions', score: /\bpackage\b|European Union|Council of the European Union/i.test(t) ? 3 : 2, ...h };
 
   // Ceasefires & peace talks
-  if (inCats(item, 'conflict', 'relations', 'politics') && (h = hit(CEASEFIRE, t)) && !reportedBefore(t, h.at) && !NOT_YET.test(t.slice(Math.max(0, h.at - 40), h.at))
+  if (inCats(item, 'conflict', 'relations', 'politics') && (h = hit(CEASEFIRE, t)) && !reportedBefore(t, h.at) && !NOT_YET.test(t.slice(Math.max(0, h.at - 40), h.at)) && !EARLIER_DEAL(t, h, item.date)
     && !/\b(?:will be held|will take place|will resume|is scheduled|are scheduled)\b/i.test(t.slice(h.at, h.end + 60))
     && !/\bviolat\w+\b[^.;]{0,30}\b(?:ceasefire|truce)\b|\b(?:ceasefire|truce) violations?\b/i.test(t.slice(0, h.at)))
     return { type: 'ceasefire', score: /\b(?:agree|sign|into (?:force|effect)|declares?|accept)/i.test(t.slice(h.at, h.end)) ? 3 : 2, ...h };
@@ -383,5 +390,8 @@ export async function fetchDays(from, to) {
 export async function currentEvents(from, to) {
   const days = await fetchDays(from, to);
   const items = [...days].flatMap(([d, text]) => parseDay(d, text));
-  return { events: eventsFromItems(items), days: [...days.values()].filter(Boolean).length, items: items.length };
+  // The calendar's corrections (corrections.mjs), keyed by day and source; one whose item is gone is reported.
+  const { events, unused } = applyCorrections(eventsFromItems(items), items);
+  for (const c of unused) if (c.date >= from && c.date <= to) console.log(`::warning title=Calendar::the correction for ${c.date} ${c.source} found no Current events item`);
+  return { events, days: [...days.values()].filter(Boolean).length, items: items.length };
 }

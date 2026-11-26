@@ -4,7 +4,9 @@
 //   countryOf({ links, text, topics })  → the first country named, or null
 //   normaliseCountry(name)               → the calendar's spelling of a country name
 
-// name|demonyms|capitals and cities
+// name|demonyms|capitals and cities. "Philippine", the adjective Wikipedia writes ("Philippine police"), is the
+// Philippines' too since 25 November 2026: without it, protests in Manila were filed under the United States they named
+// (ChatGPT's page reviews, front-pages-13).
 const RAW = `Afghanistan|Afghan|Kabul,Kandahar;Albania|Albanian|Tirana;Algeria|Algerian|Algiers;Andorra|Andorran|Andorra la Vella;Angola|Angolan|Luanda;
 Antigua and Barbuda|Antiguan|St. John's;Argentina|Argentine|Buenos Aires;Armenia|Armenian|Yerevan;Australia|Australian|Canberra,Sydney,Melbourne,New South Wales,Queensland,Tasmania,Western Australia,South Australia;
 Austria|Austrian|Vienna;Azerbaijan|Azeri,Azerbaijani|Baku,Nagorno-Karabakh;Bahrain|Bahraini|Manama;Bangladesh|Bangladeshi|Dhaka,Chittagong;Barbados|Barbadian|Bridgetown;
@@ -31,7 +33,7 @@ Mongolia|Mongolian|Ulaanbaatar;Montenegro|Montenegrin|Podgorica;Morocco|Moroccan
 Nauru|Nauruan|Yaren;Nepal|Nepalese,Nepali|Kathmandu;New Zealand|New Zealander|Wellington,Auckland;Nicaragua|Nicaraguan|Managua;Niger|Nigerien|Niamey;Nigeria|Nigerian|Abuja,Lagos,Kano,Borno;
 North Korea|North Korean|Pyongyang;North Macedonia|North Macedonian|Skopje;Norway|Norwegian|Oslo,Storting;Oman|Omani|Muscat;Pakistan|Pakistani|Islamabad,Karachi,Lahore,Balochistan,Khyber Pakhtunkhwa,Azad Kashmir;
 Palau|Palauan|Ngerulmud;Palestine|Palestinian|Ramallah,East Jerusalem,Gaza Strip,Gaza,West Bank,State of Palestine;Panama|Panamanian|Panama City;Papua New Guinea|Papua New Guinean|Port Moresby;
-Paraguay|Paraguayan|Asunción;Peru|Peruvian|Lima;Philippines|Filipino,Filipina|Manila,Quezon City,Mindanao;Poland|Polish|Warsaw,Sejm;Portugal|Portuguese|Lisbon;Qatar|Qatari|Doha;
+Paraguay|Paraguayan|Asunción;Peru|Peruvian|Lima;Philippines|Filipino,Filipina,Philippine|Manila,Quezon City,Mindanao;Poland|Polish|Warsaw,Sejm;Portugal|Portuguese|Lisbon;Qatar|Qatari|Doha;
 Ireland|Irish|Dublin,Dáil;Congo||Brazzaville,Republic of the Congo;Romania|Romanian|Bucharest;Russia|Russian|Moscow,Saint Petersburg,St. Petersburg,Chechnya,Dagestan,Kursk,Belgorod,Kremlin,State Duma;
 Rwanda|Rwandan|Kigali;Saint Kitts and Nevis||Basseterre;Saint Lucia|Saint Lucian|Castries;Saint Vincent and the Grenadines|Vincentian|Kingstown;Samoa|Samoan|Apia;San Marino|Sammarinese|;
 Saudi Arabia|Saudi|Riyadh,Jeddah,Mecca;Senegal|Senegalese|Dakar;Serbia|Serbian|Belgrade,Novi Sad;Seychelles|Seychellois|;Sierra Leone|Sierra Leonean|Freetown;Singapore|Singaporean|;
@@ -50,7 +52,7 @@ Western Sahara|Sahrawi|;Yemen|Yemeni|Sanaa,Aden;Zambia|Zambian|Lusaka;Zimbabwe|Z
 // Names that are also people's names or places elsewhere: trusted only as a link target, never in running text.
 const LINK_ONLY = new Set(['Chad', 'Jordan', 'Georgia', 'Guinea', 'Niger', 'Turkey', 'US', 'Victoria']);
 // Words that look like a country but are not ("Persian Gulf", "Latin American", "New Mexico"…).
-const NOT_COUNTRY = /\b(?:Latin|South|North|Central|African|Native|Asian|Anglo|Pan|Afro)[- ]Americans?\b|\bBritish (?:Columbia|Virgin|Overseas|Indian Ocean)\b|\bNew (?:Mexico|Jersey|York|South Wales|Caledonia|Guinea|Zealand)\b|\bIndian Ocean\b|\bSouth China Sea\b|\bEast China Sea\b|\bGulf of Mexico\b|\bSea of Japan\b|\bChinese Taipei\b|\bNorthern Irish\b|\bTurkish Cypriots?\b|\bGerman Shepherd\b|\bDutch Caribbean\b/g;
+const NOT_COUNTRY = /\b(?:Latin|South|North|Central|African|Native|Asian|Anglo|Pan|Afro)[- ]Americans?\b|\bBritish (?:Columbia|Virgin|Overseas|Indian Ocean)\b|\bNew (?:Mexico|Jersey|York|South Wales|Caledonia|Guinea|Zealand)\b|\bIndian Ocean\b|\bSouth China Sea\b|\bEast China Sea\b|\bGulf of Mexico\b|\bSea of Japan\b|\bPhilippine Sea\b|\bChinese Taipei\b|\bNorthern Irish\b|\bTurkish Cypriots?\b|\bGerman Shepherd\b|\bDutch Caribbean\b/g;
 
 export const COUNTRIES = [];
 const TERM = new Map(); // term → country

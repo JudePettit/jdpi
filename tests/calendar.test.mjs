@@ -16,6 +16,8 @@ import { countryOf, countryInText, normaliseCountry } from '../calendar/scripts/
 import { parseDate, eventsFromList, referendumsFromCalendar, ballotsFromCalendar, infoboxDates, preferOwnDates, ownArticle } from '../calendar/scripts/wiki-lists.mjs';
 import { atlasElections, mergeBallots, resolveExpected } from '../calendar/scripts/outlook.mjs';
 import { lostTypes, lostCounts, lostEvents } from '../calendar/scripts/guard.mjs';
+import { applyCorrections, CORRECTIONS } from '../calendar/scripts/corrections.mjs';
+import { staleTitles, roundLead, pickSummary, keepLead, shorten, sentenceEnds, cutAtAbbreviation, samePath, REFRESH_DAYS } from '../calendar/scripts/enrich-summaries.mjs';
 
 const BASE = (process.env.JDPI_URL || 'https://jdpi.pages.dev').replace(/\/$/, '');
 const TYPES = ['election', 'referendum', 'party', 'leader', 'inauguration', 'resignation', 'coup', 'conflict', 'ceasefire', 'assassination', 'crisis', 'protest', 'treaty', 'summit', 'sanctions', 'vote', 'court'];
@@ -672,4 +674,187 @@ test('Historical Calendar: an event names its own date and, apart, when its reco
 test('page file: the Sources give Archigos’s terms line beside the Political Retrospective', () => {
   const html = readFileSync(new URL('../q/calendar.html', import.meta.url), 'utf8');
   assert.ok(html.includes('Political Retrospective (Archigos and Wikidata) for new leaders, coups, elections and referendums (leaders to 2015 and how they took and left office: Archigos 4.1, which states no licence; kept until VM’s owner decides);'));
+});
+
+// Build 8 of ChatGPT's page reviews (25 November 2026), with the second readers' mendings: the Historical Calendar's
+// five faults, and the Navajo Nation votes that left the Political Retrospective's data (hp-retrospective d32a2e1) and so
+// leave the calendar. The tests are here, not in a file of their own, so that the daily refresh runs them before it
+// commits: a portal line reworded on Wikipedia, which a correction then misses, stops that day's commit and no more.
+// The portal lines below are Wikipedia's "Portal:Current events" as it read on 25 and 26 November 2026 (wikitext).
+const portalDay = (date, category, heading, body) => parseDay(date, `'''${category}'''\n*${heading}\n**${body}`);
+const corrected = items => applyCorrections(eventsFromItems(items), items).events;
+const PROTEST = portalDay('2026-11-15', 'Law and crime', '[[2026 ASEAN Summits]], [[Protests against Donald Trump]]',
+  "[[Philippines|Philippine]] [[Philippine National Police|police]] arrest at least 287 people during nationwide protests against the potential signing of a ''[[Pax Silica]]'' deal with the [[United States]] coinciding with the 49th [[ASEAN Summit]] in [[Metro Manila]]. Police also report that 15 officers sustained injuries during demonstrations. [https://www.gmanetwork.com/news/topstories/metro/1009656/pnp-defends-response-to-asean-summit-protests/story/ (GMA News Online)]");
+const HUANG = portalDay('2026-11-12', 'Business and economy', '[[Jensen Huang spying scandal]]',
+  "[[Jensen Huang]] resigns as [[chief executive officer]] (CEO) and president of [[Nvidia]] and leaves the company's [[Board of directors|board]] following reports of two [[extramarital affair]]s, including one involving a suspected [[China|Chinese]] [[Chinese intelligence activity abroad|intelligence agent]]. [[Chief financial officer]] [[Colette Kress]] becomes interim CEO. [https://www.afp.com/en/nvidia-ceo-jensen-huang-resigns (AFP)]");
+const REINSTATED = portalDay('2026-11-23', 'Business and economy', '[[Jensen Huang scandal]], [[Chinese intelligence activity abroad]]',
+  "[[Nvidia]] reinstates [[Jensen Huang]] as [[president (corporate title)|president]] and [[chief executive officer]] less than two weeks after he resigned following revelations of an [[affair]] with [[Alice Huang (executive)|Alice Huang]], who is suspected by [[United States Intelligence Community|U.S. intelligence]] of [[espionage|spying]] for [[China]]. [https://www.cbsnews.com/news/nvidia-reinstates-jensen-huang-ceo/ (CBS)]");
+const INDEPAZ = portalDay('2026-11-15', 'Armed conflicts and attacks', '[[Colombian conflict]]',
+  "A report released by the ''Human Rights and Conflict Dynamics Observatory of Indepaz'' confirms that 45 [[community leader]]s and [[human rights]] activists, eight former [[Revolutionary Armed Forces of Colombia|FARC]] commanders who signed the [[Colombian peace process|2016 peace deal]] and 87 more people were killed in [[Colombia]] since the beginning of [[Abelardo de la Espriella]]'s mandate in August 2026. [https://www.democrata.es/en/international/they-warn-of-45-social-leaders-murdered-in-the-first-100-days-of-de-la-espriella-s-government/amp/ (Democrata)]");
+const ALLIANA = portalDay('2026-11-06', 'Politics and elections', '[[2026 Paraguay banking crisis]]',
+  "[[Vice President of Paraguay|Vice President]] [[Pedro Alliana]] is sworn in as the interim president of Paraguay. [https://www.reuters.com/world/americas/paraguays-alliana-sworn-president-after-pea-impeachment-2026-11-06/ (Reuters)]");
+// Wikipedia, "2026 Bulgarian presidential election", its lead as cached on 25 November 2026.
+const BULGARIA_LEAD = "Presidential elections were held in Bulgaria on 25 October 2026, with a second round held on 1 November 2026 after no candidate received a majority of the vote in the first round. Incumbent president Iliana Iotova was eligible to run for a full 5 year term. In the end, she won the election with 57.6% of the votes against Andrey Gurov's 39.5%.";
+
+test('front-pages-13: "Philippine police" files the Manila protests under the Philippines, not the United States they name', () => {
+  const [e] = corrected(PROTEST);
+  assert.equal(e.type, 'protest');
+  assert.equal(e.country, 'Philippines');
+  assert.equal(countryOf({ text: 'Philippine police arrest at least 287 people during protests against a deal with the United States in Metro Manila.' }), 'Philippines');
+  // The Philippine Sea is a sea, not the country: named first, it must not take Japan's place.
+  assert.equal(countryOf({ text: 'A typhoon crosses the Philippine Sea towards Japan.' }), 'Japan');
+  // The title is the item's own words, not the portal's story heading ("Protests against Donald Trump").
+  assert.equal(e.title, 'Philippine police arrest at least 287 people during nationwide protests against the potential signing of a Pax Silica deal with the United States');
+  assert.equal(eventsFromItems(PROTEST)[0].title, 'Protests against Donald Trump');
+});
+
+test('front-pages-13 and 14: the Nvidia resignation is the United States\', dated 12 November, worded as the announcement of a resignation effective 11 November, and names the reinstatement', () => {
+  const [e] = corrected(HUANG);
+  assert.equal(e.date, '2026-11-12');
+  assert.equal(e.type, 'resignation');
+  assert.equal(e.country, 'United States');
+  assert.equal(e.source, 'https://en.wikipedia.org/wiki/Jensen_Huang');
+  assert.match(e.title, /^Nvidia announces the resignation of Jensen Huang\b.*\beffective 11 November$/);
+  assert.match(e.summary, /\baccepted the resignation of Jensen Huang\b.*\bon 11 November, effective immediately\b/);
+  assert.match(e.summary, /On 23 November Nvidia announced that its board had reinstated him as president, chief executive and a director\.$/);
+  assert.equal(e.ref, 'https://www.afp.com/en/nvidia-ceo-jensen-huang-resigns');
+  // Without the correction the classifier files it under China (the only country word in the item).
+  assert.equal(eventsFromItems(HUANG)[0].country, 'China');
+});
+
+test('front-pages-14: the reinstatement is not an event of its own (neither an inauguration nor a swearing-in); an added item is never doubled', () => {
+  assert.deepEqual(corrected(REINSTATED), []);
+  assert.ok(!CORRECTIONS.some(c => c.add && c.date === '2026-11-23'));
+  const { unused } = applyCorrections([], []);
+  assert.equal(unused.length, CORRECTIONS.length, 'a correction that finds nothing changes nothing and is reported');
+  // An `add` correction: added once, not added again, and not added when the classifier took the same portal item.
+  const ADD = [{ date: '2026-11-23', source: 'https://en.wikipedia.org/wiki/Jensen_Huang', add: { text: /\bNvidia\b[^.;]*\breinstates\b/, country: 'United States', type: 'resignation', title: 'Nvidia reinstates Jensen Huang' } }];
+  const once = applyCorrections([], REINSTATED, ADD).events;
+  assert.deepEqual(once.map(e => [e.title, e.ref]), [['Nvidia reinstates Jensen Huang', 'https://www.cbsnews.com/news/nvidia-reinstates-jensen-huang-ceo/']]);
+  assert.equal(applyCorrections(once, REINSTATED, ADD).events.length, 1);
+  const classified = { date: '2026-11-23', title: 'Jensen Huang scandal', type: 'resignation', summary: REINSTATED[0].text };
+  assert.deepEqual(applyCorrections([classified], REINSTATED, ADD).events.map(e => e.title), ['Jensen Huang scandal']);
+});
+
+test('front-pages-15: a report of killings that names the 2016 peace deal in passing is not a ceasefire; a deal of the news\'s own year is', () => {
+  assert.equal(classify(INDEPAZ[0]), null);
+  assert.deepEqual(corrected(INDEPAZ), []);
+  const type = (text, category = 'Armed conflicts and attacks') => classify({ date: '2026-05-14', category, topics: [], text, links: [], refs: [] })?.type ?? null;
+  assert.equal(type('Former rebels that signed the 2016 peace agreement protest in Bogotá.'), null);
+  // New deals are still ceasefires, a deal named by the item's own year among them.
+  assert.equal(type('The government and the ELN sign a peace agreement in Havana.'), 'ceasefire');
+  assert.equal(type('Armenia and Azerbaijan sign the peace treaty in Washington.', 'International relations'), 'ceasefire');
+  assert.equal(type('Armenia and Azerbaijan sign the 2026 peace treaty in Washington.', 'International relations'), 'ceasefire');
+  assert.equal(type('The government and the ELN sign the 2026 peace agreement in Havana.'), 'ceasefire');
+  assert.equal(type('U.S. president Donald Trump announces that Israel and Lebanon have agreed to a 10-day ceasefire.'), 'ceasefire');
+});
+
+test('front-pages-16: leads of event articles whose day passed in the last 30 days are fetched again; news items are not', () => {
+  const cache = { A: 'Elections are scheduled to be held on 3 November 2026.', B: 'Old.', C: 'Old.', D: 'Old.', E: 'Old.', F: 'Old.' };
+  const url = t => `https://en.wikipedia.org/wiki/${t}`;
+  const events = [
+    { date: '2026-11-03', class: 'retrospective', source: url('A'), summary: cache.A },          // past, lead: again
+    { date: '2026-11-07', class: 'wikipedia-list', source: url('B') },                            // past, no summary yet: again
+    { date: '2026-11-06', class: 'wikidata', source: url('C'), summary: 'Jane Doe resigned as Minister on 6 November 2026.' }, // the build's own account: no
+    { date: '2026-11-15', class: 'wikipedia-news', source: url('D'), summary: 'Old.' },          // the day's news: no
+    { date: '2026-10-01', class: 'wikidata', source: url('E'), summary: 'Old.' },                 // more than 30 days ago: no
+    { date: '2026-12-01', class: 'wikidata', source: url('F'), summary: 'Old.' },                 // not yet: no
+  ];
+  assert.equal(REFRESH_DAYS, 30);
+  assert.deepEqual(staleTitles(events, cache, '2026-11-25').sort(), ['A', 'B']);
+});
+
+test('front-pages-16: an old lead gives way to the one fetched again; the build\'s own account stays; an empty refetch keeps the old lead', () => {
+  const url = t => `https://en.wikipedia.org/wiki/${t}`;
+  const before = { A: 'Elections are scheduled to be held on 3 November 2026.' };
+  const cache = { A: 'Elections were held on 3 November 2026.', C: 'Jane Doe is a politician.', Y: 'Events in the year 1990 in Ruritania.' };
+  assert.equal(pickSummary({ source: url('A'), summary: before.A }, cache, before), cache.A);
+  assert.equal(pickSummary({ source: url('A') }, cache, before), cache.A);
+  assert.equal(pickSummary({ source: url('C'), summary: 'Jane Doe resigned as Minister on 6 November 2026.' }, cache, {}), 'Jane Doe resigned as Minister on 6 November 2026.');
+  assert.equal(pickSummary({ source: url('Y') }, cache, {}), '');
+  assert.equal(pickSummary({ source: 'https://ucdp.uu.se/conflict/1', summary: 'UCDP records an armed conflict.' }, cache, {}), 'UCDP records an armed conflict.');
+  assert.equal(keepLead('A', '', before), false, 'an empty refetch keeps the cached lead');
+  assert.equal(keepLead('A', null, before), false, 'a failed fetch changes nothing');
+  assert.equal(keepLead('A', 'Elections were held.', before), true);
+  assert.equal(keepLead('Z', '', before), true, 'a new article with no lead is cached as empty, so it is not fetched every day');
+});
+
+test('front-pages-16: a second round\'s summary starts at the lead\'s sentence about that round; a figure or an abbreviation never splits a sentence', () => {
+  const round = { title: '2026 Bulgarian presidential election (second round)' };
+  // The lead's first sentence names the second round, so the whole lead comes back, its result (57.6%) and all.
+  assert.equal(roundLead(round, BULGARIA_LEAD), BULGARIA_LEAD);
+  assert.equal(pickSummary({ ...round, source: 'https://en.wikipedia.org/wiki/2026_Bulgarian_presidential_election' }, { '2026_Bulgarian_presidential_election': BULGARIA_LEAD }, {}), BULGARIA_LEAD);
+  assert.equal(roundLead(round, 'Presidential elections were held on 25 October. A runoff was held on 1 November between them.'), 'A runoff was held on 1 November between them.');
+  assert.equal(roundLead(round, "Turnout was 33.4% on 25 October. A runoff in St. John's followed. It was won with 57.6%."), "A runoff in St. John's followed. It was won with 57.6%.");
+  assert.equal(roundLead({ title: '2026 Bulgarian presidential election' }, 'Held on 25 October. A runoff followed.'), 'Held on 25 October. A runoff followed.');
+});
+
+test('front-pages-16: a lead is shortened at a sentence\'s end, not at "St." or "U.S."; the sentence running at 360 characters is finished if it ends by 480', () => {
+  // Wikipedia, "2026 Commonwealth Heads of Government Meeting" and "APEC China 2026", read 25 and 26 November 2026.
+  const chogm = "The 2026 Commonwealth Heads of Government Meeting, also known as CHOGM 2026, was the 28th Commonwealth Heads of Government Meeting, bringing together leaders and representatives of the 56 member states of the Commonwealth of Nations. It was held in St. John's, Antigua and Barbuda, from 3 to 4 November 2026, with associated events taking place from 1 November. Antigua and Barbuda became the smallest country to have hosted a Commonwealth Heads of Government Meeting.";
+  const apec = "The APEC China 2026 was a year-long hosting of the Asia-Pacific Economic Cooperation (APEC) meetings, which concluded with the APEC Economic Leaders' Meeting in November 2026. It will be the third time China hosted the summit, having previously hosted in 2001 and 2014. The sidelines of the meeting featured an unprecedented China–Russia–U.S. Summit, which was issued by a joint statement. Following the conclusion of the APEC summit, the member countries issued the \"Shenzhen Outlook\" declaration.";
+  for (const lead of [chogm, apec]) {
+    const s = shorten(lead);
+    assert.ok(lead.startsWith(s) && s.length <= 480, s);
+    assert.match(s, /\.$/);
+    assert.doesNotMatch(s, /\b(?:St|U\.S)\.$/, s);
+  }
+  assert.match(shorten(chogm), /It was held in St\. John's, Antigua and Barbuda, from 3 to 4 November 2026, with associated events taking place from 1 November\./);
+  assert.match(shorten(apec), /an unprecedented China–Russia–U\.S\. Summit, which was issued by a joint statement\.$/);
+  assert.deepEqual(sentenceEnds("Voters in the fifty U.S. states and St. John's voted. Turnout was 57.6%. Done!"), [53, 72, 78]);
+  assert.equal(shorten('Short. Lead.'), 'Short. Lead.');
+  assert.match(shorten('word '.repeat(120).trim()), /…$/);
+  // A lead the older cut left at an abbreviation is fetched again; one that ends a sentence, or with "…", is not.
+  assert.equal(cutAtAbbreviation('The House elections were held across each of the fifty U.S.'), true);
+  assert.equal(cutAtAbbreviation('The meeting was held in St.'), true);
+  assert.equal(cutAtAbbreviation('The meeting was held in St. John\'s.'), false);
+  assert.equal(cutAtAbbreviation('Turnout was 57.6%.'), false);
+  assert.equal(cutAtAbbreviation('A long lead cut at a word…'), false);
+});
+
+test('enrich-summaries.mjs runs when called directly, whatever the case of the drive and folders on Windows', () => {
+  assert.equal(samePath('C:\\Users\\x\\calendar\\scripts\\enrich-summaries.mjs', 'c:\\users\\x\\calendar\\scripts\\enrich-summaries.mjs', 'win32'), true);
+  assert.equal(samePath('/home/x/calendar/scripts/enrich-summaries.mjs', '/home/x/calendar/scripts/enrich-summaries.mjs', 'linux'), true);
+  assert.equal(samePath('/home/x/Calendar/enrich-summaries.mjs', '/home/x/calendar/enrich-summaries.mjs', 'linux'), false);
+});
+
+test('front-pages-17: Pedro Alliana is sworn in as president of Paraguay, to complete the term to 2028 (as the Political Atlas, named, gives it), not "interim president"', () => {
+  const [e] = corrected(ALLIANA);
+  assert.equal(e.type, 'inauguration');
+  assert.equal(e.country, 'Paraguay');
+  assert.equal(e.title, 'Vice-President Pedro Alliana is sworn in as president of Paraguay, to complete the term to 2028');
+  assert.doesNotMatch(e.title + ' ' + e.summary, /\binterim\b/);
+  assert.match(e.summary, /\bwhich ends in August 2028\. Political Atlas, checked 25 November 2026\.$/);
+});
+
+test('the built calendar: the five corrections, the summaries mended, and no Navajo Nation votes (the Retrospective dropped them)', () => {
+  assert.deepEqual(ALL.filter(e => /Navajo/.test(e.title)).map(e => `${e.date} ${e.title}`), []);
+  const on = (date, re) => ALL.filter(e => e.date === date && re.test(e.title + ' ' + (e.summary || '')));
+  assert.deepEqual(on('2026-11-15', /Philippine police/).map(e => [e.country, e.iso3, e.title]), [['Philippines', 'PHL', 'Philippine police arrest at least 287 people during nationwide protests against the potential signing of a Pax Silica deal with the United States']]);
+  const huang = on('2026-11-12', /Jensen Huang/);
+  assert.deepEqual(huang.map(e => [e.country, e.iso3, e.title]), [['United States', 'USA', 'Nvidia announces the resignation of Jensen Huang as president and chief executive, effective 11 November']]);
+  assert.match(huang[0].summary, /\bOn 23 November Nvidia announced that its board had reinstated him\b/);
+  assert.deepEqual(on('2026-11-23', /Jensen Huang/).map(e => e.title), []);
+  assert.deepEqual(on('2026-11-15', /Indepaz/).map(e => e.type), []);
+  const alliana = on('2026-11-06', /Alliana/).filter(e => e.type === 'inauguration');
+  assert.deepEqual(alliana.map(e => e.title), ['Vice-President Pedro Alliana is sworn in as president of Paraguay, to complete the term to 2028']);
+  assert.match(alliana[0].summary, /\bPolitical Atlas, checked 25 November 2026\.$/);
+  // Bulgaria's second round no longer reads as a vote still to come, and keeps its result.
+  const round = ALL.find(e => e.date === '2026-11-01' && /Bulgarian presidential election \(second round\)/.test(e.title));
+  assert.ok(round, 'Bulgaria\'s second round (1 November 2026) is in the calendar');
+  assert.doesNotMatch(round.summary || '', /\bis eligible and has declared\b/);
+  assert.match(round.summary || '', /\bwith 57\.6% of the votes against Andrey Gurov's 39\.5%\./);
+  // The leads fetched again end at a sentence's end, not at an abbreviation.
+  for (const [date, title] of [['2026-11-03', '2026 Commonwealth Heads of Government Meeting'], ['2026-11-18', 'APEC China 2026'], ['2026-11-03', '2026 United States House of Representatives elections']]) {
+    const e = ALL.find(x => x.date === date && x.title === title);
+    assert.ok(e && e.summary, `${date} ${title}`);
+    assert.doesNotMatch(e.summary, /\b(?:St|U\.S)\.$/, `${date} ${title}`);
+  }
+  // Nor do the older leads that the earlier cut left at "U.S.": they have been fetched again. (Some leads do end so:
+  // Hamdan v. Rumsfeld's whole lead ends "ratified by the U.S.")
+  for (const [date, title] of [['2000-11-07', '2000 United States presidential election'], ['2008-06-26', 'District of Columbia v. Heller'], ['2025-01-20', 'Second inauguration of Donald Trump']]) {
+    const e = ALL.find(x => x.date === date && x.title === title);
+    assert.ok(e && e.summary, `${date} ${title}`);
+    assert.doesNotMatch(e.summary, /\bU\.S\.$/, `${date} ${title}`);
+  }
 });

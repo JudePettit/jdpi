@@ -1,5 +1,5 @@
 {
-  "generated": "2026-11-26T11:14:58.293Z",
+  "generated": "2026-11-26T14:06:25.472Z",
   "name": "Vitruvian Manager data catalogue",
   "publisher": "JDP-Iq",
   "description": "Every public dataset in Vitruvian Manager (VM, by JDP-Iq), with its fields, size, licence and sources. Read-only; no keys. Files are static JSON on this site; the MCP server (/mcp) and the JSON API (/api/v1/) query them with row and size caps.",
@@ -732,14 +732,14 @@
         "UCDP/PRIO Armed Conflict Dataset (CC BY 4.0): conflict history since 1946",
         "Kardashev Tracker: energy share"
       ],
-      "updated": "2026-11-15",
+      "updated": "2026-11-26",
       "refresh": "monthly",
       "page": "q/national.html",
       "derivedFrom": [
         "national/data/index.json",
         "volatility/data/index.json"
       ],
-      "bytes": 185090
+      "bytes": 185025
     },
     {
       "id": "national-indicators",
@@ -812,14 +812,14 @@
       "sources": [
         "World Bank World Development Indicators and Worldwide Governance Indicators"
       ],
-      "updated": "2026-11-15",
+      "updated": "2026-11-26",
       "refresh": "monthly",
       "page": "q/national.html",
       "derivedFrom": [
         "national/data/index.json",
         "national/data/years/manifest.json"
       ],
-      "bytes": 11247
+      "bytes": 11257
     },
     {
       "id": "national-indicator-latest",
@@ -903,13 +903,13 @@
       "sources": [
         "World Bank World Development Indicators and Worldwide Governance Indicators (CC BY 4.0)"
       ],
-      "updated": "2026-11-15",
+      "updated": "2026-11-26",
       "refresh": "monthly",
       "page": "q/national.html",
       "derivedFrom": [
         "national/data/index.json"
       ],
-      "bytes": 1768935
+      "bytes": 1770645
     },
     {
       "id": "national-key-series",
@@ -983,7 +983,7 @@
       "sources": [
         "World Bank World Development Indicators (CC BY 4.0)"
       ],
-      "updated": "2026-11-15",
+      "updated": "2026-11-26",
       "refresh": "monthly",
       "page": "q/national.html#compare=USA,CHN,RUS,IND",
       "derivedFrom": [
@@ -1068,7 +1068,7 @@
           "description": "month, when the date is known only to the month; absent when the day is known"
         }
       ],
-      "rows": 327,
+      "rows": 318,
       "licence": "Summaries from Wikipedia, CC BY-SA 4.0 (credit Wikipedia); facts from Wikidata (CC0) and UCDP/PRIO (CC BY 4.0); compilation © JDP-Iq. Leaders to 2015 after Archigos 4.1 (Goemans, Gleditsch and Chiozza), whose page states no licence: kept with its citation until VM’s owner decides.",
       "sources": [
         "Wikipedia national electoral calendars and lists of summits",
@@ -1088,7 +1088,7 @@
         "calendar/data/2010s.json",
         "calendar/data/2020s.json"
       ],
-      "bytes": 176650
+      "bytes": 172926
     },
     {
       "id": "intelligence-briefing-stories",
@@ -1412,7 +1412,7 @@
           "description": "The same item at the other outlets that carried it, each { source, url, title, access }"
         }
       ],
-      "rows": 488,
+      "rows": 493,
       "licence": "Titles, links and short summaries © their publishers, quoted for reference; classification and metadata © JDP-Iq.",
       "sources": [
         "RSS and Atom feeds of the journals, working-paper series, central banks, think tanks and economics desks listed in econ-briefing-sources"
@@ -1420,7 +1420,7 @@
       "updated": "2026-11-26",
       "refresh": "6-hourly",
       "page": "econ/briefing/index.html",
-      "bytes": 285280
+      "bytes": 289252
     },
     {
       "id": "econ-briefing-sources",
@@ -1556,7 +1556,7 @@
       "updated": "2026-11-26",
       "refresh": "6-hourly",
       "page": "econ/briefing/index.html",
-      "bytes": 285280
+      "bytes": 289252
     },
     {
       "id": "science-briefing-stories",
@@ -1649,15 +1649,15 @@
           "description": "The same item at the other outlets that carried it, each { source, url, title, access }"
         }
       ],
-      "rows": 1241,
+      "rows": 1212,
       "licence": "Titles, links and short summaries © their publishers, quoted for reference; classification and metadata © JDP-Iq.",
       "sources": [
         "RSS and Atom feeds of the journals and science desks listed in science-briefing-sources (Springer Nature, AAAS, Cell Press, PNAS, APS, Wiley, IOP, AAS, PLOS, NASA, ESA and others)"
       ],
-      "updated": "2026-11-25",
+      "updated": "2026-11-26",
       "refresh": "6-hourly",
       "page": "science/briefing/index.html",
-      "bytes": 721659
+      "bytes": 711013
     },
     {
       "id": "science-briefing-sources",
@@ -1780,10 +1780,10 @@
       "sources": [
         "RSS and Atom feeds of the journals and science desks listed in science-briefing-sources (Springer Nature, AAAS, Cell Press, PNAS, APS, Wiley, IOP, AAS, PLOS, NASA, ESA and others)"
       ],
-      "updated": "2026-11-25",
+      "updated": "2026-11-26",
       "refresh": "6-hourly",
       "page": "science/briefing/index.html",
-      "bytes": 721659
+      "bytes": 711013
     },
     {
       "id": "digital-briefing-stories",
@@ -1886,7 +1886,7 @@
           "description": "The same item at the other outlets that carried it, each { source, url, title, access }"
         }
       ],
-      "rows": 1115,
+      "rows": 1155,
       "licence": "Titles, links and short summaries © their publishers, quoted for reference; classification and metadata © JDP-Iq.",
       "sources": [
         "RSS and Atom feeds of the journals, preprint servers, labs and technology desks listed in digital-briefing-sources"
@@ -1894,7 +1894,7 @@
       "updated": "2026-11-26",
       "refresh": "6-hourly",
       "page": "digital/briefing/index.html",
-      "bytes": 663512
+      "bytes": 691787
     },
     {
       "id": "digital-briefing-sources",
@@ -2040,7 +2040,7 @@
       "updated": "2026-11-26",
       "refresh": "6-hourly",
       "page": "digital/briefing/index.html",
-      "bytes": 663512
+      "bytes": 691787
     },
     {
       "id": "political-calendar",
@@ -2124,7 +2124,7 @@
           "description": "month, when the date is known only to the month; absent when the day is known"
         }
       ],
-      "rows": 5951,
+      "rows": 5849,
       "licence": "Summaries from Wikipedia, CC BY-SA 4.0 (credit Wikipedia); facts from Wikidata (CC0) and UCDP/PRIO (CC BY 4.0); compilation © JDP-Iq. Leaders to 2015 after Archigos 4.1 (Goemans, Gleditsch and Chiozza), whose page states no licence: kept with its citation until VM’s owner decides.",
       "sources": [
         "Wikipedia national electoral calendars and lists of summits",
@@ -2137,7 +2137,7 @@
       "updated": "2026-11-26",
       "refresh": "daily",
       "page": "q/calendar.html?period=history",
-      "bytes": 2923177
+      "bytes": 2879674
     },
     {
       "id": "encyclopaedia-entities",
@@ -2265,7 +2265,7 @@
         {
           "name": "type",
           "type": "string",
-          "description": "Conflict type (civil, internationalised civil, interstate, colonial…)"
+          "description": "Conflict type in its last active year (civil, internationalised civil, interstate, colonial…), from UCDP's type_of_conflict; a conflict's type can change from year to year (Cuba, u242: civil in 1953 and 1956–58, internationalised civil in 1961), and the page gives each year's"
         },
         {
           "name": "aim",
@@ -2494,12 +2494,22 @@
         {
           "name": "start",
           "type": "date",
-          "description": "Start date"
+          "description": "Start date: Wikidata's, except where VM has found that Wikidata's start, given with no reference, differs from the battle's English Wikipedia article, when it is the article's (start_wikidata then gives Wikidata's); for a battle of several dates (pts), the first of them"
         },
         {
           "name": "end",
           "type": "date",
-          "description": "End date"
+          "description": "End date: Wikidata's, except where Wikidata ends the battle more than a month after its English Wikipedia article does, when it is the article's (the page marks it uncertain and gives both); for a battle of several dates (pts), the last of them, not the end of a span"
+        },
+        {
+          "name": "start_wikidata",
+          "type": "date",
+          "description": "Wikidata's start, where War Focus shows the battle from its English Wikipedia article's start instead (the Battle of Iwo Jima: 8 February 1945 in Wikidata, 19 February in the article); null otherwise"
+        },
+        {
+          "name": "pts",
+          "type": "string",
+          "description": "For a battle Wikidata gives several points in time and no start or end, each date, comma-separated (YYYY-MM-DD a day, YYYY-MM a month, YYYY a year): separate dates, not a span, so the battle was not under way between them (the atomic bombings of Hiroshima and Nagasaki: 1945-08-06, 1945-08-09); null otherwise"
         },
         {
           "name": "precision",
@@ -2608,10 +2618,10 @@
         }
       ],
       "rows": 4241,
-      "licence": "Wikidata CC0; the figure_ columns from English Wikipedia infoboxes, CC BY-SA 4.0 (the figures as facts, each article named at its revision in the figures files).",
+      "licence": "Wikidata CC0; the figure_ columns, and a start or end War Focus takes from the battle's English Wikipedia article, from English Wikipedia, CC BY-SA 4.0 (as facts; each infobox figure's article is named at its revision in the figures files).",
       "sources": [
         "Wikidata (CC0): battles, sieges and operations that are part of each war",
-        "English Wikipedia (CC BY-SA 4.0): the casualty fields of each battle's infobox, at the revision named"
+        "English Wikipedia (CC BY-SA 4.0): the casualty fields of each battle's infobox, at the revision named; and a battle's start or end where War Focus takes it from the article (start, end)"
       ],
       "updated": "2026-11-26",
       "refresh": "monthly",
@@ -2619,7 +2629,7 @@
       "derivedFrom": [
         "battlefield/focus/data/wars/*.json"
       ],
-      "bytes": 2999387
+      "bytes": 3140486
     },
     {
       "id": "war-focus-monthly-deaths",

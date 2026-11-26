@@ -96,7 +96,7 @@ National Analysis: key indicator time series. Yearly values since 1980 for every
 
 Realtime Calendar: recent and upcoming events. The Realtime Calendar's window: political events from six months ago to eighteen months ahead (2026-05-26 to 2028-05-26 at the last build): elections, referendums, summits, new leaders, coups, ceasefires, protests, court rulings and more.
 
-- Rows: 327 · refresh: daily · licence: Summaries from Wikipedia, CC BY-SA 4.0 (credit Wikipedia); facts from Wikidata (CC0) and UCDP/PRIO (CC BY 4.0); compilation © JDP-Iq. Leaders to 2015 after Archigos 4.1 (Goemans, Gleditsch and Chiozza), whose page states no licence: kept with its citation until VM’s owner decides.
+- Rows: 318 · refresh: daily · licence: Summaries from Wikipedia, CC BY-SA 4.0 (credit Wikipedia); facts from Wikidata (CC0) and UCDP/PRIO (CC BY 4.0); compilation © JDP-Iq. Leaders to 2015 after Archigos 4.1 (Goemans, Gleditsch and Chiozza), whose page states no licence: kept with its citation until VM’s owner decides.
 - File: https://jdpi.pages.dev/integration/data/upcoming-political-events.json (records at `records`)
 - Fields: `date` (date), `country` (string), `title` (string), `type` (string), `status` (string), `source` (string), `summary` (string), `ref` (string), `refName` (string), `level` (string), `iso3` (string), `class` (string), `precision` (string)
 
@@ -130,7 +130,7 @@ Daily Synopsis: the day's major stories. Each day's major political stories, pic
 
 Economics Briefing: stories and papers. Every paper and story in the Economics Briefing over the last 7 days, classed by fields (macro, monetary, trade, labour, development, finance, public, energy) and by type (papers or news). Join `source` to econ-briefing-sources.
 
-- Rows: 488 · refresh: 6-hourly · licence: Titles, links and short summaries © their publishers, quoted for reference; classification and metadata © JDP-Iq.
+- Rows: 493 · refresh: 6-hourly · licence: Titles, links and short summaries © their publishers, quoted for reference; classification and metadata © JDP-Iq.
 - File: https://jdpi.pages.dev/econ/briefing/data/stories.json (records at `items`)
 - Fields: `id` (string), `title` (string), `url` (string), `source` (string), `kind` (string), `tier` (number), `fields` (array), `type` (string), `published` (date), `summary` (string), `section` (string), `doi` (string), `authors` (string), `also` (array), `undated` (boolean), `access` (string), `alt` (array)
 
@@ -146,7 +146,7 @@ Economics Briefing: sources. The journals, preprint servers, institutions and ne
 
 Scientific Briefing: stories and papers. Every paper and story in the Scientific Briefing over the last 7 days, classed by disciplines (physics, chemistry, biology, earth, space) and by type (papers or news). Join `source` to science-briefing-sources.
 
-- Rows: 1,241 · refresh: 6-hourly · licence: Titles, links and short summaries © their publishers, quoted for reference; classification and metadata © JDP-Iq.
+- Rows: 1,212 · refresh: 6-hourly · licence: Titles, links and short summaries © their publishers, quoted for reference; classification and metadata © JDP-Iq.
 - File: https://jdpi.pages.dev/science/briefing/data/stories.json (records at `items`)
 - Fields: `id` (string), `title` (string), `url` (string), `source` (string), `kind` (string), `tier` (number), `disciplines` (array), `type` (string), `published` (date), `summary` (string), `section` (string), `doi` (string), `also` (array), `undated` (boolean), `access` (string), `alt` (array)
 
@@ -162,7 +162,7 @@ Scientific Briefing: sources. The journals, preprint servers, institutions and n
 
 Digital Briefing: stories and papers. Every paper and story in the Digital Briefing over the last 7 days, classed by fields (ai, software, security, hardware, networks, quantum, privacy, policy) and by type (papers or news). Join `source` to digital-briefing-sources.
 
-- Rows: 1,115 · refresh: 6-hourly · licence: Titles, links and short summaries © their publishers, quoted for reference; classification and metadata © JDP-Iq.
+- Rows: 1,155 · refresh: 6-hourly · licence: Titles, links and short summaries © their publishers, quoted for reference; classification and metadata © JDP-Iq.
 - File: https://jdpi.pages.dev/digital/briefing/data/stories.json (records at `items`)
 - Fields: `id` (string), `title` (string), `url` (string), `source` (string), `kind` (string), `tier` (number), `fields` (array), `type` (string), `published` (date), `summary` (string), `section` (string), `doi` (string), `authors` (string), `also` (array), `undated` (boolean), `access` (string), `accessMark` (string), `alt` (array)
 
@@ -180,7 +180,7 @@ Digital Briefing: sources. The journals, preprint servers, institutions and news
 
 Historical Calendar: political events since 1980. Political history from 1980 to today and scheduled events ahead, one file per decade: elections and referendums, new leaders, inaugurations and resignations, coups, wars and ceasefires, assassinations, summits, treaties, sanctions, protests, parliamentary votes and court rulings, each with a plain-English account. The Realtime Calendar shows the same records for the current window.
 
-- Rows: 5,951 · refresh: daily · licence: Summaries from Wikipedia, CC BY-SA 4.0 (credit Wikipedia); facts from Wikidata (CC0) and UCDP/PRIO (CC BY 4.0); compilation © JDP-Iq. Leaders to 2015 after Archigos 4.1 (Goemans, Gleditsch and Chiozza), whose page states no licence: kept with its citation until VM’s owner decides.
+- Rows: 5,849 · refresh: daily · licence: Summaries from Wikipedia, CC BY-SA 4.0 (credit Wikipedia); facts from Wikidata (CC0) and UCDP/PRIO (CC BY 4.0); compilation © JDP-Iq. Leaders to 2015 after Archigos 4.1 (Goemans, Gleditsch and Chiozza), whose page states no licence: kept with its citation until VM’s owner decides.
 - Files: https://jdpi.pages.dev/calendar/data/1980s.json, https://jdpi.pages.dev/calendar/data/1990s.json, https://jdpi.pages.dev/calendar/data/2000s.json (+2 more) (records at `events`)
 - Fields: `date` (date), `country` (string), `title` (string), `type` (string), `status` (string), `source` (string), `summary` (string), `ref` (string), `refName` (string), `level` (string), `iso3` (string), `class` (string), `precision` (string)
 
@@ -212,9 +212,9 @@ War Focus: major wars. The major wars of the last hundred years that War Focus f
 
 War Focus: battles, sieges and operations. Every battle, siege and operation that Wikidata records as part of a War Focus war, with dates at the precision Wikidata gives, deaths or casualties where known, and coordinates where mapped. Where a whole and its parts are both listed (the atomic bombings of Hiroshima and Nagasaki, and each bombing), part_of and parts link them, and deaths_counted_once gives the figure War Focus shows for each, each death once: the figure recorded for the item itself where there is one, else the sum of its parts' (figure_from says which). To total a war's battles without counting a death twice, add deaths_counted_once over the rows with no part_of; adding deaths over every row counts a whole and its parts both. That total is of mixed kinds (recorded counts, estimates and disputed figures: see figure_deaths_kind) and is not the war's toll, which is its deaths by month (war-focus-monthly-deaths): War Focus never adds battle figures into it. A part of two wholes is counted under part_of; also_part_of names the others. Where Wikidata gives no figure, the figure_ columns give the one War Focus reads from the battle's English Wikipedia infobox (BF-08), with its kind (recorded, estimate or disputed), its range and whether it is a lower bound; deaths and casualties stay Wikidata's own. The revision of each article read, each side's figures and every Wikidata statement are in battlefield/focus/data/figures/<war_id>.json.
 
-- Rows: 4,241 · refresh: monthly · licence: Wikidata CC0; the figure_ columns from English Wikipedia infoboxes, CC BY-SA 4.0 (the figures as facts, each article named at its revision in the figures files).
+- Rows: 4,241 · refresh: monthly · licence: Wikidata CC0; the figure_ columns, and a start or end War Focus takes from the battle's English Wikipedia article, from English Wikipedia, CC BY-SA 4.0 (as facts; each infobox figure's article is named at its revision in the figures files).
 - Files: https://jdpi.pages.dev/integration/data/war-focus-battles/0.json, https://jdpi.pages.dev/integration/data/war-focus-battles/1.json, https://jdpi.pages.dev/integration/data/war-focus-battles/2.json (+8 more) (records at `records`)
-- Fields: `war_id` (string), `war` (string), `qid` (string), `name` (string), `description` (string), `start` (date), `end` (date), `precision` (string), `deaths` (number), `casualties` (number), `lat` (number), `lon` (number), `wikipedia` (string), `part_of` (string), `also_part_of` (array), `parts` (array), `deaths_counted_once` (number), `figure_from` (string), `figure_deaths_low` (number), `figure_deaths_high` (number), `figure_deaths_kind` (string), `figure_deaths_source` (string), `figure_deaths_at_least` (boolean), `figure_casualties_low` (number), `figure_casualties_high` (number), `figure_casualties_kind` (string), `figure_casualties_source` (string), `figure_state` (string)
+- Fields: `war_id` (string), `war` (string), `qid` (string), `name` (string), `description` (string), `start` (date), `end` (date), `start_wikidata` (date), `pts` (string), `precision` (string), `deaths` (number), `casualties` (number), `lat` (number), `lon` (number), `wikipedia` (string), `part_of` (string), `also_part_of` (array), `parts` (array), `deaths_counted_once` (number), `figure_from` (string), `figure_deaths_low` (number), `figure_deaths_high` (number), `figure_deaths_kind` (string), `figure_deaths_source` (string), `figure_deaths_at_least` (boolean), `figure_casualties_low` (number), `figure_casualties_high` (number), `figure_casualties_kind` (string), `figure_casualties_source` (string), `figure_state` (string)
 
 ### war-focus-monthly-deaths
 

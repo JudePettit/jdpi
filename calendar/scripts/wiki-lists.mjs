@@ -1,6 +1,7 @@
 // Summits and other scheduled political events from Wikipedia's own lists and infoboxes, past and upcoming:
-// the European Council's meetings, the G7, G20, NATO, BRICS, SCO, APEC, ASEAN, Commonwealth (CHOGM) and European
-// Political Community summits, the UN climate conferences (COP) and the UN General Assembly's general debates.
+// the European Council's meetings, the G7, G20, NATO, BRICS, SCO, APEC, ASEAN, Commonwealth (CHOGM), European
+// Political Community and Organization of Turkic States summits, the UN climate conferences (COP) and the UN General
+// Assembly's general debates.
 //   import { listEvents } from './wiki-lists.mjs'; await listEvents({ from: '1980-01-01', today: '2026-10-28' })
 // Each list row gives a summit's article, its year and its dates; an upcoming summit with only a month is kept as
 // "expected" on the 1st of that month and says so in its title. Rows with no date yet ("TBA") are skipped.
@@ -265,6 +266,9 @@ export const LISTS = [
   { article: 'ASEAN Summit', link: /ASEAN Summits?$/ },
   { article: 'Commonwealth Heads of Government Meeting', link: /Commonwealth Heads of Government Meeting/ },
   { article: 'European Political Community', link: /European Political Community Summit/ },
+  // Its summits table links each summit since 2022 that had an article of its own (the second readers, 26 November 2026:
+  // the 2023 and 2024 summits, in Astana and Bishkek, had come from Wikidata through their articles, deleted that day).
+  { article: 'Organization of Turkic States', link: /^\d{4} Organization of Turkic States summit$/ },
 ];
 export const ARTICLES = [
   { article: '2026 United Nations Climate Change Conference', title: 'COP31: 2026 United Nations Climate Change Conference' },
@@ -308,6 +312,37 @@ async function wikitexts(titles) {
 }
 
 /**
+ * Where each title leads on Wikipedia today: a Map of title → { to, fragment } for a redirect ("1990 Romanian
+ * parliamentary election" → "1990 Romanian general election", fragment "Parliament"), → { missing: true } for a page
+ * that is not there (the 2023 and 2024 Organization of Turkic States summits, deleted on 26 November 2026), and no entry
+ * for a title that is its own article. 50 titles per request, no page text; a batch with no answer after four tries
+ * throws (follow-up of 26 November 2026, after the second readers).
+ */
+export async function resolveTitles(titles) {
+  const out = new Map(), list = [...new Set(titles.filter(Boolean))];
+  for (let i = 0; i < list.length; i += 50) {
+    const batch = list.slice(i, i + 50);
+    const url = 'https://en.wikipedia.org/w/api.php?' + new URLSearchParams({ action: 'query', titles: batch.join('|'), redirects: '1', format: 'json', formatversion: '2' });
+    let j = null;
+    for (let attempt = 0; attempt < 4 && !j; attempt++) {
+      if (attempt) await new Promise(r => setTimeout(r, 3000 * attempt));
+      try {
+        const res = await fetch(url, { headers: UA });
+        const body = res.ok ? await res.json() : null;
+        if (Array.isArray(body?.query?.pages)) j = body;
+      } catch {}
+    }
+    if (!j) throw new Error(`could not resolve ${batch.length} titles with the Wikipedia API (${batch[0]}…)`);
+    const normal = new Map((j.query.normalized || []).map(r => [r.to, r.from]));
+    const asked = t => normal.get(t) || t;
+    const missing = new Set(j.query.pages.filter(p => p.missing || p.invalid).map(p => p.title));
+    for (const r of j.query.redirects || []) out.set(asked(r.from), missing.has(r.to) ? { missing: true } : { to: r.to, fragment: r.tofragment || '' });
+    for (const t of missing) if (!out.has(asked(t))) out.set(asked(t), { missing: true });
+  }
+  return out;
+}
+
+/**
  * Summits (and a few scheduled sessions) from the lists and articles above, and elections and referendums from the
  * national electoral calendars of every year from 2026 (or last year, if earlier) to the year after next.
  * `unknown`: the articles of the calendars' votes that have no date yet; `calendarsFrom`: the first calendar's year.
@@ -325,13 +360,19 @@ export async function listEvents({ from = '1980-01-01', today = new Date().toISO
     ballots?.unknown.forEach(t => unknown.add(t));
   }
   // The rows of the last two years and those to come are checked against their summits' own articles (preferOwnDates).
-  const since = `${y - 2}${today.slice(4)}`, listed = [], ownOf = new Map();
+  const since = `${y - 2}${today.slice(4)}`, listed = [], ownOf = new Map(), listOf = new Map();
   for (const l of LISTS) {
     const list = eventsFromList(texts.get(l.article) || '', { ...l, from, today });
     log.push(`${l.article}: ${list.length}`);
-    if (l.link) for (const e of list) { const t = e.date >= since && ownArticle(e, l.article); if (t) ownOf.set(e, t); }
+    if (l.link) for (const e of list) { const t = ownArticle(e, l.article); if (t) listOf.set(e, [t, l.article]); if (t && e.date >= since) ownOf.set(e, t); }
     listed.push(...list);
   }
+  // A row whose own article is not on Wikipedia (a red link, or a page deleted: the 2023 and 2024 Organization of Turkic
+  // States summits, deleted on 26 November 2026) takes the list as its source, as a row with no link does.
+  const gone = await resolveTitles([...listOf.values()].map(([t]) => t)).catch(err => { log.push(`own articles: not looked up (${err.message})`); return new Map(); });
+  let relinked = 0;
+  for (const [e, [t, article]] of listOf) if (gone.get(t)?.missing) { e.source = wiki(article); ownOf.delete(e); relinked++; }
+  log.push(`rows whose own article is not on Wikipedia: ${relinked}`);
   const ownTexts = ownOf.size ? await wikitexts([...new Set(ownOf.values())]).catch(err => { log.push(`own articles: not checked (${err.message})`); return new Map(); }) : new Map();
   events.push(...preferOwnDates(listed, e => ownOf.get(e), ownTexts, log).map(({ end, ...e }) => e));
   for (const a of ARTICLES) {

@@ -15,6 +15,7 @@
 // kept only for the leaders (the Retrospective's records, under either of its shapes) and for links.
 
 export const SINCE = '1926-10-26'; // "the last 100 years", as the overview has counted them
+export const TIE_DAYS = 7; // leaders whose times in office differ by no more than this are tied for the longest (leadership)
 
 const years = (a, b, today) => Math.max(0, (Date.parse(b || today) - Date.parse(a)) / (365.25 * 864e5));
 const round = (x, d = 3) => (x == null ? null : Math.round(x * 10 ** d) / 10 ** d);
@@ -106,17 +107,35 @@ export function leadership(records, current, today = new Date().toISOString().sl
   const usual = [...most].sort((a, b) => b[1] - a[1] || a[0] - b[0])[0]?.[0];
   const lengths = shared.filter(t => t.end).map(t => (Date.parse(t.end) - Date.parse(t.start)) / 864e5).sort((a, b) => a - b);
   const months = lengths.length ? Math.round(lengths[Math.floor(lengths.length / 2)] / 30.44) : null;
+  const together = shared.length > terms.size / 2 ? { at: usual, ...(months ? { months } : {}), ...(term ? { term } : {}) } : null;
+  // The longest-serving. Where others served as long, give or take a week (TIE_DAYS: how the sources date a handover,
+  // on the successor's first day or the day before, not a longer time in office), no one is named: Mexico's fourteen
+  // presidents from Cárdenas to Peña Nieto each served the six-year term, and the Retrospective ends Echeverría's and
+  // Calderón's on their successors' first day, which made one of them "the longest" by a day (the second readers of
+  // 26 November 2026); Switzerland's Presidents each serve a calendar year. `longest` is then null and `longestTied`
+  // gives the years, at the page's tenth of a year, and how many served them. A real lead of more than a week is still
+  // named (Japan: Shinzo Abe, 24 days longer than Eisaku Satō). An office held together for a fixed term (together.term,
+  // below) keeps its longest, which the page gives as the term in words.
+  const longestExact = longest ? years(longest.start, longest.end, today) : null, longestYears = round(longestExact, 1);
+  const tied = longest ? ls.filter(l => longestExact - years(l.start, l.end, today) <= TIE_DAYS / 365.25).length : 0;
+  const named = longest && (tied < 2 || together?.term);
+  // Votes held (not those still to come: the Retrospective lists the next scheduled ones, such as the United States'
+  // elections of November 2028). Where none of the country's records holds any vote at all, the Retrospective does not
+  // cover its votes (Japan: its record holds leaders and borders only), so the count is unknown (null, shown as "–"),
+  // not 0.
+  const votes = events.filter(e => e.type === 'election' || e.type === 'referendum');
   return {
     leaders100: ls.length,
     avgTenure: tenures.length ? round(tenures.reduce((a, b) => a + b, 0) / tenures.length, 1) : null,
     medianTenure: tenures.length ? round([...tenures].sort((a, b) => a - b)[Math.floor(tenures.length / 2)], 1) : null,
-    longest: longest ? { name: longest.full || longest.name, years: round(years(longest.start, longest.end, today), 1), from: longest.start.slice(0, 4), to: longest.end ? longest.end.slice(0, 4) : 'present' } : null,
+    longest: named ? { name: longest.full || longest.name, years: longestYears, from: longest.start.slice(0, 4), to: longest.end ? longest.end.slice(0, 4) : 'present' } : null,
+    ...(longest && !named ? { longestTied: { years: longestYears, count: tied } } : {}),
     irregular: leaders.filter(l => l.start >= SINCE && l.entry && l.entry !== 'Regular').length,
-    elections: events.filter(e => (e.type === 'election' || e.type === 'referendum') && e.date >= SINCE).length,
+    elections: votes.length ? votes.filter(e => e.date >= SINCE && e.date <= today).length : null,
     // An office held together for a fixed term (San Marino's Captains Regent: Wikidata gives Q258045 a term length of
     // 0.5 years) carries the term, `together.term`: the page then names no longest-serving leader (every holder serves
     // one term at a time, so the "longest" is one of hundreds tied at 0.5 years) and gives the term's length in words.
-    ...(shared.length > terms.size / 2 ? { together: { at: usual, ...(months ? { months } : {}), ...(term ? { term } : {}) } } : {}),
+    ...(together ? { together } : {}),
     // The leaders come from the Retrospective's hand-built lists (its scripts/leader-lists.mjs: Montenegro and ten
     // microstates Archigos does not cover), not from Archigos and Wikidata: the page names those sources.
     ...(ls.some(l => l.source === 'leader-lists') ? { leaderLists: true } : {}),

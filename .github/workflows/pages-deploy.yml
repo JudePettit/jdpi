@@ -30,7 +30,10 @@ permissions:
 jobs:
   test:
     runs-on: ubuntu-latest
-    timeout-minutes: 25
+    # The suite took 21 minutes 25 seconds on 26 November 2026 and 24 minutes 54 seconds an hour later, when the old
+    # limit of 25 minutes cancelled a refresh's deploy (run 45815540474). The limit only stops a hung run: keep it
+    # well above the suite's real length, and raise it as tests are added.
+    timeout-minutes: 45
     outputs:
       sha: ${{ steps.head.outputs.sha }}
       current: ${{ steps.current.outputs.current }}

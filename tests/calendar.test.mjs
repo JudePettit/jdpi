@@ -804,7 +804,8 @@ test('front-pages-16: a lead is shortened at a sentence\'s end, not at "St." or 
   assert.deepEqual(sentenceEnds("Voters in the fifty U.S. states and St. John's voted. Turnout was 57.6%. Done!"), [53, 72, 78]);
   assert.equal(shorten('Short. Lead.'), 'Short. Lead.');
   assert.match(shorten('word '.repeat(120).trim()), /…$/);
-  // A lead the older cut left at an abbreviation is fetched again; one that ends a sentence, or with "…", is not.
+  // A lead that ends at an abbreviation is told from one that ends a sentence, or with "…" (since 26 November 2026 such
+  // leads are whole and are not fetched again).
   assert.equal(cutAtAbbreviation('The House elections were held across each of the fifty U.S.'), true);
   assert.equal(cutAtAbbreviation('The meeting was held in St.'), true);
   assert.equal(cutAtAbbreviation('The meeting was held in St. John\'s.'), false);

@@ -155,8 +155,12 @@ export function leaderOffice({ atlas = null, decision = null, government = [], h
 // Where the head of state's powers are exercised by a regent on his behalf (heads.regent, from a 'regent' correction:
 // Liechtenstein, where Hereditary Prince Alois has acted for Prince Hans-Adam II since 15 August 2004; Jude, 12 November
 // 2026), the leader is the regent, office 'regent', and the head of state stays head of state.
-// { name, qid, office, rule, since, party, url, source: 'wikidata' | 'correction' | 'vacant' }
-export function currentLeader({ office, rule }, heads = {}, { retro = null, vacant = [] } = {}) {
+// The party is the Retrospective's; where it has none for this person (its record lists only some offices: Finland's
+// lists the Presidents, not the Prime Minister), it is the Political Atlas's for the same office and person (atlas: the
+// country's Atlas record), and partySource says so: 'atlas' (26 November 2026, the second readers: Petteri Orpo had
+// lost his party when the Retrospective's Finland record came to list Presidents only).
+// { name, qid, office, rule, since, party, partySource?, url, source: 'wikidata' | 'correction' | 'vacant' }
+export function currentLeader({ office, rule }, heads = {}, { retro = null, vacant = [], atlas = null } = {}) {
   if (office === 'headOfState' && named(heads.regent)) {
     const r = heads.regent;
     return { name: r.name, qid: r.qid || null, office: 'regent', rule, since: r.start || null, party: null, url: r.qid ? `https://www.wikidata.org/wiki/${r.qid}` : null, source: 'correction' };
@@ -165,12 +169,15 @@ export function currentLeader({ office, rule }, heads = {}, { retro = null, vaca
   if (!named(h)) {
     if (vacant.includes(office)) return { name: 'Vacant', qid: null, office, rule, since: null, party: null, url: null, source: 'vacant' };
     const other = OFFICES.find(o => o !== office);
-    return named(heads[other]) ? currentLeader({ office: other, rule: 'only-holder' }, heads, { retro }) : null;
+    return named(heads[other]) ? currentLeader({ office: other, rule: 'only-holder' }, heads, { retro, atlas }) : null;
   }
   const r = openRetroEntry(retro, h);
   const party = r ? r.parties?.filter(p => !p.e).map(p => p.name)[0] || r.parties?.[0]?.name || null : null;
+  const a = atlas?.executive?.[office];
+  const atlasParty = !party && hasLetters(a?.party) && samePerson(a?.name, h.name) ? a.party : null;
   return {
-    name: h.name, qid: h.qid || null, office, rule, since: h.start || r?.start || null, party,
+    name: h.name, qid: h.qid || null, office, rule, since: h.start || r?.start || null, party: party || atlasParty,
+    ...(atlasParty ? { partySource: 'atlas' } : {}),
     url: r?.url || (h.qid ? `https://www.wikidata.org/wiki/${h.qid}` : null), source: h.corrected ? 'correction' : 'wikidata',
   };
 }

@@ -11,8 +11,10 @@
 // The order of steps:
 // 1. Reads science/progress/data/events.json (its events, disciplines and placing rules).
 // 2. Keeps each event with a year and a place: { id, q, year, circa, d, title, note, pt, basis, placeQ, placeName }.
-// 3. Writes omni/data/layers/breakthroughs/events.json and the layer's entry in omni/data/layers.json, the `built`
-//    stamp moving only when the rows change.
+// 3. Writes omni/data/layers/breakthroughs/events.json, the layer's entry in omni/data/layers.json (and its head,
+//    layers.head.json), and the vm-invention entry of integration/sources.json (version and accessed from events.json,
+//    terms from the wikidata entry; the entry's other fields, such as standing and databaseRight, are kept). The
+//    `built` stamp moves only when the rows change.
 import { readFileSync, writeFileSync, mkdirSync, existsSync } from 'node:fs';
 import { join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -65,8 +67,11 @@ async function main() {
   const S = join(ROOT, 'integration/sources.json');
   const { putSource } = await import('./layer-catalogue.mjs');
   // Its facts are Wikidata's, so its terms are Wikidata's (CC0): the terms VM read are taken from Wikidata's own entry.
-  const wd = JSON.parse(readFileSync(S, 'utf8')).sources.find(s => s.id === 'wikidata') || {};
-  putSource(S, { ...SOURCE, version: doc.generated || null, accessed: (doc.generated || '').slice(0, 10) || null, termsUrl: wd.termsUrl, termsQuote: wd.termsQuote, termsRead: wd.termsRead });
+  // The entry's other fields (its standing and database right, set when the sources were checked for commercial use)
+  // are kept: putSource replaces the whole entry.
+  const held = JSON.parse(readFileSync(S, 'utf8')).sources;
+  const wd = held.find(s => s.id === 'wikidata') || {}, was = held.find(s => s.id === SOURCE.id) || {};
+  putSource(S, { ...was, ...SOURCE, version: doc.generated || null, accessed: (doc.generated || '').slice(0, 10) || null, termsUrl: wd.termsUrl, termsQuote: wd.termsQuote, termsRead: wd.termsRead });
   putLayer(LAYERS, entry(file, m, doc));
   console.log(`events.json: ${rows.length} breakthroughs, ${file.from}–${file.to}; ${m.bytes} bytes, ${m.gzip} gzipped; built ${file.built}`);
 }

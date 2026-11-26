@@ -215,7 +215,15 @@ function card(e) {
     return `<li><span class="pname" data-qid="${esc(q)}">${esc(p.name)}</span>${meta ? `<small class="pmeta">${esc(meta)}</small>` : ''}`
       + `${others.length ? `<span class="also">Also: ${others.slice(0, 4).map(x => `<button type="button" class="link" data-e="${esc(x.id)}">${esc(x.t)} (${esc(evYear(x))})</button>`).join(', ')}${others.length > 4 ? ` and ${others.length - 4} more` : ''}</span>` : ''}</li>`;
   }).join('');
-  const inst = e.inst.map(q => `<li><span data-qid="${esc(q)}">${esc(instName(q))}</span>${D.institutions[q]?.desc ? `<small class="pmeta">${esc(D.institutions[q].desc)}</small>` : ''}</li>`).join('');
+  // The institution the event is placed at goes under its name in the event's year (the seed's pn, in e.place.n:
+  // Queen's College Cork in 1854, not University College Cork); the lookup holds one name per item, today's. Under a
+  // name of the time, today's name stands in place of the lookup's description, which is today's too and may be false
+  // for the year ("constituent university of the National University of Ireland" is not true of 1854).
+  const inst = e.inst.map(q => {
+    const then = q === e.place.q && e.place.n && e.place.n !== instName(q) ? e.place.n : null;
+    const sub = then ? `now ${instName(q)}` : D.institutions[q]?.desc;
+    return `<li><span data-qid="${esc(q)}">${esc(then || instName(q))}</span>${sub ? `<small class="pmeta">${esc(sub)}</small>` : ''}</li>`;
+  }).join('');
   const links = [e.w ? `<a class="btn go" href="${wikiUrl(e.w)}" target="_blank" rel="noreferrer">Wikipedia ↗</a>` : '',
     e.q ? `<a class="btn" href="https://www.wikidata.org/wiki/${esc(e.q)}" target="_blank" rel="noreferrer">Wikidata ↗</a>` : ''].join('');
   return `<article class="card" data-e="${esc(e.id)}">

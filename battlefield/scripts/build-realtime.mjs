@@ -22,12 +22,15 @@ import { writeHeads } from '../../integration/scripts/heads.mjs';
 import { seriesFromEvents } from '../../monthly/scripts/series.mjs';
 import { gwTable } from '../../monthly/scripts/series.mjs';
 // Each month's note, with the deaths in events UCDP dates only to a month or longer said apart (S0).
-import { monthInsight, country } from './realtime-insight.mjs';
+import { monthInsight, country, sidesOf } from './realtime-insight.mjs';
+import { actors, stateName } from './ucdp.mjs';
 
 const [csvPath, version = ''] = process.argv.slice(2).filter(a => !a.startsWith('--'));
 const rows = parseCsv(readFileSync(csvPath, 'utf8'));
 // An empty download, an error page or a re-shaped file would otherwise build quietly into zeros or "other" wars.
-const COLUMNS = ['date_start', 'date_end', 'date_prec', 'best', 'deaths_civilians', 'conflict_new_id', 'conflict_name', 'dyad_name', 'type_of_violence', 'country', 'country_id', 'region', 'adm_1', 'latitude', 'longitude'];
+// The notes' "Main fighting" and the conflicts' names are built from side_a and side_b (26 November 2026), not from
+// dyad_name, so a file without the sides is refused here rather than half-way through the build.
+const COLUMNS = ['date_start', 'date_end', 'date_prec', 'best', 'deaths_civilians', 'conflict_new_id', 'conflict_name', 'side_a', 'side_b', 'type_of_violence', 'country', 'country_id', 'region', 'adm_1', 'latitude', 'longitude'];
 if (!rows.length) throw new Error(`${csvPath} has no events`);
 const missing = COLUMNS.filter(k => !(k in rows[0]));
 if (missing.length) throw new Error(`${csvPath} is not a UCDP candidate events file this build can read: no ${missing.join(', ')}`);
@@ -35,6 +38,28 @@ const events = rows.filter(e => e.date_start);
 if (!events.length) throw new Error(`${csvPath} has no dated events`);
 const TYPES = { 1: 'state-based', 2: 'non-state', 3: 'one-sided violence against civilians' };
 const fmt = n => n.toLocaleString('en-GB');
+
+// A conflict's name under "Conflicts in this war (UCDP)" (26 November 2026, the follow-on to front-pages-47). UCDP names
+// a non-state conflict and one-sided violence by its dyad joined with " - ", and an interstate conflict by its states so
+// joined; " - " also falls inside actors' own names ("FARC - Segunda Marquetalia  - Civilians"), and a state can carry
+// its old name ("DR Congo (Zaire) - Rwanda"). Such a name is now "A v B", as the notes' "Main fighting" is: a non-state
+// conflict or one-sided violence (one dyad in UCDP) by its event's side_a and side_b (realtime-insight.mjs sidesOf); an
+// interstate conflict by the states on each side of UCDP's name, each by its name on the event's day (ucdp.mjs
+// stateName), an alliance joined with "and", or kept in UCDP's comma list when a state's own name has " and " in it
+// ("Trinidad and Tobago"), as the notes' sides are (realtime-insight.mjs sideOf). A state-based conflict within a state
+// keeps UCDP's name, its state too by the name on the day ("Myanmar (Burma): Karen" in 2026 → "Myanmar: Karen").
+const andList = l => (l.length > 1 ? `${l.slice(0, -1).join(', ')} and ${l.at(-1)}` : l[0] || '');
+const sideList = l => (l.some(a => / and /.test(a)) ? l.join(', ') : andList(l));
+// A count with its noun, singular for one ("1 death in 1 recorded event").
+const count = (n, one, many) => `${fmt(n)} ${n === 1 ? one : many}`;
+function conflictName(e) {
+  const c = country(e.country), date = String(e.date_start || '').slice(0, 10), name = String(e.conflict_name || '');
+  if (e.type_of_violence === '2' || e.type_of_violence === '3') return sidesOf(e);
+  const sides = name.split(' - ');
+  if (e.type_of_violence === '1' && sides.length === 2 && !name.includes(':'))
+    return sides.map(s => sideList(actors(s).map(a => cleanName(stateName(a, date), c)))).join(' v ');
+  return cleanName(name.replace(/^([^:]+):/, (m, s) => `${stateName(s, date)}:`), c);
+}
 
 const warOf = new Map(WARS.flatMap(w => w.ids.map(id => [String(id), w.id])));
 const wars = new Map(WARS.map(w => [w.id, { ...w, conflicts: new Map() }]));
@@ -49,7 +74,7 @@ for (const e of events) {
   e.war = wid;
   const w = wars.get(wid);
   const k = e.conflict_new_id;
-  if (!w.conflicts.has(k)) w.conflicts.set(k, { id: +k, name: cleanName(e.conflict_name, country(e.country)), type: TYPES[e.type_of_violence], deaths: 0, events: 0 });
+  if (!w.conflicts.has(k)) w.conflicts.set(k, { id: +k, name: conflictName(e), type: TYPES[e.type_of_violence], deaths: 0, events: 0 });
   const c = w.conflicts.get(k); c.deaths += +e.best || 0; c.events++;
 }
 
@@ -97,7 +122,7 @@ for (const w of wars.values()) {
   out.push({
     id: w.id, name: w.name, zone: w.zone, wiki: w.wiki, background: w.background, keywords: w.keywords || [], countries, deaths, events: evs.length, lastActive,
     status: lastActive >= `${months.at(-2) || latest}-01` ? 'active' : 'quiet',
-    summary: `${fmt(deaths)} deaths in ${fmt(evs.length)} recorded events so far this year; ${fmt(recent)} in the last three months. Last recorded event ${lastActive}.`,
+    summary: `${count(deaths, 'death', 'deaths')} in ${count(evs.length, 'recorded event', 'recorded events')} so far this year; ${fmt(recent)} in the last three months. Last recorded event ${lastActive}.`,
     conflicts: [...w.conflicts.values()].sort((a, b) => b.deaths - a.deaths),
     monthly, points: [...cells.values()], series,
   });

@@ -548,11 +548,17 @@ test('page: San Marino\'s term in words and the marked ranking, one plural for e
       assert.equal(longest.notes[0], 'each term, held by two together; no one held office longer than one term at a time, so no one is named');
       assert.match(longest.notes.at(-1), /; the term: Wikidata, the office’s term length \(Q258045\)$/);
       assert.ok(!/0\.5 years|Giacomini/.test(JSON.stringify(longest)), JSON.stringify(longest));
-      stat = await open('CHE'); // one at a time: the longest-serving is named, with "1 year", not "1 years"
-      const ch = await stat('Longest-serving leader'), cl = by.CHE.leadership.longest;
-      assert.equal(ch.value, cl.name);
-      assert.equal(ch.notes[0], `${cl.years} ${cl.years === 1 ? 'year' : 'years'} (${cl.from}–${cl.to})`, `${width}: ${ch.notes[0]}`);
+      // Switzerland: one President at a time, each for a calendar year, so a hundred are tied for the longest and no one is
+      // named (overview.mjs, longestTied: the second readers of 26 November 2026); the singular "1 year" is the helper's,
+      // checked above. Where one leader is the longest (Germany), he is named with his years.
+      stat = await open('CHE');
+      assert.equal(by.CHE.leadership.longest, null);
+      assert.ok(by.CHE.leadership.longestTied?.count > 1, JSON.stringify(by.CHE.leadership.longestTied));
+      assert.equal(await stat('Longest-serving leader'), null, `${width}: no one of the tied Presidents is named`);
       stat = await open('DEU');
+      const dl = by.DEU.leadership.longest, de = await stat('Longest-serving leader');
+      assert.equal(de.value, dl.name);
+      assert.equal(de.notes[0], `${dl.years} ${dl.years === 1 ? 'year' : 'years'} (${dl.from}–${dl.to})`, `${width}: ${de.notes[0]}`);
       const cal = (await stat('Calendar events since 1980')).notes[0];
       assert.equal(by.DEU.calendar.election, 1, 'Germany has one election in the calendar (the case reported)');
       assert.ok(cal.split(' · ').includes('1 election') && !/\b1 (elections|coups|assassinations|protests|court rulings)\b/.test(cal), `${width}: ${cal}`);

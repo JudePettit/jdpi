@@ -2,10 +2,10 @@
   "layer": "battles",
   "format": "vm-layer/1",
   "source": "wikidata",
-  "built": "2026-11-21T00:36:13Z",
+  "built": "2026-11-26T13:03:23Z",
   "from": 1258,
   "to": 2025,
-  "about": "The battles the Master Index holds with a date, and War Focus’s located battles, read from Wikidata on 2026-11-21 by omni/scripts/build-battles.mjs. Dates at the precision and in the calendar Wikidata records; points as Wikidata gives them; each value with what supports it.",
+  "about": "The battles the Master Index holds with a date, and War Focus’s located battles, read from Wikidata on 2026-11-26 by omni/scripts/build-battles.mjs. Dates at the precision and in the calendar Wikidata records (a battle of several points in time lists each in `dates`, a day, or a month or a year where that is all Wikidata gives, and `date` is the first; a start War Focus takes from the battle’s English Wikipedia article keeps Wikidata’s in `wikidataFrom`); points as Wikidata gives them; each value with what supports it.",
   "rows": [
     {
       "id": "Q369560",
@@ -111,6 +111,356 @@
       }
     },
     {
+      "id": "Q2449358",
+      "q": "Q2449358",
+      "label": "Battle of Fort Necessity",
+      "date": {
+        "from": "1754-07-03",
+        "p": 11,
+        "cal": "gregorian"
+      },
+      "sortYear": 1754,
+      "pt": [
+        -79.58710556,
+        39.81413889
+      ],
+      "ptPrec": 0.00000277777777778,
+      "partOf": "Q154697",
+      "partOfLabel": "French and Indian War",
+      "src": {
+        "date": {
+          "id": "wikidata",
+          "loc": "Q2449358#P585",
+          "support": "wikipedia",
+          "via": "French Wikipedia",
+          "viaQ": "Q8447",
+          "line": "Wikidata Q2449358, point in time (P585): Wikipedia-sourced, unverified (imported from French Wikipedia)"
+        },
+        "pt": {
+          "id": "wikidata",
+          "loc": "Q2449358#P625",
+          "support": "wikipedia",
+          "via": "French Wikipedia",
+          "viaQ": "Q8447",
+          "line": "Wikidata Q2449358, coordinate location (P625): Wikipedia-sourced, unverified (imported from French Wikipedia)"
+        }
+      }
+    },
+    {
+      "id": "Q695485",
+      "q": "Q695485",
+      "label": "Battle of Jumonville Glen",
+      "date": {
+        "from": "1754-05-28",
+        "p": 11,
+        "cal": "gregorian"
+      },
+      "sortYear": 1754,
+      "pt": [
+        -79.58710556,
+        39.81413889
+      ],
+      "ptPrec": 0.00000277777777778,
+      "partOf": "Q154697",
+      "partOfLabel": "French and Indian War",
+      "src": {
+        "date": {
+          "id": "wikidata",
+          "loc": "Q695485#P585",
+          "support": "wikipedia",
+          "via": "French Wikipedia",
+          "viaQ": "Q8447",
+          "line": "Wikidata Q695485, point in time (P585): Wikipedia-sourced, unverified (imported from French Wikipedia)"
+        },
+        "pt": {
+          "id": "wikidata",
+          "loc": "Q695485#P625",
+          "support": "wikipedia",
+          "via": "French Wikipedia",
+          "viaQ": "Q8447",
+          "line": "Wikidata Q695485, coordinate location (P625): Wikipedia-sourced, unverified (imported from French Wikipedia)"
+        }
+      }
+    },
+    {
+      "id": "Q3177722",
+      "q": "Q3177722",
+      "label": "Braddock Expedition",
+      "date": {
+        "from": "1755-05",
+        "p": 10,
+        "cal": "gregorian",
+        "to": "1755-07"
+      },
+      "sortYear": 1755,
+      "pt": [
+        -79.60111111111111,
+        39.8325
+      ],
+      "ptPrec": 0.0002777777777777778,
+      "partOf": "Q154697",
+      "partOfLabel": "French and Indian War",
+      "src": {
+        "date": {
+          "id": "wikidata",
+          "loc": "Q3177722#P580",
+          "support": "wikipedia",
+          "via": "English Wikipedia",
+          "viaQ": "Q328",
+          "line": "Wikidata Q3177722, start time (P580): Wikipedia-sourced, unverified (imported from English Wikipedia)"
+        },
+        "pt": {
+          "id": "wikidata",
+          "loc": "Q3177722#P625",
+          "support": "wikipedia",
+          "via": "English Wikipedia",
+          "viaQ": "Q328",
+          "line": "Wikidata Q3177722, coordinate location (P625): Wikipedia-sourced, unverified (imported from English Wikipedia)"
+        }
+      }
+    },
+    {
+      "id": "Q524828",
+      "q": "Q524828",
+      "label": "Battle of the Monongahela",
+      "date": {
+        "from": "1755-07-09",
+        "p": 11,
+        "cal": "gregorian"
+      },
+      "sortYear": 1755,
+      "pt": [
+        -80.011,
+        40.442
+      ],
+      "ptPrec": 0.00002777777777778,
+      "partOf": "Q33143",
+      "partOfLabel": "Seven Years' War",
+      "src": {
+        "date": {
+          "id": "wikidata",
+          "loc": "Q524828#P585",
+          "support": "wikipedia",
+          "via": "French Wikipedia",
+          "viaQ": "Q8447",
+          "line": "Wikidata Q524828, point in time (P585): Wikipedia-sourced, unverified (imported from French Wikipedia)"
+        },
+        "pt": {
+          "id": "wikidata",
+          "loc": "Q524828#P625",
+          "support": "wikipedia",
+          "via": "French Wikipedia",
+          "viaQ": "Q8447",
+          "line": "Wikidata Q524828, coordinate location (P625): Wikipedia-sourced, unverified (imported from French Wikipedia)"
+        }
+      }
+    },
+    {
+      "id": "Q154426",
+      "q": "Q154426",
+      "label": "Battle of Jena–Auerstedt",
+      "date": {
+        "from": "1806-10-14",
+        "p": 11,
+        "cal": "gregorian"
+      },
+      "sortYear": 1806,
+      "pt": [
+        11.575,
+        50.95
+      ],
+      "ptPrec": 0.00027777777777778,
+      "partOf": "Q78994",
+      "partOfLabel": "Napoleonic Wars",
+      "src": {
+        "date": {
+          "id": "wikidata",
+          "loc": "Q154426#P585",
+          "support": "wikipedia",
+          "via": "English Wikipedia",
+          "viaQ": "Q328",
+          "line": "Wikidata Q154426, point in time (P585): Wikipedia-sourced, unverified (imported from English Wikipedia)"
+        },
+        "pt": {
+          "id": "wikidata",
+          "loc": "Q154426#P625",
+          "support": "wikipedia",
+          "via": "English Wikipedia",
+          "viaQ": "Q328",
+          "line": "Wikidata Q154426, coordinate location (P625): Wikipedia-sourced, unverified (imported from English Wikipedia)"
+        }
+      }
+    },
+    {
+      "id": "Q1071578",
+      "q": "Q1071578",
+      "label": "Battle of Smolensk",
+      "date": {
+        "from": "1812",
+        "p": 9,
+        "cal": "gregorian"
+      },
+      "sortYear": 1812,
+      "pt": [
+        32.05,
+        54.78333333
+      ],
+      "ptPrec": 0.016666666666667,
+      "partOf": "Q179250",
+      "partOfLabel": "French invasion of Russia",
+      "src": {
+        "date": {
+          "id": "wikidata",
+          "loc": "Q1071578#P585",
+          "support": "none",
+          "line": "Wikidata Q1071578, point in time (P585): no reference"
+        },
+        "pt": {
+          "id": "wikidata",
+          "loc": "Q1071578#P625",
+          "support": "wikipedia",
+          "via": "French Wikipedia",
+          "viaQ": "Q8447",
+          "line": "Wikidata Q1071578, coordinate location (P625): Wikipedia-sourced, unverified (imported from French Wikipedia)"
+        }
+      }
+    },
+    {
+      "id": "Q184320",
+      "q": "Q184320",
+      "label": "Battle of Borodino",
+      "date": {
+        "from": "1812-09-07",
+        "p": 11,
+        "cal": "gregorian"
+      },
+      "sortYear": 1812,
+      "pt": [
+        35.816666666667,
+        55.516666666667
+      ],
+      "partOf": "Q179250",
+      "partOfLabel": "French invasion of Russia",
+      "src": {
+        "date": {
+          "id": "wikidata",
+          "loc": "Q184320#P585",
+          "support": "none",
+          "line": "Wikidata Q184320, point in time (P585): no reference"
+        },
+        "pt": {
+          "id": "wikidata",
+          "loc": "Q184320#P625",
+          "support": "wikipedia",
+          "via": "English Wikipedia",
+          "viaQ": "Q328",
+          "line": "Wikidata Q184320, coordinate location (P625): Wikipedia-sourced, unverified (imported from English Wikipedia)"
+        }
+      }
+    },
+    {
+      "id": "Q903304",
+      "q": "Q903304",
+      "label": "Battle of Ostrovno",
+      "date": {
+        "from": "1812-07-25",
+        "p": 11,
+        "cal": "gregorian",
+        "to": "1812-07-27"
+      },
+      "sortYear": 1812,
+      "pt": [
+        29.8554,
+        55.139
+      ],
+      "ptPrec": 0.015716146933834,
+      "partOf": "Q179250",
+      "partOfLabel": "French invasion of Russia",
+      "src": {
+        "date": {
+          "id": "wikidata",
+          "loc": "Q903304#P580",
+          "support": "none",
+          "line": "Wikidata Q903304, start time (P580): no reference"
+        },
+        "pt": {
+          "id": "wikidata",
+          "loc": "Q903304#P625",
+          "support": "wikipedia",
+          "via": "French Wikipedia",
+          "viaQ": "Q8447",
+          "line": "Wikidata Q903304, coordinate location (P625): Wikipedia-sourced, unverified (imported from French Wikipedia)"
+        }
+      }
+    },
+    {
+      "id": "Q151005",
+      "q": "Q151005",
+      "label": "Battle of Leipzig",
+      "date": {
+        "from": "1813-10-16",
+        "p": 11,
+        "cal": "gregorian",
+        "to": "1813-10-19"
+      },
+      "sortYear": 1813,
+      "pt": [
+        12.413333333333334,
+        51.312222222222225
+      ],
+      "ptPrec": 0.0002777777777777778,
+      "partOf": "Q814235",
+      "partOfLabel": "German campaign of 1813",
+      "src": {
+        "date": {
+          "id": "wikidata",
+          "loc": "Q151005#P580",
+          "support": "none",
+          "line": "Wikidata Q151005, start time (P580): no reference"
+        },
+        "pt": {
+          "id": "wikidata",
+          "loc": "Q151005#P625",
+          "support": "none",
+          "line": "Wikidata Q151005, coordinate location (P625): no reference"
+        }
+      }
+    },
+    {
+      "id": "Q647827",
+      "q": "Q647827",
+      "label": "Battle of Dennewitz",
+      "date": {
+        "from": "1813-09-06",
+        "p": 11,
+        "cal": "gregorian"
+      },
+      "sortYear": 1813,
+      "pt": [
+        13,
+        51.966666666667
+      ],
+      "ptPrec": 0.016666666666667,
+      "partOf": "Q138107",
+      "partOfLabel": "War of the Sixth Coalition",
+      "src": {
+        "date": {
+          "id": "wikidata",
+          "loc": "Q647827#P585",
+          "support": "referenced",
+          "ref": "Q4114391",
+          "refLabel": "Sytin Military Encyclopedia",
+          "line": "Wikidata Q647827, point in time (P585): referenced: Sytin Military Encyclopedia"
+        },
+        "pt": {
+          "id": "wikidata",
+          "loc": "Q647827#P625",
+          "support": "none",
+          "line": "Wikidata Q647827, coordinate location (P625): no reference"
+        }
+      }
+    },
+    {
       "id": "Q780921",
       "q": "Q780921",
       "label": "Battle of Paris",
@@ -142,6 +492,75 @@
           "via": "French Wikipedia",
           "viaQ": "Q8447",
           "line": "Wikidata Q780921, coordinate location (P625): Wikipedia-sourced, unverified (imported from French Wikipedia)"
+        }
+      }
+    },
+    {
+      "id": "Q855429",
+      "q": "Q855429",
+      "label": "Battle of Ligny",
+      "date": {
+        "from": "1815-06-16",
+        "p": 11,
+        "cal": "gregorian"
+      },
+      "sortYear": 1815,
+      "pt": [
+        4.575,
+        50.512222222222
+      ],
+      "ptPrec": 0.00027777777777778,
+      "partOf": "Q199955",
+      "partOfLabel": "Hundred Days",
+      "src": {
+        "date": {
+          "id": "wikidata",
+          "loc": "Q855429#P585",
+          "support": "wikipedia",
+          "via": "French Wikipedia",
+          "viaQ": "Q8447",
+          "line": "Wikidata Q855429, point in time (P585): Wikipedia-sourced, unverified (imported from French Wikipedia)"
+        },
+        "pt": {
+          "id": "wikidata",
+          "loc": "Q855429#P625",
+          "support": "none",
+          "line": "Wikidata Q855429, coordinate location (P625): no reference"
+        }
+      }
+    },
+    {
+      "id": "Q920107",
+      "q": "Q920107",
+      "label": "Battle of Wavre",
+      "date": {
+        "from": "1815-06-18",
+        "p": 11,
+        "cal": "gregorian",
+        "to": "1815-06-19"
+      },
+      "sortYear": 1815,
+      "pt": [
+        4.6,
+        50.71666667
+      ],
+      "ptPrec": 0.016666666666667,
+      "partOf": "Q199955",
+      "partOfLabel": "Hundred Days",
+      "src": {
+        "date": {
+          "id": "wikidata",
+          "loc": "Q920107#P580",
+          "support": "none",
+          "line": "Wikidata Q920107, start time (P580): no reference"
+        },
+        "pt": {
+          "id": "wikidata",
+          "loc": "Q920107#P625",
+          "support": "wikipedia",
+          "via": "French Wikipedia",
+          "viaQ": "Q8447",
+          "line": "Wikidata Q920107, coordinate location (P625): Wikipedia-sourced, unverified (imported from French Wikipedia)"
         }
       }
     },
@@ -10966,6 +11385,43 @@
       }
     },
     {
+      "id": "Q22947438",
+      "q": "Q22947438",
+      "label": "Attack on Convoy AN 14",
+      "date": {
+        "from": "1941-01-31",
+        "p": 11,
+        "cal": "gregorian"
+      },
+      "sortYear": 1941,
+      "pt": [
+        25.57055556,
+        35.55888889
+      ],
+      "ptPrec": 0.00027777777777778,
+      "partOf": "Q702176",
+      "partOfLabel": "Battle of the Mediterranean",
+      "war": "wf-ww2",
+      "src": {
+        "date": {
+          "id": "wikidata",
+          "loc": "Q22947438#P585",
+          "support": "wikipedia",
+          "via": "English Wikipedia",
+          "viaQ": "Q328",
+          "line": "Wikidata Q22947438, point in time (P585): Wikipedia-sourced, unverified (imported from English Wikipedia)"
+        },
+        "pt": {
+          "id": "wikidata",
+          "loc": "Q22947438#P625",
+          "support": "wikipedia",
+          "via": "English Wikipedia",
+          "viaQ": "Q328",
+          "line": "Wikidata Q22947438, coordinate location (P625): Wikipedia-sourced, unverified (imported from English Wikipedia)"
+        }
+      }
+    },
+    {
       "id": "Q2310240",
       "q": "Q2310240",
       "label": "Operation Anklet",
@@ -14754,6 +15210,43 @@
           "loc": "Q121594957#P625",
           "support": "none",
           "line": "Wikidata Q121594957, coordinate location (P625): no reference"
+        }
+      }
+    },
+    {
+      "id": "Q12406889",
+      "q": "Q12406889",
+      "label": "Invasion of Buna-Gona",
+      "date": {
+        "from": "1942-07-27",
+        "p": 11,
+        "cal": "gregorian"
+      },
+      "sortYear": 1942,
+      "pt": [
+        148.36666667,
+        -8.65
+      ],
+      "ptPrec": 0.016666666666667,
+      "partOf": "Q184425",
+      "partOfLabel": "Pacific War",
+      "war": "wf-ww2",
+      "src": {
+        "date": {
+          "id": "wikidata",
+          "loc": "Q12406889#P585",
+          "support": "wikipedia",
+          "via": "English Wikipedia",
+          "viaQ": "Q328",
+          "line": "Wikidata Q12406889, point in time (P585): Wikipedia-sourced, unverified (imported from English Wikipedia)"
+        },
+        "pt": {
+          "id": "wikidata",
+          "loc": "Q12406889#P625",
+          "support": "wikipedia",
+          "via": "English Wikipedia",
+          "viaQ": "Q328",
+          "line": "Wikidata Q12406889, coordinate location (P625): Wikipedia-sourced, unverified (imported from English Wikipedia)"
         }
       }
     },
@@ -20367,7 +20860,7 @@
     {
       "id": "Q157873",
       "q": "Q157873",
-      "label": "Third Battle of Kharkov",
+      "label": "Third Battle of Kharkiv",
       "date": {
         "from": "1943-02-19",
         "p": 11,
@@ -22168,6 +22661,18 @@
         "p": 11,
         "cal": "gregorian"
       },
+      "dates": [
+        {
+          "from": "1943-11-05",
+          "p": 11,
+          "cal": "gregorian"
+        },
+        {
+          "from": "1944-03-01",
+          "p": 11,
+          "cal": "gregorian"
+        }
+      ],
       "sortYear": 1943,
       "pt": [
         12.451666666666666,
@@ -22182,7 +22687,7 @@
           "id": "wikidata",
           "loc": "Q2909620#P585",
           "support": "none",
-          "line": "Wikidata Q2909620, point in time (P585): no reference"
+          "line": "Wikidata Q2909620, point in time (P585), two values, each a date of its own, not a span: 5 November 1943 and 1 March 1944 (no reference)"
         },
         "pt": {
           "id": "wikidata",
@@ -23566,6 +24071,18 @@
         "p": 11,
         "cal": "gregorian"
       },
+      "dates": [
+        {
+          "from": "1943-09-14",
+          "p": 11,
+          "cal": "gregorian"
+        },
+        {
+          "from": "1943-09-15",
+          "p": 11,
+          "cal": "gregorian"
+        }
+      ],
       "sortYear": 1943,
       "pt": [
         7.710165,
@@ -23582,7 +24099,7 @@
           "support": "wikipedia",
           "via": "English Wikipedia",
           "viaQ": "Q328",
-          "line": "Wikidata Q54945425, point in time (P585): Wikipedia-sourced, unverified (imported from English Wikipedia)"
+          "line": "Wikidata Q54945425, point in time (P585), two values, each a date of its own, not a span: 14 September 1943 and 15 September 1943 (Wikipedia-sourced, unverified (imported from English Wikipedia))"
         },
         "pt": {
           "id": "wikidata",
@@ -24748,10 +25265,22 @@
       "q": "Q11391098",
       "label": "Bombing of Yawata on June 1944",
       "date": {
-        "from": "1944-06-16",
+        "from": "1944-06-15",
         "p": 11,
         "cal": "gregorian"
       },
+      "dates": [
+        {
+          "from": "1944-06-15",
+          "p": 11,
+          "cal": "gregorian"
+        },
+        {
+          "from": "1944-06-16",
+          "p": 11,
+          "cal": "gregorian"
+        }
+      ],
       "sortYear": 1944,
       "pt": [
         130.88333333333333,
@@ -24765,10 +25294,8 @@
         "date": {
           "id": "wikidata",
           "loc": "Q11391098#P585",
-          "support": "wikipedia",
-          "via": "English Wikipedia",
-          "viaQ": "Q328",
-          "line": "Wikidata Q11391098, point in time (P585): Wikipedia-sourced, unverified (imported from English Wikipedia)"
+          "support": "none",
+          "line": "Wikidata Q11391098, point in time (P585), two values, each a date of its own, not a span: 15 June 1944 and 16 June 1944 (no reference; Wikipedia-sourced, unverified (imported from English Wikipedia))"
         },
         "pt": {
           "id": "wikidata",
@@ -26932,6 +27459,18 @@
         "p": 11,
         "cal": "gregorian"
       },
+      "dates": [
+        {
+          "from": "1944-06-07",
+          "p": 11,
+          "cal": "gregorian"
+        },
+        {
+          "from": "1944-06-08",
+          "p": 11,
+          "cal": "gregorian"
+        }
+      ],
       "sortYear": 1944,
       "pt": [
         -0.4138917,
@@ -26946,7 +27485,7 @@
           "id": "wikidata",
           "loc": "Q22947455#P585",
           "support": "none",
-          "line": "Wikidata Q22947455, point in time (P585): no reference"
+          "line": "Wikidata Q22947455, point in time (P585), two values, each a date of its own, not a span: 7 June 1944 and 8 June 1944 (no reference)"
         },
         "pt": {
           "id": "wikidata",
@@ -34350,11 +34889,12 @@
       "q": "Q180182",
       "label": "Battle of Iwo Jima",
       "date": {
-        "from": "1945-02-08",
+        "from": "1945-02-19",
         "p": 11,
         "cal": "gregorian",
         "to": "1945-03-26"
       },
+      "wikidataFrom": "1945-02-08",
       "sortYear": 1945,
       "pt": [
         141.32,
@@ -34366,10 +34906,12 @@
       "war": "wf-ww2",
       "src": {
         "date": {
-          "id": "wikidata",
+          "id": "wikipedia",
           "loc": "Q180182#P580",
-          "support": "none",
-          "line": "Wikidata Q180182, start time (P580): no reference"
+          "support": "wikipedia",
+          "via": "English Wikipedia",
+          "viaQ": "Q328",
+          "line": "English Wikipedia, “Battle of Iwo Jima”, as War Focus reads it (its start, where Wikidata’s has no reference and the article gives another): 19 February 1945; Wikidata Q180182 starts it 8 February 1945 (start time, P580: no reference)"
         },
         "pt": {
           "id": "wikidata",
@@ -35313,7 +35855,7 @@
         "from": "1945-02-18",
         "p": 11,
         "cal": "gregorian",
-        "to": "1945-02-25"
+        "to": "1945-02-24"
       },
       "sortYear": 1945,
       "pt": [
@@ -35864,6 +36406,18 @@
         "p": 11,
         "cal": "gregorian"
       },
+      "dates": [
+        {
+          "from": "1945-08-06",
+          "p": 11,
+          "cal": "gregorian"
+        },
+        {
+          "from": "1945-08-09",
+          "p": 11,
+          "cal": "gregorian"
+        }
+      ],
       "sortYear": 1945,
       "pt": [
         132.45462036,
@@ -35878,7 +36432,7 @@
           "id": "wikidata",
           "loc": "Q488#P585",
           "support": "none",
-          "line": "Wikidata Q488, point in time (P585): no reference"
+          "line": "Wikidata Q488, point in time (P585), two values, each a date of its own, not a span: 6 August 1945 and 9 August 1945 (no reference)"
         },
         "pt": {
           "id": "wikidata",
@@ -48623,6 +49177,18 @@
         "p": 11,
         "cal": "gregorian"
       },
+      "dates": [
+        {
+          "from": "1994-02-05",
+          "p": 11,
+          "cal": "gregorian"
+        },
+        {
+          "from": "1995-08-28",
+          "p": 11,
+          "cal": "gregorian"
+        }
+      ],
       "sortYear": 1994,
       "pt": [
         18.42416667,
@@ -48639,7 +49205,7 @@
           "support": "wikipedia",
           "via": "English Wikipedia",
           "viaQ": "Q328",
-          "line": "Wikidata Q1482369, point in time (P585): Wikipedia-sourced, unverified (imported from English Wikipedia)"
+          "line": "Wikidata Q1482369, point in time (P585), two values, each a date of its own, not a span: 5 February 1994 and 28 August 1995 (Wikipedia-sourced, unverified (imported from English Wikipedia); no reference)"
         },
         "pt": {
           "id": "wikidata",
@@ -65589,7 +66155,7 @@
     {
       "id": "Q120703876",
       "q": "Q120703876",
-      "label": "2023 Crimean Bridge explosion",
+      "label": "July 2023 Crimean Bridge explosion",
       "date": {
         "from": "2023-07-17",
         "p": 11,
@@ -66164,6 +66730,18 @@
         "p": 11,
         "cal": "gregorian"
       },
+      "dates": [
+        {
+          "from": "2023-10-09",
+          "p": 11,
+          "cal": "gregorian"
+        },
+        {
+          "from": "2023-10-12",
+          "p": 11,
+          "cal": "gregorian"
+        }
+      ],
       "sortYear": 2023,
       "pt": [
         34.44539444444444,
@@ -66178,7 +66756,7 @@
           "id": "wikidata",
           "loc": "Q122998566#P585",
           "support": "none",
-          "line": "Wikidata Q122998566, point in time (P585): no reference"
+          "line": "Wikidata Q122998566, point in time (P585), two values, each a date of its own, not a span: 9 October 2023 and 12 October 2023 (no reference)"
         },
         "pt": {
           "id": "wikidata",

@@ -66,9 +66,9 @@ INDICATORS.slice(0, 22).forEach(i => { i.core = true; });
 // "Creative Commons Attribution 4.0" (https://datacatalog.worldbank.org/search/dataset/0038026, read the same day).
 // The job below writes national/data/governance/<GOV_WGI_xx>.json (national/lib/governance.js has the shape):
 //   node national/scripts/indicators.mjs --governance      no key; it stops unless every series' licence reads CC BY 4.0
-// It reads the countries from the committed index.json. national/scripts/build.mjs empties national/data on its monthly
-// run, so it must call governanceFiles() and writeGovernance() too, keeping the previous files if the fetch or the
-// licence check fails (not done by this addition: build.mjs is not its file).
+// It reads the countries from the committed index.json. national/scripts/build.mjs, which empties national/data on its
+// monthly run, calls governanceFiles() and writeGovernance() too, and keeps the previous files if the fetch or the
+// licence check fails (carry.mjs, 26 November 2026).
 export const GOVERNANCE = INDICATORS.filter(i => i.source === WGI).map(i => ({ est: i.code, label: i.label, dimension: i.dimension, ...rangeCodes(i.code) }));
 export const GOVERNANCE_META = code => `https://api.worldbank.org/v2/sources/${WGI}/series/${code}/metadata?format=json`;
 export const GOVERNANCE_DATA = code => `https://api.worldbank.org/v2/country/all/indicator/${code}?format=json&per_page=20000&date=1996:2100&source=${WGI}`;

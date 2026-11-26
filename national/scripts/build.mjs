@@ -16,13 +16,17 @@
 //   the office the system of government gives (leader-offices.json where the data cannot decide). leaders.mjs has the
 //   rules. The build lists where the Atlas and these heads name different people for that office, for a person to look
 //   at; --report writes every country's leader, rule and those disagreements to a JSON file.
+// - The World Bank's governance scores with their 90% range (national/data/governance/, indicators.mjs governanceFiles),
+//   fetched again each run; the stand-in series (standins.json, omni/scripts/build-standins.mjs) are not this build's.
+//   Both are carried across the emptying of national/data (carry.mjs): a failed governance fetch keeps the files there.
 // Guard: nothing is written when an indicator's countries halve, or the countries, their Wikidata matches, GW codes or
 // leadership data fall by a tenth, against the committed index (a World Bank series, the code list or the
 // Retrospective that failed); --allow-drop writes anyway.
 import { readFileSync, writeFileSync, mkdirSync, existsSync, rmSync } from 'node:fs';
 import { join, resolve } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
-import { INDICATORS, DIMENSIONS } from './indicators.mjs';
+import { INDICATORS, DIMENSIONS, governanceFiles, writeGovernance } from './indicators.mjs';
+import { readKept, governanceOrKept, writeKept } from './carry.mjs';
 import { writeBrief } from './brief.mjs';
 import { headsFromRows, applyCorrections, currentLeader, leaderOffice, readAtlas, atlasDisagreement, peopleInIndex, plainName, OFFICES } from './leaders.mjs';
 import { parseCsv } from '../../battlefield/scripts/csv.mjs';
@@ -45,8 +49,16 @@ const sleep = ms => new Promise(r => setTimeout(r, ms));
 const json = p => JSON.parse(readFileSync(p, 'utf8'));
 async function getJson(url, init = {}) {
   for (let i = 0; i < 5; i++) {
-    try { const r = await fetch(url, { ...init, headers: { ...UA, ...(init.headers || {}) } }); if (r.ok) return await r.json(); } catch {} // a cut-off body is tried again too
-    await sleep(2000 * (i + 1));
+    let wait = 2000 * (i + 1);
+    try {
+      const r = await fetch(url, { ...init, headers: { ...UA, ...(init.headers || {}) } });
+      if (r.ok) return await r.json();
+      // "Too many requests" (Wikidata's query service after a long query, 26 November 2026): wait as long as it asks,
+      // or a minute where it does not say, at most two.
+      if (r.status === 429) wait = Math.min(120, Number(r.headers.get('retry-after')) || 60) * 1000;
+      console.warn(`HTTP ${r.status} (try ${i + 1} of 5): ${url.slice(0, 80)}`);
+    } catch (e) { console.warn(`${e.message} (try ${i + 1} of 5): ${url.slice(0, 80)}`); } // a cut-off body is tried again too
+    await sleep(wait);
   }
   throw new Error('Failed: ' + url.slice(0, 120));
 }
@@ -88,9 +100,14 @@ const wbCountries = (await getJson('https://api.worldbank.org/v2/country?format=
 const sparql = `SELECT ?c ?iso3 ?iso2 ?num (GROUP_CONCAT(DISTINCT ?govL; separator="|") AS ?gov) ?capL WHERE {
   ?c wdt:P298 ?iso3. FILTER NOT EXISTS { ?c wdt:P576 ?end }
   OPTIONAL { ?c wdt:P297 ?iso2 } OPTIONAL { ?c wdt:P299 ?num }
-  OPTIONAL { ?c wdt:P122 ?gv. ?gv rdfs:label ?govL FILTER(LANG(?govL)="en") }
+  OPTIONAL { ?c wdt:P122 ?gv. ?c p:P122 ?gst. ?gst ps:P122 ?gv. FILTER NOT EXISTS { ?gst pq:P582 ?gend }
+    ?gv rdfs:label ?govL FILTER(LANG(?govL)="en") }
   OPTIONAL { ?c wdt:P36 ?cap. ?cap rdfs:label ?capL FILTER(LANG(?capL)="en") }
 } GROUP BY ?c ?iso3 ?iso2 ?num ?capL`;
+// Forms of government (P122): the truthy ones (wdt:, best rank) whose statement has no end time (pq:P582). The truthy
+// shortcut alone gives ended statements too: Mexico (Q96) showed "empire", whose two statements end in 1823 and 1867
+// (the second readers, 26 November 2026). GROUP_CONCAT has no fixed order, so the build sorts the labels before it keeps
+// four (government, below), and a rerun shows the same four.
 // The offices of head of state (P1906) and of government (P1313), a request of their own (in the query above they
 // would reorder its forms of government): one office for both is an executive presidency (leaders.mjs, leaderOffice).
 // With each office its term length (P2097, amount and unit), where Wikidata gives one: overview.mjs (officeTerm) keeps
@@ -107,7 +124,7 @@ const wdBy = new Map();
 for (const b of wd) {
   const k = WD_ISO3[b.iso3.value] || b.iso3.value, x = wdBy.get(k) || { qid: b.c.value.split('/').pop(), num: b.num?.value || null, iso2: b.iso2?.value || null, gov: new Set(), capital: null, hosOffices: new Set(), hogOffices: new Set() };
   (b.gov?.value || '').split('|').filter(Boolean).forEach(g => x.gov.add(g));
-  x.capital ||= b.capL?.value || null;
+  if (b.capL?.value) (x.capitals ||= new Set()).add(b.capL.value);
   wdBy.set(k, x);
 }
 await sleep(1000);
@@ -126,7 +143,7 @@ for (const b of (await getJson('https://query.wikidata.org/sparql?format=json&qu
 }
 // Heads of state (P35) and government (P6), read as statements, not through the truthy wdt: shortcut (which returns
 // ended statements too), and the "position held" (P39) statements of the country's offices of head of state (P1906)
-// and government (P1313), ended ones included, against which the country's statements are checked (two requests);
+// and government (P1313), ended ones included, against which the country's statements are checked (four requests, and four for the offices);
 // leaders.mjs chooses among them. The label is the English one, or else the item's "mul" label, which Wikidata now uses
 // in place of an English one for many people (Donald Trump and Claudia Sheinbaum have no "en" label: why the United
 // States and Mexico had no heads).
@@ -134,21 +151,29 @@ const HEAD_FIELDS = `?st wikibase:rank ?rank. FILTER(?rank != wikibase:Deprecate
   OPTIONAL { ?st pq:P580 ?start } OPTIONAL { ?st pq:P582 ?end } OPTIONAL { ?st pq:P1366 ?repl }
   OPTIONAL { ?h rdfs:label ?en FILTER(LANG(?en)="en") } OPTIONAL { ?h rdfs:label ?mul FILTER(LANG(?mul)="mul") }
   BIND(COALESCE(?en, ?mul) AS ?hL) OPTIONAL { ?h wdt:P570 ?dead } BIND(EXISTS { ?h wdt:P31 wd:Q5 } AS ?human)`;
-const headsQuery = `SELECT ?c ?prop ?h ?hL ?rank ?start ?end ?repl ?dead ?human WHERE {
-  ?c wdt:P298 ?iso3. FILTER NOT EXISTS { ?c wdt:P576 ?gone }
-  VALUES (?p ?ps ?prop) { (p:P35 ps:P35 "hos") (p:P6 ps:P6 "hog") }
+// The country statements in four parts too, by property and by codes before and from M: asked for at once, the reply
+// was cut short at the same place five times running on 26 November 2026 (the query service's 60-second limit).
+const HEAD_PARTS = [['p:P35', 'ps:P35', 'hos'], ['p:P6', 'ps:P6', 'hog']].flatMap(([p, ps, prop]) => ['?iso3 < "M"', '?iso3 >= "M"'].map(half => ({ p, ps, prop, half })));
+const headsQuery = ({ p, ps, prop, half }) => `SELECT ?c ?prop ?h ?hL ?rank ?start ?end ?repl ?dead ?human WHERE {
+  ?c wdt:P298 ?iso3. FILTER(${half}) FILTER NOT EXISTS { ?c wdt:P576 ?gone }
+  VALUES (?p ?ps ?prop) { (${p} ${ps} "${prop}") }
   ?c ?p ?st. ?st ?ps ?h. ${HEAD_FIELDS}
 }`;
-const officeQuery = `SELECT ?c ?prop ?h ?hL ?rank ?start ?end ?repl ?dead ?human WHERE {
-  ?c wdt:P298 ?iso3. FILTER NOT EXISTS { ?c wdt:P576 ?gone }
-  VALUES (?op ?prop) { (wdt:P1906 "hos") (wdt:P1313 "hog") }
+// The office statements are asked for in four parts, by office and by codes before and from M: asked for at once
+// (13,726 rows on 26 November 2026), the query ran past the query service's 60-second limit, which then cuts the reply
+// short with a TimeoutException, and the build stopped; each part takes well under that.
+const OFFICE_PARTS = [['wdt:P1906', 'hos'], ['wdt:P1313', 'hog']].flatMap(([op, prop]) => ['?iso3 < "M"', '?iso3 >= "M"'].map(half => ({ op, prop, half })));
+const officeQuery = ({ op, prop, half }) => `SELECT ?c ?prop ?h ?hL ?rank ?start ?end ?repl ?dead ?human WHERE {
+  ?c wdt:P298 ?iso3. FILTER(${half}) FILTER NOT EXISTS { ?c wdt:P576 ?gone }
+  VALUES (?op ?prop) { (${op} "${prop}") }
   ?c ?op ?office. ?h p:P39 ?st. ?st ps:P39 ?office. ${HEAD_FIELDS}
 }`;
 const sparqlRows = async q => (await getJson('https://query.wikidata.org/sparql?format=json&query=' + encodeURIComponent(q), { headers: { Accept: 'application/sparql-results+json' } })).results.bindings;
 await sleep(1000);
-const headRows = await sparqlRows(headsQuery);
-await sleep(1000);
-const officeRows = await sparqlRows(officeQuery);
+const headRows = [];
+for (const part of HEAD_PARTS) { await sleep(1000); headRows.push(...await sparqlRows(headsQuery(part))); }
+const officeRows = [];
+for (const part of OFFICE_PARTS) { await sleep(1000); officeRows.push(...await sparqlRows(officeQuery(part))); }
 console.log(`heads: ${headRows.length} country statements, ${officeRows.length} office statements`);
 const headsByQid = headsFromRows(headRows, officeRows, TODAY);
 const heads = new Map([...wdBy].map(([iso3, x]) => { const h = headsByQid.get(x.qid) || {}; return [iso3, { headOfState: h.hos || null, headOfGovernment: h.hog || null, vacant: (h.vacant || []).map(v => (v === 'hos' ? 'headOfState' : 'headOfGovernment')) }]; }));
@@ -248,6 +273,11 @@ refuseIfLost([
 
 // ---- Assemble (in memory; national/data is replaced only once every country is done)
 const countries = [], seriesFiles = [];
+const oldBy = new Map(OLD.countries.map(c => [c.iso3, c]));
+// Where Wikidata gives more than one capital (South Africa three, Sri Lanka and Palestine two), the one shown before
+// while Wikidata still gives it, else the first by name: the query's rows have no fixed order, and the capital shown
+// had changed from run to run (26 November 2026).
+const capitalOf = (iso3, w) => { const all = [...(w.capitals || [])].sort((a, b) => a.localeCompare(b, 'en')), was = oldBy.get(iso3)?.capital; return all.includes(was) ? was : all[0] || null; };
 for (const c of wbCountries) {
   const s = series.get(c.id), w = wdBy.get(c.id) || {}, gw = gwByIso3.get(c.id);
   const h = heads.get(c.id) || {}, rc = retroNow(c.id);
@@ -256,7 +286,12 @@ for (const c of wbCountries) {
   // The Atlas's "Vacant" counts where National Analysis has no holder either (Haiti's head of state).
   for (const o of OFFICES) if (!h[o]?.name && /^\s*vacant\b/i.test(ar?.executive?.[o]?.name || '') && !vacant.includes(o)) vacant.push(o);
   const choice = leaderOffice({ atlas: ar, decision: decisions.get(c.id), government: [...(w.gov || [])], heads: h, sameOffice, sharedHead: (hosCount.get(h.headOfState?.qid) || 0) > 1, retro: rc?.leaders });
-  const leader = currentLeader(choice, h, { retro: rc?.leaders, vacant });
+  let leader = currentLeader(choice, h, { retro: rc?.leaders, vacant });
+  // A party the Retrospective no longer gives for a leader who had one in the index before (its Finland record came to
+  // list Presidents only, so Petteri Orpo lost his): the Political Atlas's for the same office and person, marked
+  // partySource 'atlas' (leaders.mjs). The Atlas's parties for leaders who had none are not added here.
+  const was = oldBy.get(c.id)?.leader;
+  if (leader && !leader.party && was?.party && was.qid && was.qid === leader.qid) leader = currentLeader(choice, h, { retro: rc?.leaders, vacant, atlas: ar });
   const shown = leader && { ...leader, name: plainName(leader.name) }; // NA-03: the name without its realm
   const differ = ar ? atlasDisagreement(ar, choice.office, h, vacant) : null;
   if (differ) disagreements.push({ iso3: c.id, country: c.name, ...differ });
@@ -268,13 +303,13 @@ for (const c of wbCountries) {
   const ks = KARDASHEV[c.id] ? energy.steps.at(-1).polities.find(p => p.id === KARDASHEV[c.id]) : null;
   const people = peopleInIndex({ headOfStateQid: h.headOfState?.qid, headOfGovernmentQid: h.headOfGovernment?.qid, leader }, q => lakeIdx.has(q));
   countries.push({
-    iso3: c.id, iso2: c.iso2Code, num: w.num || null, name: c.name, region: c.region.value, income: c.incomeLevel.value, capital: w.capital || c.capitalCity || null,
+    iso3: c.id, iso2: c.iso2Code, num: w.num || null, name: c.name, region: c.region.value, income: c.incomeLevel.value, capital: capitalOf(c.id, w) || c.capitalCity || null,
     qid: w.qid || null, encyclopedia: w.qid && lakeIdx.has(w.qid) ? w.qid : null, retro: retroKey(c.id),
     // The Gleditsch and Ward number stays for the builders that still read one (battlefield/scripts/build-realtime.mjs,
     // monthly/scripts/build.mjs and integration/scripts/coverage.mjs, through UCDP's own country codes); the page reads
     // none (MP-11, 20 November 2026).
     gw: gw ?? null,
-    government: [...(w.gov || [])].slice(0, 4), headOfState: plainName(h.headOfState?.name) || null, headOfGovernment: plainName(h.headOfGovernment?.name) || null, // NA-03: shown without the realm
+    government: [...(w.gov || [])].sort((a, b) => a.localeCompare(b, 'en')).slice(0, 4), headOfState: plainName(h.headOfState?.name) || null, headOfGovernment: plainName(h.headOfGovernment?.name) || null, // NA-03: shown without the realm
     headOfStateQid: h.headOfState?.qid || null, headOfGovernmentQid: h.headOfGovernment?.qid || null,
     ...(h.regent?.name ? { regent: plainName(h.regent.name), regentQid: h.regent.qid || null } : {}), // who exercises the head of state's powers for him (a 'regent' correction)
     ...(people.length ? { peopleInIndex: people } : {}), // those of these IDs with a Master Index entry: the page tags only them
@@ -288,9 +323,19 @@ for (const c of wbCountries) {
   });
   seriesFiles.push([join(OUT, `series/${c.id}.json`), JSON.stringify(s)]);
 }
+// The files this build does not make from its own sources, carried across the emptying below (carry.mjs): the
+// governance scores with their 90% range, fetched again for these countries in index.json's order (the files there
+// before are kept when the World Bank or the licence check fails), and the stand-in series, kept as they were.
+const kept = readKept(OUT);
+const governance = await governanceOrKept({
+  fresh: () => governanceFiles({ getJson, countries: wbCountries.map(c => c.id), accessed: TODAY, wait: () => sleep(250) }),
+  kept: kept.governance, countries: wbCountries.map(c => c.id), warn: m => console.warn(m),
+});
+console.log(`governance: ${governance.files.length} files (${governance.from}); kept as they were: ${kept.asIs.map(([p]) => p).join(', ') || 'none'}`);
 rmSync(OUT, { recursive: true, force: true });
 mkdirSync(join(OUT, 'series'), { recursive: true });
 for (const [file, text] of seriesFiles) writeFileSync(file, text);
+writeKept(OUT, { governance: governance.files, asIs: kept.asIs }, writeGovernance);
 // Each source's own date, so the page can put a statistic's age and source beside it rather than only the build's date
 // (13 November 2026): when Wikidata was read (this build), the day Political Atlas's records were last reviewed (its
 // manifest's lastUpdated), when the Political Retrospective's data was built, the calendars' and Realtime Battlefield's

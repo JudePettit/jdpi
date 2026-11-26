@@ -180,6 +180,27 @@ export function stateFrom(q, e) {
   return Math.min(...starts);
 }
 
+/** A place whose item Wikidata gives no inception (P571), whose land took its present name when the state that held it
+    ended, so the page must not call it by that name, as if it were then, in the years before (VM's own, by hand, 26
+    November 2026): place Q → the country (P17) on the place's own item whose end time (P582) is the place's `since`.
+    Western Sahara (Q6250) has no P571; its P17 Spanish Sahara (Q689837) runs from 1958 to 1976 (P580, P582), and
+    Spanish Sahara's own end (P576) is 6 February 1976 (both read 26 November 2026), so in 1975 the page names it
+    "today’s Western Sahara". The build is to write that year as `since` where P571 gives none (build-history.mjs). */
+export const SINCE_FROM = {
+  Q6250: 'Q689837', // Western Sahara ← Spanish Sahara: P17 Q689837, P582 1976
+};
+
+/** A place's `since` by SINCE_FROM from its own entity `e`: the latest end time (P582) of its country (P17) statement
+    for the item SINCE_FROM names, or null where SINCE_FROM does not name it or the item has an inception (P571) of its
+    own. Throws where Wikidata gives that statement no end. */
+export function sinceFrom(q, e) {
+  const of = SINCE_FROM[q];
+  if (!of || live(e, 'P571').length) return null;
+  const ends = live(e, 'P17').filter(c => c.mainsnak?.datavalue?.value?.id === of).flatMap(c => (c.qualifiers?.P582 || []).map(x => yearOf(x.datavalue?.value))).filter(Number.isInteger);
+  if (!ends.length) throw new Error(`Wikidata gives ${q} no end time (P582) for its country (P17) ${of}`);
+  return Math.max(...ends);
+}
+
 /** A place's entry in places.json, its keys in the build's order: { n, iso3?, since?, stateFrom?, was? }. */
 export const placeEntry = ({ n, iso3, since }, { stateFrom: s = null, was = null } = {}) => ({
   n, ...(iso3 ? { iso3 } : {}), ...(since ? { since } : {}), ...(s != null ? { stateFrom: s } : {}), ...(was ? { was } : {}) });

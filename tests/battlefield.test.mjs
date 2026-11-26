@@ -530,7 +530,7 @@ test('Realtime notes: deaths in events UCDP dates only to a month or longer, or 
   assert.deepEqual([plain.periodDeaths, plain.periodBeyond, plain.unplacedDeaths], [0, 0, 0]);
   assert.doesNotMatch(plain.text, /UCDP dates only|no area recorded/);
   // The builder writes its notes by this rule, and the page's bars say it in their tooltip.
-  assert.match(readFileSync(new URL('../battlefield/scripts/build-realtime.mjs', import.meta.url), 'utf8'), /import \{ monthInsight, country \} from '\.\/realtime-insight\.mjs';/);
+  assert.match(readFileSync(new URL('../battlefield/scripts/build-realtime.mjs', import.meta.url), 'utf8'), /import \{ monthInsight, country(, \w+)* \} from '\.\/realtime-insight\.mjs';/); // sidesOf too, for the conflicts' names (26 November 2026)
   assert.match(readFileSync(new URL('../q/battlefield.html', import.meta.url), 'utf8'), /x\.periodDeaths \?/);
   // The committed data, once built by this rule (a file built before has no periodDeaths: the next UCDP release's
   // build, battlefield-refresh, writes them): every month's figures add up and its note says them.

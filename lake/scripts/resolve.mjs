@@ -107,6 +107,23 @@ export function titleAlias(aliases, { label, name = null, title = null, type }) 
   const t = normTitle(title);
   return t === label || t === name || aliases.includes(t) ? aliases : [...aliases, t];
 }
+/** A description as the index's rows hold it (build.mjs; the Master Index's list shows it under the name): untouched,
+ *  when it fits in `n` characters (a no-break space stays one); else, its runs of white space made one space, cut at the
+ *  last space that leaves room for "…", the cut's trailing punctuation or opening bracket or quote gone, and "…" after
+ *  it, so no row ends mid-word: 932 of the committed rows were cut at 80 characters on 25 November 2026, Mikheil
+ *  Saakashvili's at "… (2004–2013) and Go". A first word longer than the limit is cut where the limit falls, one
+ *  character sooner where that would split a surrogate pair (a character outside the Basic Multilingual Plane). A
+ *  straight quote is kept at the cut: it may close what it quotes. */
+export function shortDesc(s, n = 80) {
+  s = String(s ?? '');
+  if (s.length <= n) return s;
+  const t = s.replace(/\s+/g, ' ').trim();
+  if (t.length <= n) return t;
+  const at = t.slice(0, n).lastIndexOf(' ');
+  let end = at > 0 ? at : n - 1;
+  if (at <= 0 && /[\uD800-\uDBFF]/.test(t[end - 1])) end--;
+  return t.slice(0, end).replace(/[\s,;:.\-–—(\[{“‘«]+$/, '') + '…';
+}
 
 // The badges Wikidata puts on a sitelink that leads to a redirect ("sitelink to redirect", "intentional sitelink to
 // redirect"): Wikipedia's summary for that title is the article it redirects to (First Phase Offensive's was the

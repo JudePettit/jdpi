@@ -955,8 +955,9 @@ test('page: Screens only lays the pane over the text under the head (1366 and 36
 // off, with four scroll bars. The pane, and the screen in it, run from under the head to the foot of the window; on a
 // desktop the screen is given the window's height and scaled to its frame, on a phone it keeps its own layout.
 // The professor's review of 15 November 2026: On War's byline linked to encyclopedia/index.html#Q76430, an address with
-// no entry. Q76430 is Clausewitz's Wikidata ID, but the Master Index has no record of him (nothing on the site tags or
-// casts him yet; the Master Index's gaps are queued), nor of Gibbon or Wieser. A byline now links its author only to an
+// no entry. Q76430 is Clausewitz's Wikidata ID, but the Master Index then had no record of him (nothing on the site
+// tagged or cast him; he has had his entry since VM's canon list of 25 November 2026), nor of Gibbon or Wieser, who
+// still have none. A byline now links its author only to an
 // entry the Master Index has, and names him plainly otherwise; here over every book of the shelf as the page draws it.
 test('page: every book\'s byline links its author only to an entry the Master Index has (1440 × 900)', PAGE, async () => {
   const has = q => !!read(`lake/data/e/${+q.slice(1) % 512}.json`)[q];
@@ -978,7 +979,8 @@ test('page: every book\'s byline links its author only to an entry the Master In
       assert.deepEqual(links.map(l => l[0]), q && has(q) ? [q] : [], `${row.slug}: the author is linked exactly when there is an entry`);
       seen.push([row.slug, links.length]);
     }
-    assert.deepEqual(seen.find(s => s[0] === 'on-war'), ['on-war', 0], 'On War: Clausewitz, with no entry yet, stands unlinked');
+    // Clausewitz has had his entry since VM's canon list (25 November 2026).
+    assert.deepEqual(seen.find(s => s[0] === 'on-war'), ['on-war', 1], 'On War: Clausewitz is linked to his entry');
     assert.deepEqual(seen.find(s => s[0] === 'the-prince'), ['the-prince', 1], 'The Prince: Machiavelli is linked to his entry');
     assert.deepEqual(errors, []);
     await ctx.close();

@@ -689,6 +689,12 @@ test('built: every term has valid offsets, a whole word, a known string of its e
   // is the state of their own day and keeps its tag.
   for (let v = 1; v <= 6; v++) assert.ok(!qids(`decline-and-fall-${v}`).has('Q207521'), `decline-and-fall-${v}: no Ethiopian Empire for Gibbon's Abyssinia`);
   assert.ok(qids('origin-of-species').has('Q207521') && qids('wealth-of-nations-1').has('Q207521'), 'Darwin’s and Smith’s Abyssinia is the Ethiopian Empire');
+  // Master Index canon review, finding 30 (26 November 2026): the four "Origin of Species" of the Historical Sketch
+  // (chapter 0) mean the question or another man's work, not Darwin's book (shelf.mjs), so they are left untagged; the
+  // book's Linnæus is Carl Linnaeus.
+  const sketch = book('origin-of-species').chapters.find(c => c.n === 0).paragraphs;
+  assert.ok(!sketch.some(p => p.terms.some(t => t.qid === 'Q20124')), 'origin-of-species chapter 0: no term for On the Origin of Species');
+  assert.ok(texts(book('origin-of-species')).some(p => p.terms.some(t => t.qid === 'Q1043' && p.text.slice(t.s, t.e) === 'Linnæus')), 'origin-of-species: Linnæus is Q1043');
 });
 
 test('built: every term is of its text’s time: first dated by the time the text was written, or by the edition in a note', () => {

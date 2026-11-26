@@ -325,10 +325,11 @@ test('page: Neo Book’s book side lists what the book is a source on, its parts
     assert.match(await box.locator('[data-q="Q207318"]').textContent(), /French Revolutionary Wars.*the author took part in it.*written long after \(16 to 28 years after it ended\)/s);
     assert.match(all, /Brief memoir of General Clausewitz, by J\. J\. Graham/, 'the memoir is the translator’s (review R2)');
     assert.match(await box.locator('[data-q="Q78994"] a.srcsubj').first().getAttribute('href'), /encyclopedia\/index\.html#Q78994/);
-    // Clausewitz has no entry yet: named, not linked, and said so; the introduction by Maude is a part apart.
+    // Clausewitz has had his entry since VM's canon list (25 November 2026; he waited until then, named but not
+    // linked): his lines link to it, and none says it waits; the introduction by Maude is a part apart.
     const carl = box.locator('[data-q="Q76430"]');
-    assert.equal(await carl.locator('a.srcsubj').count(), 0);
-    assert.match(await carl.first().textContent(), new RegExp(WORDING.waiting));
+    assert.match(await carl.locator('a.srcsubj').first().getAttribute('href'), /encyclopedia\/index\.html#Q76430/);
+    assert.doesNotMatch(await carl.first().textContent(), new RegExp(WORDING.waiting));
     assert.match(all, /Introduction, by F\. N\. Maude/);
     assert.match(all, /AI model \(Claude\)/, 'the rule, with who made the judgements');
     assert.doesNotMatch(all, ID);

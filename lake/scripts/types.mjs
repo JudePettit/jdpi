@@ -142,9 +142,12 @@ export const NOT_CONFLICT = new Set(['Q273120', 'Q2061202', 'Q208383', 'Q584041'
 // A label's "-ism" makes an idea, but not a mechanism or a magnetism (the Higgs mechanism, electromagnetism).
 const ISM = /ism$/i, NOT_ISM = /(mechanism|magnetism)$/i;
 import { wikidataDate, bestClaim } from './dates.mjs';
+import { CANON_TYPES } from './canon.mjs';
 const WAR_WORD = /\b(war|battle|siege|invasion|insurgency|conflict|revolt|rebellion|uprising|massacre|genocide|coup)\b/i;
 export function typeOf(e) {
   if (e.id && TYPE_OVERRIDES[e.id]) return TYPE_OVERRIDES[e.id];
+  // An item of VM's canon list whose classes read otherwise today, each with its reason there (canon.mjs CANON_TYPES).
+  if (e.id && CANON_TYPES[e.id]) return CANON_TYPES[e.id].type;
   // A date counts as a sign only when it is the date the record will show (dates.mjs datedFacts reads it the same way):
   // Wikidata's best statement, never a deprecated one, and one that states a time. A "no value" or "unknown value"
   // statement, or only a deprecated date, ends nothing (second review X1, 21 November 2026: a state of today whose

@@ -13,8 +13,11 @@ export const tidyAlias = s => String(s ?? '').replace(/[\s,;:]+$/, '').replace(/
 
 /** The aliases a record keeps: Wikidata's first six (English), tidied, less the label and repeats; then the names a
     module's own text uses (a mention's `aliases`: a book's "Duke Valentino" for Cesare Borgia), so the Bibliotheca
-    tagger finds the entity in the book. */
-export function recordAliases(wikidata = [], label = null, own = []) {
+    tagger finds the entity in the book. An item of VM's canon list (canon.mjs) keeps its reviewed names instead of
+    Wikidata's (`canon`, its `aliases`): each was read against every Wikidata alias, and one left out is left out
+    because a book would read it as something else (canon.mjs, the note on `aliases`). */
+export function recordAliases(wikidata = [], label = null, own = [], canon = null) {
+  if (Array.isArray(canon)) return recordAliases([], label, [...canon.map(tidyAlias), ...own]);
   const wd = [...new Set(wikidata.slice(0, 6).map(tidyAlias).filter(a => a && a !== label))];
   return [...wd, ...[...new Set(own)].filter(a => a && a !== label && !wd.includes(a))];
 }

@@ -7,6 +7,8 @@
 // Every launch adds --enable-unsafe-swiftshader (PRP-SCHOLAR-USP-DESIGN.md S1): recent Chromium no longer falls back to
 // its software renderer for WebGL without it, so a map drawn with WebGL (the Omni-Map's MapLibre GL JS) would have no
 // WebGL in headless Edge or on GitHub's runners, which have no GPU. tests/omni.test.mjs fails loudly if WebGL is absent.
+import assert from 'node:assert/strict';
+
 export const pageTest = process.env.PRP_PAGES === '0' ? { skip: 'page and site tests are off (PRP_PAGES=0)' } : {};
 
 export const SWIFTSHADER = '--enable-unsafe-swiftshader';
@@ -21,4 +23,41 @@ export function launchOptions(options = {}) {
 export async function launch(options = {}) {
   const { chromium } = await import('playwright-core');
   return chromium.launch(launchOptions(options));
+}
+
+// A real pointer on a period slider (design/prp-period.js). Its inputs take the pointer only at their thumbs, so a press
+// a few pixels off the thumb starts no drag and the moves after it change nothing. Two things arrive after a page has
+// drawn and move the control down: the return bar, and on some pages a strip drawn above the track once its data has
+// loaded. A test that finds the thumb before they arrive and presses after loses its drag (26 November 2026: National's
+// NA-05 review and Kardashev's movement check, each on a busy runner). So a test waits for settled() before it finds
+// the thumb, and presses with pressThumb(), which says at once where the press landed if it missed.
+
+/** Waits for the known late arrivals that move a page's controls: the load event (National's #map address, say, sits
+    scrolled down to <svg id="map"> until its load handler scrolls back to the top), the fonts, and the return bar.
+    design/prp-bar.js adds the bar to a page opened on its own (not in the shell's frame) after the load event, 800 ms
+    and an idle callback with a limit of 3 s, in the page's flow, so it moves everything below it down by its height.
+    The 15 s limit covers the whole wait, the load event included as well as the bar's delay after it, on a busy runner.
+    `more` (page => a promise) waits for the page's own late arrival, National's strip, say. Not waited for: the Master
+    Index linker (design/jdpi-entities.js, loaded by the bar), which starts 1.2 s after load and can add a mark after a
+    linked name. No slider page has such a name above its slider today; if one ever does, pressThumb() fails at once
+    and names what it hit. */
+export async function settled(page, more) {
+  await page.waitForFunction(() => document.readyState === 'complete' && (window.self !== window.top
+    || !document.querySelector('script[src*="prp-bar.js"]') || !!document.querySelector('.jdpi-returnbar')), null, { timeout: 15000 });
+  await page.evaluate(() => document.fonts.ready);
+  if (more) await more(page);
+}
+
+/** Moves the pointer to (x, y), checks that it is on the thumb of the input `input` (a selector), presses, and checks
+    that the input took the press. A missed press fails here, naming what was under the pointer, and not later as a
+    drag that changed nothing. The caller then makes its moves and releases. */
+export async function pressThumb(page, input, x, y) {
+  await page.mouse.move(x, y);
+  const hit = await page.evaluate(([s, px, py]) => {
+    const h = document.elementFromPoint(px, py);
+    return h === document.querySelector(s) ? '' : h ? `${h.tagName.toLowerCase()}${h.id ? '#' + h.id : ''}${h.className && typeof h.className === 'string' ? '.' + h.className.trim().split(/\s+/).join('.') : ''}` : 'nothing';
+  }, [input, x, y]);
+  assert.equal(hit, '', `the press is aimed at ${input}'s thumb, but at (${Math.round(x)}, ${Math.round(y)}) the pointer is on ${hit}`);
+  await page.mouse.down();
+  assert.ok(await page.evaluate(s => document.querySelector(s).matches(':active'), input), `${input} took the press at (${Math.round(x)}, ${Math.round(y)})`);
 }

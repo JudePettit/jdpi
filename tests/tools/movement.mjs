@@ -11,11 +11,16 @@
 // short  true on a page whose data can hold too few stops for the moves below (the Realtime archive starts again each
 //        January, and until its fifth month there is no room to move a pair three stops back): the moves that need
 //        the room are then left out and the rest is still checked; with one stop the control shows no buttons
+// settled  page => a promise that resolves once the page's own late arrival above the track is in (National's strip,
+//          drawn when its scores have loaded), for a page that has one: the check waits for it, and for the load event
+//          and the return bar, before its first click, so no click or press lands on a control that is still moving
+//          (tests/tools/pages.mjs settled())
 // It checks: the three buttons and their names (tooltip and accessible name), Independent chosen; Move Together, then
 // the end handle dragged by the pointer and the start handle moved by its keys, moves both, the span kept, and the
 // readout follows; Single brings the handles onto one stop and the readout shows that one time; the address carries
 // move=together and move=single and a reload restores Single; the same address with no move= opens as it did at first.
 import assert from 'node:assert/strict';
+import { settled, pressThumb } from './pages.mjs';
 
 export async function movementCheck(page, o) {
   const base = (process.env.JDPI_URL || 'https://jdpi.pages.dev').replace(/\/$/, '');
@@ -28,9 +33,22 @@ export async function movementCheck(page, o) {
       pressed: [...document.querySelectorAll('.prp-period-move[aria-pressed="true"]')].map(x => x.dataset.move) };
   }, [o.from, o.to]);
   const where = s => `${s.from}–${s.to} (${s.i}, ${s.j})`;
+  // The readout follows the handles once the page has drawn the time they name, which can mean loading its figures
+  // first (National loads a period's layers): it is read until ok(text) holds, for up to 15 s, and the last text read
+  // is returned for the assertion to judge and report.
+  const readoutWhen = async ok => {
+    const end = Date.now() + 15000;
+    for (;;) {
+      const text = await o.readout(page);
+      if (ok(text) || Date.now() > end) return text;
+      await new Promise(r => setTimeout(r, 100));
+    }
+  };
 
   await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 30000 });
   await o.ready(page);
+  // The load event, the return bar and a late strip move the control: nothing is clicked or pressed until they are in.
+  await settled(page, o.settled);
   const n = await page.evaluate(t => { const e = document.querySelector(t); return e ? +e.max - +e.min + 1 : 0; }, o.to);
   if (o.short && n < 2) {
     assert.equal(await page.locator('.prp-period-move:visible').count(), 0, 'one stop: the control shows no movement buttons');
@@ -52,14 +70,12 @@ export async function movementCheck(page, o) {
   let s2;
   if (room) {
   await page.locator(o.to).scrollIntoViewIfNeeded();
-  await page.waitForTimeout(1000); // the page settles (a late banner or map can move the control) before the thumb is found
   const drag = await page.evaluate(t => {
     const e = document.querySelector(t), r = e.getBoundingClientRect(), th = parseFloat(getComputedStyle(e.closest('.prp-period')).getPropertyValue('--prp-period-thumb')) || 16;
     const per = (r.width - th) / Math.max(1, +e.max - +e.min);
     return { x: r.left + th / 2 + (+e.value - +e.min) * per, y: r.top + r.height / 2, per };
   }, o.to);
-  await page.mouse.move(drag.x, drag.y);
-  await page.mouse.down();
+  await pressThumb(page, o.to, drag.x, drag.y);
   for (const k of [1, 2, 3, 4]) await page.mouse.move(drag.x - (k / 2) * drag.per, drag.y);
   await page.mouse.up();
   const s1 = await state();
@@ -74,8 +90,7 @@ export async function movementCheck(page, o) {
     s2 = await state();
     assert.deepEqual([s2.i, s2.j], [s0.i, s0.j], `choosing Move Together moves nothing: ${where(s0)} to ${where(s2)}`);
   }
-  await page.waitForTimeout(300);
-  const t2 = await o.readout(page);
+  const t2 = await readoutWhen(t => together(t, s2));
   assert.ok(together(t2, s2), `the map shows ${where(s2)}: "${t2}"`);
   assert.match(s2.address, /move=together/);
 
@@ -87,8 +102,7 @@ export async function movementCheck(page, o) {
   assert.equal(s3.i, s3.j, `one stop: ${where(s3)}`);
   assert.equal(s3.to, s2.to, 'the end\'s time is kept');
   assert.equal(s3.from, s3.to);
-  await page.waitForTimeout(300);
-  const t3 = await o.readout(page);
+  const t3 = await readoutWhen(t => one(t, s3));
   assert.ok(one(t3, s3), `the map shows one time, ${s3.to}: "${t3}"`);
   // Its keys move the one time.
   await page.locator(o.to).focus();

@@ -5,7 +5,19 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
-import { pageTest, launch } from './tools/pages.mjs';
+import { pageTest, launch, settled, pressThumb } from './tools/pages.mjs';
+// The strip above the years' track: the page draws it once pressure.json has loaded (in idle time at Latest, or when a
+// year or period is first drawn), and it moves the track down (prp.css .has-strip), so a pointer drag waits for it
+// before it finds the thumb.
+const naStrip = p => p.waitForSelector('#years .prp-period-slider.has-strip', { state: 'attached', timeout: 20000 });
+// Waits for the years' label to match `re`. On a timeout it says what the label and the note read, so a period whose
+// figures were still loading ("2008–Latest …") or failed to load (the label back as it was, the note "could not load")
+// is told apart from a drag that changed nothing.
+const yrLabel = (page, re) => page.waitForFunction(r => new RegExp(r).test(document.querySelector('#yrlabel').textContent), re.source)
+  .catch(async e => {
+    const [label, tnote] = await page.evaluate(() => [document.querySelector('#yrlabel').textContent, document.querySelector('#tnote').textContent]).catch(() => ['(unread)', '(unread)']);
+    throw new Error(`#yrlabel never matched ${re}: it reads "${label}", and the note "${tnote}"`, { cause: e });
+  });
 
 const BASE = (process.env.JDPI_URL || 'https://jdpi.pages.dev').replace(/\/$/, '');
 const read = path => JSON.parse(readFileSync(new URL(`../${path}`, import.meta.url), 'utf8'));
@@ -1277,13 +1289,14 @@ test('page NA-05: the slider replaces the decades, Latest stays the opening view
   await page.waitForFunction(() => document.querySelector('#yrlabel').textContent === 'Latest' && document.querySelector('#yr-play').getAttribute('aria-label') !== 'Pause', null, { timeout: 15000 });
   assert.equal(await page.evaluate(() => location.hash), '#map');
 
-  // A real pointer: the start handle dragged back from Latest opens a period ending at Latest.
+  // A real pointer: the start handle dragged back from Latest opens a period ending at Latest. The track is found once
+  // the return bar and the strip, which move it down, are in.
+  await settled(page, naStrip);
   const track = await page.locator('#years .prp-period-track').boundingBox();
-  await page.mouse.move(track.x + track.width - 1, track.y + track.height / 2);
-  await page.mouse.down();
+  await pressThumb(page, '#yr-from', track.x + track.width - 1, track.y + track.height / 2);
   await page.mouse.move(track.x + track.width * 0.6, track.y + track.height / 2, { steps: 8 });
   await page.mouse.up();
-  await page.waitForFunction(() => /^\d{4}–Latest$/.test(document.querySelector('#yrlabel').textContent));
+  await yrLabel(page, /^\d{4}–Latest$/);
   assert.match(await page.evaluate(() => location.hash), /^#map&from=\d{4}$/);
 
   // 18. A comparison opens as before, and follows the slider. (Opened afresh: a hash moved in place keeps the period
@@ -1396,14 +1409,15 @@ test('page NA-05 review: years shown honestly, movers like for like, failures sa
   await open('#map');
   assert.equal(await page.isDisabled('#yr-latest'), true);
   assert.match(await page.textContent('#yrhint'), /newest value/);
+  // The track is found once the return bar and the strip, which arrive after the first draw and move it down, are in.
+  await settled(page, naStrip);
   const before = await page.locator('#years .prp-period-track').boundingBox();
-  await page.mouse.move(before.x + before.width - 1, before.y + before.height / 2);
-  await page.mouse.down();
+  await pressThumb(page, '#yr-from', before.x + before.width - 1, before.y + before.height / 2);
   await page.mouse.move(before.x + before.width * 0.6, before.y + before.height / 2, { steps: 8 });
   const during = await page.locator('#years .prp-period-track').boundingBox();
   await page.mouse.up();
-  assert.equal(during.x, before.x, 'the track does not move under the pointer');
-  await page.waitForFunction(() => /–Latest$/.test(document.querySelector('#yrlabel').textContent));
+  assert.deepEqual([during.x, during.y], [before.x, before.y], 'the track does not move under the pointer');
+  await yrLabel(page, /–Latest$/);
   assert.equal(await page.isDisabled('#yr-latest'), false);
   await page.click('#yr-latest');
   await page.waitForFunction(() => document.querySelector('#yrlabel').textContent === 'Latest');
@@ -1603,7 +1617,7 @@ test('page: the movement buttons: Move Together moves both years with the span k
   const { s0 } = await movementCheck(page, {
     url: '/q/national.html#map&year=2015&from=2008', from: '#yr-from', to: '#yr', single: 'Single Year',
     ready: p => p.waitForFunction(() => document.querySelector('#yr')?.dataset.value && /\d{4}/.test(document.querySelector('#yrlabel')?.textContent || ''), null, { timeout: 30000 }),
-    readout: p => p.locator('#yrlabel').innerText(),
+    readout: p => p.locator('#yrlabel').innerText(), settled: naStrip,
   });
   assert.deepEqual([s0.from, s0.to], ['2008', '2015'], 'an address with no move= opens its period as before');
   // The buttons share the label's line with ‹ ▶ › Latest, above the track's own full-width row, at 1400 and 390 px.

@@ -115,6 +115,11 @@ export function span(st, life = {}, open = 40) {
 }
 export const covers = (st, year, life, open) => { const r = span(st, life, open); return !!r && r[0] <= year + 1 && year - 1 <= r[1]; };
 
+/** The first year a Wikidata date { y, pr } may mean: a date given only to the decade, century or millennium counts from
+ *  its first year ("16th century", stored as 1600 with precision 7, is 1501); a year or finer is itself. The build
+ *  takes a place's founding year (place().founded) as the earliest of these over its P571 statements. */
+export const firstYear = ({ y, pr = 9 }) => (pr >= 9 ? y : pr === 8 ? Math.floor(y / 10) * 10 : pr === 7 ? Math.floor((y - 1) / 100) * 100 + 1 : pr === 6 ? Math.floor((y - 1) / 1000) * 1000 + 1 : null);
+
 const ACADEMIC = /universit|college|institut|laborator|observator|academ|école|ecole|school|hospital|polytechn|research|society|station|museum|centre|center|faculty|abbey|monastery|librar|bell labs|cern|nasa|agency|company|corporation/i;
 /** Does a Wikidata description or label read like an institution rather than a town or a house? */
 export const looksInstitutional = (label, desc) => ACADEMIC.test(`${label || ''} ${desc || ''}`);
@@ -124,13 +129,15 @@ export const looksInstitutional = (label, desc) => ACADEMIC.test(`${label || ''}
  *   event  { year, at?, fb?, item? }  at/fb: curated place QIDs; item: { loc: [QID], coord: [lat, lon] }
  *   people [{ qid, born, died, employer: [st], affiliation: [st], educated: [st], work: [st], birthplace: [QID] }]
  *           st = { q, s?, e?, preferred? }
- *   place(q) → { lat, lon, label, inst? } or null (has coordinates)
+ *   place(q) → { lat, lon, label, inst?, founded? } or null (has coordinates); founded: the earliest P571 year
  *   weight(q) → how many seed scientists share this institution (to prefer main ones when undated)
  * Rules, in order: curated override; location of discovery (P189); the item's own coordinates; an institution two or
  * more of the discoverers shared at the time; the discoverer's employer, affiliation or place of study dated around
  * the event year; dated work location; main employer or affiliation; work location; education; birthplace; curated
  * fallback. The fallback place, when the seed gives one, also anchors the person-based rules: a candidate more than
- * maxKm from it is skipped (Wikidata often lists later, earlier or honorary posts without dates).
+ * maxKm from it is skipped (Wikidata often lists later, earlier or honorary posts without dates). Every person-based
+ * rule also skips a place founded (its earliest P571) after the year, and the undated rules (main institution, work
+ * location, education) drop a statement whose own start or end rules the year out.
  */
 export function choosePlace(event, people, place, weight = () => 0, maxKm = ANCHOR_KM) {
   const y = event.year;
@@ -143,7 +150,13 @@ export function choosePlace(event, people, place, weight = () => 0, maxKm = ANCH
     return { qid: event.item.qid, name: event.item.label || event.item.qid, lat, lon, basis: 'site' };
   }
   const anchor = at(event.fb);
-  const fits = (q, km = maxKm) => { const p = at(q); return !!p && (!anchor || distanceKm([p.lat, p.lon], [anchor.lat, anchor.lon]) <= km); };
+  // A place founded after the year (its earliest P571) cannot be where the discoverer worked then: the University of
+  // Zurich (1833) for Gessner in 1551, Imperial College (1907) for Perkin in 1856.
+  const fits = (q, km = maxKm) => { const p = at(q); return !!p && !(p.founded != null && p.founded > y) && (!anchor || distanceKm([p.lat, p.lon], [anchor.lat, anchor.lon]) <= km); };
+  // The undated rules (3 to 5) still drop a statement whose own dates rule out the year: a post that began after it or
+  // ended before it (Avogadro's Turin chair from 1820, for 1811), or a school entered after it. Only the explicit dates
+  // count here, not span()'s 40-year guess for an open end (Hawking's Cambridge post, given only its end in 2018).
+  const datedOut = st => (st.s != null && st.s > y + 1) || (st.e != null && st.e < y - 1);
   const weak = Math.min(maxKm, ANCHOR_KM_WEAK);
   const life = p => ({ born: p.born, died: p.died });
   const width = (st, p) => { const r = span(st, life(p)); return r ? r[1] - r[0] : 999; };
@@ -174,20 +187,20 @@ export function choosePlace(event, people, place, weight = () => 0, maxKm = ANCH
   const near = (st, p) => { const r = span(st, life(p)); return r ? Math.max(0, r[0] - y, y - r[1]) : 500; };
   for (const p of people) {
     for (const k of ['employer', 'affiliation']) {
-      const c = (p[k] || []).filter(st => fits(st.q)).sort((a, b) => !!b.preferred - !!a.preferred || near(a, p) - near(b, p)
+      const c = (p[k] || []).filter(st => !datedOut(st) && fits(st.q)).sort((a, b) => !!b.preferred - !!a.preferred || near(a, p) - near(b, p)
         || !!at(b.q).inst - !!at(a.q).inst || weight(b.q) - weight(a.q));
       if (c.length) return out(c[0].q, 'institution', at(c[0].q), p.qid);
     }
   }
   // 4. Work location (only if there is one obvious candidate, or the preferred one).
   for (const p of people) {
-    const w = (p.work || []).filter(st => fits(st.q));
+    const w = (p.work || []).filter(st => !datedOut(st) && fits(st.q));
     const pick = w.find(st => st.preferred) || (w.length === 1 ? w[0] : w.sort((a, b) => near(a, p) - near(b, p))[0]);
     if (pick) return out(pick.q, 'work-location', at(pick.q), p.qid);
   }
   // 5. Education (the latest: usually the most advanced), then birthplace.
   for (const p of people) {
-    const ed = (p.educated || []).filter(st => fits(st.q, weak) && at(st.q).inst).sort((a, b) => (span(b, life(p))?.[1] ?? -1e9) - (span(a, life(p))?.[1] ?? -1e9));
+    const ed = (p.educated || []).filter(st => !(st.s != null && st.s > y) && fits(st.q, weak) && at(st.q).inst).sort((a, b) => (span(b, life(p))?.[1] ?? -1e9) - (span(a, life(p))?.[1] ?? -1e9));
     if (ed.length) return out(ed[0].q, 'education', at(ed[0].q), p.qid);
   }
   for (const p of people) for (const q of p.birthplace || []) { if (fits(q, weak)) return out(q, 'birthplace', at(q), p.qid); }
@@ -195,7 +208,9 @@ export function choosePlace(event, people, place, weight = () => 0, maxKm = ANCH
   return null;
 }
 
-/** Institutions linked to an event: those its people belonged to around the event year (and the placing institution). */
+/** Institutions linked to an event: those its people belonged to around the event year (and the placing institution).
+ *  A place founded after the year is left out, as choosePlace leaves it out: Goethe University Frankfurt (1914) for
+ *  Salvarsan in 1909, the University of Palermo (1806) for Ceres in 1801. */
 export function eventInstitutions(event, people, place, chosen) {
   const y = event.year, out = [];
   const add = q => { if (q && !out.includes(q)) out.push(q); };
@@ -203,7 +218,7 @@ export function eventInstitutions(event, people, place, chosen) {
   if (chosen && chosen.basis === 'curated' && place(chosen.qid)?.inst) add(chosen.qid);
   for (const p of people) {
     for (const k of ['employer', 'affiliation', 'educated']) {
-      for (const st of p[k] || []) if (covers(st, y, { born: p.born, died: p.died }) && place(st.q)?.inst !== false) add(st.q);
+      for (const st of p[k] || []) if (covers(st, y, { born: p.born, died: p.died }) && place(st.q)?.inst !== false && !(place(st.q)?.founded > y)) add(st.q);
     }
   }
   return out.slice(0, 8);

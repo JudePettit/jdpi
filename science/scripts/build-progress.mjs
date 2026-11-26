@@ -14,8 +14,12 @@
 // 4. Place each event on the map (choosePlace in progress-lib.mjs: location of discovery, the discoverer's institution
 //    at the time, their main institution, birthplace, the seed's fallback) and record the rule as positionBasis.
 //    The seed's hand-set place anchors the person-based rules: an institution or birthplace more than ANCHOR_KM from
-//    it is skipped, since Wikidata often lists later or honorary posts without dates. Locations of discovery that are
-//    whole countries are not used; discovery sites far from the hand-set place are logged for review.
+//    it is skipped, since Wikidata often lists later or honorary posts without dates. Every person-based rule also
+//    skips a place founded (earliest P571) after the year, and the undated rules drop a statement whose own start or
+//    end rules the year out; the card's list of institutions leaves out a place founded after the year too. Locations
+//    of discovery that are whole countries are not used; discovery sites far from the hand-set place are logged for
+//    review. A seed pn ("Q<id> name") names the place as it was called in the year; if the event is no longer placed
+//    at that QID, nothing is written until the seed is mended (--allow-drop writes anyway).
 // 5. Write events.json: events, plus people and institution lookups; but not if a seed event found no place, people or
 //    institutions fell below 90% of the last build's, or the file would pass 1.5 MB (--allow-drop writes the first two).
 // Answers are cached in progress-cache.json (compact, per item, with the date fetched). --refresh refetches anything
@@ -24,7 +28,7 @@ import { readFileSync, writeFileSync, mkdirSync, existsSync } from 'node:fs';
 import { join, resolve, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { SEED } from './progress-seed.mjs';
-import { DISCIPLINES, BASIS, ANCHOR_KM, parseRef, nameMatches, choosePlace, eventInstitutions, looksInstitutional, seedProblems, distanceKm } from './progress-lib.mjs';
+import { DISCIPLINES, BASIS, ANCHOR_KM, parseRef, nameMatches, normName, firstYear, choosePlace, eventInstitutions, looksInstitutional, seedProblems, distanceKm } from './progress-lib.mjs';
 import { lostCounts, refuseIfLost } from '../../calendar/scripts/guard.mjs';
 import { writeHeads } from '../../integration/scripts/heads.mjs';
 
@@ -190,13 +194,18 @@ function coordOf(q, hop = 0) {
   for (const p of ['P159', 'P276', 'P131']) for (const s of claims(q, p)) { const ll = s.q && coordOf(s.q, 1); if (ll) return ll; }
   return null;
 }
+/** The earliest inception year (P571) Wikidata gives, not the preferred one: the University of Paris, Halle and TU Berlin
+ *  carry later refoundings as preferred. choosePlace and eventInstitutions skip a place founded after the event's year.
+ *  A date given only to the decade, century or millennium counts from the first year it may mean (firstYear). */
+const founding = q => { const ys = claims(q, 'P571').filter(s => s.y != null).map(firstYear).filter(y => y != null); return ys.length ? Math.min(...ys) : null; };
 const hopTargets = qs => qs.filter(q => items[q] && !items[q].missing && !claims(q, 'P625').some(s => s.ll)).flatMap(q => ['P159', 'P276', 'P131'].flatMap(p => claims(q, p).map(s => s.q)));
 const placeMemo = new Map();
 function place(q) {
   if (!q) return null;
   if (!placeMemo.has(q)) {
     const ll = coordOf(q);
-    placeMemo.set(q, ll ? { lat: ll[0], lon: ll[1], label: label(q) || q, inst: looksInstitutional(items[q].l, items[q].d) } : null);
+    const founded = founding(q);
+    placeMemo.set(q, ll ? { lat: ll[0], lon: ll[1], label: label(q) || q, inst: looksInstitutional(items[q].l, items[q].d), ...(founded != null ? { founded } : {}) } : null);
   }
   return placeMemo.get(q);
 }
@@ -311,6 +320,7 @@ const COARSE = ['Q6256', 'Q3624078', 'Q7275', 'Q5107', 'Q9430'];
 const coarse = q => COARSE.some(v => has(q, 'P31', v));
 const events = [], usedPeople = new Set(), usedInst = new Set(), basisCount = {};
 report.review = [];
+report.pnUnused = [];
 for (const e of SEED) {
   const item = refOf('item', itemRaw(e))?.q || null;
   const loc = item ? claims(item, 'P189').map(s => s.q).filter(Boolean) : [];
@@ -339,6 +349,11 @@ for (const e of SEED) {
   people.forEach(q => usedPeople.add(q));
   inst.forEach(q => usedInst.add(q));
   if (['shared-institution', 'institution-at-time', 'institution', 'education'].includes(chosen.basis) || (chosen.basis !== 'birthplace' && place(chosen.qid)?.inst)) usedInst.add(chosen.qid);
+  // The seed's pn names the place as it was called in the event's year (Queen's College Cork until 1908), for the place
+  // it gives by QID only, so a later move to another place cannot carry the old name with it.
+  const pn = e.pn ? parseRef(e.pn) : null;
+  if (pn && pn.qid === chosen.qid) chosen.name = pn.name;
+  else if (pn) report.pnUnused.push(`${e.id}: pn “${e.pn}” not used, since the event is placed at ${chosen.qid} “${chosen.name}”`);
   const wiki = item ? items[item].w : (e.w && cache.titles[e.w]?.q && !cache.titles[e.w]?.dab ? e.w : null);
   events.push({
     id: e.id, y: e.y, ...(e.ca ? { ca: 1 } : {}), d: e.d.split(/\s+/), t: e.t, n: e.n,
@@ -351,6 +366,23 @@ for (const e of SEED) {
 events.sort((a, b) => a.y - b.y || a.id.localeCompare(b.id));
 
 // ---------------------------------------------------------------- 5. lookups and output
+// A person is named by their Wikidata label when it is their English Wikipedia title (without a disambiguator such
+// as "(physicist)": "Stanisław Ulam", "Harry Kroto"), or differs from the seed's spelling only in accents, case or
+// punctuation ("Banū Mūsā" for "Banu Musa"). Otherwise the label may be vandalised ("Christian Dopplerr", "Mary-Anne
+// Paulzzze Lavoisier") or a variant ("Hans Lippershay" beside a title saying Lipperhey), and the name is shown as the
+// seed spells it (the p string without its QID or disambiguator; mostly the Wikipedia title, or a name that redirects
+// to it). Each such case is listed in the report: most are fuller or shorter forms of a right name, a few are faults
+// for the owner to mend on Wikidata if he wishes.
+const seedName = new Map();
+const bare = s => (s || '').replace(/\s*\([^)]*\)\s*$/, '').trim();
+for (const r of R) if (r.kind === 'person' && r.q && !seedName.has(r.q)) seedName.set(r.q, bare(r.name));
+report.names = [];
+function displayName(q) {
+  const it = items[q], l = it.l || it.w, s = seedName.get(q);
+  if (!s || !l || l === bare(it.w) || normName(l) === normName(s)) return l || s;
+  report.names.push(`${q}: Wikidata label “${l}” is not the Wikipedia title “${bare(it.w) || '—'}”; shown as the seed’s “${s}”`);
+  return s;
+}
 const labelsOf = (q, p, n) => uniq([...claims(q, p)].sort((a, b) => (b.preferred || 0) - (a.preferred || 0)).map(s => label(s.q)).filter(l => l && !/^Q\d+$/.test(l))).slice(0, n);
 const people = {};
 for (const q of [...usedPeople].sort((a, b) => +a.slice(1) - +b.slice(1))) {
@@ -359,7 +391,7 @@ for (const q of [...usedPeople].sort((a, b) => +a.slice(1) - +b.slice(1))) {
   inst.forEach(v => usedInst.add(v));
   // approx: Wikidata gives the birth or death only to the decade or century.
   const approx = ['P569', 'P570'].some(p => { const s = pick(claims(q, p).filter(x => x.y != null)); return s && (s.pr ?? 9) < 9; });
-  people[q] = { name: it.l || it.w, ...(it.w ? { wiki: it.w } : {}), ...(it.d ? { desc: it.d } : {}),
+  people[q] = { name: displayName(q), ...(it.w ? { wiki: it.w } : {}), ...(it.d ? { desc: it.d } : {}),
     ...(yearOf(q, 'P569') != null ? { born: yearOf(q, 'P569') } : {}), ...(yearOf(q, 'P570') != null ? { died: yearOf(q, 'P570') } : {}), ...(approx ? { approx: 1 } : {}),
     country: labelsOf(q, 'P27', 2), occupation: labelsOf(q, 'P106', 4), field: labelsOf(q, 'P101', 4), inst };
 }
@@ -391,6 +423,8 @@ if (text.length > 1.5 * 1024 * 1024) { console.error(`Not written: events.json w
 const last = (existsSync(OUT_FILE) && JSON.parse(readFileSync(OUT_FILE, 'utf8')).counts) || {};
 refuseIfLost([
   ...(events.length < SEED.length ? [`${SEED.length - events.length} of ${SEED.length} seed events not placed (see "dropped")`] : []),
+  // A pn the build could not use would silently bring back today's name for the year (see "pnUnused"): mend the seed.
+  ...(report.pnUnused.length ? [`${report.pnUnused.length} seed pn names not used (see "pnUnused")`] : []),
   ...lostCounts({ people: last.people || 0, institutions: last.institutions || 0 }, out.counts, { keep: 0.9 }),
 ]);
 mkdirSync(dirname(OUT_FILE), { recursive: true });

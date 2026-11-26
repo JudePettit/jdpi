@@ -1,5 +1,5 @@
 // SIGINT Dashboard: shared feed access used by the Overview checks and the live views (browser only).
-import { store, fetchWithTimeout, fetchJSON, localFetchOptions, isoDay } from './util.js';
+import { store, fetchWithTimeout, fetchJSON, localFetchOptions, isoDay, explainError, hhmm } from './util.js';
 
 /* ---- Public ADS-B: adsb.lol ------------------------------------------------------------------------------------------
    adsb.lol sends no CORS headers, so a browser can't read it directly. Routes, in order:
@@ -74,20 +74,68 @@ export async function fetchReceiverJSON(ctx, opts, timeout = 8000) {
   return r.json();
 }
 
-/* ---- CelesTrak GP data, cached in this browser (CelesTrak asks clients not to download the same data repeatedly) ---- */
+/* ---- CelesTrak GP data, cached in this browser (CelesTrak asks clients not to download the same data repeatedly) ----
+   CelesTrak's usage policy (celestrak.org/usage-policy.php, updated 16 November 2026) asks software to stop querying on
+   any answer other than HTTP 200, and to stop every request for at least 15 minutes after a 500 or 503. So after any
+   failed download (another status, a reply that is not GP data, a timeout or a network failure) this browser leaves
+   CelesTrak alone for 15 minutes, for every group, whether or not the visitor forces a refresh or reloads the page:
+   the pause is kept in this browser's storage, and in this module too for when storage is blocked. Requests to
+   CelesTrak go one at a time and a group already being asked for is not asked for twice, so a failure stops the
+   requests queued behind it. Meanwhile the copy this browser kept is shown with its own time. */
+const GP_PAUSE_KEY = 'prp.sigint.gpPausedUntil', GP_PAUSE_MS = 15 * 60e3;
+let memPause = null;
+const gpInFlight = new Map();
+let gpChain = Promise.resolve();
+// A pause that ends more than 15 minutes from now was stored while the clock was ahead; it is not trusted.
+const livePause = (p, now) => p && typeof p.until === 'number' && p.until > now && p.until - now <= GP_PAUSE_MS ? p : null;
+/** The pause after a failed CelesTrak download, { at, until, why, status }, or null when the page may ask again. */
+export function gpPause(now = Date.now()) {
+  return livePause(store.get(GP_PAUSE_KEY, null), now) || livePause(memPause, now);
+}
+const pauseNote = p => `${p.why} at ${hhmm(new Date(p.at))}, so this page will not ask CelesTrak again before ${hhmm(new Date(p.until))}`;
+/** One request to CelesTrak, made only when no pause is running: { data, at } or { pause }. Never throws. */
+async function askCelestrak(group, key) {
+  const paused = gpPause();
+  if (paused) return { pause: paused };
+  const started = Date.now();
+  try {
+    const data = await fetchJSON(`https://celestrak.org/NORAD/elements/gp.php?GROUP=${encodeURIComponent(group)}&FORMAT=json`, { timeout: 20000 })
+      .catch(e => { throw e instanceof SyntaxError ? new Error('Unexpected reply from CelesTrak') : e; });
+    if (!Array.isArray(data)) throw new Error('Unexpected reply from CelesTrak');
+    const at = Date.now();
+    store.set(key, { t: at, data });
+    // A good answer ends only a pause that began before this request was sent (another tab may have started one since).
+    const stored = store.get(GP_PAUSE_KEY, null);
+    if (!(stored?.at >= started)) store.del(GP_PAUSE_KEY);
+    if (!(memPause?.at >= started)) memPause = null;
+    return { data, at };
+  } catch (e) {
+    const at = Date.now();
+    const pause = { at, until: at + GP_PAUSE_MS, why: explainError(e), status: e.status || null };
+    memPause = pause;
+    store.set(GP_PAUSE_KEY, pause);
+    return { pause };
+  }
+}
 export async function loadGp(group, { maxAgeH = 6, force = false } = {}) {
   const key = `prp.sigint.gp.${group}`;
   const cached = store.get(key, null);
-  if (!force && cached && Array.isArray(cached.data) && Date.now() - cached.t < maxAgeH * 3600e3) return { data: cached.data, at: cached.t, cached: true };
-  try {
-    const data = await fetchJSON(`https://celestrak.org/NORAD/elements/gp.php?GROUP=${encodeURIComponent(group)}&FORMAT=json`, { timeout: 20000 });
-    if (!Array.isArray(data)) throw new Error('Unexpected reply from CelesTrak');
-    store.set(key, { t: Date.now(), data });
-    return { data, at: Date.now(), cached: false };
-  } catch (e) {
-    if (cached?.data) return { data: cached.data, at: cached.t, cached: true, stale: true, error: e };
-    throw e;
+  const have = cached && Array.isArray(cached.data);
+  if (!force && have && Date.now() - cached.t < maxAgeH * 3600e3) return { data: cached.data, at: cached.t, cached: true };
+  let job = gpInFlight.get(group);
+  if (!job) {
+    job = gpChain.then(() => askCelestrak(group, key)).finally(() => { if (gpInFlight.get(group) === job) gpInFlight.delete(group); });
+    gpInFlight.set(group, job);
+    gpChain = job.then(() => {}, () => {});
   }
+  const got = await job;
+  if (got.data) return { data: got.data, at: got.at, cached: false };
+  const { pause } = got;
+  const note = pauseNote(pause);
+  // No status on this error, so explainError() shows the whole sentence where the page gives the data's state.
+  const err = Object.assign(new Error(note), { paused: true, retryAt: pause.until, httpStatus: pause.status });
+  if (have) return { data: cached.data, at: cached.t, cached: true, stale: true, paused: true, retryAt: pause.until, note, error: err };
+  throw err;
 }
 
 /* ---- Small public checks for the Overview -------------------------------------------------------------------------------- */

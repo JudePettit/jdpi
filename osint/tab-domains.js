@@ -11,7 +11,8 @@ import {
 import { $, fetchData, failText, settings, num, extLink } from './ui.js';
 
 const EXAMPLES = ['wikipedia.org', 'gdeltproject.org', 'bbc.co.uk', 'rte.ie'];
-// Registries with no RDAP service that offer a web lookup of their own (checked 28 October 2026).
+// Registries missing from IANA’s RDAP bootstrap file that offer a web lookup of their own (lookups checked 28 October
+// 2026; none of the five is in data.iana.org/rdap/dns.json as published on 20 November 2026, read 26 November 2026).
 const REGISTRY_LOOKUPS = {
   ie: ['the .ie registry’s WHOIS lookup', d => `https://www.weare.ie/whois-result/?whois=${encodeURIComponent(d)}`],
   de: ['DENIC’s domain query', () => 'https://www.denic.de/en/services/whois-service/'],
@@ -100,7 +101,7 @@ async function rdapLookup(host, me) {
     const r = await fetchData(rdapDomainUrl(cand), { timeout: 20000 });
     if (r.ok) return { domain: cand, data: summariseDomainRdap(r.json), url: rdapDomainUrl(cand), via: 'rdap.org' };
     if (r.kind === 'http' && r.status === 404) {
-      if (/no rdap service/i.test(r.text)) return { domain: cand, unsupported: true };
+      if (/no rdap service/i.test(r.text)) return { domain: cand, unsupported: true, via: 'rdap.org' };
       continue;
     }
     return { domain: cand, error: r };
@@ -111,9 +112,18 @@ async function rdapLookup(host, me) {
 function renderRdap(rdap, host, domain) {
   const tld = domain.split('.').pop();
   if (rdap.unsupported) {
-    setKpi('registered', 'No RDAP', `.${tld} does not publish it${rdap.httpOnly ? ' securely' : ''}`); setKpi('expires', '—'); setKpi('registrar', '—');
+    // Said from the file the page read, as it reads it: a registry missing from IANA's bootstrap file may still run RDAP
+    // elsewhere (DENIC's rdap.denic.de, for one), and one listed there only at an http:// address may also serve HTTPS
+    // (.kg and .mg did on 26 November 2026), so the page never says what the registry itself runs. When IANA's file
+    // could not be read, the answer came from rdap.org and is said to come from there.
+    const fromRdapOrg = rdap.via === 'rdap.org';
+    setKpi('registered', rdap.httpOnly ? 'No HTTPS RDAP listed' : 'No RDAP listed',
+      fromRdapOrg ? `rdap.org knows no RDAP server for .${tld}` : rdap.httpOnly ? `.${tld} has only a plain-HTTP RDAP address in IANA’s bootstrap file` : `.${tld} is not in IANA’s RDAP bootstrap file`);
+    setKpi('expires', '—'); setKpi('registrar', '—');
     const own = REGISTRY_LOOKUPS[tld];
-    setBody('dom-rdap', `<div class="panel-msg">The registry for <b>.${esc(tld)}</b> ${rdap.httpOnly ? 'publishes RDAP only over an unencrypted connection, which browsers block on this page' : 'publishes no RDAP service'}, so registration details can’t be read from here. Look the domain up at the registry itself: ${own ? `${extLink(own[1](domain), own[0])}, or ` : ''}${extLink(ianaTldUrl(domain), `IANA’s entry for .${tld}`)}, which names the registry and its WHOIS service.</div>`);
+    const why = fromRdapOrg ? `rdap.org knows no RDAP server for <b>.${esc(tld)}</b> (IANA’s bootstrap file could not be read)`
+      : `The registry for <b>.${esc(tld)}</b> ${rdap.httpOnly ? 'has only a plain-HTTP RDAP address in IANA’s bootstrap file, which browsers block on this page' : 'has no RDAP server in IANA’s bootstrap file'}`;
+    setBody('dom-rdap', `<div class="panel-msg">${why}, so registration details can’t be read from here. Look the domain up at the registry itself: ${own ? `${extLink(own[1](domain), own[0])}, or ` : ''}${extLink(ianaTldUrl(domain), `IANA’s entry for .${tld}`)}, which names the registry and its WHOIS service.</div>`);
     return;
   }
   if (rdap.notFound) {

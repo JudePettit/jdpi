@@ -1,6 +1,6 @@
 {
   "format": "vm-layers/1",
-  "generated": "2026-11-21T12:54:55Z",
+  "generated": "2026-11-26T13:07:00Z",
   "layers": [
     {
       "id": "borders",
@@ -54,12 +54,12 @@
       "measure": null,
       "status": "as Wikidata records them",
       "style": null,
-      "legend": "Battles: Wikidata (CC0), each date and point with its Wikidata item and property",
+      "legend": "Battles: Wikidata (CC0), each date and point with its Wikidata item and property; one start, as War Focus gives it, from the battle’s English Wikipedia article (CC BY-SA 4.0, as a fact), named in its row (Battle of Iwo Jima)",
       "source": "wikidata",
-      "method": "VM’s own text. The 1,966 battles VM holds with a date and a point, 1258 to 2025: every conflict of the Master Index that Wikidata types a battle (P31 Q178561), and every located battle of War Focus, each read from Wikidata by omni/scripts/build-battles.mjs: its point in time (P585), or its start and end (P580, P582), at the precision and in the calendar Wikidata records, never converted; its coordinate location (P625) as Wikidata gives it, with its precision; and what supports each value, by VM’s rule: a reference naming a work (P248), a reference URL or a database record counts as a reference; a value only imported from a Wikipedia (P143, P4656) reads ‘Wikipedia-sourced, unverified’; anything less reads ‘no reference’. A battle with no date or no point in Wikidata is left out, and so is one whose year no battle can have (before 3000 BC). 1,912 are tied to a war of VM’s war registry (omni/data/layers/wars/registry.json), 1,912 of them to a war War Focus covers, which a click opens. Above 2,000 drawn at once, the points cluster. Wikidata’s data is CC0. Each view says how many battles VM holds for its years.",
+      "method": "VM’s own text. The 1,980 battles VM holds with a date and a point, 1258 to 2025: every conflict of the Master Index that Wikidata types a battle (P31 Q178561), and every located battle of War Focus, each read from Wikidata by omni/scripts/build-battles.mjs: its point in time (P585), or its start and end (P580, P582), at the precision and in the calendar Wikidata records, never converted, by War Focus’s rules: where Wikidata gives a battle several points in time and no start or end, each is a date of its own (a day, or only a month or a year where that is all Wikidata gives), not a span (the atomic bombings of Hiroshima and Nagasaki, 6 and 9 August 1945), and every one is read that Wikidata does not mark deprecated, whatever its rank, as War Focus reads them, and where it gives one date twice, to the year and to the month, the month is used; a battle whose start War Focus takes from its English Wikipedia article, where Wikidata’s has no reference and the article gives another, starts on the article’s date, with Wikidata’s named (the Battle of Iwo Jima: 19 February 1945, not 8 February); its coordinate location (P625) as Wikidata gives it, with its precision; its name, Wikidata’s English label, or for a battle War Focus holds the name War Focus shows, so the two pages agree, except where Wikidata’s label was lately changed away from the title of the battle’s English Wikipedia article, when VM keeps the earlier name (the killing of Yahya Sinwar); and what supports each value, by VM’s rule: a reference naming a work (P248), a reference URL or a database record counts as a reference; a value only imported from a Wikipedia (P143, P4656) reads ‘Wikipedia-sourced, unverified’; anything less reads ‘no reference’. A battle with no date or no point in Wikidata is left out, and so is one whose year no battle can have (before 3000 BC). 1,914 are tied to a war of VM’s war registry (omni/data/layers/wars/registry.json), 1,914 of them to a war War Focus covers, which a click opens. Above 2,000 drawn at once, the points cluster. Wikidata’s data is CC0; a start taken from English Wikipedia is CC BY-SA 4.0, taken as a fact, and its row names the article. Each view says how many battles VM holds for its years.",
       "open": true,
       "pinnable": true,
-      "built": "2026-11-21T00:36:13Z"
+      "built": "2026-11-26T13:03:23Z"
     },
     {
       "id": "countries",
@@ -362,16 +362,16 @@
       },
       "legend": "Conflict on territory: UCDP/PRIO Armed Conflict Dataset 26.1 and UCDP Battle-Related Deaths Dataset 26.1 (CC BY 4.0), on Cliopatria v0.2.1 (CC BY 4.0) or Natural Earth (public domain) – processed by Vitruvian Manager",
       "source": "ucdp-acd",
-      "method": "VM’s own text. A state is filled in a year when UCDP/PRIO’s Armed Conflict Dataset 26.1 records an armed conflict on its territory that year: a contested incompatibility over government or territory, between two parties of which at least one is a state’s government, with at least 25 battle-related deaths in the year (UCDP’s threshold). The stronger colour is a war, 1,000 or more deaths in the year. From 1989 each conflict’s battle-related deaths are UCDP’s Battle-Related Deaths Dataset 26.1 (conflict level), its best estimate with its low and high; before 1989 VM gives none, because the only series, PRIO’s Battle Deaths Dataset, states no licence. A state that fought outside its own territory that year (a government on either side, primary or secondary, that is not a location of the conflict) is outlined. UCDP names each state by today’s name with the older one in brackets (“Vietnam (North Vietnam)”); VM joins the names to Wikidata Q-ids and ISO3 codes through its own crosswalk, checked on Wikidata at each build, never by a Gleditsch and Ward number. Each state is drawn on Cliopatria’s border for the year, where VM’s crosswalk of Cliopatria holds it, else on Natural Earth’s border of today from the year Wikidata gives as the state’s inception; a state neither holds is listed beside the map, never drawn on a guessed shape. Before 1946 the layer is empty: the Correlates of War, which covers 1926–1945, bars commercial use. 2026 is not in this layer: UCDP’s Candidate Events, which cover it, give counts of events by country and month, not the conflicts and their intensity this layer draws; the layer “Organised violence, UCDP events” shows 2026 from them, marked candidate.",
+      "method": "VM’s own text. A state is filled in a year when UCDP/PRIO’s Armed Conflict Dataset 26.1 records an armed conflict on its territory that year: a contested incompatibility over government or territory, between two parties of which at least one is a state’s government, with at least 25 battle-related deaths in the year (UCDP’s threshold). The territory is UCDP’s location, which for a conflict within a state is the government’s state and for a war between states every primary party’s, wherever the fighting was; so a conflict the Retrospective Battlefield places elsewhere is placed as it places it (battlefield/scripts/history-fought.mjs), by year where the fighting moved: among them the war of 2003 in Iraq, not in the United States, Britain and Australia, the war between Hungary and the Soviet Union in 1956 in Hungary, Israel’s conflict over Southern Lebanon in Lebanon, the United States’ with al-Qaida in the countries where each year’s fighting was, Israel’s conflict over Palestine in Israel and Palestine, South Africa’s over Namibia in Namibia, Indonesia’s over East Timor in Timor-Leste, and Morocco’s and Mauritania’s over Western Sahara in Western Sahara and, as English Wikipedia’s “Western Sahara War” records Polisario’s raids on both, in the government’s state too. Hyderabad’s conflicts of 1947–48 alone keep UCDP’s location, since the Retrospective Battlefield places them within India only because its map has no shape for Hyderabad State, which Cliopatria draws here in 1947. Those places are VM’s own, checked from 1989 against the countries UCDP’s Georeferenced Event Dataset 26.1 places each conflict’s events in, and, for the internal conflicts fought outside the government’s state, taken from Wikidata’s location of each war. The stronger colour is a war, 1,000 or more deaths in the year. From 1989 each conflict’s battle-related deaths are UCDP’s Battle-Related Deaths Dataset 26.1 (conflict level), its best estimate with its low and high; before 1989 VM gives none, because the only series, PRIO’s Battle Deaths Dataset, states no licence. A state that fought outside its own territory that year (a government on either side, primary or secondary, that is not a location of the conflict) is outlined. UCDP names each state by today’s name with the older one in brackets (“Vietnam (North Vietnam)”); VM joins the names to Wikidata Q-ids and ISO3 codes through its own crosswalk, checked on Wikidata at each build, never by a Gleditsch and Ward number. Each state is drawn on Cliopatria’s border for the year, where VM’s crosswalk of Cliopatria holds it, else on Natural Earth’s border of today from the year Wikidata gives as the state’s inception; a state neither holds is listed beside the map, never drawn on a guessed shape. Before 1946 the layer is empty: the Correlates of War, which covers 1926–1945, bars commercial use. 2026 is not in this layer: UCDP’s Candidate Events, which cover it, give counts of events by country and month, not the conflicts and their intensity this layer draws; the layer “Organised violence, UCDP events” shows 2026 from them, marked candidate.",
       "open": true,
       "pinnable": true,
-      "built": "2026-11-20T15:54:21Z",
+      "built": "2026-11-26T13:07:00Z",
       "files": [
         {
           "file": "omni/data/layers/conflict-territory/conflicts.json",
-          "bytes": 226287,
-          "gzip": 41277,
-          "sha256": "a4c2786c059df0fc1272b498db161a2564b0238d3a08a2e0d6fdd02808c0de8c"
+          "bytes": 258653,
+          "gzip": 43671,
+          "sha256": "f62bbc973620421436ccd2ea30662fef87f2a75d46de9222664659d5dc367778"
         }
       ],
       "gw": "link only: the Retrospective Battlefield’s address names a country by UCDP’s Gleditsch and Ward number (c=), so each state keeps the number UCDP gives it, for that link alone"
@@ -588,16 +588,16 @@
       },
       "legend": "Breakthroughs: the Invention Timeline (Wikidata, CC0; selection, titles and notes by Vitruvian Manager)",
       "source": "vm-invention",
-      "method": "VM’s own text. The 570 breakthroughs of VM’s Invention Timeline (science/progress), 3000 BC to 2025: which events are in it is VM’s choice, and every title and note is VM’s own text; the facts behind each (its Wikidata item) are Wikidata’s (CC0). A year the timeline marks as approximate is written “c.”. Each point is placed by the Invention Timeline’s rule for it, which the point’s card names (the place of discovery, the site, or the discoverer’s institution, work place, school or birthplace, each from Wikidata); 165 are placed by hand by VM, where Wikidata gives no place or would mislead, and say so. A discipline can be chosen alone (the filter in the layer’s address: l=breakthroughs:d=astro).",
+      "method": "VM’s own text. The 570 breakthroughs of VM’s Invention Timeline (science/progress), 3000 BC to 2025: which events are in it is VM’s choice, and every title and note is VM’s own text; the facts behind each (its Wikidata item) are Wikidata’s (CC0). A year the timeline marks as approximate is written “c.”. Each point is placed by the Invention Timeline’s rule for it, which the point’s card names (the place of discovery, the site, or the discoverer’s institution, work place, school or birthplace, each from Wikidata); 196 are placed by hand by VM, where Wikidata gives no place or would mislead, and say so. A discipline can be chosen alone (the filter in the layer’s address: l=breakthroughs:d=astro).",
       "open": true,
       "pinnable": true,
-      "built": "2026-11-20T11:38:45Z",
+      "built": "2026-11-26T11:49:42Z",
       "files": [
         {
           "file": "omni/data/layers/breakthroughs/events.json",
-          "bytes": 326683,
-          "gzip": 67437,
-          "sha256": "adbdaa42062e3be22a3f4d2c57745b44e3deb6777e697e9301a00103c0bc0f14"
+          "bytes": 326219,
+          "gzip": 67463,
+          "sha256": "1bf2dfbabbb27c5d0d35c0aa271809a1be1b49d32ad30b97017f0ed4a43c57b4"
         }
       ]
     },

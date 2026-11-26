@@ -47,9 +47,18 @@ const END_NOTE = { end: 'end not recorded', order: 'dates uncertain: Wikidata en
 // A battle Wikidata dates only to its decade (s null) has no date to show; one whose Wikidata end is over a month after
 // its Wikipedia article's (u 'conflict', scripts/rules.mjs endAgainstArticle) is drawn to the article's, and says so.
 // A battle whose start falls before the war's says so after its dates (figures.mjs beforeWarNote, S0).
-const bDates = b => { const d = bDatesOnly(b), early = beforeWarNote(b, state.war?.start); return early ? `${d} · ${early}` : d; };
+// A battle whose start the build corrected from its Wikipedia article (sW, Wikidata's start at its precision sWp:
+// scripts/build.mjs DATE_FIXES, each with its source) says so after its dates.
+const atPrec = (d, p) => (p === 'y' ? d.slice(0, 4) : p === 'm' ? monthLabel(d.slice(0, 7)) : fmtDate(d));
+const startNote = b => (b.sW ? ` · start as its Wikipedia article gives it; Wikidata starts it ${atPrec(b.sW, b.sWp)}` : '');
+// A battle of several separate days (pts, scripts/rules.mjs battleDates: '1944-08-20' a day, '1944-06' a month, '1944'
+// a year) lists them: "5 Nov 1943 and 1 Mar 1944", not a span.
+const ptLabel = d => (d.length === 4 ? d : d.length === 7 ? monthLabel(d) : fmtDate(d));
+const andList = l => (l.length <= 2 ? l.join(' and ') : `${l.slice(0, -1).join(', ')} and ${l.at(-1)}`);
+const bDates = b => { const d = bDatesOnly(b) + startNote(b), early = beforeWarNote(b, state.war?.start); return early ? `${d} · ${early}` : d; };
 const bDatesOnly = b => {
-  const f = (d, p) => (p === 'y' ? d.slice(0, 4) : p === 'm' ? monthLabel(d.slice(0, 7)) : fmtDate(d));
+  const f = atPrec;
+  if (b.s && b.pts) return andList(b.pts.map(ptLabel));
   if (!b.s) return `date not recorded${b.dec != null ? ` (Wikidata gives only the decade, the ${b.dec}s)` : ''}`;
   const a = f(b.s, b.p);
   if (!b.e) return b.u ? `${a} · ${END_NOTE[b.u] || 'end uncertain'}${b.eW ? ` (${fmtDate(b.eW)})` : ''}` : a;
@@ -329,8 +338,11 @@ const periodLabel = () => {
   if (!isPeriod() || a === z) return monthLabel(z);
   return a.slice(0, 4) === z.slice(0, 4) ? `${shortMonth(a)} – ${shortMonth(z)} ${z.slice(0, 4)}` : `${shortMonth(a)} ${a.slice(0, 4)} – ${shortMonth(z)} ${z.slice(0, 4)}`;
 };
-const overlaps = (b, a, z) => b.s.slice(0, 7) <= z && (b.e || b.s).slice(0, 7) >= a;
-const underWay = (b, a, z) => b.p !== 'y' && overlaps(b, a, z);
+// A battle of several separate days (pts) is under way only in their months, not in those between (the Vatican was
+// bombed on 5 November 1943 and 1 March 1944); a day of it dated only to its year is in none.
+const ptMonth = (b, a, z) => b.pts.some(d => d.length >= 7 && d.slice(0, 7) >= a && d.slice(0, 7) <= z);
+const overlaps = (b, a, z) => (b.pts ? ptMonth(b, a, z) : b.s.slice(0, 7) <= z && (b.e || b.s).slice(0, 7) >= a);
+const underWay = (b, a, z) => (b.pts || b.p !== 'y') && overlaps(b, a, z);
 function periodDeaths() {
   const w = state.war; let deaths = 0, est = false;
   for (let k = state.f; k <= state.m; k++) { deaths += w.deaths[k]; est ||= !!w.estimated[k]; }
@@ -653,7 +665,7 @@ function renderPanel() {
   const w = state.war, i = state.m, m = w.months[i], date = dateOf(i), p = isPeriod(), a = p ? w.months[state.f] : m;
   // Under way this month, or at some point in the period: those starting in it first, then the shortest, so war-long
   // campaigns sink.
-  const span = b => Date.parse(b.e || b.s) - Date.parse(b.s), begins = b => b.s.slice(0, 7) >= a && b.s.slice(0, 7) <= m;
+  const span = b => (b.pts ? 0 : Date.parse(b.e || b.s) - Date.parse(b.s)), begins = b => b.s.slice(0, 7) >= a && b.s.slice(0, 7) <= m;
   const now = w.battles.filter(b => underWay(b, a, m)).sort((x, y) => begins(y) - begins(x) || span(x) - span(y));
   // Each death once (figures.mjs groupBattles): wholes and lone battles, a whole's parts under it, never beside it.
   // Ranked by deaths only, by the lowest figure given (figures.mjs deadliest); a battle dated only to its decade is in no
@@ -983,7 +995,7 @@ function battleLine(b) {
   const n = b.n.replace(/^the /i, '');
   const common = /^(battle|siege|offensive|invasion|campaign|capture|liberation|occupation|bombing|landing|evacuation)\b/i.test(n) || /\b(pogrom|massacre|attack|raid|uprising|campaign|offensive|convoys?|front|participation|bombing|landing)\b/.test(n);
   const subject = /^Operation\b/.test(n) ? n : common ? `The ${n}` : cap(n);
-  return `${subject} ${b.s === b.e ? (plural(n) ? 'take place' : 'takes place') : plural(n) ? 'begin' : 'begins'}.`;
+  return `${subject} ${b.s === b.e || b.pts ? (plural(n) ? 'take place' : 'takes place') : plural(n) ? 'begin' : 'begins'}.`;
 }
 function changes(i) {
   const w = state.war, d = dateOf(i), p = i ? dateOf(i - 1) : null;
@@ -1031,7 +1043,7 @@ function monthStory(i) {
   const fig = b => nodeOf(b)?.fig ?? (b.deaths || 0);
   const begun = once(w.battles.filter(b => b.p !== 'y' && b.s.slice(0, 7) === m)).sort((x, y) => fig(y) - fig(x) || !!y.w - !!x.w).slice(0, 3);
   for (const b of begun) parts.push(battleLine(b));
-  const ended = once(w.battles.filter(b => b.p !== 'y' && b.e && b.e !== b.s && b.e.slice(0, 7) === m)).filter(b => fig(b) >= 10000).slice(0, 2);
+  const ended = once(w.battles.filter(b => b.p !== 'y' && !b.pts && b.e && b.e !== b.s && b.e.slice(0, 7) === m)).filter(b => fig(b) >= 10000).slice(0, 2);
   // Its own toll only; a whole with none, its parts' recorded figures said as theirs (figures.mjs endLine, WF2-02).
   for (const b of ended) { const line = endLine(b, nodeOf(b), spokenNumber); if (line) parts.push(line); }
   qids.push(...[...begun, ...ended].filter(b => b.lat != null).map(b => b.q));
@@ -1135,6 +1147,9 @@ window.addEventListener('hashchange', () => {
 // War Focus's index (it carries the Retrospective Battlefield's years, for the link), the borders' spans, the
 // Battlefield's crosswalk and Natural Earth's points; the dots' Q-ids and first days are War Focus's own (dots.mjs),
 // each at Natural Earth's point for it, and one with no point is not drawn.
+// A war's name in the menu with its years, unless the name carries them already: two wars are both the Chinese Civil
+// War, so scripts/wars.mjs names them by their years (review front-pages-12, 25 November 2026).
+const menuName = w => (/\(\d{4}/.test(w.name) ? w.name : `${w.name} (${w.start.slice(0, 4)}–${w.end ? w.end.slice(0, 4) : 'present'})`);
 const json = (url, what) => fetch(url).then(r => { if (!r.ok) throw new Error(`${what}: ${r.status}`); return r.json(); });
 Promise.all([json('data/index.json', 'the wars'), json('data/borders/index.json', 'the borders'), json('../history/data/places.json', 'the places'),
   json('../../omni/data/base/small-states.json', 'the small states')]).then(([idx, bindex, places, small]) => {
@@ -1142,7 +1157,7 @@ Promise.all([json('data/index.json', 'the wars'), json('data/borders/index.json'
   for (const p of small.points || []) if (p.q && Array.isArray(p.at)) state.small.set(p.q, p);
   DOTS = Object.entries(DOT_TABLE).flatMap(([iso3, d]) => { const p = state.small.get(d.q); return p ? [{ iso3, q: d.q, name: p.n, lonlat: [...p.at], from: d.from }] : []; });
   const eras = [['1926–1945', w => w.start < '1946'], ['1946–1988', w => w.start >= '1946' && w.start < '1989'], ['1989 to today', w => w.start >= '1989']];
-  $('#war').innerHTML = eras.map(([l, f]) => `<optgroup label="${esc(l)}">${idx.wars.filter(f).map(w => `<option value="${esc(w.id)}">${esc(w.name)} (${esc(w.start.slice(0, 4))}–${w.end ? esc(w.end.slice(0, 4)) : 'now'})</option>`).join('')}</optgroup>`).join('');
+  $('#war').innerHTML = eras.map(([l, f]) => `<optgroup label="${esc(l)}">${idx.wars.filter(f).map(w => `<option value="${esc(w.id)}">${esc(menuName(w))}</option>`).join('')}</optgroup>`).join('');
   $('#war').onchange = e => loadWar(e.target.value);
   initMap();
   const h = readHash();

@@ -33,24 +33,63 @@ const LASTING = /\b(campaigns?|offensives?|counteroffensives?|counter-offensives
  *          'order' Wikidata's end (eW) is before its start: the end is dropped, the start kept and both are doubtful
  *          'after' Wikidata's end (eW) is after the war's own end: the battle is not drawn running past the war
  *   p, pe  the precision of the start ('m' month, 'y' year, null day) and, when it differs, of the end ('d' a day)
- * A point in time alone is the battle's start and end, unless its name says it lasted (a campaign, an offensive, a
- * siege, an occupation), when it is its start.
+ *   pts    for a battle of several points in time, the days themselves (below); otherwise absent
+ * Points in time alone run from the first to the last (one point: a one-day battle), unless its name says it lasted (a
+ * campaign, an offensive, a siege, an occupation), when the first is its start. Several points are several days, not a
+ * span: the separate raids of the bombing of Yawata (June 1944, 20 August 1944, 8 August 1945) or of the Vatican (5
+ * November 1943, 1 March 1944) were not under way in the months between. Their s and e are still the first and the
+ * last, for sorting, and `pts` lists each, sorted and distinct, at its precision ('1944-08-20' a day, '1944-06' a
+ * month, '1944' a year), so the page lists them and draws the battle only in their months (the atomic bombings of
+ * Hiroshima and Nagasaki, Q488: 6 and 9 August 1945, not 6 August alone; review front-pages-10, 25 November 2026).
+ * A point that holds a finer one is the same date recorded twice, not a span (Operation Martin, Q19384597: "1943"
+ * with no reference and "March 1943" with one): only the finer is kept.
  */
 export function battleDates({ start = [], end = [], point = [], name = '', warEnd = null }) {
   const pick = (list, atEnd) => list.map(x => ({ d: wdDate(x.v, x.p, atEnd), p: PREC(x.p ?? 11) })).filter(x => x.d)
     .sort((a, b) => (a.d < b.d ? -1 : 1));
-  const st = pick(start)[0], pt = pick(point)[0], en = pick(end, true).at(-1), ptEnd = pick(point, true)[0];
+  const prec = x => +(x.p ?? 11);
+  const holds = (x, y) => prec(y) > prec(x) && wdDate(y.v, y.p) && wdDate(x.v, x.p) <= wdDate(y.v, y.p) && wdDate(y.v, y.p, true) <= wdDate(x.v, x.p, true);
+  const points = point.filter(x => wdDate(x.v, x.p) && !point.some(y => y !== x && holds(x, y)));
+  const st = pick(start)[0], pt = pick(points)[0], en = pick(end, true).at(-1), ptEnd = pick(points, true).at(-1);
   const first = st || pt;
   if (!first) return undatedOf([...start, ...point, ...end]);
   const out = { s: first.d, e: null, p: first.p, pe: null, u: null, eW: null };
-  let last = en;
-  if (!last && !st && pt && !LASTING.test(name)) last = ptEnd;
+  let last = en, several = false;
+  if (!last && !st && pt && !LASTING.test(name)) { last = ptEnd; several = true; }
   if (!last) { out.u = 'end'; return out; }
   if (last.d < out.s) return { ...out, u: 'order', eW: last.d };
   if (warEnd && FIRST[last.p](last.d) > warEnd) return { ...out, u: 'after', eW: last.d };
   out.e = last.d;
   if (last.p !== out.p) out.pe = last.p || 'd';
+  if (several) {
+    const cut = { 11: 10, 10: 7, 9: 4 };
+    const days = [...new Set(points.map(x => String(x.v).slice(0, cut[Math.min(11, prec(x))])))].sort();
+    if (days.length > 1) out.pts = days;
+  }
   return out;
+}
+
+/** The months (yyyy-mm) of a battle's several points in time (battleDates' pts); a point dated only to its year is in
+ *  no month, as a battle dated only to its year weighs none (monthWeights). */
+export const pointMonths = pts => (pts || []).filter(d => d.length >= 7).map(d => d.slice(0, 7));
+
+/**
+ * A battle's dates (battleDates) with a date correction applied: `fix` { s }, an entry of build.mjs DATE_FIXES, gives
+ * its start to the day from the source the entry names, where Wikidata's has no reference and the battle's own article
+ * says otherwise (the Battle of Iwo Jima, 19 February 1945, not Wikidata's 8 February; review front-pages-9, 25 November
+ * 2026). Wikidata's start is kept in sW, at its own precision in sWp ('m' a month, 'y' a year, absent a day), so the
+ * page can say both; the end keeps its own precision. With no entry, or once Wikidata gives the same start, the dates
+ * are returned as they were. Refused, so that no correction stops applying unseen: a battle with no start (undated, or
+ * no date at all), one of several separate days (pts), and a start after the battle's end.
+ */
+export function fixDates(d, fix) {
+  if (!fix?.s) return d;
+  if (!d?.s) throw new Error(`date correction ${fix.q || ''}: the battle has no start in Wikidata to correct`);
+  if (d.pts) throw new Error(`date correction ${fix.q || ''}: the battle is several separate days (${d.pts.join(', ')}), not a start and an end`);
+  if (d.s === fix.s) return d;
+  if (d.e && fix.s > d.e) throw new Error(`date correction ${fix.q || ''}: start ${fix.s} is after its end ${d.e}`);
+  const endP = d.e ? (d.pe === 'd' ? null : d.pe || d.p) : null;
+  return { ...d, s: fix.s, p: null, pe: endP, sW: d.s, ...(d.p ? { sWp: d.p } : {}) };
 }
 
 /**
@@ -239,10 +278,12 @@ export function eventMonths(dStart, dEnd, deaths, from, to) {
  * used to weigh all twelve (S0, the spread fix, 16 November 2026: "Battle of Łódź", 1939, weighed January to August,
  * before the war began). `months` are yyyy-mm; a battle { s, e, p, pe } as scripts/rules.mjs battleDates gives it.
  */
+// A battle of several separate days (battleDates' pts) weighs only the months of its days, not those between.
 export function monthWeights(months, battles) {
   const endPrec = b => (b.pe === 'd' ? null : b.pe || b.p);
-  const known = (battles || []).filter(b => b.s && b.p !== 'y' && endPrec(b) !== 'y');
-  return months.map(m => 1 + known.filter(b => b.s.slice(0, 7) <= m && (b.e || b.s).slice(0, 7) >= m).length);
+  const known = (battles || []).filter(b => b.s && (b.pts || (b.p !== 'y' && endPrec(b) !== 'y')));
+  const on = (b, m) => (b.pts ? pointMonths(b.pts).includes(m) : b.s.slice(0, 7) <= m && (b.e || b.s).slice(0, 7) >= m);
+  return months.map(m => 1 + known.filter(b => on(b, m)).length);
 }
 
 const MONTH_NO = Object.fromEntries(['january', 'february', 'march', 'april', 'may', 'june', 'july', 'august', 'september', 'october', 'november', 'december'].map((m, i) => [m, i + 1]));
@@ -281,9 +322,11 @@ export function infoboxEnd(wikitext) {
  * is after the war) more than a month after the article does, and the article's end falls within the battle's start
  * and the war's end, the battle is drawn to the article's end, the earlier, which both sources agree it lasted to, and
  * marked u 'conflict' with Wikidata's end in eW and the article's in eA. Battle of Bakhmut: Wikidata 7 January 2024,
- * Wikipedia 20 May 2023, when the city fell. Otherwise the dates are returned as they were.
+ * Wikipedia 20 May 2023, when the city fell. Otherwise the dates are returned as they were, and always for a battle of
+ * several separate days (pts), which has no end to check: its last day is a day of its own.
  */
 export function endAgainstArticle(d, wp, warEnd = null) {
+  if (d?.pts) return d;
   const wd = d && (d.e || (d.u === 'after' ? d.eW : null));
   if (!wd || !wp || !d.s || wp.d < d.s || (warEnd && FIRST[wp.p](wp.d) > warEnd)) return d;
   if (dayNo(wd) - dayNo(wp.d) <= 31) return d;

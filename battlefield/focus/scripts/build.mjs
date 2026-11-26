@@ -41,7 +41,7 @@ import { execFileSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
 import { createRequire } from 'node:module';
 import { WARS, leftOutOf } from './wars.mjs';
-import { battleDates, partsWithin, apportion, eventMonths, monthWeights, wdDate, decadeFits, stateBoxes, infoboxEnd, endAgainstArticle, casualtiesOf, byStart, pickCoord } from './rules.mjs';
+import { battleDates, fixDates, partsWithin, apportion, eventMonths, monthWeights, wdDate, decadeFits, stateBoxes, infoboxEnd, endAgainstArticle, casualtiesOf, byStart, pickCoord } from './rules.mjs';
 import { linkParts, ownDeaths, groupBattles, ownFigure } from '../figures.mjs';
 import { readArticle, battleFigures, wdStatements, keptFigures } from './infobox.mjs';
 import { candidateFiles } from '../../scripts/ucdp.mjs';
@@ -244,8 +244,9 @@ function readSafely(text, b) { try { return readArticle(text, { s: b.s, e: b.e |
 function ucdpNear(b, ev) {
   // A day-precise date has no `p` (scripts/rules.mjs); an end at another precision has `pe`.
   if (!b.s || b.s < '1989-01-01' || b.lat == null || b.p != null || (b.pe && b.pe !== 'd') || b.u) return null;
-  const e1 = b.e || b.s;
-  const hit = ev.filter(e => e.dp === 1 && e.prec <= 2 && e.d >= b.s && e.de <= e1 && isFinite(e.lat) && distKm(b.lat, b.lon, e.lat, e.lon) <= KM);
+  // A battle of several separate days (rules.mjs battleDates, pts): the clashes of those days, not of the days between.
+  const e1 = b.e || b.s, inDates = e => (b.pts ? b.pts.some(d => d.length === 10 && e.d >= d && e.de <= d) : e.d >= b.s && e.de <= e1);
+  const hit = ev.filter(e => e.dp === 1 && e.prec <= 2 && inDates(e) && isFinite(e.lat) && distKm(b.lat, b.lon, e.lat, e.lon) <= KM);
   if (!hit.length) return null;
   const sum = k => hit.reduce((s, e) => s + (e[k] || 0), 0);
   return { v: sum('best'), low: sum('low'), high: sum('high'), n: hit.length, km: KM };
@@ -278,6 +279,15 @@ async function deathsAndParts(qids) {
   for (const [b, list] of casStmts) cas.set(b, casualtiesOf(list));
   return { has, deaths, cas, coords };
 }
+// ---- Date corrections (review front-pages-9, 25 November 2026): a battle whose Wikidata date gives no reference and
+// whose own English Wikipedia article gives another. Each entry names its source, at the revision read; the battle
+// keeps Wikidata's start in sW and the page says both (rules.mjs fixDates). Once Wikidata gives the same date the entry
+// changes nothing, and the build says it can go; an entry whose battle is no longer among its war's battles is warned
+// of, and one whose battle has no start in Wikidata stops the build (fixDates), so no correction stops applying unseen.
+const DATE_FIXES = [
+  { war: 'ww2', q: 'Q180182', s: '1945-02-19', source: 'English Wikipedia, "Battle of Iwo Jima", its infobox: "19 February – 26 March 1945" (revision 1387000548, read 25 November 2026); Wikidata starts it on 8 February 1945 (P580) with no reference', url: 'https://en.wikipedia.org/w/index.php?oldid=1387000548' },
+];
+const FIXES = new Map(DATE_FIXES.map(f => [f.q, f]));
 async function battlesOf(qid, span, theatre, warId) {
   const { within, edges } = await partsOf(qid, span, theatre);
   // What War Focus leaves out of this war although Wikidata makes it part of it (wars.mjs LEFT_OUT, with its reason).
@@ -310,15 +320,17 @@ async function battlesOf(qid, span, theatre, warId) {
   const planned = /\b(proposed|planned|plan|cancelled|canceled|aborted)\b/i;
   const out = [];
   for (const b of by.values()) {
-    const d = battleDates({ start: b.t.start, end: b.t.end, point: b.t.point, name: b.n, warEnd: span.warEnd });
+    const d = fixDates(battleDates({ start: b.t.start, end: b.t.end, point: b.t.point, name: b.n, warEnd: span.warEnd }), FIXES.get(b.q));
     if (!d) continue;
+    if (FIXES.has(b.q)) console.log(d.sW ? `  date corrected: ${b.q} ${b.n} from ${d.s}, not Wikidata's ${d.sW} (DATE_FIXES)` : `  date correction for ${b.q} ${b.n}: Wikidata now gives ${d.s}, so its DATE_FIXES entry can go`);
     delete b.t; Object.assign(b, d);
     out.push(b);
   }
+  for (const f of DATE_FIXES) if (f.war === warId && !out.some(b => b.q === f.q)) console.warn(`  DATE_FIXES ${f.q}: not among ${warId}'s battles, so the correction is not applied`);
   const kept = out.filter(b => (b.u === 'undated' ? b.dec != null : /^\d{4}-\d{2}-\d{2}$/.test(b.s) && !b.s.startsWith('-')) && !planned.test(b.n) && !/\b(planned|proposed|never (carried out|executed|implemented)|cancelled|canceled)\b/i.test(b.desc));
   // An end checked against the battle's English Wikipedia article (endAgainstArticle, scripts/rules.mjs): only where
   // Wikidata's runs more than a month, as it must to end over a month after the article's.
-  const long = kept.filter(b => b.w && b.s && (b.e || b.u === 'after') && dayNo(b.e || b.eW) - dayNo(b.s) > 31 && (b.u === 'after' || (b.pe === 'd' ? null : b.pe || b.p) !== 'y'));
+  const long = kept.filter(b => b.w && b.s && !b.pts && (b.e || b.u === 'after') && dayNo(b.e || b.eW) - dayNo(b.s) > 31 && (b.u === 'after' || (b.pe === 'd' ? null : b.pe || b.p) !== 'y'));
   // Every battle's article is read once (BF-08: its infobox's casualties too, scripts/infobox.mjs), at the revision named.
   const articles = await fetchLeads([...new Set(kept.filter(b => b.w).map(b => b.w))]);
   if (long.some(b => wpFailed.has(b.w))) throw new Error('Wikipedia lead sections failed (an end could not be checked against its article)');
@@ -614,7 +626,7 @@ console.log('GED loaded through', maxGed);
 // ---- Per war (the files are kept in memory and written only once the whole build has passed the guard)
 const index = [], pending = [], figLost = [];
 const FIG_SOURCES = { wikidata: 'Wikidata (CC0): deaths (P1120), casualties (P1590), injured (P1339) and missing (P1446), each statement with its rank, qualifiers and references',
-  wikipedia: 'English Wikipedia (CC BY-SA 4.0): the casualty fields of each battle’s infobox, at the revision named; figures taken as facts, with at most a few words of its own',
+  wikipedia: 'English Wikipedia (CC BY-SA 4.0): the casualty fields of each battle’s infobox and, where the page says so, its dates, at the revision named; figures and dates taken as facts, with at most a few words of its own',
   ucdp: 'UCDP Georeferenced Event Dataset v26.1 and candidate events (CC BY 4.0): recorded clashes within 25 km of a battle in its dates, since 1989, shown apart' };
 for (const w of wars) {
   const qid = await qidOf(w.wiki);
@@ -696,7 +708,7 @@ for (const w of wars) {
   const data = {
     id: w.id, name: w.name, qid, wiki: w.wiki, bf, start: w.start, end: w.end, ongoing: !w.end, dataThrough: w.end ? null : maxGed,
     months, deaths, estimated, deathsSource: source, totalDeaths: total, covered, shared: shared.some(Boolean) ? shared : null,
-    ...states, names, unplaced, lands, bbox, battles: battles.map(({ q, n, desc, lat, lon, s, e, p, pe, u, eW, eA, dec, deaths, cas, dv, dAt, w: art, up, upAlso, parts, fd, fc, fs, fw, fwp, fu }) => ({ q, n, desc, lat, lon, s: s || null, e: e || null, p: p || null, ...(pe ? { pe } : {}), ...(u ? { u } : {}), ...(eW ? { eW } : {}), ...(eA ? { eA } : {}), ...(dec != null ? { dec } : {}), deaths: deaths || null, cas: cas || null,
+    ...states, names, unplaced, lands, bbox, battles: battles.map(({ q, n, desc, lat, lon, s, e, p, pe, pts, u, eW, eA, sW, sWp, dec, deaths, cas, dv, dAt, w: art, up, upAlso, parts, fd, fc, fs, fw, fwp, fu }) => ({ q, n, desc, lat, lon, s: s || null, e: e || null, p: p || null, ...(pe ? { pe } : {}), ...(pts ? { pts } : {}), ...(u ? { u } : {}), ...(eW ? { eW } : {}), ...(eA ? { eA } : {}), ...(sW ? { sW } : {}), ...(sWp ? { sWp } : {}), ...(dec != null ? { dec } : {}), deaths: deaths || null, cas: cas || null,
       ...(dv ? { dv } : {}), ...(dAt ? { dAt } : {}), w: art || null, ...(up ? { up } : {}), ...(upAlso?.length ? { upAlso } : {}), ...(parts?.length ? { parts } : {}),
       ...(fd ? { fd } : {}), ...(fc ? { fc } : {}), ...(fs ? { fs } : {}), ...(fw ? { fw } : {}), ...(fwp ? { fwp } : {}), ...(fu ? { fu } : {}) })),
     cells: cellsOut, top: topOut, events: ev.length,

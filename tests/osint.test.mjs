@@ -154,7 +154,7 @@ test('domains: IANA’s RDAP bootstrap picks the registry or regional registry, 
   assert.equal(L.rdapServiceForDomain(dns, 'shop.example.uk').base, 'https://rdap.example-sld.test/');
   assert.equal(L.rdapServiceForDomain(dns, 'wikipedia.org').base, 'https://rdap.publicinterestregistry.org/rdap/', 'https preferred, trailing slash added');
   assert.deepEqual(L.rdapServiceForDomain(dns, 'gov.kg'), { base: '', httpOnly: true });
-  assert.deepEqual(L.rdapServiceForDomain(dns, 'rte.ie'), { base: '', httpOnly: false }, '.ie publishes no RDAP');
+  assert.deepEqual(L.rdapServiceForDomain(dns, 'rte.ie'), { base: '', httpOnly: false }, '.ie is not in IANA’s RDAP bootstrap file');
   assert.equal(L.rdapServiceForDomain(dns, 'com').base, '', 'a bare TLD is not a domain to look up');
   assert.equal(L.rdapServiceForDomain(null, 'example.com').base, '');
   assert.equal(L.rdapUrlAt('https://rdap.nominet.uk/uk/', 'domain', 'bbc.co.uk'), 'https://rdap.nominet.uk/uk/domain/bbc.co.uk');
@@ -863,6 +863,16 @@ test('page: hookup, tabs, tokens only, pinned libraries, no old brand names', ()
     const src = read('osint/' + f);
     for (const m of src.matchAll(/https:\/\/(?:unpkg\.com|cdn\.jsdelivr\.net\/npm|cdnjs\.cloudflare\.com\/ajax\/libs)\/([^/'"\s]+)/g)) assert.match(m[1], /@\d+\.\d+\.\d+$|\/\d+\.\d+\.\d+$/, `${f}: ${m[1]} pins an exact version`);
   }
+});
+
+// front-pages-31 (25 Nov 2026): DENIC runs an RDAP server (rdap.denic.de answers with RDAP JSON), but IANA's bootstrap
+// file (data.iana.org/rdap/dns.json, published 20 Nov 2026) has no entry for de, ie, eu or io, so the page finds none.
+test('overview: the RDAP row says the country domains are missing from IANA’s bootstrap file, not that they have no RDAP', () => {
+  const src = read('osint/tab-overview.js');
+  const row = src.match(/\{ id: 'rdap',[^\n]*/)?.[0] || '';
+  assert.ok(row, 'the RDAP service row');
+  assert.ok(!/publish no RDAP/.test(row), 'not "publish no RDAP": DENIC runs an RDAP server');
+  assert.match(row, /limits: 'Many country domains \(\.ie, \.de, \.eu, \.io\) have no RDAP server in IANA’s bootstrap file: the page links to their WHOIS instead'/);
 });
 
 /* ---------------------------------------------------------------- the page in a browser (optional) */

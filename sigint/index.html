@@ -18,7 +18,7 @@
   <header class="front">
     <div class="prp-eyebrow">Intelligence Collection <span class="sep">·</span> SIGINT Dashboard</div>
     <h1 class="prp-title">SIGINT Dashboard</h1>
-    <p class="prp-dek">Receive-only monitoring of public, unencrypted signals: aircraft, ships, satellites, LoRa mesh nodes, satellite navigation and space weather. Every view works without hardware from public feeds and connects to your own receiver when you have one. Nothing here transmits, decrypts or listens to private communications.</p>
+    <p class="prp-dek">Receive-only monitoring of public, unencrypted signals: aircraft, ships, satellites, LoRa mesh nodes, satellite navigation and space weather. Most views work without hardware from public feeds and connect to your own receiver when you have one. Nothing here transmits, decrypts or listens to private communications.</p>
     <div class="prp-meta" id="meta">
       <span><b>Location</b> <span id="meta-loc">Dublin (default)</span> <button type="button" class="linkish" data-goto="overview" data-focus="loc-lat">Change</button></span>
       <span><b>Mode</b> Receive only</span>
@@ -72,9 +72,9 @@
     </div>
 
     <section class="prp-panel matrix-panel" aria-labelledby="h-matrix">
-      <div class="prp-panel-head"><h2 class="prp-h3" id="h-matrix">What you can monitor, and with what</h2><span class="prp-label">Zero hardware → €30 RTL-SDR → more</span></div>
+      <div class="prp-panel-head"><h2 class="prp-h3" id="h-matrix">What you can monitor, and with what</h2><span class="prp-label">Zero hardware → cheap hardware → more</span></div>
       <div class="scroll"><table class="prp-table matrix">
-        <thead><tr><th scope="col">Signal</th><th scope="col">Where</th><th scope="col">With no hardware (this page)</th><th scope="col">With a €30 RTL-SDR</th><th scope="col">With more</th></tr></thead>
+        <thead><tr><th scope="col">Signal</th><th scope="col">Where</th><th scope="col">With no hardware (this page)</th><th scope="col">With cheap hardware</th><th scope="col">With more</th></tr></thead>
         <tbody>
           <tr><th scope="row"><button type="button" class="linkish" data-goto="aircraft">Aircraft (ADS-B)</button></th><td class="mono">1090 MHz</td><td>Live map and table of aircraft near you from adsb.lol (through the Vitruvian Manager proxy or bridge)</td><td>Your own receiver (readsb + tar1090); hear 150–250 km with an outdoor antenna; feed the aggregators</td><td>Filtered LNA, collinear on a mast, a Raspberry Pi feeding 24/7, MLAT</td></tr>
           <tr><th scope="row"><button type="button" class="linkish" data-goto="ships">Ships (AIS)</button></th><td class="mono">161.975 / 162.025 MHz</td><td>Links to public ship maps; aisstream.io through the Vitruvian Manager bridge (free key)</td><td>AIS-catcher with a marine VHF antenna, if you can see the sea or a big river</td><td>Dedicated AIS antenna high up; share with aggregators</td></tr>

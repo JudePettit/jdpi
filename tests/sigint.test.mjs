@@ -396,6 +396,20 @@ test('page: structure, tabs and tokens-only CSS', () => {
   for (const f of ['views/satellites.js', 'lib/maps.js']) for (const u of read(f).match(/https:\/\/(cdn\.jsdelivr\.net|unpkg\.com)\/[^'"`]+/g) || []) assert.match(u, /@\d+\.\d+\.\d+/, u);
 });
 
+// front-pages-34 and -35 (25 Nov 2026): the middle column holds a u-blox receiver and a LoRa board as well as RTL-SDR
+// set-ups, and the LoRa mesh row shows no public feed, so not every view works without hardware. The heading carries no
+// price: the Hardware Guide (content/hardware.md) prices the column's kit from €12 (u-blox) to €50–65 (an RTL-SDR Blog
+// V4 or V4L kit) and €40–80 (a marine VHF antenna), so each row and the guide give the prices.
+test('page: the overview says most views work without hardware and heads the cheap column without RTL-SDR or a price', () => {
+  const html = read('index.html');
+  assert.ok(!/Every view works without hardware/.test(html), 'not "every view": the mesh row has no public feed');
+  assert.match(html, /<p class="prp-dek">[^<]*Most views work without hardware from public feeds and connect to your own receiver when you have one\./);
+  assert.ok(!/With a €30 RTL-SDR|€30 RTL-SDR →/.test(html), 'the column is not only RTL-SDRs');
+  assert.match(html, /<th scope="col">With no hardware \(this page\)<\/th><th scope="col">With cheap hardware<\/th><th scope="col">With more<\/th>/);
+  assert.match(html, /<span class="prp-label">Zero hardware → cheap hardware → more<\/span>/);
+  for (const row of ['A €15–30 USB u-blox receiver', 'A €25 LoRa board on USB']) assert.ok(html.includes(row), `the row still names its device: ${row}`);
+});
+
 /* ---- Bridge and edge proxy ------------------------------------------------------------------------------------------------ */
 test('bridge: options, origins, hosts and request validation', () => {
   const o = B.parseArgs(['--port', '9001', '--route', 'adsb=http://pi.local:8080/data/aircraft.json?x=1', '--origin', 'https://example.org/'], { AISSTREAM_API_KEY: 'k' });

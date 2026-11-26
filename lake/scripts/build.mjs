@@ -21,7 +21,8 @@ import { recordAliases } from './aliases.mjs';
 import { wikidataDate, datedFacts, bestClaim, centuryTag } from './dates.mjs';
 import { wikidataPoint } from './coords.mjs';
 import { shortCounts, recount } from './counts.mjs';
-import { isDisambiguation, getBatched, entityLabel, nameOf, otherLabel, shownName, uniqueNames, titleAlias, summaryFor, restSummary, isQid, REDIRECT_BADGES } from './resolve.mjs';
+import { isDisambiguation, getBatched, entityLabel, nameOf, otherLabel, shownName, uniqueNames, titleAlias, summaryFor, restSummary, isQid, REDIRECT_BADGES, shortDesc } from './resolve.mjs';
+import { CANON_BY_QID, CANON_LABELS } from './canon.mjs';
 import { lostCounts, refuseIfLost } from '../../calendar/scripts/guard.mjs';
 import { typeOf, TYPE_NAMES } from './types.mjs';
 import { schoolSelfTags } from './thinkers.mjs';
@@ -77,7 +78,7 @@ const wbget = params => getJson('https://www.wikidata.org/w/api.php?' + new URLS
 // Every module an adapter reports is listed (tests/master-index.test.mjs): the order of an entity's appearances on its
 // Master Index page, so a country's profile pages (National Analysis, Volatility) follow its Retrospective entry.
 const MODULE_ORDER = ['retrospective', 'pestle', 'volatility', 'historical-calendar', 'calendar', 'battlefield-history', 'war-focus', 'battlefield', 'monthly', 'kardashev', 'traders', 'learning', 'learning-politics', 'progress', 'neo-classic',
-  'kino-political-events', 'kino-political-figures', 'kino-political-parties', 'kino-wars', 'kino-geopolitical-events', 'kino-great-thinkers'];
+  'kino-political-events', 'kino-political-figures', 'kino-political-parties', 'kino-wars', 'kino-geopolitical-events', 'kino-great-thinkers', 'encyclopedia'];
 // The new lake is written beside the old one and swapped in at the end (below). A build interrupted between the two
 // renames leaves the old data as lake/data.old: it is put back first, so this build compares against it rather than
 // against nothing. With no previous manifest at all (a first build), the guards have nothing to compare with, and only
@@ -219,8 +220,19 @@ const LABEL_OVERRIDES = [
   { q: 'Q3366745', label: 'Spanish Socialist Workers\' Party of the Community of Madrid', why: 'its English label is "Vox", another party, while its Spanish label (Partido Socialista Obrero Español de la Comunidad de Madrid), its alias PSM and its English description ("territorial organization of the PSOE in the Community of Madrid") say PSOE, so Pedro Sánchez was tagged "Member of:Vox"; the name is the one the last full build had (review D1)', read: '2026-11-21' },
   { q: 'Q296718', label: 'Lázaro Cárdenas', why: 'its English label is "Lázaro Cárdenas segundo", while its Spanish and multilingual labels and its English Wikipedia article are "Lázaro Cárdenas", the 51st President of Mexico (review D1)', read: '2026-11-21' },
 ];
-const LABEL_HOLD = new Map(LABEL_OVERRIDES.map(({ q, label }) => [q, label]));
+// VM's canon list holds three more, each with its reason there (canon.mjs CANON_LABELS: Wikidata's English label is
+// cut short or misspelt, or names another entry).
+const LABEL_HOLD = new Map([...LABEL_OVERRIDES, ...CANON_LABELS].map(({ q, label }) => [q, label]));
 for (const [q, label] of LABEL_HOLD) if (labels.has(q)) labels.set(q, label);
+// English names Wikidata has moved to its multilingual aliases (`mul`), which the lake does not read, so an entry that
+// had them would lose them at its next build, and the Master Index's name search with them. Each is held here with the
+// day it was read: the names the last full build had, every one a `mul` alias that day. An entry leaves the list when
+// the lake reads `mul` aliases (a decision for the owner: it needs a rule to keep other scripts out).
+const ALIAS_HOLD = [
+  { q: 'Q1043', names: ['Carolo Linnaeo', 'Carl von Linnaeus', 'Carl Linnæus', 'Carolus a Linné', 'Karl von Linné', 'Linnæus'], why: 'Carl Linnaeus had no English alias left; the six are multilingual now', read: '2026-11-26' },
+  { q: 'Q20124', names: ['The Origin of Species'], why: 'On the Origin of Species: "The Origin of Species" is multilingual now; its English aliases are the full title and "The origin of species" in lower case', read: '2026-11-26' },
+];
+const aliasHold = new Map(ALIAS_HOLD.map(({ q, names }) => [q, names]));
 // Nationality tags read better as demonyms ("American" rather than "United States of America").
 const demonym = new Map();
 const citizenships = [...new Set([...raw.values()].flatMap(e => refIds(e, 'P27')))];
@@ -274,7 +286,7 @@ if (unfetched) console.warn(`${unfetched} of ${needSummary.length} summaries cou
 // ---- 5. Entity records and shards
 // The names "Appears in" shows; a Kino category's carries the suite's name, since "Wars" alone would be anyone's.
 const MODULE_NAMES = { retrospective: 'Political Retrospective', pestle: 'National Analysis', volatility: 'Geopolitical Volatility', 'historical-calendar': 'Historical Calendar', calendar: 'Realtime Calendar', 'battlefield-history': 'Retrospective Battlefield', 'war-focus': 'War Focus', battlefield: 'Realtime Battlefield', monthly: 'Month by Month', kardashev: 'Kardashev Tracker', traders: 'Investor Impersonator', learning: 'Learning · Finance & Economics', 'learning-politics': 'Learning · Politics', progress: 'Invention Timeline', 'science-briefing': 'Scientific Briefing', 'osint-training': 'Intel Training', 'neo-classic': 'Bibliotheca',
-  'kino-political-events': 'Kino · Political Events', 'kino-political-figures': 'Kino · Political Figures', 'kino-political-parties': 'Kino · Political Parties', 'kino-wars': 'Kino · Wars', 'kino-geopolitical-events': 'Kino · Geopolitical Events', 'kino-great-thinkers': 'Kino · Great Thinkers' };
+  'kino-political-events': 'Kino · Political Events', 'kino-political-figures': 'Kino · Political Figures', 'kino-political-parties': 'Kino · Political Parties', 'kino-wars': 'Kino · Wars', 'kino-geopolitical-events': 'Kino · Geopolitical Events', 'kino-great-thinkers': 'Kino · Great Thinkers', encyclopedia: 'Master Index' };
 // The type's name in the "Type:" tag: TYPE_NAMES in types.mjs, beside the rules, so a new type is never "Type:undefined".
 // `notes` gathers the notes a module gives a tag (adapters.mjs mentionTags: Learning's positions, VM's own placement),
 // which the record keeps as `tn` and the page shows beside the tag.
@@ -315,7 +327,8 @@ function record(q) {
   // however often it names the entity (Jude, 15 November 2026, BI-19 and MI-10). The list holds them all up to 300;
   // `places` is kept only beyond that, where the list stops short.
   const places = new Set(ms.map(m => m.module + m.url)).size;
-  // Wikidata's first six aliases, tidied, then the names a module's own text uses (a mention's `aliases`: a book's
+  // Wikidata's first six aliases, tidied (an item of VM's canon list: its reviewed names instead, canon.mjs), then the
+  // names a module's own text uses (a mention's `aliases`: a book's
   // "Duke Valentino" for Cesare Borgia), so Bibliotheca's tagger finds the entity in the book (aliases.mjs). Only a
   // trailing comma or space, or the full stop after a regnal number ("Alexander VI."), goes: an abbreviation keeps its
   // stop, or William Withering's "With." would be "With", a term at every sentence that opens with the word in every
@@ -336,7 +349,7 @@ function record(q) {
   const tn = {}, tags = tagsFor(e, type, ms, tn);
   return {
     q, label, ...(name !== label ? { name } : {}), desc: e.descriptions?.en?.value || '', type,
-    aliases: titleAlias(recordAliases((e.aliases?.en || []).map(a => a.value), label, ms.flatMap(m => m.aliases || [])), { label, name, title, type }), wiki: title, img: img || null,
+    aliases: titleAlias(recordAliases((e.aliases?.en || []).map(a => a.value), label, [...(aliasHold.get(q) || []), ...ms.flatMap(m => m.aliases || [])], CANON_BY_QID.get(q)?.aliases), { label, name, title, type }), wiki: title, img: img || null,
     summary, ...(ns ? { ns } : {}), facts, ...(Object.keys(fp).length ? { fp } : {}), ...(point ? { pt: point.pt, ...(point.p ? { ptp: point.p } : {}) } : {}), ...(fc.length ? { fc } : {}), ...(fcal.length ? { fcal } : {}), ...(Object.keys(fd).length ? { fd } : {}), rel, mentions: mentionsOut, total: ms.length, ...(places !== mentionsOut.length ? { places } : {}), ...(Object.keys(n).length ? { n } : {}),
     tags, ...(Object.keys(tn).length ? { tn } : {}),
   };
@@ -442,7 +455,7 @@ for (const [q, r] of records) {
   for (const m of r.mentions) { const x = perModule.get(m.m); if (x) x[2]++; else perModule.set(m.m, [m.m, m.u, 1]); }
   // The row shows the record's shown name; where that differs from the label, the label leads its aliases, so a search
   // for "Frederik X of Denmark" still finds "Frederik X".
-  index.push([q, r.name || r.label, r.type, r.desc.slice(0, 80), r.total, (r.name ? [r.label, ...r.aliases] : r.aliases).slice(0, 3), r.tags.map(t => tagIds.get(t)), [...perModule.values()]]);
+  index.push([q, r.name || r.label, r.type, shortDesc(r.desc, 80), r.total, (r.name ? [r.label, ...r.aliases] : r.aliases).slice(0, 3), r.tags.map(t => tagIds.get(t)), [...perModule.values()]]);
   typeCounts[r.type] = (typeCounts[r.type] || 0) + 1;
 }
 // Requested titles that were redirects also map to their entity.

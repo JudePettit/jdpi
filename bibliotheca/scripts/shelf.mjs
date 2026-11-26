@@ -96,6 +96,10 @@ const GIBBON = {
     Switzerland: 'Q435583', Swiss: 'Q435583',
     // "The second, or German Empire of the West" is Charlemagne's and the Ottos', not the empire of 1871.
     'German Empire': 'Q12548',
+    // Gibbon's "reformation" is a reform in lower case far more often than his Reformation of the sixteenth century,
+    // which the books' rule therefore leaves untagged (a one-word name the book writes in lower case more often:
+    // tests/bibliotheca-data.test.mjs; the re-tag after VM's canon list, 25 November 2026).
+    Reformation: null,
     // Places the lake's match gets wrong here: Byzantium is the city before Constantine, not the empire named after
     // it; Caledonia, Alba and "Scot" are the Roman north of Britain and its people, not the kingdom of 843; "Saxony" is
     // Charlemagne's and the Saxons', not the Electorate; "Man" is Beausobre's "Hist. de Man[ichée]"; "States" is not the
@@ -578,6 +582,14 @@ export const SHELF = [
       // Darwin's Russia ("In Russia the small Asiatic cockroach", Murchison's "great work on Russia") is the empire of
       // his day, not the federation the lake now has under the bare word.
       Russia: 'Q34266',
+      // Linnæus, whose names Wikidata moved to its multilingual aliases (read on 25 November 2026: Q1043 had no English
+      // alias left); the lake holds them again (lake/scripts/build.mjs ALIAS_HOLD), and this keeps the book's four
+      // terms whatever the lake reads. "Origin of Species" is never Darwin's book in it: all four are in the Historical
+      // Sketch (chapter 0) and mean the question or another man's work: "the progress of opinion on the Origin of
+      // Species", "the papers by Mr. Wallace and myself on the Origin of Species" (of 1858), Freke's "Origin of
+      // Species by means of Organic Affinity", Naudin's "paper on the Origin of Species" (the second reader, 26
+      // November 2026), so the words are left untagged.
+      'Linnæus': 'Q1043', 'Origin of Species': null,
     },
   },
   smith(1, {
@@ -606,9 +618,12 @@ export const SHELF = [
     // Milman's population table of 1845 (note to chapter II, from the Almanach de Gotha) counts the Poland of the
     // partitions, "Prussian and Austrian Poland" and Russia's Congress Poland ("Russia, including Poland"), not the
     // Commonwealth of 1569–1795 that is Gibbon's Poland beside them ("six in Poland"), so those two phrases are left
-    // untagged whole.
+    // untagged whole. The volume's "balance of power" (twice, chapter XIV) is the tetrarchy's within one empire, "the
+    // balance of power established by Diocletian" among his co-emperors and Constantine's "balance of power in the
+    // divided empire", not the lake's balance of power among states (Q1125082), so it is left untagged here (the second
+    // reader, 26 November 2026; the four of the later volumes are between powers, and stay).
     decisions: { Rome: 'Q1747689', Germany: null, Moses: null, 'Marcus Aurelius Antoninus': null, Severus: null, Cyrus: 'Q8423',
-      ...untag('Prussian and Austrian Poland', 'including Poland') },
+      ...untag('Prussian and Austrian Poland', 'including Poland', 'balance of power') },
     // After the contents: the editor's preface and Gibbon's three share chapter 0 (the Gutenberg heads them all
     // "Introduction", a label of its own that goes). Chapter I's long title is the file's "Introduction." block and
     // the title after it, joined as Milman prints them. Three words of the long titles are broken in the file, in its
@@ -648,8 +663,12 @@ export const SHELF = [
     // church, not the philosopher; the "acts of St. Paul" are those of Paul of Constantinople. "The three Basilicæ of
     // Rome, St. Peter, St. Paul, and St. John Lateran" of chapter XX are three churches and their estates, not the
     // apostles.
+    // The re-tag after VM's canon list (25 November 2026, lake/scripts/canon.mjs) brought in related entries the books
+    // read otherwise: "Chi" is the Greek letter (the people of Antioch's attachment "to the Chi, (Christ,) and the
+    // Kappa, (Constantius.)"), not the Chinese state of Qi, whose Wikidata alias it is; Geneva is Isaac's see of the
+    // fifth century, not the Republic of Geneva the lake has under the word (founded 1534, its entry).
     decisions: { Rome: 'Q1747689', Germany: null, Socrates: null, Mahomet: null, ...untag('Severus', 'Cyrus', 'David', 'Moses', 'Bentivoglio'),
-      ...untag('Lucian', 'Lucianus', 'Boethius', 'Syrianus', 'acts of St. Paul', 'St. Peter, St. Paul, and St. John Lateran') },
+      ...untag('Lucian', 'Lucianus', 'Boethius', 'Syrianus', 'acts of St. Paul', 'St. Peter, St. Paul, and St. John Lateran'), ...untag('Chi', 'Geneva') },
   }),
   gibbon(3, {
     gutenberg: 733, first: 27, count: 12, written: 1781, published: 1781, appeared: '1781',
@@ -665,8 +684,11 @@ export const SHELF = [
     // Lucian is the presbyter of Caphargamala and the son of the præfect Florentius six times in seven, not Lucian of
     // Samosata; Boethius the Prætorian præfect killed with Aëtius in 454, not the philosopher; "Plutarch in Pyrrho" is
     // his Life of Pyrrhus, not Pyrrho the sceptic.
+    // Geneva is twice the Burgundian "dependent principality" of Godegisel, "the youngest of his brothers", beside
+    // Calvin's city and an eighteenth-century librarian's, so the word is left untagged here (the re-tag after VM's
+    // canon list, 25 November 2026: the lake's Geneva is the Republic of 1534 to 1815, its entry).
     decisions: { Rome: 'Q1747689', Germany: null, Socrates: null, Anthemius: null, ...untag('Severus', 'Cyrus', 'David', 'Moses', 'Romulus'),
-      ...untag('Lucian', 'Boethius', 'Pyrrho') },
+      ...untag('Lucian', 'Boethius', 'Pyrrho', 'Geneva') },
   }),
   gibbon(4, {
     gutenberg: 734, first: 39, count: 10, written: 1787, published: 1788, appeared: '1788',
@@ -715,8 +737,11 @@ export const SHELF = [
     // University of Paris of Milman's note to chapter LVIII (its students' joke "not later than A.D. 1200") is the
     // Master Index's University of Paris, whose entry is the university of 1150 to 1970 although Wikidata now prefers
     // its refoundation of 1896 for the date (the data test allows it, with this decision).
+    // "Human rights" are men's as against God's ("the imperfection of human rights was supplied and armed by the
+    // plenitude of divine power"), and "the dearest of human rights, religion and property": not the doctrine of the
+    // lake's entry (the re-tag after VM's canon list, 25 November 2026).
     decisions: { Rome: null, Germany: 'Q12548', Socrates: null, Russia: null, ...untag('Severus', 'Cyrus', 'David', 'Pope Alexander'),
-      Poland: null, 'University of Paris': 'Q209842' },
+      Poland: null, 'University of Paris': 'Q209842', ...untag('human rights') },
   }),
   gibbon(6, {
     gutenberg: 736, first: 59, count: 13, written: 1787, published: 1788, appeared: '1788',
@@ -733,9 +758,11 @@ export const SHELF = [
     // Poland and Bohemia" of 1147, "Ladislaus of Poland"), split in the lake between its kingdoms of 1025–1385 and
     // 1386–1569 and not the Commonwealth of 1569; Japan is Cublai's target of the 1270s and the Buddhists' Japan, not
     // the Tokugawa shogunate. All three are left untagged. The Jubilee's "apostolic churches of St. Peter and St. Paul"
-    // (chapter LXIX) are the two basilicas of Rome, not the apostles.
+    // (chapter LXIX) are the two basilicas of Rome, not the apostles. Geneva is the Lake of Geneva of a note and Robert
+    // of Geneva, "Clement the Seventh", neither the Republic of 1534 to 1815 the lake has under the word, its entry
+    // (the re-tag after VM's canon list, 25 November 2026).
     decisions: { Rome: null, Germany: 'Q12548', Socrates: null, Mahomet: null, Athens: null, Song: 'Q7462', ...untag('Severus', 'Cyrus', 'David'),
-      Russia: null, Poland: null, Japan: null, ...untag('churches of St. Peter and St. Paul') },
+      Russia: null, Poland: null, Japan: null, ...untag('churches of St. Peter and St. Paul', 'Geneva') },
   }),
   {
     slug: 'on-war',
@@ -837,6 +864,9 @@ export const SHELF = [
       // (Book VIII, chapter III, from Louis XI to Louis XIV) is Graham's word for the Empire of the sixteenth and
       // seventeenth centuries, the Holy Roman Empire, not the Confederation of 1815.
       'German Confederation': 'Q12548',
+      // The Vendeans' "Revolutionary War" is France's, the French Revolutionary Wars, not the American war whose
+      // Wikidata alias the bare words are (the re-tag after VM's canon list, 25 November 2026).
+      'Revolutionary War': 'Q207318',
     },
   },
   {
@@ -909,6 +939,10 @@ export const SHELF = [
       // partitioned nation, neither the Commonwealth of 1569–1795 nor the state of 1918, so it is left untagged.
       Russia: 'Q34266',
       Poland: null,
+      // The preface's Geneva, where the Russian translations were published "about 1863" and in 1882, is the city, not
+      // the Republic of Geneva (1534 to 1815, its entry) the lake has under the word (the re-tag after VM's canon list,
+      // 25 November 2026).
+      Geneva: null,
     },
   },
   bohmBawerk({

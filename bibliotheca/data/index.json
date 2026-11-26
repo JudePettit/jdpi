@@ -1,5 +1,5 @@
 {
- "generated": "2026-11-21T06:20:20.944Z",
+ "generated": "2026-11-26T07:31:56.825Z",
  "books": [
   {
    "slug": "the-prince",
@@ -14,8 +14,8 @@
    "words": 32453,
    "chapters": 27,
    "paragraphs": 254,
-   "terms": 570,
-   "generated": "2026-11-21T06:19:39.660Z"
+   "terms": 572,
+   "generated": "2026-11-25T20:41:43.977Z"
   },
   {
    "slug": "peloponnesian-war",
@@ -30,8 +30,8 @@
    "words": 204119,
    "chapters": 26,
    "paragraphs": 998,
-   "terms": 1121,
-   "generated": "2026-11-21T06:19:41.977Z"
+   "terms": 1127,
+   "generated": "2026-11-25T20:41:40.585Z"
   },
   {
    "slug": "origin-of-species",
@@ -46,8 +46,8 @@
    "words": 196098,
    "chapters": 16,
    "paragraphs": 972,
-   "terms": 278,
-   "generated": "2026-11-21T06:19:44.235Z"
+   "terms": 274,
+   "generated": "2026-11-26T07:30:36.373Z"
   },
   {
    "slug": "wealth-of-nations-1",
@@ -62,8 +62,8 @@
    "words": 162323,
    "chapters": 22,
    "paragraphs": 950,
-   "terms": 712,
-   "generated": "2026-11-21T06:19:46.349Z",
+   "terms": 713,
+   "generated": "2026-11-25T20:41:48.191Z",
    "set": {
     "slug": "wealth-of-nations",
     "title": "The Wealth of Nations",
@@ -84,8 +84,8 @@
    "words": 217807,
    "chapters": 14,
    "paragraphs": 1194,
-   "terms": 1203,
-   "generated": "2026-11-21T06:19:48.524Z",
+   "terms": 1212,
+   "generated": "2026-11-25T20:41:55.272Z",
    "set": {
     "slug": "wealth-of-nations",
     "title": "The Wealth of Nations",
@@ -106,8 +106,8 @@
    "words": 261444,
    "chapters": 16,
    "paragraphs": 2415,
-   "terms": 1526,
-   "generated": "2026-11-21T06:19:51.680Z",
+   "terms": 1548,
+   "generated": "2026-11-26T07:30:49.130Z",
    "set": {
     "slug": "decline-and-fall",
     "title": "The History of the Decline and Fall of the Roman Empire",
@@ -128,8 +128,8 @@
    "words": 288405,
    "chapters": 11,
    "paragraphs": 2082,
-   "terms": 834,
-   "generated": "2026-11-21T06:19:54.418Z",
+   "terms": 847,
+   "generated": "2026-11-25T20:41:01.482Z",
    "set": {
     "slug": "decline-and-fall",
     "title": "The History of the Decline and Fall of the Roman Empire",
@@ -150,8 +150,8 @@
    "words": 242252,
    "chapters": 12,
    "paragraphs": 1718,
-   "terms": 891,
-   "generated": "2026-11-21T06:19:56.800Z",
+   "terms": 909,
+   "generated": "2026-11-25T20:41:09.108Z",
    "set": {
     "slug": "decline-and-fall",
     "title": "The History of the Decline and Fall of the Roman Empire",
@@ -172,8 +172,8 @@
    "words": 276026,
    "chapters": 10,
    "paragraphs": 1642,
-   "terms": 1055,
-   "generated": "2026-11-21T06:19:59.221Z",
+   "terms": 1068,
+   "generated": "2026-11-25T20:41:16.964Z",
    "set": {
     "slug": "decline-and-fall",
     "title": "The History of the Decline and Fall of the Roman Empire",
@@ -194,8 +194,8 @@
    "words": 260464,
    "chapters": 10,
    "paragraphs": 1698,
-   "terms": 982,
-   "generated": "2026-11-21T06:20:01.659Z",
+   "terms": 1017,
+   "generated": "2026-11-25T21:09:47.390Z",
    "set": {
     "slug": "decline-and-fall",
     "title": "The History of the Decline and Fall of the Roman Empire",
@@ -216,8 +216,8 @@
    "words": 233699,
    "chapters": 13,
    "paragraphs": 1520,
-   "terms": 945,
-   "generated": "2026-11-21T06:20:04.397Z",
+   "terms": 965,
+   "generated": "2026-11-25T20:41:29.502Z",
    "set": {
     "slug": "decline-and-fall",
     "title": "The History of the Decline and Fall of the Roman Empire",
@@ -238,8 +238,8 @@
    "words": 291958,
    "chapters": 130,
    "paragraphs": 3210,
-   "terms": 281,
-   "generated": "2026-11-21T06:20:06.956Z"
+   "terms": 308,
+   "generated": "2026-11-25T20:41:36.494Z"
   },
   {
    "slug": "communist-manifesto",
@@ -254,8 +254,8 @@
    "words": 13630,
    "chapters": 5,
    "paragraphs": 243,
-   "terms": 90,
-   "generated": "2026-11-21T06:20:08.842Z"
+   "terms": 92,
+   "generated": "2026-11-25T20:40:47.164Z"
   },
   {
    "slug": "capital-and-interest",
@@ -270,8 +270,8 @@
    "words": 168907,
    "chapters": 31,
    "paragraphs": 1736,
-   "terms": 452,
-   "generated": "2026-11-21T06:20:10.961Z"
+   "terms": 455,
+   "generated": "2026-11-25T20:40:44.298Z"
   },
   {
    "slug": "positive-theory-of-capital",

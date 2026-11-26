@@ -24,6 +24,9 @@ import { CATEGORY_IDS, flatScenes } from '../kino/lib/format.js';
 import { readAt, onOwnPage } from '../kino/lib/links.js';
 import { pageTest, launch } from './tools/pages.mjs';
 import { groupBattles, figureLine } from '../battlefield/focus/figures.mjs';
+import { CANON, CANON_REFS, CANON_TYPES, CANON_LABELS, CANON_BY_QID, canonNote, canonContext } from '../lake/scripts/canon.mjs';
+import { TAG_GROUPS } from '../lake/scripts/thinkers.mjs';
+import { recordAliases } from '../lake/scripts/aliases.mjs';
 
 const ROOT = fileURLToPath(new URL('../', import.meta.url));
 const text = p => readFileSync(join(ROOT, p), 'utf8');
@@ -41,7 +44,8 @@ const STORIES = 'stories, not entities: news items whose names carry no Wikidata
   + 'nothing to badge yet; marking the countries each story is filed under with data-qid is to come';
 const EXEMPT = {
   dashboard: 'the shell’s own page (the Home module’s, once the Workspace): a few lines from other submodules’ data over every module and submodule, with no entities of its own',
-  encyclopedia: 'the Master Index itself: it reads the lake that every other submodule feeds',
+  // The Master Index itself was exempt here, as the page that reads the lake, until 25 November 2026: it now reports
+  // VM's canon list through the canon adapter (OWN_LIST below).
   briefing: STORIES, 'econ-briefing': STORIES, 'science-briefing': STORIES, 'digital-briefing': STORIES, headlines: STORIES,
   highbrowse: 'a view of the four briefings’ stories (exempt above): its stories, topics and search are theirs, with no entities of its own',
   'daily-synopsis': 'the Political Briefing’s stories of each day (exempt above), grouped and laid out by side, with a short checked digest of their headlines: no entities of its own',
@@ -82,6 +86,13 @@ function constant(file, name) {
 }
 
 const declared = new Map(Object.entries(ADAPTER_MODULES).flatMap(([adapter, mods]) => mods.map(m => [m, adapter])));
+// The rule's one written exception. The lake makes its entries only from what a submodule's page mentions (lake/README.md);
+// the canon adapter alone reports a list instead of a page: VM's canon list (lake/scripts/canon.mjs), one hand-kept and
+// reviewed file of the entries the canon review's references name (ledger MI-12, step F4), filed under the Master Index
+// itself, so those entries exist although no other submodule mentions them yet, and the bodies named in "Member of" tags
+// have entries to link to (F5). Its mentions are honest about it: each says it is VM's canon list, names its references,
+// and links to the list on the Master Index's own page (the tests of the canon below).
+const OWN_LIST = { encyclopedia: { adapter: 'canon', why: 'VM’s canon list, a reviewed list rather than a page: the entries the canon review’s references name, and the bodies the "Member of" tags name (MI-12, F4 and F5)' } };
 // A submodule whose adapter is new and whose mentions wait for the lake's next full build (one with the network:
 // lake-refresh.yml, on the 3rd of each month), with the date that build is due (a note: the test does not read the
 // clock). Once the committed lake holds the submodule, the test below fails until its line here is taken out.
@@ -102,6 +113,12 @@ test('registry: every live submodule reports to the Master Index through an adap
   }
   for (const [m, adapter] of declared) assert.ok(SUBMODULE.has(m), `ADAPTER_MODULES.${adapter}: registry.json has no submodule ${m}`);
   assert.equal(declared.size, Object.values(ADAPTER_MODULES).flat().length, 'each submodule is one adapter’s');
+  // The exception to "made only from module mentions", with its reason: the one adapter that reports a list.
+  for (const [m, { adapter, why }] of Object.entries(OWN_LIST)) {
+    assert.equal(declared.get(m), adapter, `${m}: the ${adapter} adapter reports it`);
+    assert.deepEqual(ADAPTER_MODULES[adapter], [m], `${adapter}: files under ${m} alone`);
+    assert.ok(why.length >= 40, `${m}: say why`);
+  }
 });
 
 test('adapters: each reports the submodules it declares and no other, with keys, and links the shell opens', async t => {
@@ -1419,4 +1436,268 @@ test('schools: a school related to its thinker carries its own School value, and
   for (let i = 0; i < lakeManifest.shards.entities; i++) for (const [q, r] of Object.entries(read(`lake/data/e/${i}.json`))) all.set(q, r);
   assert.ok(all.get('Q60238').tags.includes('School:New classical macroeconomics'), 'new classical macroeconomics');
   assert.deepEqual(schoolSelfTags(all), [], 'no school in the lake is left without its own value');
+});
+
+/* ---------------------------------------------------------------- VM's canon list (MI-12, steps F4 to F6 and F10) */
+// lake/scripts/canon.mjs: the entries a reader of politics expects the Master Index to hold, from the references the
+// canon review (VM-MASTER-INDEX-CANON-REVIEW.md) names, each read from Wikidata on 25 November 2026. The canon adapter
+// reports them as the Master Index's own mentions (OWN_LIST above says why), and a tag it gives carries its reference.
+const CANON_GROUPS = ['School', 'Ideology', 'Field', 'Theory', 'Event type', 'Conflict'];
+const CANON_LISTS = ['ideas', 'schools', 'organisations', 'events', 'individuals'];
+const CODE = new RegExp(`^(${Object.keys(CANON_REFS).map(c => c.replace('-', '\\-')).join('|')})\\b`);
+test('canon: each item has its QID, its type, its references, and each tag its reference, in a group the lake has', async () => {
+  const { TYPES, typeOf } = await import('../lake/scripts/types.mjs');
+  const index = read('lake/data/index.json'), groups = new Set(index.tags.map(t => t.slice(0, t.indexOf(':'))));
+  const bad = [], seen = new Set();
+  for (const i of CANON) {
+    const at = `${i.q} ${i.label}`;
+    if (!QID.test(i.q) || seen.has(i.q)) bad.push(`${at}: a QID, once`);
+    seen.add(i.q);
+    if (!i.label || !TYPES.includes(i.type) || ![1, 2, null].includes(i.tier) || !CANON_LISTS.includes(i.list)) bad.push(`${at}: a label, a type, a tier and its list`);
+    if (!i.refs.length || i.refs.some(c => !(c in CANON_REFS))) bad.push(`${at}: references by their codes (${i.refs})`);
+    for (const [g, v, ref] of i.tags) {
+      if (!CANON_GROUPS.includes(g) || !groups.has(g)) bad.push(`${at}: ${g} is a group the lake has, and no new one`);
+      if (!v || /^\s|\s$/.test(v)) bad.push(`${at}: ${g} has a value`);
+      if (!CODE.test(ref) || ref.length < 8) bad.push(`${at}: ${g}:${v} names its reference (${ref})`);
+    }
+    // Every item with no hand tag says why, a held one too (the second reader, 26 November 2026: eight held schools had
+    // none, their School tag being the Learning courses').
+    if (!i.tags.length && !(i.untagged?.length >= 20)) bad.push(`${at}: untagged, and says why`);
+    if (i.held) { if ('aliases' in i) bad.push(`${at}: held, so the entry keeps its own names`); }
+    else if (!Array.isArray(i.aliases) || new Set(i.aliases).size !== i.aliases.length || i.aliases.some(a => !a || a === i.label)) bad.push(`${at}: its reviewed names, each once, the label not among them`);
+  }
+  assert.deepEqual(bad, []);
+  for (const [q, { type, why }] of Object.entries(CANON_TYPES)) {
+    const i = CANON_BY_QID.get(q);
+    assert.ok(i && !i.held && i.type === type && why.length >= 40, `CANON_TYPES ${q}: an item of the list, its type and why`);
+    assert.equal(typeOf({ id: q, claims: {} }), type, `${q}: typeOf reads it first`);
+  }
+  for (const { q, label, why, read: day } of CANON_LABELS) assert.ok(CANON_BY_QID.get(q) && label && label !== CANON_BY_QID.get(q).label && why.length >= 40 && /^2026-11-2[5-9]$/.test(day), `CANON_LABELS ${q}`);
+  assert.equal(canonNote('OPS, § Political theory'), 'VM’s canon list, from OPS, § Political theory');
+});
+
+test('canon adapter: one mention per item, by the Master Index, linked to its list, saying it is VM’s canon list, with each tag’s reference as its note', async () => {
+  const { canon, CANON_URL, canonUrl } = await import('../lake/scripts/adapters.mjs');
+  const mentions = await canon(), mod = SUBMODULE.get('encyclopedia');
+  const memOnly = CANON.filter(i => i.refs.every(c => c === 'MEM'));
+  // The review had these from its own memory alone, and no reference read names them: they are no mention (the page
+  // names no source it cannot show). The four parties and the Muslim Brotherhood were "VA3, IGO" or "IGO" by the
+  // review's blanket column until 26 November 2026, though neither page names them. All but the Muslim Brotherhood are
+  // entries already, through other modules.
+  assert.deepEqual(memOnly.map(i => i.label), ['Muslim Brotherhood', 'Communist Party of the Soviet Union', 'Chinese Communist Party', 'Nazi Party', 'National Fascist Party', 'Winston Churchill', 'Mikhail Gorbachev']);
+  assert.deepEqual(memOnly.filter(i => !i.held).map(i => i.q), ['Q133207']);
+  assert.equal(mentions.length, CANON.length - memOnly.length);
+  assert.equal(new Set(mentions.map(m => m.key.qid)).size, mentions.length, 'one mention per item');
+  for (const m of mentions) {
+    const i = CANON_BY_QID.get(m.key.qid), refs = i.refs.filter(c => c !== 'MEM');
+    assert.equal(m.module, 'encyclopedia');
+    // The list, narrowed by the name filter to the item, so it is in the first rows (the list shows 100 of 239 at once).
+    assert.equal(m.url, canonUrl(m.label));
+    assert.ok(m.url.startsWith(`${CANON_URL}&name=`) && decodeURIComponent(m.url.split('&name=')[1]) === m.label, m.url);
+    assert.ok(onOwnPage({ at: m.url }, mod.url, JDPI), m.url);
+    assert.equal(m.context, `${canonContext(refs)}.`);
+    assert.match(m.context, /^VM’s canon list, from the references named: /);
+    for (const c of refs) assert.ok(m.context.includes(`${c} (${CANON_REFS[c]})`), `${i.label}: names ${c}`);
+    assert.ok(!m.context.includes('MEM'), `${i.label}: no reference from memory`);
+    assert.deepEqual(m.tags, i.tags.map(([g, v, ref]) => [g, v, { note: `VM’s canon list, from ${ref}` }]));
+    assert.ok(!('aliases' in m), `${i.label}: the mention gives no names (build.mjs keeps the reviewed ones, or the entry’s own)`);
+    const held = CANON_LABELS.find(x => x.q === i.q);
+    assert.equal(m.label, held ? held.label : i.label);
+  }
+  assert.equal(decodeURIComponent(CANON_URL.split('q=')[1]), '"Appears in:Master Index"');
+});
+
+// The review's own items, pinned (the second reader, 26 November 2026: every canon test took its list from canon.mjs,
+// so an item dropped from the file passed them all). Tier 1 is the review's tables C2 to C6, Tier 2 its B3 items made
+// entries, and the rest the bodies of step F5. Dropping an item, or moving it between tiers, fails here.
+const CANON_TIER1 = [
+  'Q23', 'Q91', 'Q361', 'Q362', 'Q458', 'Q517', 'Q859', 'Q868', 'Q1001', 'Q1048', 'Q1065', 'Q2269', 'Q2487', 'Q2763',
+  'Q3588', 'Q4604', 'Q6186', 'Q6199', 'Q6206', 'Q6216', 'Q6223', 'Q6229', 'Q6235', 'Q6527', 'Q6534', 'Q7159',
+  'Q7164', 'Q7167', 'Q7169', 'Q7172', 'Q7174', 'Q7178', 'Q7184', 'Q7252', 'Q7260', 'Q7264', 'Q7272', 'Q7310',
+  'Q7320', 'Q7768', 'Q7785', 'Q7795', 'Q7801', 'Q7804', 'Q7825', 'Q8016', 'Q8023', 'Q8409', 'Q8442', 'Q8458',
+  'Q8663', 'Q8669', 'Q8676', 'Q8683', 'Q8698', 'Q8707', 'Q8729', 'Q8736', 'Q8740', 'Q9235', 'Q9294', 'Q9312',
+  'Q9353', 'Q9387', 'Q9438', 'Q10806', 'Q10859', 'Q12562', 'Q15975', 'Q17427', 'Q19771', 'Q30487', 'Q34296',
+  'Q37151', 'Q37470', 'Q37621', 'Q38130', 'Q41644', 'Q42008', 'Q42388', 'Q44918', 'Q46362', 'Q47488', 'Q51122',
+  'Q60025', 'Q60224', 'Q60238', 'Q60571', 'Q76430', 'Q77148', 'Q78994', 'Q79854', 'Q79896', 'Q81299', 'Q83201',
+  'Q83937', 'Q101638', 'Q121254', 'Q123759', 'Q126065', 'Q128135', 'Q128160', 'Q129053', 'Q133207', 'Q139596',
+  'Q140694', 'Q142988', 'Q150995', 'Q154705', 'Q154959', 'Q159385', 'Q160590', 'Q161227', 'Q162527', 'Q162719',
+  'Q163931', 'Q167651', 'Q178598', 'Q179848', 'Q179975', 'Q180490', 'Q185729', 'Q188181', 'Q188532', 'Q189280',
+  'Q189746', 'Q192125', 'Q192139', 'Q192769', 'Q201712', 'Q203411', 'Q204886', 'Q209158', 'Q211930', 'Q230533',
+  'Q243630', 'Q267932', 'Q271857', 'Q299938', 'Q373177', 'Q382861', 'Q471183', 'Q485207', 'Q494792', 'Q545449',
+  'Q674530', 'Q689128', 'Q760037', 'Q794394', 'Q847001', 'Q847198', 'Q854537', 'Q877848', 'Q896666', 'Q936174',
+  'Q1061896', 'Q1125082', 'Q1186378', 'Q1291690', 'Q1326430', 'Q1342733', 'Q1472670', 'Q1661415', 'Q1761068',
+  'Q1761621', 'Q1764511', 'Q1783023', 'Q1822951', 'Q1949683', 'Q2745901', 'Q3054672', 'Q3092681', 'Q3268778',
+  'Q5128352', 'Q5186732', 'Q5251484', 'Q6778656', 'Q6992186', 'Q7234129', 'Q15984000',
+];
+const CANON_TIER2 = [
+  'Q4264', 'Q7779', 'Q7809', 'Q7817', 'Q8475', 'Q8908', 'Q41550', 'Q41984', 'Q42908', 'Q42970', 'Q43056', 'Q47543',
+  'Q154640', 'Q159454', 'Q177859', 'Q183725', 'Q188592', 'Q191582', 'Q193235', 'Q193272', 'Q220945', 'Q277252',
+  'Q318693', 'Q862603',
+];
+const CANON_F5 = [
+  'Q4230', 'Q17495', 'Q25079', 'Q42262', 'Q128064', 'Q151991', 'Q170424', 'Q170481', 'Q188822', 'Q190008', 'Q191384',
+  'Q205995', 'Q212712', 'Q233611', 'Q294278', 'Q340195', 'Q376150', 'Q380340', 'Q496967', 'Q605326', 'Q624307',
+  'Q656801', 'Q663492', 'Q688638', 'Q703593', 'Q782942', 'Q789769', 'Q827525', 'Q842008', 'Q842490', 'Q899770',
+  'Q939743', 'Q1043527', 'Q1125994', 'Q1137381', 'Q2029901', 'Q3369762', 'Q3772571', 'Q4783148', 'Q5611262',
+  'Q7248622', 'Q7886981',
+];
+const byNumber = (a, b) => a.slice(1) - b.slice(1);
+test('canon: the list holds every item of the review, in its tier: 180 of Tier 1, 24 of Tier 2 and 42 bodies of F5', () => {
+  assert.deepEqual([CANON_TIER1.length, CANON_TIER2.length, CANON_F5.length], [180, 24, 42]);
+  assert.equal(CANON.length, 246);
+  for (const [tier, list] of [[1, CANON_TIER1], [2, CANON_TIER2], [null, CANON_F5]]) {
+    assert.deepEqual(CANON.filter(i => i.tier === tier).map(i => i.q).sort(byNumber), list, `tier ${tier}`);
+    if (tier === null) assert.ok(list.every(q => CANON_BY_QID.get(q).refs.includes('F5')), 'an F5 body names F5');
+  }
+});
+
+// The references whose pages were read again on 26 November 2026 (Wikipedia's Vital articles level 3 and level 4
+// History, its List of intergovernmental organizations and English school article, and the SEP), and the items each
+// names: a code stands beside an item only where its page names it. The review's blanket columns ("VA3,VA4H",
+// "VA3,IGO", "VA3,SEP") had given VA3 to 56 items it does not list, IGO to the parties and to bodies the list does not
+// hold, and ES and SEP to items neither names (the second reader). A code added to an item must be read first and
+// added here.
+const CANON_NAMED_BY = {
+  VA3: ['Q23', 'Q91', 'Q361', 'Q362', 'Q458', 'Q517', 'Q859', 'Q868', 'Q1001', 'Q1048', 'Q1065', 'Q2269', 'Q4604',
+    'Q6186', 'Q6199', 'Q6206', 'Q6216', 'Q6223', 'Q6229', 'Q6235', 'Q6534', 'Q7167', 'Q7169', 'Q7174', 'Q7178', 'Q7260',
+    'Q7272', 'Q8023', 'Q8409', 'Q8683', 'Q8698', 'Q9294', 'Q9312', 'Q9353', 'Q12562', 'Q101638', 'Q179848', 'Q192769',
+    'Q230533'],
+  VA4H: ['Q361', 'Q362', 'Q2269', 'Q2487', 'Q2763', 'Q3588', 'Q6534', 'Q8663', 'Q8669', 'Q8676', 'Q8683', 'Q8698',
+    'Q8707', 'Q8729', 'Q8736', 'Q8740', 'Q10806', 'Q10859', 'Q12562', 'Q46362', 'Q51122', 'Q78994', 'Q126065', 'Q128160',
+    'Q129053', 'Q150995', 'Q154705', 'Q161227', 'Q179848', 'Q179975', 'Q185729', 'Q192769', 'Q230533', 'Q382861',
+    'Q545449', 'Q689128', 'Q896666'],
+  IGO: ['Q458', 'Q1065', 'Q4230', 'Q4264', 'Q7159', 'Q7164', 'Q7172', 'Q7184', 'Q7768', 'Q7779', 'Q7785', 'Q7795',
+    'Q7801', 'Q7804', 'Q7809', 'Q7817', 'Q7825', 'Q8475', 'Q8908', 'Q17495', 'Q19771', 'Q37470', 'Q38130', 'Q41550',
+    'Q41644', 'Q41984', 'Q42262', 'Q47488', 'Q47543', 'Q81299', 'Q83201', 'Q123759', 'Q151991', 'Q159454', 'Q170424',
+    'Q170481', 'Q183725', 'Q188532', 'Q188592', 'Q188822', 'Q190008', 'Q191384', 'Q191582', 'Q193235', 'Q193272',
+    'Q205995', 'Q233611', 'Q243630', 'Q277252', 'Q294278', 'Q318693', 'Q340195', 'Q376150', 'Q380340', 'Q485207',
+    'Q496967', 'Q605326', 'Q656801', 'Q663492', 'Q782942', 'Q789769', 'Q827525', 'Q842490', 'Q899770', 'Q1043527',
+    'Q1764511', 'Q3772571'],
+  ES: ['Q9312', 'Q154959', 'Q188181', 'Q1342733', 'Q1783023', 'Q7234129'],
+  SEP: ['Q859', 'Q868', 'Q1048', 'Q4604', 'Q6199', 'Q6206', 'Q6527', 'Q7167', 'Q8409', 'Q8458', 'Q9235', 'Q9312',
+    'Q9353', 'Q9387', 'Q9438', 'Q15975', 'Q37621', 'Q42008', 'Q44918', 'Q60025', 'Q77148', 'Q79896', 'Q101638',
+    'Q140694', 'Q154959', 'Q160590', 'Q178598', 'Q192125', 'Q204886', 'Q847198', 'Q877848', 'Q1326430'],
+};
+test('canon: a reference read again names each item that cites it, and no other', () => {
+  for (const [code, list] of Object.entries(CANON_NAMED_BY)) assert.deepEqual(CANON.filter(i => i.refs.includes(code)).map(i => i.q).sort(byNumber), list, code);
+  // The context the page shows names those references alone (Tocqueville's was "VA3 …; SEP …", neither naming him).
+  assert.equal(canonContext(CANON_BY_QID.get('Q140694').refs), 'VM’s canon list, from the references named: SEP (Stanford Encyclopedia of Philosophy)');
+  assert.deepEqual(CANON_BY_QID.get('Q188532').refs, ['IGO', 'MEM'], 'Bretton Woods: IGO names it in a "See also"; VA3 and VA4H do not');
+});
+
+test('aliases: an item of the canon list keeps its reviewed names instead of Wikidata’s; every other record as before', () => {
+  assert.deepEqual(recordAliases(['CP', 'Party', 'L'], 'L', ['Duke'], ['Reviewed name', 'Reviewed name', 'L', 'Other,']), ['Reviewed name', 'Other', 'Duke']);
+  assert.deepEqual(recordAliases(['CP', 'Party', 'L'], 'L', ['Duke'], []), ['Duke'], 'an empty reviewed list keeps no Wikidata name');
+  assert.deepEqual(recordAliases(['CP', 'Party', 'L'], 'L', ['Duke']), ['CP', 'Party', 'Duke']);
+  assert.match(text('lake/scripts/build.mjs'), /recordAliases\([^\n]*CANON_BY_QID\.get\(q\)\?\.aliases\)/);
+});
+
+test('index rows: a description longer than 80 characters is cut at a word and ends "…"', () => {
+  const { shortDesc } = resolveFns;
+  const saakashvili = 'Georgian and Ukrainian politician, third President of Georgia (2004–2013) and Governor of Odesa Oblast (2015–2016)';
+  assert.equal(shortDesc(saakashvili, 80), 'Georgian and Ukrainian politician, third President of Georgia (2004–2013) and…');
+  assert.equal(shortDesc('A short one', 80), 'A short one');
+  assert.equal(shortDesc('x'.repeat(80), 80), 'x'.repeat(80), 'exactly the limit stays whole');
+  assert.equal(shortDesc('x'.repeat(90), 80), 'x'.repeat(79) + '…', 'one long word is cut at the limit');
+  assert.equal(shortDesc('a'.repeat(70) + ', b ' + 'c'.repeat(20), 80), 'a'.repeat(70) + ', b…');
+  assert.equal(shortDesc('a'.repeat(76) + ', bcdefgh', 80), 'a'.repeat(76) + '…', 'the cut’s trailing comma goes');
+  for (const s of [saakashvili, 'y '.repeat(60), 'z'.repeat(200)]) assert.ok(shortDesc(s, 80).length <= 80);
+  // The second reader (26 November 2026): a description that fits is left as it is, a no-break space or a double one
+  // too (fifteen rows had theirs rewritten); a long first word is not cut inside a surrogate pair; and an opening
+  // bracket or quote at the cut goes with the punctuation.
+  assert.equal(shortDesc('Minister of State', 80), 'Minister of State');
+  assert.equal(shortDesc('one  two', 80), 'one  two');
+  assert.equal(shortDesc('a'.repeat(78) + '\u{1D400}\u{1D400}bbbb', 80), 'a'.repeat(78) + '…', 'no lone surrogate');
+  assert.ok(!/[\uD800-\uDBFF](?![\uDC00-\uDFFF])/.test(shortDesc('a'.repeat(77) + '\u{1D400}'.repeat(5), 80)));
+  for (const open of ['(', '[', '{', '“', '‘', '«']) assert.equal(shortDesc('a'.repeat(78) + open + 'b'.repeat(10), 80), 'a'.repeat(78) + '…', `"${open}" at the cut goes`);
+  assert.equal(shortDesc('a'.repeat(70) + ' "said" ' + 'c'.repeat(20), 80), 'a'.repeat(70) + ' "said"…', 'a closing straight quote stays');
+  assert.match(text('lake/scripts/build.mjs'), /index\.push\(\[q, r\.name \|\| r\.label, r\.type, shortDesc\(r\.desc, 80\)/);
+});
+
+// Each row's description is what shortDesc makes of its record's (the second reader: the earlier test let any prefix
+// that ended "…" pass, a cut mid-word among them), and none ends inside a word.
+test('committed lake: no index row’s description stops mid-word', () => {
+  const { shortDesc } = resolveFns;
+  const recs = lakeRecords(), bad = [];
+  for (const r of read('lake/data/index.json').rows) {
+    const full = String(recs.get(r[0])?.desc ?? '');
+    const flat = full.replace(/\s+/g, ' ').trim(), kept = r[3].endsWith('…') ? r[3].slice(0, -1) : null;
+    if (r[3] !== shortDesc(full, 80) || (kept !== null && /\S/.test(flat[kept.length] ?? ' ') && !/[\s,;:.\-–—(\[{“‘«]/.test(flat[kept.length]) && kept.includes(' '))) bad.push(`${r[0]} ${r[1]}: ${r[3]}`);
+    if (bad.length > 10) break;
+  }
+  assert.deepEqual(bad, []);
+});
+
+// F10. Every Tier 1 item has its entry and its type, carries each tag the list gives it with its reference as the note,
+// and has at least one tag of its school, its kind, its parent or its event type: School (its school); Ideology, Field,
+// Theory or Movement (what kind of idea it is, or what a body or a person works in); Member of or Conflict (the body or
+// the war it is part of); Event type. The exceptions are the items no reference read gives such a tag and Wikidata gives
+// none either: each is named here, and canon.mjs says why (its `untagged`).
+const KIND_GROUPS = ['School', 'Ideology', 'Field', 'Theory', 'Movement', 'Member of', 'Conflict', 'Event type'];
+const CANON_UNTAGGED = {
+  Q7167: 'colonialism', Q44918: 'rule of law', Q79896: 'separation of powers', Q1472670: 'new world order',
+  Q6216: 'liberalism', Q7169: 'conservatism', Q7272: 'socialism', Q6186: 'communism',
+  Q6199: 'anarchism', Q6223: 'fascism', Q6206: 'capitalism', Q6229: 'authoritarianism',
+  Q180490: 'populism', Q7264: 'Marxism', Q209158: 'Christian democracy', Q7310: 'Nazism',
+  Q1661415: 'green politics', Q7260: 'imperialism', Q7174: 'democracy', Q204886: 'federalism',
+  Q847198: 'just war theory', Q760037: 'counter-insurgency', Q7768: 'ASEAN', Q123759: 'Organization of American States',
+  Q485207: 'Shanghai Cooperation Organisation', Q243630: 'BRICS', Q7795: 'Organization of the Petroleum Exporting Countries', Q7785: 'Commonwealth of Nations',
+  Q1764511: 'G7', Q19771: 'G20', Q37470: 'United Nations Security Council', Q41644: 'Warsaw Pact',
+  Q7801: 'International Court of Justice', Q81299: 'Organization for Security and Co-operation in Europe', Q83201: 'Non-Aligned Movement', Q12562: 'Protestant Reformation',
+  Q150995: 'Peace of Westphalia', Q192769: 'American Revolution', Q689128: 'Haitian Revolution', Q2269: 'Industrial Revolution',
+  Q46362: 'Congress of Vienna', Q3588: 'European Revolutions of 1848', Q154705: 'unification of Germany', Q51122: 'Unification of Italy',
+  Q8707: 'Meiji Restoration', Q179848: 'Scramble for Africa', Q8698: 'Great Depression', Q230533: 'decolonization',
+  Q126065: 'Iranian Revolution', Q10806: 'September 11 attacks', Q188532: 'Bretton Woods system', Q6534: 'French Revolution',
+  Q8729: 'Russian Revolution', Q129053: 'partition of India', Q8683: 'Cold War', Q382861: 'Revolutions of 1989',
+};
+const CANON_NO_ENTRY = { Q133207: 'Muslim Brotherhood' };
+test('canon: an item with no entry is one whose only reference is the review’s memory, and says so', () => {
+  for (const [q, label] of Object.entries(CANON_NO_ENTRY)) {
+    const i = CANON_BY_QID.get(q);
+    assert.ok(i.label === label && !i.held && i.refs.every(c => c === 'MEM') && /no entry/.test(i.untagged), q);
+  }
+});
+test('committed lake: every Tier 1 item of the canon list has its entry, its type and a tag of its kind, or is named untagged with its reason (F10)', () => {
+  const recs = lakeRecords(), index = read('lake/data/index.json'), rows = new Set(index.rows.map(r => r[0])), bad = [], untagged = {};
+  for (const i of CANON) {
+    const r = recs.get(i.q), at = `${i.q} ${i.label}`;
+    // An item new to the lake whose only reference is the review's memory gives no mention, so it has an entry only
+    // when a module mentions it: the Muslim Brotherhood alone, which no reference read names (canon.mjs says so).
+    if (CANON_NO_ENTRY[i.q]) { if (r || rows.has(i.q)) bad.push(`${at}: an entry now; take it out of CANON_NO_ENTRY`); continue; }
+    if (!r || !rows.has(i.q)) { bad.push(`${at}: no entry`); continue; }
+    if (i.refs.some(c => c !== 'MEM') && !(r.tags.includes('Appears in:Master Index') && r.mentions.some(m => m.m === 'encyclopedia'))) bad.push(`${at}: appears in the Master Index’s own list`);
+    if (i.tier !== 1) continue;
+    if (r.type !== i.type) bad.push(`${at}: ${r.type}, not ${i.type}`);
+    for (const [g, v, ref] of i.tags) if (!r.tags.includes(`${g}:${v}`) || r.tn?.[`${g}:${v}`] !== canonNote(ref)) bad.push(`${at}: ${g}:${v}, with its reference`);
+    if (!r.tags.some(t => KIND_GROUPS.includes(t.slice(0, t.indexOf(':'))))) untagged[i.q] = r.name || r.label;
+  }
+  assert.deepEqual(bad, []);
+  assert.deepEqual(untagged, CANON_UNTAGGED, 'the untagged Tier 1 items, each named in CANON_UNTAGGED');
+  for (const q of Object.keys(CANON_UNTAGGED)) assert.ok(CANON_BY_QID.get(q).untagged?.length >= 20, `${q}: canon.mjs says why it is untagged`);
+  assert.ok(read('lake/data/manifest.json').modules.encyclopedia > 0, 'the manifest counts the list');
+});
+
+test('committed lake: every body the canon list holds for a "Member of" tag is an entry, so the tag links to it (F5)', () => {
+  const rows = new Set(read('lake/data/index.json').rows.map(r => r[0]));
+  assert.deepEqual(CANON.filter(i => i.list === 'organisations' && !rows.has(i.q) && !CANON_NO_ENTRY[i.q]).map(i => `${i.q} ${i.label}`), []);
+  // The page links a related entry where the index holds it (encyclopedia/index.html, byQid).
+  assert.match(text('encyclopedia/index.html'), /byQid\.has\(/);
+});
+
+// Names the lake holds although Wikidata has moved them to its multilingual aliases, which the lake does not read
+// (build.mjs ALIAS_HOLD; the second reader, 26 November 2026: Linnaeus lost all six names at the --only bibliotheca
+// recount, and the Origin "The Origin of Species", so the Master Index's name search no longer found "Linnæus").
+// And a held label keeps the general concept's name out of a canon item's names (Q7234129 is postcolonial IR, not
+// postcolonialism, Q265425).
+test('committed lake: names held against Wikidata’s move to multilingual aliases, and a canon label held apart from the concept’s', () => {
+  const recs = lakeRecords();
+  assert.match(text('lake/scripts/build.mjs'), /recordAliases\([^\n]*aliasHold\.get\(q\)/);
+  for (const n of ['Carolo Linnaeo', 'Carl von Linnaeus', 'Carl Linnæus', 'Carolus a Linné', 'Karl von Linné', 'Linnæus']) assert.ok(recs.get('Q1043').aliases.includes(n), `Linnaeus: ${n}`);
+  assert.ok(recs.get('Q20124').aliases.includes('The Origin of Species'));
+  const pc = recs.get('Q7234129');
+  assert.equal(pc.label, 'Postcolonial international relations');
+  assert.ok(![pc.label, pc.name, ...pc.aliases].some(n => /^postcolonialism$/i.test(n || '')), 'not "Postcolonialism"');
+  // Two names a book or a reader uses that the list had left out.
+  assert.ok(recs.get('Q1761621').aliases.includes('sea power'));
+  assert.ok(recs.get('Q7184').aliases.includes('North Atlantic Treaty Organization'));
 });

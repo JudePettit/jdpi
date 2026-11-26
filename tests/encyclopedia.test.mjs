@@ -306,3 +306,98 @@ test('other modules link names into the Master Index', pageTest, async () => {
   assert.ok(n >= 3, `badges: ${n}`);
   assert.match(href, /encyclopedia\/index\.html#Q\d+/);
 });
+
+// The Master Index's second review (25 November 2026): on a phone the facets filled the first screens, so the first
+// entry was far below; the query and the name stay in view, and the facets fold behind "Filters". The fold starts
+// where the page has one column (980 px), so a phone held sideways and a tablet fold too (the second reader, 26
+// November 2026: at 561 to 980 px the facets still filled three to eight screens).
+test('on a phone either way up and a tablet, the query and the name stay in view, the facets fold behind "Filters", and the first entry is near the top', pageTest, async () => {
+  const browser = await launch({ args: ['--mute-audio'] });
+  try {
+    const errors = [];
+    const page = await browser.newPage({ viewport: { width: 390, height: 844 } });
+    page.on('pageerror', e => errors.push(e.message));
+    for (const [width, height] of [[390, 844], [844, 390], [768, 1024], [980, 800]]) {
+      await page.setViewportSize({ width, height });
+      await page.goto(`${BASE}/encyclopedia/index.html#explore`, { waitUntil: 'domcontentloaded', timeout: 30000 });
+      await page.waitForSelector('#rows .name a', { timeout: 30000 });
+      const at = `${width}×${height}`;
+      assert.ok(await page.isVisible('#query'), `${at}: the query`);
+      assert.ok(await page.isVisible('#name'), `${at}: the name`);
+      assert.ok(!(await page.isVisible('#facets')), `${at}: the facets are folded`);
+      assert.ok(await page.isVisible('#ftoggle'), `${at}: the Filters button`);
+      assert.equal(await page.getAttribute('#ftoggle', 'aria-expanded'), 'false');
+      assert.equal((await page.textContent('#ftoggle')).trim(), 'Filters');
+      const first = await page.evaluate(() => document.querySelector('#rows tr').getBoundingClientRect().top + scrollY);
+      assert.ok(first < 2 * height, `${at}: the first entry is ${Math.round(first)} px down`);
+      await page.click('#ftoggle');
+      assert.ok(await page.isVisible('#facets'), `${at}: the facets open`);
+      assert.equal(await page.getAttribute('#ftoggle', 'aria-expanded'), 'true');
+      assert.ok(await page.locator('#facets .facet button[data-toggle="Type"]').isVisible());
+      await page.click('#ftoggle');
+      assert.ok(!(await page.isVisible('#facets')), `${at}: and fold again`);
+    }
+    await page.setViewportSize({ width: 1400, height: 900 });
+    assert.ok(!(await page.isVisible('#ftoggle')), 'no button on a wide screen');
+    assert.ok(await page.isVisible('#facets'), 'the facets beside the list');
+    assert.deepEqual(errors, []);
+  } finally { await browser.close(); }
+});
+
+// VM's canon list (lake/scripts/canon.mjs; MI-12, F4 to F6): a tag it gives names its reference beside the tag on the
+// entry, the chip says whose it is, and a filter's heading names the list once.
+test('a tag from VM’s canon list names its reference on the entry, and the filter’s heading names the list once', pageTest, async () => {
+  const { CANON_BY_QID } = await import('../lake/scripts/canon.mjs');
+  const item = CANON_BY_QID.get('Q5128352'), [group, value, ref] = item.tags.find(t => t[0] === 'School' && t[1] === 'Classical realism');
+  const browser = await launch({ args: ['--mute-audio'] });
+  try {
+    const errors = [];
+    const page = await browser.newPage({ viewport: { width: 1400, height: 900 } });
+    page.on('pageerror', e => errors.push(e.message));
+    await page.goto(`${BASE}/encyclopedia/index.html#explore?q=${encodeURIComponent(`"${group}:${value}"`)}`, { waitUntil: 'domcontentloaded', timeout: 30000 });
+    await page.waitForSelector('#rows .name a', { timeout: 30000 });
+    const heading = await page.locator('.facet', { has: page.locator('button[data-toggle="School"]') }).locator('.fnote').innerText();
+    assert.equal(heading.split('VM’s canon list, from the references named on each entry').length, 2, heading);
+    assert.ok(!heading.includes(ref), 'no reference in the heading');
+    const row = page.locator('#rows tr', { has: page.locator('.name a', { hasText: /^Classical realism$/ }) });
+    const chip = row.locator('.chip', { hasText: value });
+    assert.match(await chip.innerText(), /VM’s canon list$/);
+    assert.equal(await chip.getAttribute('title'), `${group}:${value} (VM’s canon list, from ${ref})`);
+    await page.goto(`${BASE}/encyclopedia/index.html#${item.q}`, { waitUntil: 'domcontentloaded' });
+    await page.waitForSelector('#entity .tags .chip', { timeout: 15000 });
+    assert.ok((await page.locator('#entity .tags').innerText()).includes(`VM’s canon list, from ${ref}`), 'the entry names the reference');
+    const appears = await page.locator('#entity').innerText();
+    assert.match(appears, /Master Index/);
+    assert.match(appears, /VM’s canon list, from the references named: /);
+    assert.deepEqual(errors, []);
+  } finally { await browser.close(); }
+});
+
+// A mention of the canon list links to the list narrowed to its own entry (lake/scripts/adapters.mjs canonUrl): the
+// list holds 239 and shows 100 at a time, so an entry past the first hundred waited behind "Show more" (the second
+// reader, 26 November 2026).
+test('a mention of VM’s canon list opens the list with its own entry in the first rows', pageTest, async () => {
+  const { canon } = await import('../lake/scripts/adapters.mjs');
+  const mentions = canon(), JDPI = 'https://jdpi.pages.dev/';
+  const browser = await launch({ args: ['--mute-audio'] });
+  try {
+    const errors = [];
+    const page = await browser.newPage({ viewport: { width: 1400, height: 900 } });
+    page.on('pageerror', e => errors.push(e.message));
+    // The list's last entry by mentions, which the unfiltered list does not show, and a held label.
+    await page.goto(`${BASE}/encyclopedia/index.html#explore?q=${encodeURIComponent('"Appears in:Master Index"')}`, { waitUntil: 'domcontentloaded', timeout: 30000 });
+    await page.waitForSelector('#rows .name a', { timeout: 30000 });
+    const firstPage = new Set(await page.locator('#rows .name a').evaluateAll(as => as.map(a => a.getAttribute('href').slice(1))));
+    const late = mentions.find(m => !firstPage.has(m.key.qid)), held = mentions.find(m => m.key.qid === 'Q7234129');
+    assert.ok(late, 'an entry past the first page');
+    for (const m of [late, held]) {
+      await page.goto(`${BASE}/${m.url.slice(JDPI.length)}`, { waitUntil: 'domcontentloaded', timeout: 30000 });
+      await page.waitForSelector('#rows .name a', { timeout: 30000 });
+      const hrefs = await page.locator('#rows .name a').evaluateAll(as => as.map(a => a.getAttribute('href')));
+      assert.ok(hrefs.slice(0, 10).includes(`#${m.key.qid}`), `${m.label}: in the first rows of ${m.url}`);
+      assert.equal(await page.inputValue('#name'), m.label);
+      assert.equal(await page.inputValue('#query'), '"Appears in:Master Index"');
+    }
+    assert.deepEqual(errors, []);
+  } finally { await browser.close(); }
+});

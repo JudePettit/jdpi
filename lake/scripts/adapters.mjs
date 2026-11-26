@@ -16,6 +16,7 @@ import { CATEGORY_IDS, flatScenes } from '../../kino/lib/format.js';
 import { readAt, kinoHash } from '../../kino/lib/links.js';
 import { groupBattles, figureLine } from '../../battlefield/focus/figures.mjs';
 import { leaderText } from './resolve.mjs';
+import { CANON, CANON_LABELS, canonNote, canonContext } from './canon.mjs';
 
 export const JDPI = 'https://jdpi.pages.dev/';
 const RETRO = 'https://hp-retrospective.pages.dev/';
@@ -377,7 +378,30 @@ export function monthly({ jdpiDir }) {
   return out;
 }
 
-export const ADAPTERS = { retrospective, calendar, battlefield, kardashev, traders, learning, progress, bibliotheca, kino, pestle, volatility, monthly };
+/** VM's canon list (canon.mjs; ledger MI-12, steps F4 to F6 of VM-MASTER-INDEX-CANON-REVIEW.md): the one adapter that
+    reports a list, not a page (tests/master-index.test.mjs, OWN_LIST, says why). Each item is a mention by the Master
+    Index itself, linked to the list on its own page (every entry the list holds, by its "Appears in" tag) with the name
+    filter set to the item's name (`name=`, which the page reads), so the item is in the first rows and does not wait
+    behind "Show more" (the list shows 100 of its 239 at a time); its context says it is VM's canon list and names the
+    references; each hand-made tag carries its reference as the tag's note.
+    The mentions give no names (`aliases`): an item new to the lake keeps its reviewed names through build.mjs (record,
+    CANON_BY_QID), and a held entry keeps its own, so a --only canon run leaves every book's terms as they were for the
+    entries the lake held. An item whose only reference is the review's own memory (MEM) is no mention: the page names
+    no source it cannot show (canon.mjs says why for each: Churchill and Gorbachev, the four parties and the Muslim
+    Brotherhood). */
+export const CANON_URL = `${JDPI}encyclopedia/index.html#explore?q=${encodeURIComponent('"Appears in:Master Index"')}`;
+export const canonUrl = name => `${CANON_URL}&name=${encodeURIComponent(name)}`;
+export const canonRefs = i => i.refs.filter(c => c !== 'MEM');
+export function canon() {
+  const held = new Map(CANON_LABELS.map(x => [x.q, x.label]));
+  return CANON.filter(i => canonRefs(i).length).map(i => ({
+    key: { qid: i.q }, label: held.get(i.q) || i.label, module: 'encyclopedia', url: canonUrl(held.get(i.q) || i.label),
+    context: `${canonContext(canonRefs(i))}.`,
+    tags: i.tags.map(([group, value, ref]) => [group, value, { note: canonNote(ref) }]),
+  }));
+}
+
+export const ADAPTERS = { retrospective, calendar, battlefield, kardashev, traders, learning, progress, bibliotheca, kino, pestle, volatility, monthly, canon };
 
 // The submodules (registry.json ids) each adapter files its mentions under: the modules `--only <adapter>` speaks for
 // in build.mjs (it makes their entities again, and drops what they no longer mention), and what
@@ -386,7 +410,7 @@ export const ADAPTERS = { retrospective, calendar, battlefield, kardashev, trade
 export const ADAPTER_MODULES = {
   retrospective: ['retrospective'], calendar: ['historical-calendar', 'calendar'], battlefield: ['battlefield-history', 'war-focus', 'battlefield'],
   kardashev: ['kardashev'], traders: ['traders'], learning: ['learning', 'learning-politics'], progress: ['progress'], bibliotheca: ['neo-classic'],
-  kino: CATEGORY_IDS.map(c => `kino-${c}`), pestle: ['pestle'], volatility: ['volatility'], monthly: ['monthly'],
+  kino: CATEGORY_IDS.map(c => `kino-${c}`), pestle: ['pestle'], volatility: ['volatility'], monthly: ['monthly'], canon: ['encyclopedia'],
 };
 // The tag groups only one adapter gives. A --only run of that adapter makes these groups again on every entity it
 // mentions, so a curated tag it no longer gives (a thinker's school, a position) goes at once, not at the next full
@@ -394,6 +418,9 @@ export const ADAPTER_MODULES = {
 // "Political spectrum") are listed too, so a --only run takes them away. The groups it shares with Wikidata and the
 // Retrospective (Ideology, Field, Occupation, Role) are not its alone: a value it no longer gives there goes at the
 // next full build.
+// The canon list's groups (School, Ideology, Field, Theory, Event type, Conflict) are not its alone either (Learning gives
+// School and Theory, Wikidata the rest), so a tag taken out of canon.mjs goes from an entry other modules mention at the
+// next full build, not at a --only canon run.
 export const ADAPTER_TAG_GROUPS = { learning: ['School', 'Political position', 'Theory', 'School or tag', 'Political spectrum'] };
 
 // A mention's tags as "Group:Value" (Appears in aside, which build.mjs adds). A tag may carry a third element:

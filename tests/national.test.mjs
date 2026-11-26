@@ -12,6 +12,9 @@ const read = path => JSON.parse(readFileSync(new URL(`../${path}`, import.meta.u
 // The World Bank has moved SM.POP.REFG.OR (refugees by country of origin) to its "WDI Database Archives", which the
 // indicator API does not serve, so it has no values until national/scripts/indicators.mjs drops or replaces it.
 const ARCHIVED = new Set(['SM.POP.REFG.OR']);
+// Coverage as the page shows it (pestle-3, 25 November 2026): the count of the 22 core indicators with a value,
+// recovered from the stored thousandths and rounded once (21 of 22, stored 0.955, is 95%).
+const covPct = v => (v == null ? '–' : Math.round((Math.round(v * 22) / 22) * 100) + '%');
 
 test('data: the brief Geopolitical Volatility reads is the index\'s, field for field, and stays small', async () => {
   const { brief } = await import('../national/scripts/brief.mjs');
@@ -1220,7 +1223,7 @@ test('page NA-05: the slider replaces the decades, Latest stays the opening view
   await page.waitForFunction(() => document.querySelector('#profile h2')?.textContent === 'France');
   await page.waitForFunction(() => [...document.querySelectorAll('#profile .stat')].some(s => s.querySelector('span')?.textContent === 'PESTLE pressure' && /^2010/.test(s.querySelector('small')?.textContent || '')));
   const [v10, note10] = await pestleStat();
-  assert.equal(v10, pct(fra10.overall)); assert.match(note10, new RegExp(`^2010 · coverage ${pct(fra10.coverage)} · values of \\d{4}(–\\d{4})?${fra10.dims < 6 ? ' · partial' : '$'}`));
+  assert.equal(v10, pct(fra10.overall)); assert.match(note10, new RegExp(`^2010 · coverage ${covPct(fra10.coverage)} · values of \\d{4}(–\\d{4})?${fra10.dims < 6 ? ' · partial' : '$'}`));
   assert.equal(await page.evaluate(() => location.hash), '#country=FRA&year=2010');
 
   // 11. An indicator by year: life expectancy at 2010 shows Japan's 2010 value from the layer.
@@ -1380,7 +1383,7 @@ test('page NA-05 review: years shown honestly, movers like for like, failures sa
   assert.match(await page.textContent('#tnote'), /No PESTLE score for 1980/);
   await page.selectOption('#metric', 'coverage');
   await drawn();
-  assert.match(await tip('USA'), new RegExp(`PESTLE coverage, 1980: ${pct(cellAt('USA', 1980).coverage)}`));
+  assert.match(await tip('USA'), new RegExp(`PESTLE coverage, 1980: ${covPct(cellAt('USA', 1980).coverage)}`));
 
   // R3 and R5. The track keeps its place when a drag opens a period; a Latest button brings the slider back at one
   // click, and is off at Latest. R7: a line under the slider says what Latest and a year are.

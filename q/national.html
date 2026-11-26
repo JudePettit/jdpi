@@ -150,8 +150,36 @@ td .nv{color:var(--prp-muted);font-size:12px}
 .mvcols li{font-variant-numeric:tabular-nums}.mvcols li small{color:var(--prp-muted);font:var(--prp-fs-xs) var(--prp-font-mono)}
 #cmpsvg .yrband{fill:var(--prp-accent-soft)}#cmpsvg .yrrule{stroke:var(--prp-accent);stroke-width:1.5}
 .spark .yrrule{stroke:var(--prp-accent);stroke-width:1}.spark .yrband{fill:var(--prp-accent-soft)}
+/* The governance scores' own 90% range (HD-13, 25 November 2026): a faint band about the score on the sparklines and
+   the Compare chart, and the ranked view (every country a dot on its range, the compared ones in their colours). */
+.spark .rband{fill:var(--prp-text);opacity:.13}
+#cmpsvg .rband{fill-opacity:.15;stroke:none}
+#rankfig{border-top:1px solid var(--prp-line-soft)}
+#ranksvg{display:block;width:100%;height:auto;margin-top:8px;outline:none}
+#ranksvg:focus-visible{outline:2px solid var(--prp-accent);outline-offset:2px;border-radius:var(--prp-radius-sm)}
+#ranksvg .gridlines line{stroke:var(--prp-grid)}
+#ranksvg .axis .domain,#ranksvg .axis line{stroke:var(--prp-axis)}
+#ranksvg .axis text,#ranksvg .axt{fill:var(--prp-muted);font:11px var(--prp-font-mono)}
+#ranksvg .iv{stroke:var(--prp-muted);stroke-opacity:.45;stroke-width:1}
+#ranksvg .dot{fill:var(--prp-muted)}
+#ranksvg .mk line{stroke-width:2.5}#ranksvg .mk line.lead{stroke-width:1;stroke-opacity:.85}#ranksvg .mk circle{stroke:var(--prp-surface);stroke-width:1.5}
+#ranksvg .lbl{fill:var(--prp-text);font:600 12px var(--prp-font-ui);paint-order:stroke;stroke:var(--prp-surface);stroke-width:3px}
+#ranksvg .cur line{stroke:var(--prp-text);stroke-width:1;stroke-dasharray:3 3}#ranksvg .cur circle{fill:none;stroke:var(--prp-text);stroke-width:1.5}
+#ranksvg .empty{fill:var(--prp-muted);font:13px var(--prp-font-ui)}
+.rankread{min-height:1.5em;margin:6px 0 0;color:var(--prp-text-2);font-size:var(--prp-fs-sm);font-variant-numeric:tabular-nums}
+.ranksay{margin:6px 0 0;color:var(--prp-text);font-size:var(--prp-fs-sm);line-height:1.55}
+.ranksay span{display:block}.ranksay .sw{display:inline-block;width:10px;height:10px;border-radius:2px;vertical-align:-1px}
+.rnote{margin:8px 0 0;color:var(--prp-muted);font-size:var(--prp-fs-xs);line-height:1.55}
+#rankdata tr.on td{font-weight:600;color:var(--prp-text)}
+.gsc{white-space:normal}
+@media(max-width:700px){.gsl{display:none}}
 @media(max-width:1180px){.rankwrap.per{grid-template-columns:minmax(0,1fr)}.rankwrap .movers{order:-1}.mvcols{grid-template-columns:1fr 1fr}}
 @media(max-width:700px){.fld.years .prp-period{--prp-period-thumb:22px}.yrlabel{min-width:0}#yr-lbl{min-width:0}}
+/* The ranking on a phone (pestle-1, 25 November 2026): the score column fits. Region folds under the country's name,
+   and with Overall chosen the Overall pressure column, which repeats the score, is hidden, its "partial" tag shown in the score
+   cell instead. CSS only: every cell stays in the table. Whatever still runs past the box is said above the table. */
+.tblcue{margin:0;padding:6px 14px 0;color:var(--prp-muted);font-size:var(--prp-fs-xs);line-height:1.4;text-align:right}
+@media(max-width:700px){.tbl .rg{display:none}.tbl td.cn[data-region]::after{content:attr(data-region);display:block;margin-top:1px;color:var(--prp-muted);font-size:11px;font-weight:400}.tbl table.ov .pc{display:none}.tbl table.ov td.sc[data-part]::after{content:'partial';margin-left:5px;color:var(--prp-muted);font:500 10px var(--prp-font-mono);letter-spacing:.03em;text-transform:uppercase}}
 @media(max-width:700px){.page{padding:16px 16px 32px}.prp-title{font-size:26px}.grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;padding:12px}.stat b{font-size:15px}.ind{grid-template-columns:minmax(0,1fr) 64px 76px}.ind .spark{display:none}.sti{grid-template-columns:minmax(0,1fr) 76px;margin-left:4px;padding-left:8px}.sti .mv{display:none}.links{justify-content:flex-start}.pact{justify-items:start}.prp-panel-head .filters,.prp-panel-head .filters .prp-input{width:100%}.prp-panel-head .filters .prp-input{flex:1 1 140px}}
 </style>
 </head>
@@ -189,8 +217,9 @@ td .nv{color:var(--prp-muted);font-size:12px}
     <div class="rankwrap" id="rankwrap">
     <section class="prp-panel" aria-labelledby="ctitle">
       <div class="prp-panel-head"><b id="ctitle">Countries</b><span class="filters"><input type="search" class="prp-input" id="search" placeholder="Search countries…" aria-label="Search countries"><select class="prp-select" id="region" aria-label="Region"><option value="">All regions</option></select></span></div>
-      <div class="tbl"><table class="prp-table"><thead><tr id="thead"></tr></thead><tbody id="rows"></tbody></table></div>
-      <p class="panel-note">Tick up to four countries to compare them. Pressure is the share of a dimension's indicators that are worsening (Country PESTLE's method): VM's own composite, not a forecast or a ranking of worth. Coverage is the share of the 22 core indicators with data. “Partial” marks a score with fewer than six dimensions; “no value” a year with none.</p>
+      <p class="tblcue" id="tblcue" hidden>Scroll the table sideways for more columns →</p>
+      <div class="tbl" id="tblbox"><table class="prp-table"><thead><tr id="thead"></tr></thead><tbody id="rows"></tbody></table></div>
+      <p class="panel-note" id="tblnote">Tick up to four countries to compare them. Overall pressure is the average, across the dimensions scored, of the share of each one's indicators worsening (Country PESTLE's method): VM's own composite, not a forecast or a ranking of worth. Coverage is the share of the 22 core indicators with data. “Partial” marks a score with fewer than six dimensions; “too few (n%)” a score from fewer than three of the six dimensions, not coloured or ranked; “no value” a year with none.</p>
     </section>
     <!-- A period: the countries whose figure rose and fell most between its first and last years. -->
     <section class="prp-panel movers" id="movers" aria-labelledby="mvtitle" hidden>
@@ -205,8 +234,9 @@ td .nv{color:var(--prp-muted);font-size:12px}
   <section id="tab-compare" role="tabpanel" aria-labelledby="tab-btn-compare" hidden><div id="compare"></div></section>
 
   <footer class="prp-sources">
-    <p><b>Sources.</b> World Bank World Development Indicators and Worldwide Governance Indicators (CC BY 4.0) for the 41 indicators and the PESTLE scores; Wikidata (CC0) for systems of government, heads of state and government and capitals; Political Atlas for which office holds the most power (the current leader is its holder; elsewhere the head of state in presidential systems and ruling monarchies, the head of government in parliamentary ones); Political Retrospective (Archigos and Wikidata) for leaders and elections since 1926 (leaders to 2015 and how they took and left office: Archigos 4.1, which states no licence; kept until VM’s owner decides), and for the leaders of <span id="liststates">the states Archigos does not cover</span>, its own lists, built by hand from at least two of Wikidata, Wikipedia's lists of office holders and rulers.org; the UCDP/PRIO Armed Conflict Dataset (CC BY 4.0) for conflict history since 1946 and, for 1926–1945, VM’s list of wars from Wikidata (CC0); Realtime Battlefield (UCDP Candidate Events) for wars active this year; Kardashev Tracker for energy share; Historical Calendar for events since 1980; Global Headline Tracker for headlines. Country shapes: Natural Earth via world-atlas (public domain).</p>
+    <p><b>Sources.</b> World Bank World Development Indicators and Worldwide Governance Indicators (CC BY 4.0) for the 41 indicators and the PESTLE scores, and the Worldwide Governance Indicators’ 0 to 100 scores with their 90% ranges (CC BY 4.0) for the governance ranges; Wikidata (CC0) for systems of government, heads of state and government and capitals; Political Atlas for which office holds the most power (the current leader is its holder; elsewhere the head of state in presidential systems and ruling monarchies, the head of government in parliamentary ones); Political Retrospective (Archigos and Wikidata) for leaders and elections since 1926 (leaders to 2015 and how they took and left office: Archigos 4.1, which states no licence; kept until VM’s owner decides), and for the leaders of <span id="liststates">the states Archigos does not cover</span>, its own lists, built by hand from at least two of Wikidata, Wikipedia's lists of office holders and rulers.org; the UCDP/PRIO Armed Conflict Dataset (CC BY 4.0) for conflict history since 1946 and, for 1926–1945, VM’s list of wars from Wikidata (CC0); Realtime Battlefield (UCDP Candidate Events) for wars active this year; Kardashev Tracker for energy share; Historical Calendar for events since 1980; Global Headline Tracker for headlines. Country shapes: Natural Earth via world-atlas (public domain).</p>
     <p id="method"><b>How this is worked out.</b> PESTLE pressure is VM's own composite, after Country PESTLE. It is not a forecast, and not a ranking of how well a country is run. For each of the 22 core World Bank indicators, a value is compared with the country's previous value no more than five years before it; a change past the indicator's threshold is improving or worsening. A dimension's pressure is the share of its scored indicators worsening; overall pressure is the mean of the dimensions scored; coverage is the share of the 22 with a value. <b>Latest</b> uses each indicator's newest value, its year beside it. <b>A year</b> uses that year's value, or one from up to two years earlier, marked with its year; anything older counts as no value, and nothing is carried forward. <b>A period</b> compares the first and last values inside it (1990–1999 is the old “1990s”), beside its first year's and its last year's own scores. A score with fewer than six dimensions is marked partial (dotted on the map). A score from fewer than three dimensions is too few values to colour or rank: there is no other minimum, so a score of three dimensions may still rest on a handful of indicators (its coverage is beside it). A period's change, and Rose most and Fell most, compare its first and last years only where both scores rest on the same dimensions, three or more, and, for a period to Latest, where Latest's score uses no value from before the period began; the other changes are shown, marked, but not ranked. Every score before 1998 is partial, because the governance indicators begin in 1996 (every two years until 2002) and a change needs two values; 1980, the first year held, has a coverage but no score. The years offered, <span id="yrspan">1980 to the newest</span>, are VM's request window: its build asks the World Bank for 1980 (where Country PESTLE began) to last year, though most series go back to 1960, so for a value from before 1985 the five-year look-back stops at 1980 and the early 1980s are scored more thinly than the full series would allow. The World Bank's values are for present-day countries: a year before a state existed, or before its borders took today's shape (South Sudan, Russia, Ukraine and Germany in the 1980s), is its reconstruction for the present territory, not a figure of the time. Indicators marked "added" are shown and compared but not scored. Recompute any figure from <code>national/data/years/</code> with <code>national/lib/pestle.js</code>.</p>
+    <p id="govmethod"><b>The governance ranges.</b> For each of the six governance indicators the World Bank gives an estimate (about −2.5 to 2.5, the figure this page shows and scores), a score on a 0 to 100 scale (100 the best) and the lower and upper bounds of the score’s 90% confidence interval: series GOV_WGI_xx.SC, GOV_WGI_xx.SC_LB and GOV_WGI_xx.SC_UB of its Worldwide Governance Indicators (CC BY 4.0). The Bank gives the bounds on the score only, so the ranges (the small lines in a profile’s governance rows, the “score and range” choices of the Compare countries chart, and the ranking under it) are drawn on the score, and each says so. The Bank’s ranges stop at 0 and 100, the ends of the scale. These are perceptions of governance, drawn from many surveys and expert assessments, not a measure of democracy, and the World Bank says its scores are not meant as a definitive ranking of how well governments perform (<a href="https://www.worldbank.org/en/publication/worldwide-governance-indicators/usage-advisory" target="_blank" rel="noreferrer">its WGI Usage Advisory</a>). Where two countries’ ranges overlap, the data cannot tell them apart. For each compared country the ranking gives the ranks it would take with its score anywhere within its own range, every other country held at its score. It ranks the countries on this page’s list; the Bank also scores a few economies the list leaves out (Taiwan, China and Jersey among them), and the ranking names them. VM keeps each value to one decimal, the precision the World Bank’s API gives for these series, and ranks and compares the ranges on those figures, so two ends within a tenth of a point of each other may fall the other way on the Bank’s unrounded ones. A year with a score but no bound shows the score alone and says so. Written to <code>national/data/governance/</code> by <code>national/scripts/indicators.mjs</code>, which stops unless each series’ own metadata gives CC BY 4.0.</p>
     <p><b>The yearly layer.</b> <code>national/data/years/manifest.json</code> lists one layer for each indicator (<code>wb:&lt;code&gt;</code>: every country by ISO3, every year, its unit, source, licence and method; no value is <code>null</code>) and the PESTLE pressure of each year (<code>national-pestle</code>, which stays on this page as VM's composite: each field's unit and scale, and the floor of three dimensions, are in the manifest). Its country key is the World Bank's three-letter code, ISO 3166-1 alpha-3 save Kosovo (XKX) and the Channel Islands (CHI); the values are for present-day countries. The Omni-Map reads the same files; the Integration Hub's <code>national-indicators</code> dataset names each indicator's layer.</p>
     <p id="standins-note"><b>Stand-ins.</b> VM’s own text. A country’s profile shows, beside four of the seven World Bank series above whose originators’ terms bar commercial use, a different producer’s own series on free terms, each with a plain line on how it differs in method, units and years: fossil CO₂ per person from the Global Carbon Project (CC BY 4.0), PM2.5 exposure from SatPM at Washington University in St. Louis (CC BY 4.0), energy consumption per person from the US Energy Information Administration (public domain) and military spending as a share of GDP from the Global Military Spending Dataset (CC0), which ends in 2019. Each is that producer’s figure, not the World Bank’s; it is shown with its own latest year and is not scored. The renewable share of final energy, Internet users and mobile subscriptions have no stand-in yet: the free series VM found cover Europe only. Written monthly to <code>national/data/standins.json</code> by <code>omni/scripts/build-standins.mjs</code>; the Omni-Map draws the same four as layers of their own.</p>
     <p><b>Headlines.</b> The latest headlines are the Global Headline Tracker's, in its order, except that free sources lead: the first is from an outlet anyone can read wherever the country has one, and links to outlets behind a paywall or a sign-up are labelled (<code>design/prp-access.json</code> holds each outlet's class and the evidence for it).</p>
@@ -254,6 +284,37 @@ const loadPressure = () => (pressureP ||= getJson(YEARS + 'pressure.json').then(
 // value and year, shown under the World Bank row each stands beside. A failure is forgotten and simply leaves them out.
 let standinsP = null;
 const standins = () => (standinsP ||= getJson('../national/data/standins.json').catch(e => { standinsP = null; throw e; }));
+// The governance scores' own 90% range (HD-13, 25 November 2026): national/lib/governance.js and one file per
+// indicator, national/data/governance/<GOV_WGI_xx>.json (written by national/scripts/indicators.mjs --governance). Asked
+// for only when a picture needs it; a file that fails to load is forgotten, and the picture shows the score alone, or
+// the estimate as before, and says so.
+let GVP = null;
+const govLib = () => (GVP ||= import('../national/lib/governance.js').catch(e => { GVP = null; throw e; }));
+const govCache = new Map(), govData = new Map();
+const isGov = code => indBy.get(code)?.source === 3;
+const loadGov = est => {
+  if (!govCache.has(est)) govCache.set(est, Promise.all([govLib(), getJson(`../national/data/governance/${est.replace(/\.EST$/, '')}.json`)]).then(([G, L]) => { L.at = new Map(L.countries.map((c, k) => [c, k])); govData.set(est, L); return { G, L }; }, e => { govCache.delete(est); throw e; }));
+  return govCache.get(est);
+};
+const govAll = () => Promise.all(D.indicators.filter(i => isGov(i.code)).map(i => loadGov(i.code).catch(() => null)));
+const r1 = v => (v == null ? '–' : (+v).toFixed(1));
+const rangeWords = x => (x.lower == null ? `${r1(x.score)} (no range given)` : `${r1(x.score)} (90% range ${r1(x.lower)} to ${r1(x.upper)})`);
+const GOV_SRC = L => `World Bank, Worldwide Governance Indicators, ${L.codes.score}, ${L.codes.lower} and ${L.codes.upper} (CC BY 4.0)${L.released ? `, release of ${dateOf(L.released)}` : ''}`;
+// What the reader must be told beside every picture of the range (the study's caveat, in VM's own words).
+const GOV_CAVEAT = 'These are perceptions of governance, drawn from many surveys and expert assessments, not a measure of democracy.';
+const GOV_SCALE = 'It uses the World Bank’s 0 to 100 governance score (100 the best), not the estimate of about −2.5 to 2.5 shown elsewhere on this page, because the Bank gives its range on the score.';
+const GOV_OVERLAP = 'The range is the Bank’s own 90% confidence interval: where two countries’ ranges overlap, the data cannot tell them apart.';
+const GOV_ENDS = 'The Bank’s ranges stop at 0 and 100, the ends of the scale.';
+// The World Bank's WGI Usage Advisory (read 26 November 2026): its scores are not a definitive hierarchy of government
+// performance. Said beside the ranking, which looks like one.
+const GOV_ADVISORY = 'The World Bank says its scores are not meant as a definitive ranking of how well governments perform (its WGI Usage Advisory).';
+// A name as it reads in a sentence: "the United Kingdom", "the Netherlands" (The at the start of one). The World Bank's
+// names that already carry it ("Bahamas, The") are left as they are.
+const THE = /^(United |Netherlands|Philippines|Central African Republic|Dominican Republic|Comoros|Maldives|Marshall Islands|Solomon Islands|Cayman Islands|Cook Islands|Faroe Islands|Channel Islands|Isle of Man|Northern Mariana Islands|Turks and Caicos Islands|British Virgin Islands|Virgin Islands|West Bank and Gaza|Kyrgyz Republic|Slovak Republic|Russian Federation|Syrian Arab Republic|Lao PDR)/;
+const theOf = (name, cap = false) => (THE.test(name) ? (cap ? 'The ' : 'the ') : '');
+const inText = (name, cap = false) => theOf(name, cap) + name;
+// A list in words; with semicolons where a name has a comma of its own ("Taiwan, China").
+const andList = a => { const s = a.some(x => x.includes(',')) ? '; ' : ', '; return a.length < 2 ? a.join('') : `${a.slice(0, -1).join(s)}${s.trim() === ';' ? ';' : ''} and ${a.at(-1)}`; };
 // An indicator the World Bank serves no values for (none at Latest either: the manifest lists it with data null) has
 // no file, so none is asked for: an empty layer.
 const noValues = code => !D.countries.some(c => c.latest[code]);
@@ -337,6 +398,12 @@ function fmtVal(v, unit) {
   return a >= 1000 ? Math.round(v).toLocaleString('en-GB') : a >= 10 ? v.toFixed(1) : v.toFixed(2);
 }
 const pct = v => (v == null ? '–' : Math.round(v * 100) + '%');
+// Coverage is a count, the core indicators with a value out of 22, stored as a share in thousandths (21 of 22 is
+// 0.955): the count is recovered and rounded once, so 21 of 22 reads 95%, not 96% (pestle-3, 25 November 2026).
+let CORE_N = 22; // index.json's core indicators, set when it loads
+const covPts = v => Math.round((Math.round(v * CORE_N) / CORE_N) * 100);
+const covPct = v => (v == null ? '–' : covPts(v) + '%');
+const isShare = m => m.fmt === pct || m.fmt === covPct; // shown in per cent, its changes in points
 
 /* ---------- each statistic's own age and source (13 November 2026) ----------
    Beside every figure its year or date and its source, not only the page's build date: the World Bank values carry
@@ -425,7 +492,7 @@ function metrics() {
   const m = [
     { id: 'overall', label: 'Overall PESTLE pressure', at: F => F.overall, fmt: pct, better: 'down', group: 'PESTLE', press: true },
     ...DIMS.map(([k, l]) => ({ id: 'p_' + k, label: `${l} pressure`, at: F => F.pressure?.[k], fmt: pct, better: 'down', group: 'PESTLE', press: true })),
-    { id: 'coverage', label: 'PESTLE coverage', at: F => F.coverage, fmt: pct, better: 'up', group: 'PESTLE' },
+    { id: 'coverage', label: 'PESTLE coverage', at: F => F.coverage, fmt: covPct, better: 'up', group: 'PESTLE' },
     { id: 'leaders100', label: 'Leaders in the last 100 years', at: (F, c) => c.leadership?.leaders100, fmt: v => v ?? '–', better: null, group: 'Leadership' },
     { id: 'avgTenure', label: 'Average leader tenure (years)', at: (F, c) => c.leadership?.avgTenure, fmt: v => v ?? '–', better: null, group: 'Leadership' },
     { id: 'irregular', label: 'Irregular seizures of power since 1926', at: (F, c) => c.leadership?.irregular, fmt: v => v ?? '–', better: 'down', group: 'Leadership' },
@@ -458,7 +525,7 @@ const measureId = m => (m.id === 'overall' ? null : m.id.startsWith('p_') ? m.id
 const metricOf = w => (!w ? null : METRICS.find(m => measureId(m) === w || m.id === w) || null);
 // A period's change of a metric: its value in the last year less its value in the first, rounded as the values are
 // stored (pestle.js changeOf), so equal changes are equal and a tie is settled by name.
-const chg = (m, c) => PL.changeOf(m.get(c, 'start'), m.get(c, 'end'), m.fmt === pct ? 3 : 4);
+const chg = (m, c) => PL.changeOf(m.get(c, 'start'), m.get(c, 'end'), isShare(m) ? 3 : 4);
 // Whether a period's two ends can be compared like for like, and if not, why (the change is shown, marked, but not
 // ranked in Rose most / Fell most). Overall pressure: both ends on the same dimensions, three or more. A pressure to
 // Latest: Latest's score uses no value from before the period began (its years are mixed).
@@ -473,7 +540,15 @@ function likeForLike(m, c) {
   }
   return { ok: true };
 }
-const fmtChg = (m, d) => (d == null ? '–' : m.fmt === pct ? `${d > 0 ? '+' : d < 0 ? '−' : '±'}${count(Math.abs(Math.round(d * 100)), 'pt')}` : `${d > 0 ? '+' : d < 0 ? '−' : '±'}${fmtVal(Math.abs(d), m.unit)}`);
+// A coverage change, given its country, is the difference of the two percentages shown beside it (21 of 22 to 20 of 22
+// reads 95% → 91%, −4 pt, not the −5 pt its exact 4.5 points round to); it is still ranked by chg.
+const covChg = (m, d, c) => (c ? covPts(m.get(c, 'end')) - covPts(m.get(c, 'start')) : Math.sign(d) * covPts(Math.abs(d)));
+const fmtChg = (m, d, c) => {
+  if (d == null) return '–';
+  const n = m.fmt === covPct ? covChg(m, d, c) : isShare(m) ? Math.round(d * 100) : d;
+  const s = m.fmt === covPct ? n : d, sign = s > 0 ? '+' : s < 0 ? '−' : '±';
+  return isShare(m) ? `${sign}${count(Math.abs(n), 'pt')}` : `${sign}${fmtVal(Math.abs(d), m.unit)}`;
+};
 // One country's figure for the years shown, with what the reader must be told about it: hatched (a partial score, or a
 // value of an earlier year), and the plain words for the tooltip and the table.
 function cellOf(m, c) {
@@ -566,7 +641,7 @@ function tipHtml(f) {
   const ends = md === 'period' && !m.timeless ? endsText(m, c) : '';
   const lf = md === 'period' && !m.timeless && x.v != null ? likeForLike(m, c) : { ok: true };
   const extra = ends ? `<br>${esc(ends)}${lf.ok ? '' : `<br><span class="muted">Change not ranked: ${esc(lf.why)}</span>`}` : '';
-  const cov = !m.timeless && m.group === 'PESTLE' && m.id !== 'coverage' && x.v != null ? `<br>coverage ${pct(fr(c).coverage)}` : '';
+  const cov = !m.timeless && m.group === 'PESTLE' && m.id !== 'coverage' && x.v != null ? `<br>coverage ${covPct(fr(c).coverage)}` : '';
   return `<b>${esc(c.name)}</b><br>${head}: ${x.v == null ? esc(x.words) : `${val}${x.year && md === 'latest' ? ` (${esc(x.year)})` : x.year && md === 'year' && !x.hatch ? ` (${esc(x.year)})` : ''}`}${x.v != null && x.words ? `<br><span class="muted">${esc(x.words)}</span>` : ''}${extra}${cov}`;
 }
 // Documentary focus (design/prp-focus.js): the countries being discussed are outlined in the module accent and the map
@@ -598,6 +673,10 @@ window.PRPFocus?.listen({
     return null;
   },
 });
+// Overall pressure is the mean of the dimensions' shares (pestle.js), not a share of all the indicators: so its legend
+// and caption say (pestle-2, 25 November 2026); a single dimension's keep "of the indicators worsening". The legend's
+// note starts "the" ("60%+ the average, …"), so that "60%+ average" is not read as one phrase.
+const OVERALL_WORDS = 'average, across the dimensions scored, of the share of each one\'s indicators worsening';
 function colourMap() {
   const m = metricNow(), md = mode();
   const cells = new Map(D.countries.map(c => [c.iso3, cellOf(m, c)]));
@@ -622,13 +701,13 @@ function colourMap() {
   const grad = `linear-gradient(90deg,${SEQ.join(',')})`, better = m.better ? `<span class="note">${m.better === 'down' ? 'lower is better' : 'higher is better'}</span>` : '';
   const hatchKey = !m.timeless && (m.press || (m.code && md !== 'latest')) ? `<span class="nd"><i class="sw dots"></i>${m.code ? 'Value of an earlier year (up to two)' : 'Partial: fewer than six dimensions'}</span>` : '';
   const noWord = `${md === 'latest' || m.timeless ? 'No value' : `No value for ${whenText()}`}${m.id === 'overall' ? `, or too few (under ${PL.FLOOR} of 6 dimensions)` : ''}`;
-  $('#legend').innerHTML = (isPress ? `<span>0%</span><i class="ramp" style="background:${grad}"></i><span>${PRESS_MAX * 100}%+</span><span class="note">of the indicators worsening</span>`
+  $('#legend').innerHTML = (isPress ? `<span>0%</span><i class="ramp" style="background:${grad}"></i><span>${PRESS_MAX * 100}%+</span><span class="note">${m.id === 'overall' ? `the ${OVERALL_WORDS}` : 'of the indicators worsening'}</span>`
     : isChange ? `<span>${m.better ? 'worse' : 'down'} ${fmtVal(span, m.unit)}</span><i class="ramp" style="background:linear-gradient(90deg,${DIV.join(',')})"></i><span>${m.better ? 'better' : 'up'} ${fmtVal(span, m.unit)}</span><span class="note">change ${esc(whenText())}</span>`
     : `<span>${m.fmt(lo)}</span><i class="ramp" style="background:${grad}"></i><span>${m.fmt(hi)}</span>${better}`) + hatchKey + `<span class="nd"><i class="sw hatch"></i>${esc(noWord)}</span><span class="nd"><i class="sw nodata"></i>Not covered by the World Bank</span>`;
   // The ramp runs light to dark on the light theme and dark to bright on the dark theme.
   const when = m.timeless ? '' : md === 'latest' ? (m.group === 'PESTLE' ? ', latest change' : ', latest values') : md === 'year' ? `, ${view.to}` : `, ${whenText()}`;
   const strong = isDark() ? 'Brighter' : 'Darker', strongest = isDark() ? 'brightest' : 'darkest';
-  const what = isPress ? `${strong} blue means more of a dimension's indicators are worsening (${PRESS_MAX * 100}% or more is ${strongest})${md === 'period' ? ', between the first and last values inside the period' : ''}`
+  const what = isPress ? `${strong} blue means ${m.id === 'overall' ? `more pressure overall, a higher ${OVERALL_WORDS}` : 'more of a dimension\'s indicators are worsening'} (${PRESS_MAX * 100}% or more is ${strongest})${md === 'period' ? ', between the first and last values inside the period' : ''}`
     : isChange ? `Blue means it moved ${m.better ? 'the better way' : 'up'} between ${yname(view.from)} and ${yname(view.to)}, red ${m.better ? 'the worse way' : 'down'}`
     : `${strong} blue means a higher value${m.better ? ` (${m.better === 'down' ? 'lower' : 'higher'} is better)` : ''}`;
   const honest = m.group === 'PESTLE' ? ' PESTLE pressure is VM’s own composite, not a forecast or a ranking of worth.' : '';
@@ -638,7 +717,7 @@ function colourMap() {
 function recolour() { document.querySelectorAll('[data-p]').forEach(el => { el.style.background = pressColour(el.dataset.p); }); }
 
 /* ---------- ranking table ---------- */
-// A year: the measure (with its year), Pressure and Coverage, "partial" and "no value" in words. A period: the measure
+// A year: the measure (with its year), Overall pressure and Coverage, "partial" and "no value" in words. A period: the measure
 // in its first and last years, the change, and the pressure over the period (the first against the last values).
 const OVERALL = () => METRICS[0];
 const noVal = '<span class="nv">no value</span>';
@@ -646,12 +725,14 @@ function renderTable() {
   const m = metricNow(), q = $('#search').value.toLowerCase(), reg = $('#region').value, md = mode(), P = md === 'period' && !m.timeless;
   const pm = m.group === 'PESTLE' ? m : OVERALL(); // the period column: the PESTLE measure itself, else overall pressure
   const cols = P ? [['name', 'Country'], ['region', 'Region'], ['start', `${m.label}, ${yname(view.from)}`], ['end', yname(view.to)], ['change', 'Change'], ['period', pm === m ? `Over ${whenText()}` : 'Period pressure']]
-    : [['name', 'Country'], ['region', 'Region'], ['metric', m.timeless || md === 'latest' ? m.label : `${m.label}, ${view.to}`], ['overall', 'Pressure'], ['coverage', 'Coverage']];
+    : [['name', 'Country'], ['region', 'Region'], ['metric', m.timeless || md === 'latest' ? m.label : `${m.label}, ${view.to}`], ['overall', 'Overall pressure'], ['coverage', 'Coverage']];
+  // A phone hides the Overall pressure column with Overall chosen, as it repeats the score (the CSS for .ov; pestle-1).
+  $('#tblbox table').classList.toggle('ov', !P && m.id === 'overall');
   if (!cols.some(([k]) => k === sortKey)) { sortKey = P ? 'change' : 'metric'; sortDir = -1; }
   // A period with no change for any country (one starting in 1980, which has no score) is ranked by the period's own
   // figure instead of falling back to the names.
   const key = P && sortKey === 'change' && !D.countries.some(c => chg(m, c) != null) ? 'period' : sortKey;
-  $('#thead').innerHTML = '<th scope="col">Compare</th>' + cols.map(([k, l]) => `<th scope="col" class="${k === 'name' || k === 'region' ? '' : 'num'}${k === 'metric' || k === 'start' ? ' wrap' : ''}" aria-sort="${key === k ? (sortDir > 0 ? 'ascending' : 'descending') : 'none'}"><button type="button" class="sort" data-sort="${k}">${esc(l)}<span aria-hidden="true">${key === k ? (sortDir > 0 ? '↑' : '↓') : ''}</span></button></th>`).join('');
+  $('#thead').innerHTML = '<th scope="col">Compare</th>' + cols.map(([k, l]) => `<th scope="col" class="${k === 'name' ? '' : k === 'region' ? 'rg' : 'num'}${k === 'metric' || k === 'start' ? ' wrap' : ''}${k === 'overall' ? ' pc' : ''}" aria-sort="${key === k ? (sortDir > 0 ? 'ascending' : 'descending') : 'none'}"><button type="button" class="sort" data-sort="${k}">${esc(l)}<span aria-hidden="true">${key === k ? (sortDir > 0 ? '↑' : '↓') : ''}</span></button></th>`).join('');
   // Ranked as shown: a score below the floor is ranked with no value; a change that is not like for like (likeForLike,
   // as in Rose most and Fell most) is ranked with no value too, though its cell keeps its figure and its mark.
   const rankedChg = c => { const d = chg(m, c); return d != null && likeForLike(m, c).ok ? d : null; };
@@ -671,16 +752,24 @@ function renderTable() {
       const d = chg(m, c), lf = d == null ? { ok: true } : likeForLike(m, c);
       const sa = m.code ? (m.get(c, 'start') == null ? noVal : m.fmt(m.get(c, 'start')) + yearTag(m, c, 'start')) : endCell(m, fr(c, 'start'), 'start');
       const sb = m.code ? (m.get(c, 'end') == null ? noVal : m.fmt(m.get(c, 'end')) + yearTag(m, c, 'end')) : endCell(m, fr(c, 'end'), 'end');
-      return `<td class="num">${sa}</td><td class="num">${sb}</td><td class="num">${fmtChg(m, d)}${lf.ok ? '' : `<span class="st" title="Not ranked, as not like for like: ${esc(lf.why)}">not ranked</span>`}</td><td class="num">${endCell(pm, fr(c))}</td>`;
+      return `<td class="num">${sa}</td><td class="num">${sb}</td><td class="num">${fmtChg(m, d, c)}${lf.ok ? '' : `<span class="st" title="Not ranked, as not like for like: ${esc(lf.why)}">not ranked</span>`}</td><td class="num">${endCell(pm, fr(c))}</td>`;
     }
     const x = cellOf(m, c), F = fr(c);
-    return `<td class="num">${x.v == null ? (x.few ? tooFew(m.fmt, x.raw) : md === 'latest' || m.timeless ? m.fmt(null) : noVal) : m.fmt(x.v) + yearTag(m, c) + (x.hatch && m.code ? '<span class="st">earlier</span>' : '') + (x.together ? `<span class="st together" title="${esc(x.together)}">each holder counted</span>` : '')}</td><td class="num">${md === 'latest' && F.overall == null ? '–' : pressCell(F)}</td><td class="num">${pct(F.coverage)}</td>`;
+    // With Overall chosen, the score cell carries the "partial" mark too, shown only where a phone hides Pressure.
+    const part = m.id === 'overall' && x.v != null && F.dims < 6 ? ' data-part' : '';
+    return `<td class="num sc"${part}>${x.v == null ? (x.few ? tooFew(m.fmt, x.raw) : md === 'latest' || m.timeless ? m.fmt(null) : noVal) : m.fmt(x.v) + yearTag(m, c) + (x.hatch && m.code ? '<span class="st">earlier</span>' : '') + (x.together ? `<span class="st together" title="${esc(x.together)}">each holder counted</span>` : '')}</td><td class="num pc">${md === 'latest' && F.overall == null ? '–' : pressCell(F)}</td><td class="num">${covPct(F.coverage)}</td>`;
   };
   $('#rows').innerHTML = list.map(c => `<tr data-iso="${c.iso3}"><td><input type="checkbox" data-cmp="${c.iso3}" ${compare.includes(c.iso3) ? 'checked' : ''} aria-label="Compare ${esc(c.name)}"></td>
-    <td><a class="cname" href="#country=${c.iso3}">${esc(c.name)}</a></td><td class="muted">${esc(c.region)}</td>${cells(c)}</tr>`).join('');
+    <td class="cn" data-region="${esc(c.region)}"><a class="cname" href="#country=${c.iso3}">${esc(c.name)}</a></td><td class="muted rg">${esc(c.region)}</td>${cells(c)}</tr>`).join('');
+  tableCue();
   $('#thead').querySelectorAll('[data-sort]').forEach(b => b.onclick = () => { const k = b.dataset.sort; sortDir = sortKey === k ? -sortDir : (k === 'name' || k === 'region' ? 1 : -1); sortKey = k; renderTable(); $(`#thead [data-sort="${k}"]`).focus(); });
   $('#rows').querySelectorAll('[data-cmp]').forEach(cb => cb.onchange = () => toggleCompare(cb.dataset.cmp, cb.checked));
 }
+// The cue above the table, while the table runs past its box (a phone): nothing else shows that it scrolls sideways
+// (pestle-1). Again whenever the box changes size (a turned phone, or the tab shown again), or the table inside it does
+// (the web font arriving after the first render widens it while the box stays as it was).
+function tableCue() { const b = $('#tblbox'); $('#tblcue').hidden = !(b.scrollWidth > b.clientWidth + 1); }
+if (window.ResizeObserver) { const ro = new ResizeObserver(() => tableCue()); ro.observe($('#tblbox')); ro.observe($('#tblbox table')); }
 // The first year in which most countries (over 150) score all six dimensions (1998 on the data of 16 Nov 2026).
 let fullYear = null;
 const fullFrom = () => (fullYear ??= (() => { for (let y = PR.from; y <= PR.to; y++) if (PR.values.filter(r => r?.[y - PR.from]?.[8] === 6).length > 150) return y; return PR.to; })());
@@ -692,8 +781,11 @@ function renderMovers() {
   // Like for like only (likeForLike), the ties settled by name (pestle.js movers); each end with its own year.
   const rows = D.countries.map(c => { const d = chg(m, c); return { c, name: c.name, d, ok: d != null && likeForLike(m, c).ok }; });
   const mv = PL.movers(rows);
-  const li = r => `<li><a class="cname" href="#country=${r.c.iso3}">${esc(r.c.name)}</a> ${fmtChg(m, r.d)} <small>${esc(endsText(m, r.c))}</small></li>`;
-  const more = x => (x.more ? `<li class="muted">and ${x.more} more at ${esc(fmtChg(m, x.at))}</li>` : '');
+  const li = r => `<li><a class="cname" href="#country=${r.c.iso3}">${esc(r.c.name)}</a> ${fmtChg(m, r.d, r.c)} <small>${esc(endsText(m, r.c))}</small></li>`;
+  // The others tied with the last one: each as its own row would show it (a coverage change of one indicator shows as
+  // 4 or 5 points, by where its two ends round).
+  const atOf = x => [...new Set(rows.filter(r => r.ok && r.d === x.at && !x.top.includes(r)).sort((a, b) => covChg(m, a.d, a.c) - covChg(m, b.d, b.c)).map(r => fmtChg(m, r.d, r.c)))].join(' or ');
+  const more = x => (x.more ? `<li class="muted">and ${x.more} more at ${esc(atOf(x))}</li>` : '');
   const any = rows.some(r => r.d != null);
   const empty = any ? '<li class="muted">None</li>'
     : `<li class="muted">${D.countries.some(c => m.get(c, 'start') != null) ? `No score for ${esc(yname(view.to))}` : `No score for ${esc(yname(view.from))}${view.from === STOPS[0] ? ' (the first year held: a score needs an earlier value)' : ''}`}, so no change to rank.</li>`;
@@ -721,6 +813,20 @@ function spark(pts, better, mark = null) {
   const [lo, hi] = d3.extent(xs), cl = v => Math.max(1, Math.min(69, x(Math.max(lo, Math.min(hi, v)))));
   const mk = !mark ? '' : mark.length > 1 ? `<rect class="yrband" x="${cl(mark[0])}" y="0" width="${Math.max(1, cl(mark[1]) - cl(mark[0]))}" height="22"/>` : mark[0] >= lo && mark[0] <= hi ? `<line class="yrrule" x1="${x(mark[0])}" x2="${x(mark[0])}" y1="0" y2="22"/>` : '';
   return `<svg class="spark" viewBox="0 0 70 22" aria-hidden="true">${mk}<path d="${d3.line().x(p => x(p[0])).y(p => y(p[1]))(pts)}" fill="none" style="stroke:${col}" stroke-width="1.4"/><circle cx="${x(last[0])}" cy="${y(last[1])}" r="2" style="fill:${col}"/></svg>`;
+}
+// A governance row's sparkline: the World Bank's 0–100 score (rs: [[year, score, lower, upper], …]) with its 90% range
+// as a faint band (none in a year with no bound), coloured as spark() colours the estimate it stands beside (est).
+function sparkRange(rs, est, better, mark = null) {
+  if (!rs || rs.length < 2) return spark(est, better, mark);
+  const xs = rs.map(p => p[0]), all = rs.flatMap(p => [p[1], p[2], p[3]]).filter(v => v != null);
+  const x = d3.scaleLinear().domain(d3.extent(xs)).range([1, 69]), y = d3.scaleLinear().domain(d3.extent(all)).range([20, 2]);
+  const e = est && est.length >= 2 ? est : rs.map(p => [p[0], p[1]]), up = e.at(-1)[1] >= e.at(-2)[1];
+  const col = better == null ? 'var(--prp-muted)' : (up === (better === 'up')) ? 'var(--prp-good)' : 'var(--prp-bad)';
+  const [lo, hi] = d3.extent(xs), cl = v => Math.max(1, Math.min(69, x(Math.max(lo, Math.min(hi, v)))));
+  const mk = !mark ? '' : mark.length > 1 ? `<rect class="yrband" x="${cl(mark[0])}" y="0" width="${Math.max(1, cl(mark[1]) - cl(mark[0]))}" height="22"/>` : mark[0] >= lo && mark[0] <= hi ? `<line class="yrrule" x1="${x(mark[0])}" x2="${x(mark[0])}" y1="0" y2="22"/>` : '';
+  const band = d3.area().defined(p => p[2] != null && p[3] != null).x(p => x(p[0])).y0(p => y(p[2])).y1(p => y(p[3]))(rs);
+  const last = rs.at(-1);
+  return `<svg class="spark" viewBox="0 0 70 22" aria-hidden="true" data-range="1">${mk}${band ? `<path class="rband" d="${band}"/>` : ''}<path d="${d3.line().x(p => x(p[0])).y(p => y(p[1]))(rs)}" fill="none" style="stroke:${col}" stroke-width="1.4"/><circle cx="${x(last[0])}" cy="${y(last[1])}" r="2" style="fill:${col}"/></svg>`;
 }
 
 /* ---------- profile ---------- */
@@ -765,7 +871,7 @@ async function renderProfile() {
   if (!c) return;
   $('#pname').textContent = ' · ' + c.name;
   const tok = ++profileTok;
-  const [s, SI] = await Promise.all([series(c.iso3).catch(() => null), standins().catch(() => null)]);
+  const [s, SI, GOV] = await Promise.all([series(c.iso3).catch(() => null), standins().catch(() => null), govAll()]);
   try { await ensureData(); } catch { return; } // (rerender() says the figures could not load, and goes back)
   if (tok !== profileTok || selected !== c.iso3) return;
   // The country's series could not load: the note says so, and the profile that was showing stays (only its button
@@ -776,6 +882,8 @@ async function renderProfile() {
     if (profileShown === c.iso3) { const b = $('#addcmp'), on = compare.includes(c.iso3); if (b) { b.setAttribute('aria-pressed', String(on)); b.classList.toggle('primary', !on); b.textContent = on ? '✓ In comparison' : '+ Add to comparison'; } return; }
   } else seriesOk();
   const L = c.leadership, K = c.conflict, md = mode(), P = fr(c), Y = view.to;
+  const govBy = new Map((GOV || []).filter(Boolean).map(x => [x.L.indicator, x]));
+  const govLost = D.indicators.filter(i => isGov(i.code)).length - govBy.size;
   // A figure, a note under it, and its source with its own date (src, plain text).
   const stat = (label, value, small = '', src = '') => `<div class="stat"><span>${esc(label)}</span><b>${value}</b>${small ? `<small>${small}</small>` : ''}${src ? `<small class="src">${esc(src)}</small>` : ''}</div>`;
   const pop = c.latest['SP.POP.TOTL'], gdp = c.latest['NY.GDP.MKTP.CD'];
@@ -802,8 +910,14 @@ async function renderProfile() {
         const when = it === undefined ? ' · could not load' : !it ? (md === 'latest' ? '' : md === 'year' ? ` · No value for ${Y}${(e => (e ? ` (latest earlier ${e})` : ''))(PL.earlierYear(all, Y - PL.MAX_AGE))}` : ` · No value in ${whenText()}`)
           : md === 'period' ? ` · ${first ? `${first[0]}: ${fmtVal(first[1], i.unit)} → ` : ''}${last[0]}` : ` · ${last[0]}${md === 'year' && last[0] < Y ? ' (earlier value)' : ''}`;
         const mark = md === 'latest' ? null : md === 'year' ? [Y] : [view.from, isLatest(Y) ? LAST : Y];
-        return `<div class="ind" data-code="${esc(i.code)}"><div class="l">${esc(i.label)}${i.core ? '' : '<span class="added">added</span>'}<small>${esc(i.unit)}${esc(when)} · <a href="https://data.worldbank.org/indicator/${esc(i.code.replace(/^GOV_WGI_/, ''))}?locations=${esc(c.iso2)}" target="_blank" rel="noreferrer">World Bank ↗</a>${originatorLine(i.code)}</small></div>
-          ${spark(md === 'latest' ? all.slice(-25) : all, i.better, mark)}<div class="v">${last ? fmtVal(last[1], i.unit) : '–'}</div><div class="mv ${mv || ''}">${mv ? mv : ch != null ? (ch > 0 ? '+' : '') + fmtVal(ch, i.unit) : ''}</div></div>${standinRows(SI, i.code, c.iso3)}`;
+        // A governance row: the sparkline is the World Bank's 0–100 score with its 90% range, and the note gives the
+        // score and range of the year shown (Latest: the newest; a year the Bank published none, the one before).
+        const gv = isGov(i.code) ? govBy.get(i.code) : null, gk = gv ? gv.L.at.get(c.iso3) : null;
+        const rs = gv ? gv.G.rangeSeries(gv.L, gk) : [], gy = gv ? gv.G.yearFor(gv.L, isLatest(Y) ? Infinity : Y) : null, gx = gy != null ? gv.G.rangeAt(gv.L, gk, gy) : null;
+        const gnote = !gv ? '' : gx ? ` · <span class="gsc" data-gov="${gy}">World Bank score, ${gy}: ${esc(rangeWords(gx))}<span class="gsl">; drawn beside, its range shaded</span></span>` : ` · <span class="gsc" data-gov="">no World Bank score ${gy != null ? `for ${gy}` : `before ${gv.L.years[0]}`}</span>`;
+        const sp = rs.length >= 2 ? sparkRange(md === 'latest' ? rs.slice(-25) : rs, md === 'latest' ? all.slice(-25) : all, i.better, mark) : spark(md === 'latest' ? all.slice(-25) : all, i.better, mark);
+        return `<div class="ind" data-code="${esc(i.code)}"><div class="l">${esc(i.label)}${i.core ? '' : '<span class="added">added</span>'}<small>${esc(i.unit)}${esc(when)}${gnote} · <a href="https://data.worldbank.org/indicator/${esc(i.code.replace(/^GOV_WGI_/, ''))}?locations=${esc(c.iso2)}" target="_blank" rel="noreferrer">World Bank ↗</a>${originatorLine(i.code)}</small></div>
+          ${sp}<div class="v">${last ? fmtVal(last[1], i.unit) : '–'}</div><div class="mv ${mv || ''}">${mv ? mv : ch != null ? (ch > 0 ? '+' : '') + fmtVal(ch, i.unit) : ''}</div></div>${standinRows(SI, i.code, c.iso3)}`;
       }).join('')}</div>`;
   }).join('');
   // The years of the core values a year's or a period's score used ("values of 2009–2010").
@@ -812,7 +926,7 @@ async function renderProfile() {
   const coreIt = D.indicators.filter(i => i.core).map(i => P.item(i.code)).filter(Boolean);
   const ys = coreIt.map(it => it[0]).filter(Number.isFinite), firsts = coreIt.map(it => it[2] ?? it[0]).filter(Number.isFinite);
   const valuesOf = md === 'latest' ? yearsOf(c) : md === 'period' ? (ys.length ? `first values of ${span(firsts)}, last of ${span(ys)}` : '') : span(ys);
-  const pestleNote = `${md === 'latest' ? 'latest' : whenText()} · coverage ${pct(P.coverage)}${md === 'latest' ? '' : valuesOf ? ` · ${md === 'period' ? '' : 'values of '}${valuesOf}` : ''}${fewIn(P) ? ` · too few values to rank: ${P.dims} of 6 dimensions` : P.overall != null && P.dims < 6 ? ` · partial: ${P.dims} of 6 dimensions` : ''}`;
+  const pestleNote = `${md === 'latest' ? 'latest' : whenText()} · coverage ${covPct(P.coverage)}${md === 'latest' ? '' : valuesOf ? ` · ${md === 'period' ? '' : 'values of '}${valuesOf}` : ''}${fewIn(P) ? ` · too few values to rank: ${P.dims} of 6 dimensions` : P.overall != null && P.dims < 6 ? ` · partial: ${P.dims} of 6 dimensions` : ''}`;
   const pestleSrc = md === 'latest' ? `${SRC.worldBank}, values of ${yearsOf(c) || 'no year'}` : md === 'year' ? `${SRC.worldBank}, values of ${valuesOf || 'no year'} (up to two years before ${Y})` : `${SRC.worldBank}, first and last values inside ${whenText()}`;
   const inCmp = compare.includes(c.iso3);
   $('#profile').innerHTML = `<div class="prp-panel">
@@ -843,6 +957,7 @@ async function renderProfile() {
     <div class="prp-panel-head"><b>Month by Month</b><span class="hint">VM's own marks, month against the three before · UCDP and GDELT</span></div><div id="monthly" class="monthly" aria-live="polite"><div class="muted">Loading…</div></div>
     <div class="prp-panel-head"><b>PESTLE · ${md === 'latest' ? 'latest change' : md === 'year' ? `${Y}, against the previous value within five years` : `${whenText()} (first against last value inside it)`}</b><span class="hint">VM's own composite, not a forecast or a ranking of worth · improving, worsening or stable against each indicator's threshold · blank: context only</span></div>
     <div class="dims">${dimHtml}</div>
+    <p class="panel-note" id="govnote">${govBy.size ? `<b>Governance rows</b> (political and legal): the figure is the World Bank’s estimate, about −2.5 to 2.5, as Country PESTLE scored it. The note under each<span class="gsl"> (and the small line beside it, with its range shaded)</span> gives the Bank’s 0 to 100 governance score, the scale the Bank gives its range on, and its own 90% range. ${esc(GOV_ENDS)} ${esc(GOV_CAVEAT)} Where two ranges overlap, the data cannot tell the two apart: Compare countries ranks every country with its range. Source: ${esc(GOV_SRC([...govBy.values()][0].L).replace(/GOV_WGI_\w\w\./g, 'GOV_WGI_xx.'))}.${govLost ? ` The ranges of ${count(govLost, 'indicator')} could not load, so ${plural(govLost, 'its row shows', 'their rows show')} the estimate alone.` : ''}` : 'The World Bank’s 0 to 100 governance scores and their 90% ranges could not load, so the governance rows show the estimate alone.'}</p>
     <div class="prp-panel-head"><b>Latest headlines</b><span class="hint">Global Headline Tracker · free sources lead, paywalls labelled</span></div><div id="stories" class="stories" aria-live="polite"><div class="muted">Loading…</div></div>
   </div>`;
   profileShown = c.iso3;
@@ -955,11 +1070,16 @@ async function renderCompare(focus) {
   };
   // Each group's source; off Latest, the groups that are not by year say so (their figures are today's).
   const gsrc = g => `${sourceOf(METRICS.find(m => m.group === g))}${g !== 'PESTLE' && METRICS.find(m => m.group === g).timeless && md !== 'latest' ? ' · not by year: today’s figures' : g === 'PESTLE' ? ` · ${whenText()}${md === 'period' ? ', over the period' : ''}` : md === 'period' ? ` · change ${whenText()}` : ''}`;
-  const chartable = D.indicators, code = cmpCode && indBy.has(cmpCode) ? cmpCode : chartable[0].code;
+  const chartable = D.indicators, govInds = D.indicators.filter(i => isGov(i.code));
+  // The chart's choices: every indicator as before, then each governance indicator's 0–100 score with its range
+  // (value "range:<estimate's code>").
+  const okCode = v => !!v && (indBy.has(v) || (v.startsWith('range:') && isGov(v.slice(6))));
+  const code = okCode(cmpCode) ? cmpCode : chartable[0].code;
+  if (!isGov(rankCode)) rankCode = govInds[0]?.code || null;
   $('#compare').innerHTML = `<div class="prp-panel">
     <div class="prp-panel-head"><b>Comparing ${count(cs.length, 'country', 'countries')}</b><span class="chips">${cs.map((c, i) => `<button type="button" class="prp-chip on" data-rm="${c.iso3}" aria-label="Remove ${esc(c.name)} from the comparison"><i class="sw" style="background:${seriesColour(i)}"></i>${esc(c.name)} <span aria-hidden="true">✕</span></button>`).join('')}</span></div>
     ${cmpPicker()}
-    <figure class="prp-figure cmpfig"><label class="fld"><span class="prp-label">Chart over time</span><select class="prp-select" id="cmpind" aria-label="Indicator to chart">${chartable.map(i => `<option value="${i.code}"${i.code === code ? ' selected' : ''}>${esc(i.label)}</option>`).join('')}</select></label>
+    <figure class="prp-figure cmpfig"><label class="fld"><span class="prp-label">Chart over time</span><select class="prp-select" id="cmpind" aria-label="Indicator to chart">${chartable.map(i => `<option value="${i.code}"${i.code === code ? ' selected' : ''}>${esc(i.label)}</option>`).join('')}${govInds.length ? `<optgroup label="Governance score (0–100), with the World Bank’s 90% range">${govInds.map(i => `<option value="range:${i.code}"${'range:' + i.code === code ? ' selected' : ''}>${esc(i.label)}: score and range</option>`).join('')}</optgroup>` : ''}</select></label>
       <svg id="cmpsvg" viewBox="0 0 900 280" role="img" aria-label="Indicator over time for the compared countries"></svg>
       <figcaption><b>Figure 2.</b> <span id="cmpcap"></span></figcaption>
       <details class="dt" id="cmpdt"><summary>Show the chart's data as a table</summary><div id="cmpdata"></div></details></figure>
@@ -970,39 +1090,69 @@ async function renderCompare(focus) {
     <tr><td>Current leader</td>${cs.map(c => `<td class="num" data-leader="${c.iso3}">${leaderHtml(c)}</td>`).join('')}</tr>
     <tr><td>Head of state</td>${cs.map(c => `<td class="num">${headHtml(c, 'headOfState')}</td>`).join('')}</tr>
     <tr><td>Head of government</td>${cs.map(c => `<td class="num">${headHtml(c, 'headOfGovernment')}</td>`).join('')}</tr>
-    </tbody></table></div><p class="panel-note">Green and “best” mark the best value in a row, red and “worst” the worst, where “better” has a clear direction; for the PESTLE pressures, only among the countries scored on the most dimensions, three or more (“partial: 4 of 6” marks a score on fewer than six, and one from fewer than three is too few to rank). Indicators marked “added” were not part of Country PESTLE's score.</p></div>`;
+    </tbody></table></div><p class="panel-note">Green and “best” mark the best value in a row, red and “worst” the worst, where “better” has a clear direction; for the PESTLE pressures, only among the countries scored on the most dimensions, three or more (“partial: 4 of 6” marks a score on fewer than six, and one from fewer than three is too few to rank). Indicators marked “added” were not part of Country PESTLE's score.</p>
+    ${govInds.length ? `<figure class="prp-figure cmpfig" id="rankfig"><label class="fld"><span class="prp-label">Ranked, each with its range</span><select class="prp-select" id="rankind" aria-label="Governance indicator to rank">${govInds.map(i => `<option value="${i.code}"${i.code === rankCode ? ' selected' : ''}>${esc(i.label)}</option>`).join('')}</select></label>
+      <svg id="ranksvg" viewBox="0 0 900 260" tabindex="0" role="slider" aria-orientation="horizontal" aria-valuemin="1" aria-label="Ranking of every country’s governance score with its 90% range, the compared countries marked. The arrow keys step through the countries; Home, End, Page Up and Page Down jump."></svg>
+      <p class="rankread" id="rankread"></p>
+      <div class="ranksay" id="ranksay"></div>
+      <figcaption><b>Figure 3.</b> <span id="rankcap"></span></figcaption>
+      <details class="dt" id="rankdt"><summary>Show the ranking as a table</summary><div id="rankdata"></div></details></figure>` : ''}</div>`;
   $('#compare').querySelectorAll('[data-rm]').forEach(b => b.onclick = () => { toggleCompare(b.dataset.rm, false); renderCompare(); });
   wireCmpPicker(focus);
-  $('#cmpind').onchange = () => { cmpCode = $('#cmpind').value; drawCmpChart(); };
+  $('#cmpind').onchange = () => {
+    cmpCode = $('#cmpind').value; drawCmpChart();
+    // A governance score chosen for the chart is ranked too.
+    if (cmpCode.startsWith('range:') && $('#rankind') && rankCode !== cmpCode.slice(6)) { rankCode = cmpCode.slice(6); $('#rankind').value = rankCode; rankCursor = null; drawRank(); }
+  };
   $('#cmpdt').ontoggle = drawCmpTable;
+  if ($('#rankind')) {
+    $('#rankind').onchange = () => { rankCode = $('#rankind').value; rankCursor = null; drawRank(); };
+    $('#rankdt').ontoggle = drawRankTable;
+    wireRank();
+  }
   compareShown = compare.join(',');
   drawCmpChart();
+  drawRank();
 }
 let cmpData = null, compareShown = null;
 async function drawCmpChart() {
-  const code = $('#cmpind').value, ind = indBy.get(code), svg = d3.select('#cmpsvg'); svg.selectAll('*').remove();
+  const code = $('#cmpind').value, svg = d3.select('#cmpsvg'); svg.selectAll('*').remove();
+  // A governance score with its range ("range:<code>"): the World Bank's 0–100 score and its 90% bounds, from
+  // national/data/governance/ (pts: [year, score, lower, upper]); otherwise the indicator from each country's series.
+  const rng = code.startsWith('range:'), base = rng ? code.slice(6) : code, ind = indBy.get(base);
   // (A series that could not load is drawn as no line, and the caption says so: not as "no data".)
-  const data = await Promise.all(compare.map(async (iso, i) => { const s = await series(iso).catch(() => null); return { c: byIso.get(iso), i, pts: s?.[code] || [], lost: !s }; }));
+  const gv = rng ? await loadGov(base).catch(() => null) : null;
+  const data = rng ? compare.map((iso, i) => ({ c: byIso.get(iso), i, pts: gv ? gv.G.rangeSeries(gv.L, gv.L.at.get(iso)) : [], lost: !gv }))
+    : await Promise.all(compare.map(async (iso, i) => { const s = await series(iso).catch(() => null); return { c: byIso.get(iso), i, pts: s?.[code] || [], lost: !s }; }));
   if ($('#cmpind')?.value !== code) return;
   const all = data.flatMap(d => d.pts), lost = data.filter(d => d.lost).map(d => d.c.name);
-  cmpData = { ind, data, years: [...new Set(all.map(p => p[0]))].sort((a, b) => a - b) };
+  const allY = rng ? data.flatMap(d => d.pts.flatMap(p => [p[1], p[2], p[3]])).filter(v => v != null) : all.map(p => p[1]);
+  cmpData = { ind, data, rng, years: [...new Set(all.map(p => p[0]))].sort((a, b) => a - b) };
   const marked = mode() === 'year' ? ` The rule marks ${view.to}.` : mode() === 'period' ? ` The band marks ${whenText()}.` : '';
-  $('#cmpcap').innerHTML = esc(`${ind.label} (${ind.unit}), ${cmpData.years.length ? `${cmpData.years[0]}–${cmpData.years.at(-1)}` : lost.length ? 'not loaded' : 'no data'}, for ${data.map(d => d.c.name).join(', ')}. ${ind.better ? (ind.better === 'up' ? 'Higher is better. ' : 'Lower is better. ') : ''}The line joins the years that have a value.${marked}${lost.length ? ` The figures for ${lost.join(', ')} could not load.` : ''} Source: World Bank.`) + originatorNote(code);
+  if (rng) {
+    const yrs = cmpData.years, none = data.filter(d => !d.lost && !d.pts.length).map(d => d.c.name);
+    const gaps = data.map(d => [d.c.name, d.pts.filter(p => p[2] == null).map(p => p[0])]).filter(([, ys]) => ys.length);
+    $('#cmpcap').innerHTML = esc(`${ind.label}: the World Bank’s governance score, 0 to 100 (higher is better), ${yrs.length ? `${yrs[0]}–${yrs.at(-1)}` : gv ? 'no data' : 'not loaded'}, for ${data.map(d => d.c.name).join(', ')}. Each line is a country’s score, and the faint band around it, in the same colour, its range. ${GOV_OVERLAP} ${GOV_ENDS} This chart moves from the estimate (about −2.5 to 2.5) shown in the table below and on the rest of the page to the 0 to 100 score, the scale the Bank gives its range on; its axis runs the whole scale, 0 to 100, as the ranking’s does. ${GOV_CAVEAT} The line and band join the years that have a value: the indicators were published every two years until 2002 (1996, 1998 and 2000), then every year.${marked}${none.length ? ` No score for ${none.join(', ')}.` : ''}${gaps.map(([n, ys]) => ` ${n}: a score but no range in ${ys.join(', ')}, shown as the score alone.`).join('')}${gv ? '' : ' The governance scores could not load.'} Source: ${gv ? GOV_SRC(gv.L) : 'World Bank, Worldwide Governance Indicators (CC BY 4.0)'}.`);
+  } else $('#cmpcap').innerHTML = esc(`${ind.label} (${ind.unit}), ${cmpData.years.length ? `${cmpData.years[0]}–${cmpData.years.at(-1)}` : lost.length ? 'not loaded' : 'no data'}, for ${data.map(d => d.c.name).join(', ')}. ${ind.better ? (ind.better === 'up' ? 'Higher is better. ' : 'Lower is better. ') : ''}The line joins the years that have a value.${marked}${lost.length ? ` The figures for ${lost.join(', ')} could not load.` : ''} Source: World Bank.`) + originatorNote(code);
   drawCmpTable();
   // Drawn at the figure's real width, so text stays at its set size; redrawn when the window resizes.
   const W = Math.max(300, Math.round(svg.node().getBoundingClientRect().width || 900)), H = W < 560 ? 240 : 300;
   const M = { l: 58, r: Math.min(150, Math.round(W * 0.27)), t: 12, b: 28 };
   svg.attr('viewBox', `0 0 ${W} ${H}`);
   if (!all.length) { svg.append('text').attr('class', 'empty').attr('x', W / 2).attr('y', H / 2).attr('text-anchor', 'middle').text(lost.length ? 'The figures could not load' : 'No data for these countries'); return; }
-  const x = d3.scaleLinear().domain(d3.extent(all, p => p[0])).range([M.l, W - M.r]), y = d3.scaleLinear().domain(d3.extent(all, p => p[1])).nice().range([H - M.b, M.t]);
+  const x = d3.scaleLinear().domain(d3.extent(all, p => p[0])).range([M.l, W - M.r]), y = d3.scaleLinear().domain(d3.extent(allY)).nice().range([H - M.b, M.t]);
+  // The score and range: the whole 0 to 100 scale, as the ranking below draws it, so the gaps look the same in both.
+  if (rng) y.domain([0, 100]);
   svg.append('g').attr('class', 'gridlines').selectAll('line').data(y.ticks(5)).join('line').attr('x1', M.l).attr('x2', W - M.r).attr('y1', v => y(v)).attr('y2', v => y(v));
   svg.append('g').attr('class', 'axis').attr('transform', `translate(0,${H - M.b})`).call(d3.axisBottom(x).tickFormat(d3.format('d')).ticks(Math.max(3, Math.min(8, Math.floor((W - M.l - M.r) / 70)))).tickSizeOuter(0));
-  svg.append('g').attr('class', 'axis').attr('transform', `translate(${M.l},0)`).call(d3.axisLeft(y).ticks(5).tickSize(0).tickPadding(8).tickFormat(v => fmtVal(v, ind.unit))).call(g => g.select('.domain').remove());
+  svg.append('g').attr('class', 'axis').attr('transform', `translate(${M.l},0)`).call(d3.axisLeft(y).ticks(5).tickSize(0).tickPadding(8).tickFormat(v => (rng ? String(v) : fmtVal(v, ind.unit)))).call(g => g.select('.domain').remove());
   // The years shown on the slider: a rule at the year, a band over the period (none at Latest).
   const [x0, x1] = x.domain(), cx = v => x(Math.max(x0, Math.min(x1, v))), md = mode();
   if (md === 'year' && view.to >= x0 && view.to <= x1) svg.insert('line', '.axis').attr('class', 'yrrule').attr('x1', x(view.to)).attr('x2', x(view.to)).attr('y1', M.t).attr('y2', H - M.b);
   if (md === 'period') svg.insert('rect', '.gridlines').attr('class', 'yrband').attr('x', cx(view.from)).attr('width', Math.max(2, cx(isLatest(view.to) ? x1 : view.to) - cx(view.from))).attr('y', M.t).attr('height', H - M.t - M.b);
   const labels = [];
+  // The range: a faint band in each country's colour, under every line (none in a year with no bound).
+  if (rng) data.forEach(d => { const a = d3.area().defined(p => p[2] != null && p[3] != null).x(p => x(p[0])).y0(p => y(p[2])).y1(p => y(p[3]))(d.pts); if (a) svg.append('path').attr('class', 'rband').attr('d', a).attr('data-iso', d.c.iso3).style('fill', seriesColour(d.i)); });
   data.forEach(d => {
     if (d.pts.length < 1) return;
     svg.append('path').attr('d', d3.line().x(p => x(p[0])).y(p => y(p[1]))(d.pts)).attr('fill', 'none').style('stroke', seriesColour(d.i)).attr('stroke-width', 2);
@@ -1022,7 +1172,7 @@ async function drawCmpChart() {
       rule.attr('x1', x(yr)).attr('x2', x(yr)).style('display', null);
       const at = data.map(d => ({ d, p: d.pts.find(p => p[0] === yr) }));
       dots.selectAll('circle').data(at.filter(a => a.p)).join('circle').attr('r', 3.5).attr('cx', a => x(a.p[0])).attr('cy', a => y(a.p[1])).style('fill', a => seriesColour(a.d.i));
-      showTip(ev, `<b>${yr}</b>` + at.map(a => `<div class="row"><i class="sw" style="background:${seriesColour(a.d.i)}"></i>${esc(a.d.c.name)}<b>${a.p ? fmtVal(a.p[1], ind.unit) : '–'}</b></div>`).join(''));
+      showTip(ev, `<b>${yr}</b>` + at.map(a => `<div class="row"><i class="sw" style="background:${seriesColour(a.d.i)}"></i>${esc(a.d.c.name)}<b>${a.p ? (rng ? esc(rangeWords({ score: a.p[1], lower: a.p[2], upper: a.p[3] })) : fmtVal(a.p[1], ind.unit)) : '–'}</b></div>`).join(''));
     })
     .on('mouseleave', () => { rule.style('display', 'none'); dots.selectAll('*').remove(); hideTip(); });
 }
@@ -1031,13 +1181,153 @@ function drawCmpTable() {
   const box = $('#cmpdata');
   if (!box) return;
   if (!$('#cmpdt').open || !cmpData) { box.innerHTML = ''; return; }
-  const { ind, data, years } = cmpData;
-  box.innerHTML = years.length ? `<div class="tbl"><table class="prp-table"><thead><tr><th scope="col">Year</th>${data.map(d => `<th scope="col" class="num">${esc(d.c.name)}${d.lost ? ' (could not load)' : ''}</th>`).join('')}</tr></thead><tbody>${[...years].reverse().map(yr => `<tr><td class="prp-num">${yr}</td>${data.map(d => { const p = d.pts.find(q => q[0] === yr); return `<td class="num">${p ? fmtVal(p[1], ind.unit) : d.lost ? '' : '–'}</td>`; }).join('')}</tr>`).join('')}</tbody></table></div>` : `<p class="muted">${data.some(d => d.lost) ? 'The figures could not load.' : 'No data for these countries.'}</p>`;
+  const { ind, data, years, rng } = cmpData;
+  box.innerHTML = years.length ? `<div class="tbl"><table class="prp-table"><thead><tr><th scope="col">Year</th>${data.map(d => `<th scope="col" class="num">${esc(d.c.name)}${d.lost ? ' (could not load)' : ''}</th>`).join('')}</tr></thead><tbody>${[...years].reverse().map(yr => `<tr><td class="prp-num">${yr}</td>${data.map(d => { const p = d.pts.find(q => q[0] === yr); return `<td class="num">${p ? (rng ? esc(p[2] == null ? `${r1(p[1])} (no range)` : `${r1(p[1])} (${r1(p[2])}–${r1(p[3])})`) : fmtVal(p[1], ind.unit)) : d.lost ? '' : '–'}</td>`; }).join('')}</tr>`).join('')}</tbody></table></div>` : `<p class="muted">${data.some(d => d.lost) ? 'The figures could not load.' : 'No data for these countries.'}</p>`;
+}
+
+/* ---------- the ranked view, with the margins (HD-13, 25 November 2026) ----------
+   Every country on the page's list that the World Bank scores on one governance indicator in the year shown (the
+   economies the Bank scores that the list leaves out are named in the caption) (Latest: the newest year it holds;
+   a year it published none, the one before), best on the left, each a dot on its own 90% range; the compared countries
+   in their colours. Under it, for each compared country, the ranks its range spans, and for each pair whether their
+   ranges overlap. The arrow keys (or the pointer) step through the countries; the table holds every figure. */
+let rankData = null, rankTok = 0;
+const nameOf = iso => byIso.get(iso)?.name || iso;
+// How sure a rank is, in words (from G.rankSpan): the countries the data cannot tell it from, and the ranks it would
+// take with its score anywhere within its own range, the others held at their scores.
+const spanWords = (sp, ordinal, lower = false) => {
+  const s = `${sp.count > 1 ? `its range overlaps those of ${count(sp.count - 1, 'other country', 'other countries')}, so the data cannot tell it apart from any of them` : 'its range overlaps no other country’s'}; ${sp.from === sp.to ? `anywhere within its range it would still rank ${ordinal(sp.from)}, the others held at their scores` : `anywhere within its range it would rank between ${ordinal(sp.from)} and ${ordinal(sp.to)}, the others held at their scores`}`;
+  return lower ? s : s[0].toUpperCase() + s.slice(1);
+};
+// The year shown, or a period's last year; Latest is the newest year held.
+const rankYearWanted = () => (isLatest(view.to) ? Infinity : view.to);
+async function drawRank() {
+  const svg = d3.select('#ranksvg');
+  if (svg.empty() || !rankCode) return;
+  const tok = ++rankTok, code = rankCode, ind = indBy.get(code);
+  const gv = await loadGov(code).catch(() => null);
+  if (tok !== rankTok || !$('#ranksvg')) return;
+  svg.selectAll('*').remove();
+  const W = Math.max(300, Math.round(svg.node().getBoundingClientRect().width || 900)), H = (W < 560 ? 230 : 270) + 14 * Math.max(0, compare.length - 1);
+  svg.attr('viewBox', `0 0 ${W} ${H}`);
+  const say = (html, read = '') => { $('#ranksay').innerHTML = html; $('#rankread').textContent = read; };
+  const src = gv ? GOV_SRC(gv.L) : 'World Bank, Worldwide Governance Indicators (CC BY 4.0)';
+  const want = rankYearWanted(), year = gv ? gv.G.yearFor(gv.L, want) : null;
+  const yearNote = !gv ? '' : year == null ? `The governance indicators begin in ${gv.L.years[0]}, so there is no ranking for ${want}.` : Number.isFinite(want) && year !== want ? `The World Bank published no scores for ${want}, so this is ${year}, the year before it.` : '';
+  const el = svg.node();
+  if (!gv || year == null) {
+    // No ranking: the caption says only that, with the caveat and the source, not what the dots would be.
+    $('#rankcap').innerHTML = esc(`${ind.label}, ${year ?? (Number.isFinite(want) ? want : 'latest')}: ${gv ? yearNote : 'the World Bank’s governance scores could not load, so there is no ranking.'} ${GOV_CAVEAT} Source: ${src}.`);
+    rankData = null; drawRankTable();
+    el.removeAttribute('aria-valuemax'); el.removeAttribute('aria-valuenow'); el.setAttribute('aria-valuetext', gv ? 'No scores for this year' : 'The governance scores could not load');
+    svg.append('text').attr('class', 'empty').attr('x', W / 2).attr('y', H / 2).attr('text-anchor', 'middle').text(gv ? 'No scores for this year' : 'The governance scores could not load');
+    say(gv ? '' : '<span>The World Bank’s governance scores could not load, so there is no ranking. Choose the indicator again to retry.</span>');
+    return;
+  }
+  const { G, L } = gv, ordinal = G.ordinal, list = G.ranked(L, year, new Map(D.countries.map(c => [c.iso3, c.name])));
+  // What is ranked: the countries on this page's list that the Bank scores that year. The Bank also scores a few
+  // economies the list leaves out (Taiwan, China; Jersey; Anguilla …), named here under the Bank's own names.
+  const out = G.outsideIn(L, year), ofN = `of the ${list.length} ranked here`;
+  const what = `every one of the ${list.length} countries on this page’s list that the World Bank scores${out.length ? ` (the Bank scores ${list.length + out.length} economies that year; the list leaves out ${andList(out.map(o => inText(o)))}, so the ranks here are among these ${list.length} alone and can be up to ${out.length} places better than among all the Bank scores)` : ''}`;
+  $('#rankcap').innerHTML = esc(`${ind.label}, ${year}: ${what}, best on the left, each a dot (its score, 0 to 100) on a line (its 90% range); the compared countries are marked in their colours. ${GOV_CAVEAT} ${GOV_ADVISORY} ${GOV_SCALE} ${GOV_OVERLAP} ${GOV_ENDS} A rank is only as sure as its range: under the picture, each compared country’s ranks run from where it would stand at the top of its range to where it would stand at the bottom, the others held at their scores.${yearNote ? ` ${yearNote}` : ''} Source: ${src}.`);
+  const marked = compare.map((iso, i) => ({ iso, i, x: list.find(r => r.iso3 === iso) || null }));
+  // Room above the plot for the compared countries' names, a row each where they crowd together.
+  const M = { l: 34, r: 10, t: 34 + 14 * Math.max(0, marked.filter(m => m.x).length - 1), b: 24 };
+  rankData = { ind, year, list, marked, G };
+  const n = list.length;
+  const x = d3.scalePoint().domain(list.map(r => r.iso3)).range([M.l + 4, W - M.r - 4]), y = d3.scaleLinear().domain([0, 100]).range([H - M.b, M.t]);
+  svg.append('g').attr('class', 'gridlines').selectAll('line').data([0, 25, 50, 75, 100]).join('line').attr('x1', M.l).attr('x2', W - M.r).attr('y1', v => y(v)).attr('y2', v => y(v));
+  svg.append('g').attr('class', 'axis').attr('transform', `translate(${M.l},0)`).call(d3.axisLeft(y).tickValues([0, 25, 50, 75, 100]).tickSize(0).tickPadding(6)).call(g => g.select('.domain').remove());
+  const rankTicks = [1, ...d3.range(50, n + 1, 50)].filter(r => r <= n);
+  svg.append('g').attr('class', 'axis').attr('transform', `translate(0,${H - M.b})`).call(d3.axisBottom(d3.scaleLinear().domain([1, Math.max(2, n)]).range([M.l + 4, W - M.r - 4])).tickValues(rankTicks).tickFormat(r => ordinal(r)).tickSizeOuter(0));
+  svg.append('text').attr('class', 'axt').attr('x', W - M.r).attr('y', 12).attr('text-anchor', 'end').text('rank, best on the left');
+  svg.append('text').attr('class', 'axt').attr('x', M.l).attr('y', 12).text('score, 0 to 100');
+  const g = svg.append('g').attr('class', 'all');
+  g.selectAll('line').data(list.filter(r => r.lower != null)).join('line').attr('class', 'iv').attr('x1', r => x(r.iso3)).attr('x2', r => x(r.iso3)).attr('y1', r => y(r.lower)).attr('y2', r => y(r.upper));
+  g.selectAll('circle').data(list).join('circle').attr('class', 'dot').attr('r', n > 150 && W < 560 ? 1.2 : 1.7).attr('cx', r => x(r.iso3)).attr('cy', r => y(r.score)).attr('data-iso', r => r.iso3);
+  // The compared countries, on top, with their names above their ranges. A name is raised a row only where its box
+  // would overlap one already placed, and a raised name has a thin leader line in its colour down to its range.
+  const mk = svg.append('g').attr('class', 'mk');
+  const shown = marked.filter(m => m.x).sort((a, b) => x(a.iso) - x(b.iso));
+  const grp = new Map();
+  shown.forEach(m => { const r = m.x, gg = mk.append('g').attr('data-iso', r.iso3); grp.set(r.iso3, gg); if (r.lower != null) gg.append('line').attr('class', 'iv-mk').attr('x1', x(r.iso3)).attr('x2', x(r.iso3)).attr('y1', y(r.lower)).attr('y2', y(r.upper)).style('stroke', seriesColour(m.i)); gg.append('circle').attr('r', 4).attr('cx', x(r.iso3)).attr('cy', y(r.score)).style('fill', seriesColour(m.i)); });
+  const placed = [], ROW = 14;
+  shown.forEach(m => {
+    const r = m.x, px = x(r.iso3), name = nameOf(r.iso3), short = name.length > 16 ? name.slice(0, 15) + '…' : name, gg = grp.get(r.iso3);
+    const anchor = px < M.l + 50 ? 'start' : px > W - M.r - 50 ? 'end' : 'middle', top = y(r.upper ?? r.score), own = top - 6;
+    const t = gg.append('text').attr('class', 'lbl').attr('x', px).attr('y', own).attr('text-anchor', anchor).text(short);
+    const w = (t.node().getComputedTextLength?.() || short.length * 7) + 4;
+    const x0 = anchor === 'start' ? px - 2 : anchor === 'end' ? px - w + 2 : px - w / 2, x1 = x0 + w;
+    const hits = ly => placed.some(p => x0 < p.x1 && p.x0 < x1 && Math.abs(p.y - ly) < ROW);
+    let ly = own;
+    while (hits(ly) && ly - ROW >= 11) ly -= ROW;
+    placed.push({ x0, x1, y: ly });
+    t.attr('y', ly);
+    if (own - ly > 1) gg.insert('line', 'text').attr('class', 'lead').attr('x1', px).attr('x2', px).attr('y1', ly + 3).attr('y2', top - 2).style('stroke', seriesColour(m.i));
+  });
+  const cur = svg.append('g').attr('class', 'cur').style('display', 'none');
+  cur.append('line').attr('y1', M.t).attr('y2', H - M.b); cur.append('circle').attr('r', 6);
+  // The cursor: drawn, written under the picture and given to the slider (aria-valuenow and aria-valuetext), which a
+  // screen reader reads from the focused control; nothing is pushed to a live region on a redraw or a pointer move.
+  el.setAttribute('aria-valuemax', String(Math.max(1, list.at(-1)?.rank || 1)));
+  rankData.show = iso => {
+    const r = list.find(q => q.iso3 === iso);
+    if (!r) { cur.style('display', 'none'); return; }
+    rankCursor = iso;
+    cur.style('display', null).select('line').attr('x1', x(iso)).attr('x2', x(iso));
+    cur.select('circle').attr('cx', x(iso)).attr('cy', y(r.score));
+    const sp = G.rankSpan(list, iso), text = `${ordinal(r.rank)} ${ofN}: ${inText(nameOf(iso))}, ${rangeWords(r)}${sp ? `; ${spanWords(sp, ordinal, true)}` : ''}.`;
+    if ($('#rankread').textContent !== text) $('#rankread').textContent = text;
+    if (el.getAttribute('aria-valuetext') !== text) { el.setAttribute('aria-valuenow', String(r.rank)); el.setAttribute('aria-valuetext', text); }
+  };
+  rankData.list = list; rankData.x = x;
+  svg.on('mousemove', ev => { const px = d3.pointer(ev)[0]; let best = null, d = Infinity; for (const r of list) { const e = Math.abs(x(r.iso3) - px); if (e < d) { d = e; best = r; } } if (best && best.iso3 !== rankCursor) rankData.show(best.iso3); });
+  // What the picture says, in words: each compared country's place and the ranks its range spans, then each pair.
+  const one = m => {
+    const name = esc(nameOf(m.iso)), the = theOf(nameOf(m.iso), true);
+    if (!m.x) return `<span data-iso="${m.iso}">${the}${name} has no ${esc(ind.label.toLowerCase())} score for ${year}.</span>`;
+    const sp = G.rankSpan(list, m.iso);
+    return `<span data-iso="${m.iso}"><i class="sw" style="background:${seriesColour(m.i)}"></i> ${the}<b>${name}</b> is ${ordinal(m.x.rank)} ${ofN}, with ${esc(rangeWords(m.x))}${sp ? `. ${esc(spanWords(sp, ordinal))}` : ': the Bank gives a score but no range for it that year, so it is shown as the score alone'}.</span>`;
+  };
+  const pairs = [];
+  for (let a = 0; a < marked.length; a++) for (let b = a + 1; b < marked.length; b++) {
+    const A = marked[a], B = marked[b], na = esc(inText(nameOf(A.iso))), nb = esc(inText(nameOf(B.iso)));
+    if (!A.x || !B.x) continue;
+    const o = G.overlaps(A.x, B.x), hi = A.x.score >= B.x.score ? na : nb;
+    const bare = A.x.lower == null && B.x.lower == null ? 'either' : A.x.lower == null ? na : nb;
+    pairs.push(`<span data-pair="${A.iso},${B.iso}">${o == null ? `Whether the ranges of ${na} and ${nb} overlap cannot be said: the Bank gives a score with no range for ${bare}.` : o ? `The ranges of ${na} and ${nb} overlap: the data cannot tell them apart.` : `The ranges of ${na} and ${nb} do not overlap: ${hi} scores higher, and the data can tell them apart.`}</span>`);
+  }
+  say(marked.map(one).join('') + pairs.join(''));
+  const start = list.some(r => r.iso3 === rankCursor) ? rankCursor : shown[0]?.iso || list[0]?.iso3;
+  if (start) rankData.show(start);
+  drawRankTable();
+}
+function wireRank() {
+  const el = $('#ranksvg');
+  if (!el) return;
+  el.addEventListener('keydown', e => {
+    if (!rankData?.list?.length) return;
+    const L = rankData.list, i = Math.max(0, L.findIndex(r => r.iso3 === rankCursor));
+    const k = { ArrowRight: 1, ArrowDown: 1, ArrowLeft: -1, ArrowUp: -1, PageDown: 10, PageUp: -10 }[e.key];
+    const j = e.key === 'Home' ? 0 : e.key === 'End' ? L.length - 1 : k ? Math.max(0, Math.min(L.length - 1, i + k)) : null;
+    if (j == null) return;
+    e.preventDefault();
+    rankData.show(L[j].iso3);
+  });
+}
+// The ranking as a table: every country, its rank, score and range; the compared countries in bold (built only while
+// it is open).
+function drawRankTable() {
+  const box = $('#rankdata');
+  if (!box) return;
+  if (!$('#rankdt').open || !rankData) { box.innerHTML = ''; return; }
+  const { list, year, ind } = rankData, on = new Set(compare);
+  box.innerHTML = `<div class="tbl"><table class="prp-table"><caption class="muted" style="caption-side:top;text-align:left;padding:6px 10px">${esc(ind.label)}, ${year}: the World Bank’s 0 to 100 score and its 90% range, for the ${list.length} countries on this page’s list that it scores</caption><thead><tr><th scope="col">Rank</th><th scope="col">Country</th><th scope="col" class="num">Score (0–100)</th><th scope="col" class="num">90% range</th></tr></thead><tbody>${list.map(r => `<tr data-iso="${r.iso3}"${on.has(r.iso3) ? ' class="on"' : ''}><td class="prp-num">${r.rank}</td><td>${esc(nameOf(r.iso3))}${on.has(r.iso3) ? ' (compared)' : ''}</td><td class="num">${r1(r.score)}</td><td class="num">${r.lower == null ? 'none given' : `${r1(r.lower)}–${r1(r.upper)}`}</td></tr>`).join('')}</tbody></table></div>`;
 }
 
 /* ---------- tabs and URL ---------- */
 const TABS = [...document.querySelectorAll('.prp-tabs [role=tab]')];
-let profileTok = 0, compareTok = 0, cmpCode = null;
+let profileTok = 0, compareTok = 0, cmpCode = null, rankCode = null, rankCursor = null;
 function setTab(t) {
   TABS.forEach(b => { const on = b.dataset.tab === t; b.classList.toggle('active', on); b.setAttribute('aria-selected', String(on)); b.tabIndex = on ? 0 : -1; });
   for (const x of ['map', 'profile', 'compare']) $('#tab-' + x).hidden = x !== t;
@@ -1115,7 +1405,7 @@ for (const sel of ['#rows', '#compare', '#movers']) $(sel).addEventListener('cli
 window.addEventListener('load', () => { if (/^#map/.test(location.hash)) scrollTo(0, 0); }, { once: true });
 window.addEventListener('prp:themechange', () => { if (!D) return; readTokens(); colourMap(); recolour(); });
 let resizing;
-window.addEventListener('resize', () => { clearTimeout(resizing); resizing = setTimeout(() => { if (D && !$('#tab-compare').hidden && $('#cmpind')) drawCmpChart(); }, 200); });
+window.addEventListener('resize', () => { clearTimeout(resizing); resizing = setTimeout(() => { if (D && !$('#tab-compare').hidden && $('#cmpind')) { drawCmpChart(); drawRank(); } }, 200); });
 
 /* ---------- the slider (design/prp-period.js) ---------- */
 // What the years shown need before they are drawn: a year's scores (pressure.json) and, for an indicator, its layer;
@@ -1250,6 +1540,7 @@ function paintStrip() {
 const domReady = new Promise(r => (document.readyState === 'loading' ? document.addEventListener('DOMContentLoaded', r, { once: true }) : r()));
 Promise.all([fetch('../national/data/index.json').then(r => r.json()), fetch('https://cdn.jsdelivr.net/npm/world-atlas@2.0.2/countries-110m.json').then(r => r.json()), import('../national/lib/pestle.js'), domReady]).then(([d, world, pl]) => {
   D = d; PL = pl; byIso = new Map(d.countries.map(c => [c.iso3, c])); indBy = new Map(d.indicators.map(i => [i.code, i]));
+  CORE_N = d.indicators.filter(i => i.core).length || 22;
   d.countries.forEach((c, k) => isoIdx.set(c.iso3, k));
   for (const c of d.countries) if (c.num) numToIso.set(String(c.num).padStart(3, '0'), c.iso3);
   readTokens();

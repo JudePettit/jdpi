@@ -27,9 +27,13 @@ export const WARS = [
   { id: 'nigeria-lake-chad', keywords: ["Nigeria","Boko Haram"], name: 'Nigeria and the Lake Chad basin', zone: 'Africa', ids: [119, 13641, 4378, 1850, 297, 13884, 16382, 4948, 4973],
     wiki: 'Boko_Haram_insurgency',
     background: 'Boko Haram (JAS) began its insurgency in north-east Nigeria in 2009; its rival Islamic State West Africa Province now dominates the Lake Chad area. North-west Nigeria suffers mass kidnappings and killings by armed "bandit" gangs, and the Middle Belt sees recurring farmer–herder violence.' },
-  { id: 'ethiopia', keywords: ["Ethiopia","Amhara","Tigray"], name: 'Ethiopia: Amhara and Oromia insurgencies', zone: 'Africa', ids: [16069, 267, 413, 474, 4314],
+  { id: 'ethiopia', keywords: ["Ethiopia","Amhara","Tigray"], name: 'Ethiopia: Amhara, Oromia and Tigray', zone: 'Africa', ids: [16069, 267, 413, 474, 4314],
+    // 25 November 2026 (ChatGPT's review, front-pages-45): the group holds conflict 267, whose Government of Ethiopia v
+    // TPLF dyad UCDP records in Tigray in seven of 2026's first nine months (candidate events v26.01.26.09), so the
+    // name says Tigray and the background no longer leaves the Tigray war ended. The agreement's date: Wikipedia,
+    // "Ethiopia–Tigray peace agreement" (signed in Pretoria on 2 November 2022).
     wiki: 'War_in_Amhara',
-    background: 'After the 2020–22 Tigray war ended in a peace deal, fighting moved to Amhara, where Fano militias rebelled in 2023 against the federal government, and continued in Oromia with the Oromo Liberation Army.' },
+    background: 'The 2020–22 Tigray war ended with a peace agreement signed in Pretoria in November 2022. Fighting then moved to Amhara, where Fano militias rebelled in 2023 against the federal government, and continued in Oromia with the Oromo Liberation Army. In 2026 UCDP again records fighting between the government and the TPLF in Tigray.' },
   { id: 'pakistan-afghanistan', keywords: ["Pakistan","Afghanistan","Taliban","Balochistan"], name: 'Pakistan and Afghanistan', zone: 'Asia', ids: [404, 325, 11639, 14859, 333],
     wiki: 'Insurgency_in_Khyber_Pakhtunkhwa',
     background: 'The Pakistani Taliban (TTP) stepped up attacks after the Afghan Taliban returned to power in 2021, and Pakistan accuses Kabul of sheltering it. Baloch separatists wage a separate insurgency in Balochistan. Pakistan has struck targets inside Afghanistan, leading to border clashes between the two states.' },

@@ -16,7 +16,7 @@ import vm from 'node:vm';
 import { pageTest, launch } from './tools/pages.mjs';
 import {
   BRIEFINGS, BRIEFING, POSITIONS, POSITION_LABELS, POLITICAL_TOPICS, TOPICS_KEY, terms, cluster, buildModel, digest, search, parseQuery, parseHash, toHash,
-  briefingPage, itemPage, referenceTime, topicsFrom, normalise, localDay, findWord, fold, inWindow, DEFAULTS, politicalTops, rankTops,
+  briefingPage, itemPage, referenceTime, topicsFrom, normalise, localDay, findWord, fold, inWindow, DEFAULTS, politicalTops, rankTops, urlKey,
 } from '../highbrowse/analysis.js';
 import * as SCI from '../science/briefing/view.js';
 import * as ECON from '../econ/briefing/view.js';
@@ -318,7 +318,10 @@ test('search: fast enough on the four real stores', () => {
 // headlines used it and opens a search for it: the search must find every one of them. ("US" missed its "U.S.", "USA"
 // and "United States" headlines, 111 of 419 in a week, and "AI" its "A.I." ones.) Names of two words are left out
 // here: a headline that puts a possessive or a quote between the two ("Trump's administration") is not found by the
-// phrase yet, a known gap; their plural and singular are held above.
+// phrase yet, a known gap; their plural and singular are held above. The search gives one result per article, so a
+// headline is found when its article is among the results, under whichever of its titles the result shows: on
+// 26 November 2026 the Financial Times retitled a story and the Digital store held both titles at one address, and
+// the search, rightly, showed the article once.
 test('search: each name or term the page shows finds every headline it counted, on the real stores', () => {
   const real = buildModel(BRIEFINGS.map(b => json(b.data)));
   const missed = [];
@@ -327,10 +330,11 @@ test('search: each name or term the page shows finds every headline it counted, 
     for (const [t, b] of [...d.topics.map(x => [x, []]), ...d.coverage.flatMap(c => c.terms.map(x => [x, [c.key]])), ...d.shared.terms.map(x => [x, []])]) {
       if (t.k.includes(' ')) continue;
       const r = search(real, { q: /\s/.test(t.term) ? `"${t.term}"` : t.term, w, b });
-      const found = new Set(r.results.flatMap(x => [x.item, ...x.also]).map(i => i.n));
+      const shown = r.results.flatMap(x => [x.item, ...x.also]);
+      const found = new Set(shown.map(i => i.n)), foundArticle = new Set(shown.map(i => urlKey(i.u)));
       const counted = inWindow(real.items, w, real.ref).filter(i => !i.soft && (!b.length || b.includes(i.b)) && i.tm.some(x => x.k === t.k));
       assert.equal(counted.length, b.length ? t.by[b[0]] : t.items, `${w} ${t.term}: the headlines it counted`);
-      for (const i of counted) if (!found.has(i.n)) missed.push(`${w} ${t.term}: ${i.t}`);
+      for (const i of counted) if (!found.has(i.n) && !foundArticle.has(urlKey(i.u))) missed.push(`${w} ${t.term}: ${i.t}`);
     }
   }
   assert.deepEqual(missed.slice(0, 5), [], `${missed.length} headlines a term counted are not found by its search`);

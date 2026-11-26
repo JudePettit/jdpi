@@ -1,5 +1,5 @@
 {
-  "generated": "2026-11-26T15:29:16.205Z",
+  "generated": "2026-11-26T22:33:52.760Z",
   "name": "Vitruvian Manager data catalogue",
   "publisher": "JDP-Iq",
   "description": "Every public dataset in Vitruvian Manager (VM, by JDP-Iq), with its fields, size, licence and sources. Read-only; no keys. Files are static JSON on this site; the MCP server (/mcp) and the JSON API (/api/v1/) query them with row and size caps.",
@@ -1131,7 +1131,7 @@
           "description": "Soft-news class when the story is not hard news: s sport, e entertainment, l lifestyle; absent for news"
         }
       ],
-      "rows": 6545,
+      "rows": 6412,
       "licence": "Headlines, standfirsts and links © their publishers, quoted for reference; selection and metadata © JDP-Iq.",
       "sources": [
         "RSS and Atom feeds of the publishers listed in intelligence-briefing-sources",
@@ -1140,7 +1140,7 @@
       "updated": "2026-11-26",
       "refresh": "twice daily",
       "page": "q/briefing.html",
-      "bytes": 2857172
+      "bytes": 2799612
     },
     {
       "id": "intelligence-briefing-sources",
@@ -1208,7 +1208,7 @@
       "updated": "2026-11-26",
       "refresh": "twice daily",
       "page": "q/briefing.html",
-      "bytes": 2857172
+      "bytes": 2799612
     },
     {
       "id": "daily-synopsis-stories",
@@ -1412,7 +1412,7 @@
           "description": "The same item at the other outlets that carried it, each { source, url, title, access }"
         }
       ],
-      "rows": 493,
+      "rows": 502,
       "licence": "Titles, links and short summaries © their publishers, quoted for reference; classification and metadata © JDP-Iq.",
       "sources": [
         "RSS and Atom feeds of the journals, working-paper series, central banks, think tanks and economics desks listed in econ-briefing-sources"
@@ -1420,7 +1420,7 @@
       "updated": "2026-11-26",
       "refresh": "6-hourly",
       "page": "econ/briefing/index.html",
-      "bytes": 289252
+      "bytes": 292690
     },
     {
       "id": "econ-briefing-sources",
@@ -1556,7 +1556,7 @@
       "updated": "2026-11-26",
       "refresh": "6-hourly",
       "page": "econ/briefing/index.html",
-      "bytes": 289252
+      "bytes": 292690
     },
     {
       "id": "science-briefing-stories",
@@ -1649,7 +1649,7 @@
           "description": "The same item at the other outlets that carried it, each { source, url, title, access }"
         }
       ],
-      "rows": 1212,
+      "rows": 1196,
       "licence": "Titles, links and short summaries © their publishers, quoted for reference; classification and metadata © JDP-Iq.",
       "sources": [
         "RSS and Atom feeds of the journals and science desks listed in science-briefing-sources (Springer Nature, AAAS, Cell Press, PNAS, APS, Wiley, IOP, AAS, PLOS, NASA, ESA and others)"
@@ -1657,7 +1657,7 @@
       "updated": "2026-11-26",
       "refresh": "6-hourly",
       "page": "science/briefing/index.html",
-      "bytes": 711013
+      "bytes": 701539
     },
     {
       "id": "science-briefing-sources",
@@ -1783,7 +1783,7 @@
       "updated": "2026-11-26",
       "refresh": "6-hourly",
       "page": "science/briefing/index.html",
-      "bytes": 711013
+      "bytes": 701539
     },
     {
       "id": "digital-briefing-stories",
@@ -1866,11 +1866,6 @@
           "description": "Other outlets that carried the same item"
         },
         {
-          "name": "undated",
-          "type": "boolean",
-          "description": "True when the feed gave no date (the time is when Vitruvian Manager first saw it)"
-        },
-        {
           "name": "access",
           "type": "string",
           "description": "How the item can be read, where it is not free: signup (a free account), metered (a few free articles, then payment) or paid (design/prp-access.json)"
@@ -1886,7 +1881,7 @@
           "description": "The same item at the other outlets that carried it, each { source, url, title, access }"
         }
       ],
-      "rows": 1155,
+      "rows": 1118,
       "licence": "Titles, links and short summaries © their publishers, quoted for reference; classification and metadata © JDP-Iq.",
       "sources": [
         "RSS and Atom feeds of the journals, preprint servers, labs and technology desks listed in digital-briefing-sources"
@@ -1894,7 +1889,7 @@
       "updated": "2026-11-26",
       "refresh": "6-hourly",
       "page": "digital/briefing/index.html",
-      "bytes": 691787
+      "bytes": 670150
     },
     {
       "id": "digital-briefing-sources",
@@ -2040,7 +2035,7 @@
       "updated": "2026-11-26",
       "refresh": "6-hourly",
       "page": "digital/briefing/index.html",
-      "bytes": 691787
+      "bytes": 670150
     },
     {
       "id": "political-calendar",

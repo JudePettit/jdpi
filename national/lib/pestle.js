@@ -39,8 +39,11 @@ export function scorePeriod(s, pick, indicators, dimensions = DIMENSIONS) {
     const d = (dims[ind.dimension] ||= { worsening: 0, scored: 0 });
     d.scored++; if (mv === 'worsening') d.worsening++;
   }
-  const pressure = Object.fromEntries(dimensions.map(k => [k, dims[k]?.scored ? round(dims[k].worsening / dims[k].scored, 3) : null]));
-  const vals = Object.values(pressure).filter(v => v != null);
+  // Each share is rounded once: a dimension's to thousandths as stored, and overall from the unrounded shares (pestle-3,
+  // 25 November 2026), not from the rounded ones (which put 63 of 9,765 yearly scores a point out).
+  const shares = dimensions.map(k => (dims[k]?.scored ? dims[k].worsening / dims[k].scored : null));
+  const pressure = Object.fromEntries(dimensions.map((k, i) => [k, round(shares[i], 3)]));
+  const vals = shares.filter(v => v != null);
   const core = indicators.filter(i => i.core);
   return { items, pressure, overall: vals.length ? round(vals.reduce((a, b) => a + b, 0) / vals.length, 3) : null, coverage: round(core.filter(i => items[i.code]).length / core.length, 3), dims: vals.length };
 }

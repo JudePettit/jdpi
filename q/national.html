@@ -483,7 +483,7 @@ const longestStat = (c, L, stat) => {
 const TOGETHER_METRICS = new Set(['leaders100', 'avgTenure']);
 const togetherMark = (m, c) => (TOGETHER_METRICS.has(m.id) && c?.leadership?.together ? togetherNote(c.leadership) : '');
 // The current leader's source: the office the Atlas names (when it decides it), and the holder from Wikidata.
-const leaderSrc = c => (!c.leader ? '' : `${c.leader.rule === 'atlas' ? `Office named by ${SRC.atlas()}; holder from ` : ''}${SRC.wikidata()}${c.leader.source === 'correction' ? ', with VM’s correction' : ''}`);
+const leaderSrc = c => (!c.leader ? '' : `${c.leader.rule === 'atlas' ? `Office named by ${SRC.atlas()}; holder from ` : ''}${SRC.wikidata()}${c.leader.source === 'correction' ? ', with VM’s correction' : ''}${c.leader.partySource === 'atlas' ? '; party from the Political Atlas' : ''}`);
 
 /* ---------- metrics (map colouring, ranking, comparison) ---------- */
 // at(F, c): the metric in a frame. PESTLE and the indicators follow the years shown; the Leadership, Conflict and Energy
@@ -942,7 +942,7 @@ async function renderProfile() {
       ${L ? stat('Average time in office', L.avgTenure == null ? '–' : count(L.avgTenure, 'yr'), 'median ' + (L.medianTenure == null ? '–' : count(L.medianTenure, 'yr')), SRC.leaders(c)) : ''}
       ${L?.longest ? longestStat(c, L, stat) : ''}
       ${L ? stat('Irregular seizures of power', L.irregular, 'coups and foreign impositions since 1926', SRC.leaders(c)) : ''}
-      ${L ? stat('Elections and referendums', L.elections, 'since 1926, or since independence where that came later', SRC.retro()) : ''}
+      ${L ? stat('Elections and referendums', L.elections ?? '–', L.elections == null ? 'none in the Retrospective’s records for this country' : 'since 1926, or since independence where that came later', SRC.retro()) : ''}
       ${K ? stat('Armed conflicts per year', K.avgConflictsPerYear, `on its territory, 1946–2025 (${count(K.conflictYears, 'conflict-year')})`, SRC.ucdp()) : ''}
       ${K ? stat('Years at war', K.yearsAtWar, `of ${count(K.yearsWithConflict, 'year')} with any armed conflict`, SRC.ucdp()) : ''}
       ${K ? stat('New armed conflicts', K.onsetsPerDecade + ' a decade', `new wars: ${K.newWarsPerDecade} a decade (${K.newWarsPerYear} a year)`, SRC.ucdp()) : ''}

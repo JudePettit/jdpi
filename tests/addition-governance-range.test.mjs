@@ -2,7 +2,10 @@
 // governance scores with the Bank's own 90% range: a faint band on the governance sparklines of a profile and on the
 // Compare chart (its "score and range" choices), and a ranked view of every country with its range, the compared
 // countries marked and a sentence saying whether their ranges overlap. The data is national/data/governance/
-// (national/scripts/indicators.mjs --governance; national/lib/governance.js has the shape).
+// (national/scripts/build.mjs on each refresh, through carry.mjs, or indicators.mjs --governance; national/lib/governance.js
+// has the shape). Since 26 November 2026 the monthly refresh fetches these files again, so the figures read from the
+// Bank's release of 25 September 2026 (RELEASE below) are checked only while the files are that release's, and skipped
+// with a message once a newer one is in; the checks of shape run on every release.
 // The unit tests check the shaping on made-up rows and the committed files; three figures are checked against the
 // World Bank's API as read on 25-26 November 2026 (GOV_WGI_CC.SC, SC_LB and SC_UB, 2024: Denmark 94.0303422,
 // 88.695444, 99.3652404; Ireland 79.421168, 74.131216, 84.7111201; the United Kingdom 77.9084469, 72.1771379,
@@ -148,7 +151,16 @@ test('the committed files: six layers in index.json\'s country order, each range
   assert.ok(bytes < 600 * 1024, `${bytes} bytes`);
 });
 
-test('three figures equal the World Bank\'s: control of corruption, 2024, Denmark, Ireland and the United Kingdom', () => {
+// The release the pinned figures below were read from (the World Bank's source 3, lastupdated). A newer release in the
+// files skips them, with a message, rather than failing the refresh's data or the deploy's tests.
+const RELEASE = '2026-09-25';
+const newerRelease = est => {
+  let r;
+  try { r = layer(est).released; } catch { return false; } // no file: the test runs, and fails as it should
+  return r === RELEASE ? false : `the files are the World Bank's release of ${r}, not ${RELEASE}, which these figures were read from`;
+};
+
+test('three figures equal the World Bank\'s: control of corruption, 2024, Denmark, Ireland and the United Kingdom', { skip: newerRelease('GOV_WGI_CC.EST') }, () => {
   const L = layer('GOV_WGI_CC.EST'), at = iso => G.rangeAt(L, L.countries.indexOf(iso), 2024);
   assert.deepEqual(at('DNK'), { score: 94, lower: 88.7, upper: 99.4 });
   assert.deepEqual(at('IRL'), { score: 79.4, lower: 74.1, upper: 84.7 });
@@ -157,7 +169,7 @@ test('three figures equal the World Bank\'s: control of corruption, 2024, Denmar
   assert.equal(G.overlaps(at('DNK'), at('GBR')), false);
 });
 
-test('the ranking counts what the Bank scores: the countries ranked and the economies named as left out make up its total', () => {
+test('the ranking counts what the Bank scores: the countries ranked and the economies named as left out make up its total', { skip: newerRelease('GOV_WGI_CC.EST') || newerRelease('GOV_WGI_GE.EST') }, () => {
   // The World Bank's API, read 26 November 2026: GOV_WGI_CC.SC, 2025, 215 economies with a value; GOV_WGI_GE.SC, 2025,
   // 213. Eight come with no ISO3 code and are not on VM's list: Anguilla, the Cook Islands, French Guiana, Jersey,
   // Martinique, Niue, Reunion and Taiwan, China.
@@ -274,7 +286,7 @@ test('page: a country with a score but no range shows the score alone, and the p
   const { page, errors, open } = await govPage(t);
   const GE = 'GOV_WGI_GE.EST', L = layer(GE), y = NEWEST(GE), j = L.years.indexOf(y), k = L.countries.indexOf('IRL');
   const sk = L.countries.indexOf('SSD');
-  assert.equal(L.values[sk][j][1], 0, 'South Sudan\'s range starts at 0.0 in the newest year (GOV_WGI_GE.SC_LB)');
+  if (!newerRelease(GE)) assert.equal(L.values[sk][j][1], 0, 'South Sudan\'s range starts at 0.0 in the newest year (GOV_WGI_GE.SC_LB)');
   // The real file, with Ireland's newest cell cut to its score alone.
   const cut = structuredClone(L); cut.values[k][j] = [L.values[k][j][0]];
   await page.route('**/national/data/governance/GOV_WGI_GE.json', r => r.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(cut) }));
@@ -351,7 +363,7 @@ test('page: the Compare chart\'s score and range, its caption, and its table hol
     assert.deepEqual(cells, ['IRL', 'GBR', 'DNK'].map(iso => cell(iso, yr)), String(yr));
   }
   // 2024 as read from the World Bank's API (the header of this file).
-  assert.deepEqual(['IRL', 'GBR', 'DNK'].map(iso => cell(iso, 2024)), ['79.4 (74.1–84.7)', '77.9 (72.2–83.6)', '94.0 (88.7–99.4)']);
+  if (!newerRelease(CC)) assert.deepEqual(['IRL', 'GBR', 'DNK'].map(iso => cell(iso, 2024)), ['79.4 (74.1–84.7)', '77.9 (72.2–83.6)', '94.0 (88.7–99.4)']);
   assert.deepEqual(errors, []);
 });
 

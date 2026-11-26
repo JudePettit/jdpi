@@ -141,6 +141,9 @@ const DATA_URL = '../battlefield/data/realtime.json';
 const RELOAD_MS = 6 * 3600 * 1000; // data changes monthly; re-check every six hours
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const fmt = n => Number(n).toLocaleString('en-GB');
+// "1 death", "2 deaths": a count and its noun in agreement (26 November 2026: the page printed "1 deaths" beside a
+// source, a conflict, a month's bar and a map circle).
+const plural = (n, one) => `${fmt(n)} ${one}${n === 1 ? '' : 's'}`;
 const monthName = (m, opts = { month: 'long', year: 'numeric' }) => new Date(m + '-01T00:00:00Z').toLocaleString('en-GB', { ...opts, timeZone: 'UTC' });
 const params = new URLSearchParams(location.search);
 let view = params.get('view') === 'archive' ? 'archive' : 'live';
@@ -282,7 +285,7 @@ function drawMap() {
       const inFocus = focusBox && PRPFocus.contains(focusBox, [lon, lat]);
       const sel = selectedWar === w.id || inFocus, faded = (selectedWar || focusBox) && !sel, quiet = w.rank < 0 && !sel, col = selectedWar === w.id && w.rank < 0 ? ink : colour(w);
       L.circleMarker([lat, lon], { radius: Math.min(26, 2.5 + Math.sqrt(deaths) * 0.8), color: col, weight: sel ? 1.5 : .6, fillColor: col, fillOpacity: faded ? .08 : quiet ? .3 : .55, opacity: faded ? .2 : quiet ? .6 : .95 })
-        .bindTooltip(`<b>${esc(w.name)}</b><br>${filed ? `${esc(filed)} · ` : ''}${mi < 0 ? periodName('short') : monthName(data.months[mi], { month: 'short' })}: ${fmt(deaths)} deaths, ${fmt(events)} events`, { sticky: true })
+        .bindTooltip(`<b>${esc(w.name)}</b><br>${filed ? `${esc(filed)} · ` : ''}${mi < 0 ? periodName('short') : monthName(data.months[mi], { month: 'short' })}: ${plural(deaths, 'death')}, ${plural(events, 'event')}`, { sticky: true })
         .on('click', () => selectWar(w.id))
         .addTo(layer);
     }
@@ -313,29 +316,29 @@ PRPMark.load().then(m => { MARKS = m; if (data) renderSide(); });
 function countingNote(w, u) {
   const f = u?.fighting?.figures, mm = w.monthly.find(x => x.month === u?.fighting?.month);
   if (!f || !mm || u.seriesRule !== 'shared' || (f.deaths === mm.deaths && f.events === mm.events)) return '';
-  return `<p class="small">This page counts each event in the month it starts: ${fmt(mm.deaths)} deaths in ${fmt(mm.events)} events in ${monthName(mm.month)}. The mark shares out the deaths of events UCDP dates only to a span over their days, and counts such an event in each month it touches: ${fmt(f.deaths)} in ${fmt(f.events)}.</p>`;
+  return `<p class="small">This page counts each event in the month it starts: ${plural(mm.deaths, 'death')} in ${plural(mm.events, 'event')} in ${monthName(mm.month)}. The mark shares out the deaths of events UCDP dates only to a span over their days, and counts such an event in each month it touches: ${fmt(f.deaths)} in ${fmt(f.events)}.</p>`;
 }
 
 function warRow(w, months) {
   const deaths = (months ? w.monthly.filter(x => months.includes(x.month)) : w.monthly.slice(-3)).reduce((s, x) => s + x.deaths, 0);
-  return `<button class="warrow${selectedWar === w.id ? ' sel' : ''}" data-war="${w.id}"><i class="swatch" style="background:${w.cvar}"></i><div><div class="warname">${esc(w.name)}</div><div class="warmeta">${esc(w.countries.slice(0, 4).join(', '))}${w.countries.length > 4 ? ' +' + (w.countries.length - 4) : ''}</div>${!months && markOf(w) ? PRPMark.chip(markOf(w).fighting) : ''}</div><div class="deaths">${fmt(deaths)}<small>${months ? 'deaths' : '3-month deaths'}</small></div></button>`;
+  return `<button class="warrow${selectedWar === w.id ? ' sel' : ''}" data-war="${w.id}"><i class="swatch" style="background:${w.cvar}"></i><div><div class="warname">${esc(w.name)}</div><div class="warmeta">${esc(w.countries.slice(0, 4).join(', '))}${w.countries.length > 4 ? ' +' + (w.countries.length - 4) : ''}</div>${!months && markOf(w) ? PRPMark.chip(markOf(w).fighting) : ''}</div><div class="deaths">${fmt(deaths)}<small>${months ? '' : '3-month '}${deaths === 1 ? 'death' : 'deaths'}</small></div></button>`;
 }
 
 // Deaths month by month, the month shown (or every month of the archive's period) highlighted.
 function bars(w) {
   const max = Math.max(...w.monthly.map(x => x.deaths), 1), cur = new Set(view === 'archive' ? archiveMonths() : [data.latest]);
-  return `<div class="bars" style="--n:${w.monthly.length}" role="img" aria-label="Deaths per month in ${data.year}">${w.monthly.map(x => `<div class="${cur.has(x.month) ? 'cur' : ''}" style="height:${Math.max(3, x.deaths / max * 100)}%" title="${monthName(x.month)}: ${fmt(x.deaths)} deaths${x.periodDeaths ? `, ${fmt(x.periodDeaths)} of them in events UCDP dates only to a month or longer` : ''}"></div>`).join('')}</div><div class="barlabels" style="--n:${w.monthly.length}">${w.monthly.map(x => `<span>${monthName(x.month, { month: 'narrow' })}</span>`).join('')}</div><div class="barcap">Deaths per month, ${data.year} · highlighted: ${cur.size > 1 ? periodName() : monthName([...cur][0])}</div>`;
+  return `<div class="bars" style="--n:${w.monthly.length}" role="img" aria-label="Deaths per month in ${data.year}">${w.monthly.map(x => `<div class="${cur.has(x.month) ? 'cur' : ''}" style="height:${Math.max(3, x.deaths / max * 100)}%" title="${monthName(x.month)}: ${plural(x.deaths, 'death')}${x.periodDeaths ? `, ${fmt(x.periodDeaths)} of them in events UCDP dates only to a month or longer` : ''}"></div>`).join('')}</div><div class="barlabels" style="--n:${w.monthly.length}">${w.monthly.map(x => `<span>${monthName(x.month, { month: 'narrow' })}</span>`).join('')}</div><div class="barcap">Deaths per month, ${data.year} · highlighted: ${cur.size > 1 ? periodName() : monthName([...cur][0])}</div>`;
 }
 
 function warDetail(w) {
   const months = view === 'archive' ? archiveMonths() : [data.latest], m = months.at(-1);
   const mm = w.monthly.find(x => x.month === m);
   const prev = w.monthly.filter(x => x.month < m && x.events).slice(-2).reverse();
-  const sources = x => x.sources.filter(s => s.headline).map(s => `<div class="src">${esc(s.headline)}<small>${esc(s.office)} · ${s.date}${s.place ? ' · ' + esc(s.place) : ''} · ${fmt(s.deaths)} deaths</small></div>`).join('');
+  const sources = x => x.sources.filter(s => s.headline).map(s => `<div class="src">${esc(s.headline)}<small>${esc(s.office)} · ${s.date}${s.place ? ' · ' + esc(s.place) : ''} · ${plural(s.deaths, 'death')}</small></div>`).join('');
   // Over a period of months: its deaths and events, then each of its months with events, newest first.
   const told = w.monthly.filter(x => months.includes(x.month) && x.events).reverse(), sum = k => w.monthly.filter(x => months.includes(x.month)).reduce((s, x) => s + x[k], 0);
   const shown = months.length > 1
-    ? `<h3>${periodName()}</h3><p>About ${fmt(sum('deaths'))} deaths in ${fmt(sum('events'))} events over the ${months.length} months.</p>${told.map(x => `<h3>${monthName(x.month)}</h3><p>${esc(x.text)}</p>${sources(x)}`).join('')}`
+    ? `<h3>${periodName()}</h3><p>About ${plural(sum('deaths'), 'death')} in ${plural(sum('events'), 'event')} over the ${months.length} months.</p>${told.map(x => `<h3>${monthName(x.month)}</h3><p>${esc(x.text)}</p>${sources(x)}`).join('')}`
     : `<h3>${monthName(m)}</h3><p>${esc(mm.text)}</p>
     ${sources(mm)}
     ${prev.map(x => `<h3>${monthName(x.month)}</h3><p>${esc(x.text)}</p>`).join('')}`;
@@ -349,8 +352,8 @@ function warDetail(w) {
     ${w.background ? `<h3>Background</h3><p>${esc(w.background)}</p>` : ''}
     ${w.wiki ? `<p><a href="https://en.wikipedia.org/wiki/${encodeURIComponent(w.wiki)}" target="_blank" rel="noreferrer">Read more on Wikipedia ↗</a></p>` : ''}
     <h3>Conflicts in this war (UCDP)</h3>
-    ${w.conflicts.slice(0, 12).map(c => `<div class="conf"><span>${esc(c.name)} <span class="small">· ${esc(c.type)}</span></span><span>${fmt(c.deaths)} deaths</span></div>`).join('')}
-    ${w.conflicts.length > 12 ? `<div class="small" style="margin-top:6px">+ ${w.conflicts.length - 12} smaller conflicts</div>` : ''}
+    ${w.conflicts.slice(0, 12).map(c => `<div class="conf"><span>${esc(c.name)} <span class="small">· ${esc(c.type)}</span></span><span>${plural(c.deaths, 'death')}</span></div>`).join('')}
+    ${w.conflicts.length > 12 ? `<div class="small" style="margin-top:6px">+ ${plural(w.conflicts.length - 12, 'smaller conflict')}</div>` : ''}
     <h3>In the news, last 30 days</h3><p class="small dated" id="news-dated"></p><div id="stories"><div class="small">${w.keywords.length ? 'Searching tracked outlets…' : 'No news search for this group.'}</div></div>
   </div>`;
 }
@@ -374,7 +377,7 @@ async function loadStories(w) {
     const dated = document.getElementById('news-dated');
     if (dated) dated.textContent = list.length ? `Front pages from ${when(since)} to ${when(newest)} (UTC days) · Global Headline Tracker, collected daily` : `Front pages since ${when(since)} (UTC days) · Global Headline Tracker, collected daily`;
     box.innerHTML = list.length ? list.map(r => `<div class="story"><a href="${esc(r.url)}" target="_blank" rel="noreferrer">${esc(r.title_en || r.title_original)}${PRPAccess.label(cls(r))}</a><small>${esc(r.outlet)} · ${esc(r.country_code)} · front page of ${esc(when(String(r.snapshot_date)))}</small></div>`).join('')
-      + '<div class="small" style="margin-top:6px">Free sources lead: a story from an outlet behind a paywall or a sign-up never comes first.</div>'
+      + '<div class="small" style="margin-top:6px">Free sources lead: the first story from an outlet anyone can read takes the top place and the rest keep their order, so a story from an outlet behind a paywall or a sign-up comes first only when none of these is free.</div>'
       : '<div class="small">No front-page stories about this war in the tracked outlets in the last 30 days.</div>';
   } catch (e) { box.innerHTML = `<div class="small">News archive unavailable: ${esc(e.message)}</div>`; }
 }
@@ -395,7 +398,7 @@ function renderSide() {
   const list = data.wars.filter(x => months ? sum(x, 'events') : x.status === 'active')
     .sort((a, b) => months ? sum(b, 'deaths') - sum(a, 'deaths') : 0);
   document.getElementById('sidetitle').textContent = months ? `Wars in ${periodName()}` : 'Extant wars and warzones';
-  document.getElementById('sidecaption').textContent = list.length + ' groups';
+  document.getElementById('sidecaption').textContent = plural(list.length, 'group');
   side.innerHTML = `<div class="warlist" style="max-height:${months ? 'none' : '760px'}">${list.map(x => warRow(x, months)).join('')}</div>`;
   side.querySelectorAll('.warrow').forEach(b => b.onclick = () => selectWar(b.dataset.war));
 }
@@ -410,8 +413,8 @@ function renderArchive() {
     return { w, ms, deaths: ms.reduce((s, x) => s + x.deaths, 0), events: ms.reduce((s, x) => s + x.events, 0), mm: [...ms].reverse().find(x => x.events) || ms.at(-1) };
   }).filter(x => x.events).sort((a, b) => b.deaths - a.deaths);
   const total = list.reduce((s, x) => s + x.deaths, 0);
-  tail.innerHTML = `<section class="prp-panel" aria-labelledby="archtitle"><div class="prp-panel-head"><b id="archtitle">${view === 'archive' ? periodName() : `Latest month · ${monthName(data.latest)}`}</b><span class="hint">${fmt(total)} deaths across ${list.length} wars and warzones</span></div>
-    ${list.slice(0, view === 'archive' ? 25 : 8).map(({ w, ms, deaths, mm }) => `<div class="arow"><h4><button type="button" data-war="${w.id}"><i class="swatch" style="background:${w.cvar}"></i>${esc(w.name)}</button><span>${fmt(deaths)} deaths</span></h4><p>${esc(mm.text)}</p>${span ? `<div class="permonth" aria-label="Deaths month by month">${ms.map(x => `<span>${monthName(x.month, { month: 'short' })} <b>${fmt(x.deaths)}</b></span>`).join('')}</div>` : ''}</div>`).join('')}</section>`;
+  tail.innerHTML = `<section class="prp-panel" aria-labelledby="archtitle"><div class="prp-panel-head"><b id="archtitle">${view === 'archive' ? periodName() : `Latest month · ${monthName(data.latest)}`}</b><span class="hint">${plural(total, 'death')} across ${list.length === 1 ? '1 war or warzone' : `${fmt(list.length)} wars and warzones`}</span></div>
+    ${list.slice(0, view === 'archive' ? 25 : 8).map(({ w, ms, deaths, mm }) => `<div class="arow"><h4><button type="button" data-war="${w.id}"><i class="swatch" style="background:${w.cvar}"></i>${esc(w.name)}</button><span>${plural(deaths, 'death')}</span></h4><p>${esc(mm.text)}</p>${span ? `<div class="permonth" aria-label="Deaths month by month">${ms.map(x => `<span>${monthName(x.month, { month: 'short' })} <b>${fmt(x.deaths)}</b></span>`).join('')}</div>` : ''}</div>`).join('')}</section>`;
   tail.querySelectorAll('button[data-war]').forEach(h => h.onclick = () => selectWar(h.dataset.war));
 }
 
@@ -459,7 +462,6 @@ const NODATA_CLASS = (window.PRPMapkit ? PRPMapkit.install() : null)?.className 
 let countryLayer = null, countriesLoading = null;
 // The period the map shows: the archive's month or period, or the Live view's three months.
 const shownPeriod = () => (view === 'archive' ? periodName() : spanName(data.months.at(-3) || data.latest, data.latest));
-const plural = (n, one) => `${fmt(n)} ${one}${n === 1 ? '' : 's'}`;
 let byIso = new Map();
 function countryText(f) {
   const { iso, kind, name } = f.properties.rt, when = shownPeriod();
@@ -536,7 +538,7 @@ function render() {
   byIso = new Map(Object.values(data.countries || {}).map(c => [c.iso3, c]));
   document.getElementById('through').textContent = monthName(data.latest);
   renderFiguresDated();
-  document.getElementById('totals').innerHTML = `<b>${fmt(data.totals.deaths)}</b>&nbsp;deaths · <b>${fmt(data.totals.events)}</b>&nbsp;events in ${data.year}`;
+  document.getElementById('totals').innerHTML = `<b>${fmt(data.totals.deaths)}</b>&nbsp;${data.totals.deaths === 1 ? 'death' : 'deaths'} · <b>${fmt(data.totals.events)}</b>&nbsp;${data.totals.events === 1 ? 'event' : 'events'} in ${data.year}`;
   document.getElementById('ver').textContent = data.version ? `, version ${data.version}` : '';
   if (!data.months.includes(month)) month = data.latest;
   document.getElementById('monthctl').hidden = view !== 'archive';

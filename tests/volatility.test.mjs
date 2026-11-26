@@ -810,3 +810,48 @@ test('page: while the data is on its way the movement buttons keep their place u
   assert.equal(await page.locator('[data-move="independent"]').getAttribute('aria-pressed'), 'true');
   assert.deepEqual(errors, []);
 });
+
+// front-pages-54 (ChatGPT's review, confirmed 25 November 2026): over a period shorter than two weeks derive() takes
+// the mean of the period's second half minus its first half's, not of its last week minus its first week's, so the
+// three places that name the change (the measure over a period, the ranking's note and the country page) say so.
+const HALVES = 'the halves, when shorter than two weeks';
+// For an odd number of days under 14, wk = floor(n / 2), so the middle day is in neither half.
+const ODD = 'leaving out the middle day when the days are odd in number';
+test('logic: the change over a period says it compares the halves when the period is shorter than two weeks', () => {
+  const html = readFileSync(new URL('../q/volatility.html', import.meta.url), 'utf8');
+  assert.ok(html.includes('const wk = n >= 14 ? 7 : Math.max(1, Math.floor(n / 2))'), 'the code still takes the halves under 14 days');
+  assert.ok(html.includes(`span: 'Change over the period (last week vs first; ${HALVES})'`), 'the measure over a period');
+  assert.ok(html.includes(`the change from the first week to the last (Δ; ${HALVES}, ${ODD})`), 'the ranking\'s note, which also says the middle day of an odd number is left out');
+  assert.ok(html.includes(`'last week vs first; ${HALVES}'`), 'the country page');
+  assert.doesNotMatch(html, /\(last week vs first\)'|first week to the last \(Δ\)|'last week vs first'\]/, 'no place names the weeks alone');
+  // The movers' empty state over a period: derive() needs a score in the first and last weeks (or halves), not days.
+  assert.ok(html.includes(`'Needs scores in the first and last weeks of the period (its halves, when shorter than two weeks).'`), 'the movers\' empty state over a period');
+  assert.ok(!html.includes('Needs scores in the first and last days of the period.'), 'the movers\' empty state no longer names days');
+});
+
+test('page: over a two-day period the change is named as the halves\' in the ranking, the measure and the country page', pageTest, async t => {
+  const browser = await launch({ args: ['--mute-audio'] });
+  t.after(() => browser.close());
+  const page = await browser.newPage({ viewport: { width: 1400, height: 900 } });
+  const errors = [];
+  page.on('pageerror', e => errors.push(e.message));
+  // With no day the page opens on its last two days: a period of two days, so its halves are its two days.
+  await page.goto(`${BASE}/q/volatility.html`, { waitUntil: 'domcontentloaded', timeout: 30000 });
+  await page.waitForSelector('#rows tr', { timeout: 30000 });
+  assert.match(await page.locator('#rank-note').innerText(), new RegExp(`the change from the first week to the last \\(Δ; ${HALVES}, ${ODD}\\)`));
+  assert.equal((await page.locator('#metric option[value="change7"]').textContent()).trim(), `Change over the period (last week vs first; ${HALVES})`);
+  await page.goto(`${BASE}/q/volatility.html#country=UKR`, { waitUntil: 'domcontentloaded', timeout: 30000 });
+  await page.waitForSelector('#profile .stat', { timeout: 30000 });
+  const stat = page.locator('#profile .stat', { hasText: 'Change over the period' });
+  assert.equal((await stat.locator('small').innerText()).trim(), `last week vs first; ${HALVES}`);
+  // The longer name still fits a phone: coloured by the change, the page does not scroll sideways.
+  const phone = await browser.newPage({ viewport: { width: 375, height: 812 } });
+  phone.on('pageerror', e => errors.push(e.message));
+  await phone.goto(`${BASE}/q/volatility.html`, { waitUntil: 'domcontentloaded', timeout: 30000 });
+  await phone.waitForSelector('#rows tr', { timeout: 30000 });
+  await phone.locator('#metric').selectOption('change7');
+  const wide = await phone.evaluate(() => ({ page: document.documentElement.scrollWidth, view: document.documentElement.clientWidth, select: Math.round(document.querySelector('#metric').getBoundingClientRect().right) }));
+  assert.ok(wide.page <= wide.view && wide.select <= wide.view, `no sideways scroll on a phone (${JSON.stringify(wide)})`);
+  await phone.close();
+  assert.deepEqual(errors, []);
+});

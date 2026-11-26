@@ -990,15 +990,40 @@ test('freshness lines: a file that cannot be read is in neither of the Dashboard
   } finally { await ctx.close(); }
 });
 
+// Every file the shell reads for its lines (its own list, shell.js loadFreshness: the light files of every submodule
+// and the heavy ones of those shown), served as committed but with each time a line reads in it made an hour ago, in
+// the form the file gives it (a full time, a day or a month). A test that means a store to be late serves that one
+// itself, and no other store is late merely because its refresh is really late today (25 November 2026: the
+// Scientific Briefing's refresh stopped, and this test, then every deploy, failed with it).
+async function storesOnTime() {
+  const F = await import('../design/prp-freshness.js');
+  const want = F.wantedFields(registry), at = new Date(Date.now() - 3600e3), iso = at.toISOString(), routes = {};
+  for (const path of F.readsOf(modules.map(x => x.m), { heavy: true })) {
+    // The one line read from another site, the Political Atlas's: openShell fakes it. Any other would come through real.
+    if (/^https?:/i.test(path)) { assert.equal(path, ATLAS_MANIFEST, 'a line read from another site that openShell does not fake'); continue; }
+    if (!existsSync(new URL('../' + path, import.meta.url))) continue;
+    const body = JSON.parse(readFileSync(new URL('../' + path, import.meta.url), 'utf8'));
+    for (const k of want.get(path) || ['generated']) {
+      const v = body?.[k];
+      if (typeof v === 'string') body[k] = /^\d{4}-\d{2}$/.test(v) ? iso.slice(0, 7) : /^\d{4}-\d{2}-\d{2}$/.test(v) ? iso.slice(0, 10) : iso;
+    }
+    routes[`${BASE}/${path}`] = body; // from the server's root: "**/" would also catch a longer path that ends in this one
+  }
+  return routes;
+}
+
 test('freshness lines: a store late by its age, or failing in the daily check, says Late in the top bar, the sidebar and the overview', pageTest, async () => {
   const old = new Date(Date.now() - 20 * 3600e3).toISOString(); // 20 hours: past the six-hour rhythm's 15
   const { ctx, p, errors } = await openShell('#/hb/econ-briefing', { routes: {
+    ...(await storesOnTime()), // the Digital Briefing's too: made before the check below, so its failing row counts
     '**/econ/briefing/data/stories.head.json': { generated: old },
-    '**/status/health.json': { generated: new Date().toISOString(), ok: false, failing: [{ name: 'Digital Briefing', what: 'digital/briefing/data/stories.json' }, { name: 'refresh', what: 'briefing-refresh.yml' }] },
+    // The workflow rows: the Omni News Briefing's, and the one that refreshes the three briefings shown here.
+    '**/status/health.json': { generated: new Date().toISOString(), ok: false, failing: [{ name: 'Digital Briefing', what: 'digital/briefing/data/stories.json' }, { name: 'refresh', what: 'briefing-refresh.yml' }, { name: 'refresh', what: 'briefings-refresh.yml' }] },
   } });
   try {
     await p.waitForFunction(() => document.querySelector('#top-actions .prp-fresh')?.classList.contains('late'), null, { timeout: 15000 });
-    assert.match(await p.textContent('#top-actions .fresh-full'), /^Late: updated \d{1,2} [A-Z][a-z]{2} \d\d:\d\d UTC · every six hours$/);
+    // With the year when the 20 hours go back into the last one (1 January).
+    assert.match(await p.textContent('#top-actions .fresh-full'), /^Late: updated \d{1,2} [A-Z][a-z]{2}( \d{4})? \d\d:\d\d UTC · every six hours$/);
     assert.deepEqual(await p.$$eval('#nav .flag.late', fs => fs.map(f => f.closest('a').dataset.route).sort()), ['hb/digital-briefing', 'hb/econ-briefing', 'hb/highbrowse'],
       'late by age (Economics), failing in the check (Digital, not rebuilt since), and Highbrowse, which reads them; a failing workflow row marks nothing');
     await p.goto(`${BASE}/#/hb`, { waitUntil: 'networkidle' });

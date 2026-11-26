@@ -367,9 +367,27 @@ test('notation: TeX in a headline or a summary is shown in plain characters, and
     // Wiley sends the plain form, then the same in TeX: the copy goes. A span cut short by the summary's ellipsis goes too.
     ['LiMn2O4${\\rm LiMn}_2{\\rm O}_4$ is of interest. Its Mn3+${\\rm Mn}^{3+}$/Mn4+${\\text{Mn}}^{4+}$ structure', 'LiMn2O4 is of interest. Its Mn3+/Mn4+ structure'],
     ['noble‐metal‐surface‐mediated Csp3${\\rm…', 'noble‐metal‐surface‐mediated Csp3…'],
+    // 25 November 2026: a number in notation ("$9σ$", PRL 10.1103/hwwq-vj83; "$1+1$", PRL 10.1103/9b1c-bl53) and a Wiley
+    // span with a space at its end (Angewandte 10.1002/anie.6258337) were left as they came, and the refresh stopped.
+    ['Precise measurements of the metastable helium $(1\\mathrm{s})(2\\mathrm{s})\\text{ }{^{3}S}_{1}$ ionization energy have revealed a $9σ$ discrepancy with QED theory that persists in isotopic measurements, suggesting a leptophilic bosonic interaction as a possible explanation. A…',
+      'Precise measurements of the metastable helium (1s)(2s) ³S₁ ionization energy have revealed a 9σ discrepancy with QED theory that persists in isotopic measurements, suggesting a leptophilic bosonic interaction as a possible explanation. A…'],
+    ['We show that the conformal anomaly of a ($1+1$)-dimensional conformal field theory can be extracted directly from a ground-state wave-function overlap associated with a spatial conformal deformation. Focusing on the $q$-Möbius deformation, we derive an exact overlap formula…',
+      'We show that the conformal anomaly of a (1+1)-dimensional conformal field theory can be extracted directly from a ground-state wave-function overlap associated with a spatial conformal deformation. Focusing on the q-Möbius deformation, we derive an exact overlap formula…'],
+    ['A radiotherapy‐activated nano‐radiosensitizer (RT‐nRS) features a hydrated electron (eaq−${\\mathrm{e}}_{{\\mathrm{aq}}}^ - $)‐responsive N‐oxides surface, conferring antifouling properties and minimizing immune clearance during circulation, thereby enhancing tumor accumulation…',
+      'A radiotherapy‐activated nano‐radiosensitizer (RT‐nRS) features a hydrated electron (eaq−)‐responsive N‐oxides surface, conferring antifouling properties and minimizing immune clearance during circulation, thereby enhancing tumor accumulation…'],
+    // The helium summary cut at its "$9σ", as a summary's ellipsis can cut it: the number in notation stays.
+    ['Precise measurements of the metastable helium $(1\\mathrm{s})(2\\mathrm{s})\\text{ }{^{3}S}_{1}$ ionization energy have revealed a $9σ…',
+      'Precise measurements of the metastable helium (1s)(2s) ³S₁ ionization energy have revealed a 9σ…'],
+    // The second readers' checks of the rules (made for the test, not a story): TeX between two prices is read and the
+    // prices kept; a root's index; an operator the source spaced.
+    ['cost $5 and \\(\\alpha\\) then $6 later', 'cost $5 and α then $6 later'],
+    ['$\\sqrt[3]{8}$ and $\\sqrt[n]{x}$', '∛8 and ⁿ√x'],
+    ['$1.2 \\times 10^{5}$ and $1.2\\times10^{5}$', '1.2 × 10⁵ and 1.2×10⁵'],
   ];
   for (const [raw, want] of cases) assert.equal(plain(raw), want, raw);
-  for (const price of ['Modified $450 3D printer builds living materials', 'Humain raises $667m for AI buildout, and $40bn more', 'Oil falls below $90 as Trump pulls back', 'costs $5 to $6 each', 'US$5 and US$6', 'No dollar at all', ''])
+  for (const price of ['Modified $450 3D printer builds living materials', 'Humain raises $667m for AI buildout, and $40bn more', 'Oil falls below $90 as Trump pulls back', 'costs $5 to $6 each', 'US$5 and US$6', 'No dollar at all', '',
+    // Made for the test: a command between two prices, a lone dollar sign, and a currency's letters before the sign.
+    'He paid $5 \\textbf{now} and $6 later', 'cost $5 for \\alpha particles, $6 for \\beta ones', 'a lone $ sign and \\alpha then $5', 'US$1=$1.36 Canadian', 'US$1+$2 deal', 'A$1=$0.65'])
     assert.equal(plain(price), price, price);
   assert.equal(plain(null), '');
   // Whatever a store holds today, nothing a reader must decode is left: no command, no ^{ or _{, no $…$ around TeX.

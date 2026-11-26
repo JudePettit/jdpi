@@ -271,7 +271,7 @@ its link names, the person in its portrait, the war or the country its link name
 to four countries on its map, the last two through `battlefield/focus/data/index.json` and `national/data/brief.json`
 (`tagTables`); or else the film's subjects; up to four each, leaving out other films; then the film's other places,
 nearest scene first. Today there are 18 films and 225 scenes. Of the scenes 159 are tagged by what they show (87 by
-the links and portraits alone), and 30 have no tagged screen (`node kino/scripts/validate.mjs` prints these counts,
+the links and portraits alone), and 16 have no tagged screen (`node kino/scripts/validate.mjs` prints these counts,
 and `tests/kino.test.mjs` holds this sentence to them). A chosen screen shows in the pane, held, turning Split view on
 if it was off.
 

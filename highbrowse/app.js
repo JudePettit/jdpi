@@ -132,7 +132,7 @@ function secStories(d) {
   const body = d.stories.length ? `<div class="stories">${d.stories.map((s, k) => storyCard(s, k, d.w)).join('')}</div>`
     : '<p class="prp-note empty-note">No story was covered by two outlets or more in this window.</p>';
   return `<section class="sec" aria-labelledby="h-stories-${d.w}"><div class="sec-head"><h2 class="prp-h2" id="h-stories-${d.w}"><span class="prp-section-no">1.</span>The biggest stories</h2>
-    <p class="sec-note">Headlines from different outlets grouped as one story, ranked by the outlets that covered it (${plural(d.storyCount, 'story', 'stories')} had two or more). Each headline opens at its publisher; “›” opens it in its briefing. Free sources lead: a story's first headline is from an outlet anyone can read wherever one covered it, a story only paywalled outlets covered never comes first, and a headline behind a paywall or a sign-up is labelled, with the same story's free headline beside it.</p></div>${body}</section>`;
+    <p class="sec-note">Headlines from different outlets grouped as one story, ranked by the outlets that covered it (${plural(d.storyCount, 'story', 'stories')} had two or more). Each headline opens at its publisher; “›” opens it in its briefing. Free sources lead: a story's first headline is from an outlet anyone can read wherever one covered it, a story only paywalled outlets covered comes first only when none of these stories has a free outlet, and a headline behind a paywall or a sign-up is labelled, with the same story's free headline beside it.</p></div>${body}</section>`;
 }
 
 // A term's seven days as small bars (Figure 1), the window's days darker.

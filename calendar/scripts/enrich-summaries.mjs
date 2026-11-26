@@ -24,7 +24,13 @@ export function sentenceEnds(text) {
   return out;
 }
 
-/** A cached lead that an older shorten() cut at an abbreviation ("… the fifty U.S."): it is fetched again. */
+/** A cached lead that ends at an abbreviation ("… the fifty U.S."). On 25 and 26 November 2026 every such lead an older
+ *  shorten() had cut was fetched again (build 8); those that still end so are whole leads, as Wikipedia writes them
+ *  ("ratified by the U.S." in Hamdan v. Rumsfeld; "about 63% Yes to 37% No." for California's Proposition 12;
+ *  "Washington, D.C." for the 2024 Libertarian National Convention: Wikipedia REST summaries, read 26 November 2026).
+ *  They are not fetched again: this shorten() never cuts at an abbreviation, so a lead it wrote that ends at one is
+ *  whole. Fetching them on every run cost three requests a day for nothing (follow-up of 26 November 2026). The check
+ *  is kept only to tell such a lead from one that ends a sentence (the tests read it); no run fetches by it. */
 export const cutAtAbbreviation = lead => !!lead && /\.$/.test(lead) && !sentenceEnds(lead).includes(lead.length);
 
 // Two or three sentences, about 360 characters, ending on a sentence boundary where possible: the sentence still
@@ -84,6 +90,14 @@ export function pickSummary(e, cache, before = {}) {
   return own || fromWiki || e.summary || '';
 }
 
+/** The articles a run fetches: those with no cached lead yet, and the leads fetched again (staleTitles), which are
+ *  `recent` alone. */
+export function titlesToFetch(events, cache, today) {
+  const recent = staleTitles(events, cache, today);
+  const titles = [...new Set([...events.filter(e => !e.summary).map(e => titleOf(e.source)).filter(Boolean).filter(t => !(t in cache)), ...recent])];
+  return { recent, titles };
+}
+
 /** A lead fetched again keeps the cached one when it comes back empty: a failed or moved page is not a better text. */
 export const keepLead = (title, fetched, before) => fetched !== null && !(title in before && !fetched);
 
@@ -109,14 +123,10 @@ async function main() {
   const files = readdirSync(DATA).filter(f => /^\d{4}s\.json$/.test(f));
   const decades = files.map(f => [f, JSON.parse(readFileSync(new URL(f, DATA), 'utf8'))]);
   const all = decades.flatMap(([, d]) => d.events);
-  // The leads cut at an abbreviation by the older shorten() are fetched again too (they then end at a sentence's end).
-  const cut = [...new Set(all.map(e => titleOf(e.source)).filter(t => t && t in cache && cutAtAbbreviation(cache[t])))];
-  const recent = staleTitles(all, cache, TODAY);
-  const stale = [...new Set([...recent, ...cut])];
-  if (cut.length) console.log(`${cut.length} cached leads cut at an abbreviation are fetched again`);
+  const { recent, titles } = titlesToFetch(all, cache, TODAY);
+  const stale = recent;
   // The leads as cached before this run: an event whose summary is one of them takes the lead fetched now.
   const before = Object.fromEntries(stale.map(t => [t, cache[t]]));
-  const titles = [...new Set([...all.filter(e => !e.summary).map(e => titleOf(e.source)).filter(Boolean).filter(t => !(t in cache)), ...stale])];
   console.log(`${titles.length} articles to fetch (${Object.keys(cache).length} cached; ${recent.length} leads fetched again, their day passed in the last ${REFRESH_DAYS} days)`);
   let done = 0;
   const queue = [...titles];

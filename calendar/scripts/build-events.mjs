@@ -18,7 +18,8 @@
 //     strikes and riots; ceasefires, armistices and peace talks; sanctions; party leadership contests and congresses;
 //     inaugurations; and resignations of office-holders (a position held with end cause "resignation").
 //   - Wikipedia's lists and infoboxes (wiki-lists.mjs): European Council meetings; G7, G20, NATO, BRICS, SCO, APEC,
-//     ASEAN, Commonwealth and European Political Community summits; COP climate conferences; UN General Assembly
+//     ASEAN, Commonwealth, European Political Community and Organization of Turkic States summits; COP climate
+//     conferences; UN General Assembly
 //     general debates; and every country's elections and referendums from the national electoral calendars, from
 //     2026 on. Past and scheduled.
 //   - Wikipedia's "Portal:Current events" (current-events.mjs), from --news-from (default: six months ago or the start
@@ -31,8 +32,9 @@ import { interstateName, stateName } from '../../battlefield/scripts/ucdp.mjs';
 import { leaderText } from '../../lake/scripts/resolve.mjs';
 import { countryInText, countryOfLink, isKnownCountry, normaliseCountry } from './countries.mjs';
 import { currentEvents } from './current-events.mjs';
-import { listEvents } from './wiki-lists.mjs';
-import { atlasElections, mergeBallots, resolveExpected } from './outlook.mjs';
+import { listEvents, resolveTitles } from './wiki-lists.mjs';
+import { atlasElections, atlasLater, mergeBallots, resolveExpected, markDeadlines, sameArticle } from './outlook.mjs';
+import { PARTY_CONTEST, belowState, NOT_HELD, offYear, PLACED, ownTerritory } from './ballot-scope.mjs';
 import { lostEvents, refuseIfLost } from './guard.mjs';
 import { writeHeads } from '../../integration/scripts/heads.mjs';
 import { isoResolver, neCountries } from '../../omni/scripts/country-names.mjs';
@@ -179,16 +181,24 @@ const KINDS = [
   { type: 'treaty', cls: 'wd:Q131569', minLinks: 15, prefix: 'Treaty signed: ' },
 ];
 const APEX = /Supreme|Constitutional|International Court of Justice|International Criminal Court|European Court|Court of Justice|Inter-American Court/i;
+// What the calendar leaves out, counted for the page's Sources (written to every decade file as `leftOut`).
+const leftOut = { belowState: [], notHeld: [], datesGone: [] };
+const homeless = []; // Wikidata events filed under "International": [event, item]
 const wikidataSeen = new Set(); // an item can match several classes (e.g. pandemic and epidemic): the first one wins
 for (const k of KINDS) {
   const bar = Math.min(k.minLinks, k.recentLinks ?? k.minLinks);
-  const q = `SELECT ?e ?date ?countryLabel ?courtLabel ?links ?article WHERE {
+  const referendum = k.type === 'referendum';
+  // A date Wikidata ranks deprecated is one it says is wrong (the 2020 Italian constitutional referendum, first set for
+  // 29 March 2020 and held on 20 and 21 September: the earliest date then put it in March, beside the Retrospective's
+  // September record; follow-up of 26 November 2026).
+  const q = `SELECT ?e ?date ?countryLabel ?courtLabel ?links ?article${referendum ? ' ?jurLabel ?jurState' : ''} WHERE {
     ?e wdt:P31${k.direct ? '' : '/wdt:P279*'} ${k.cls}; wikibase:sitelinks ?links.
     FILTER(?links >= ${bar})
-    VALUES ?prop { ${k.dates || 'p:P585 p:P580 p:P571'} } ?e ?prop [ ?psv [ wikibase:timeValue ?date; wikibase:timePrecision ?prec ] ]. FILTER(?prec >= 11)
+    VALUES ?prop { ${k.dates || 'p:P585 p:P580 p:P571'} } ?e ?prop ?dst. ?dst wikibase:rank ?rank; ?psv [ wikibase:timeValue ?date; wikibase:timePrecision ?prec ]. FILTER(?prec >= 11 && ?rank != wikibase:DeprecatedRank)
     FILTER(?date >= "${FROM}T00:00:00Z"^^xsd:dateTime)
     OPTIONAL { ?e wdt:P17 ?country }
     ${k.type === 'court' ? 'OPTIONAL { ?e wdt:P4884 ?court }' : ''}
+    ${referendum ? 'OPTIONAL { VALUES ?jp { wdt:P1001 wdt:P131 } ?e ?jp ?jur. OPTIONAL { VALUES ?sc { wd:Q6256 wd:Q3624078 wd:Q7275 wd:Q3024240 wd:Q15634554 } ?jur wdt:P31 ?sc. BIND(1 AS ?jurState) } }' : ''}
     ?article schema:about ?e; schema:isPartOf <https://en.wikipedia.org/>.
     SERVICE wikibase:label { bd:serviceParam wikibase:language "en,mul". }
   }`;
@@ -197,8 +207,20 @@ for (const k of KINDS) {
     const byItem = new Map();
     for (const r of rows) {
       const date = r.date.value.slice(0, 10), x = byItem.get(r.e.value);
-      if (!x || date < x.date) byItem.set(r.e.value, { date, links: +r.links.value, country: r.countryLabel?.value || x?.country || 'International', court: r.courtLabel?.value || x?.court || '', source: r.article.value });
+      if (!x || date < x.date) byItem.set(r.e.value, { date, links: +r.links.value, country: r.countryLabel?.value || x?.country || 'International', countries: x?.countries || new Set(), court: r.courtLabel?.value || x?.court || '', source: r.article.value, jurs: x?.jurs || new Set(), jurState: !!x?.jurState });
       else if (!x.court && r.courtLabel) x.court = r.courtLabel.value;
+      const y = byItem.get(r.e.value);
+      if (r.countryLabel) y.countries.add(r.countryLabel.value);
+      if (r.jurLabel) y.jurs.add(r.jurLabel.value);
+      if (r.jurState) y.jurState = true;
+    }
+    // A referendum with several countries (P17) is filed under the one its title names, else one the calendar knows, not
+    // the first row the query service happens to return: the jurisdiction rows reorder them ("1991 Russian presidential
+    // referendum": Russia and the Soviet Union; "2014 Donetsk status referendum": Ukraine and the Donetsk People's
+    // Republic; follow-up of 26 November 2026). Other kinds keep the first row's country, as before.
+    if (referendum) for (const x of byItem.values()) {
+      const cs = [...x.countries], named = countryInText(articleTitle(x.source));
+      x.country = cs.find(c => named && normaliseCountry(c) === normaliseCountry(named)) || cs.find(c => isKnownCountry(c)) || cs[0] || 'International';
     }
     let n = 0;
     for (const [id, x] of byItem) {
@@ -207,18 +229,41 @@ for (const k of KINDS) {
       if (wikidataSeen.has(id)) continue;
       wikidataSeen.add(id);
       let title = articleTitle(x.source), type = k.type;
-      // Party primaries are filed under referendums on Wikidata; they are party contests.
-      if (type === 'referendum' && /\bprimar(?:y|ies)\b|\bcaucus/i.test(title)) type = 'party';
+      if (type === 'referendum' && PARTY_CONTEST.test(title)) type = 'party';
       if (k.prefix && !title.toLowerCase().startsWith(k.prefix.replace(/[:\s]+$/, '').toLowerCase())) title = k.prefix + title;
       if (type === 'court' && !/\bv\.|\b(?:ruling|judgment|decision|warrants?|opinion|verdict|case)\b/i.test(title)) title = 'Ruling: ' + title;
       // No country on the item: the one its title names ("2026 state visit by Xi Jinping to North Korea").
-      const country = x.country === 'International' ? countryInText(articleTitle(x.source)) || 'International' : x.country;
-      add({ date: x.date, country, title, type, status: 'declared', source: x.source }, 'wikidata');
+      const country = x.country === 'International' ? PLACED[title] || countryInText(articleTitle(x.source)) || 'International' : x.country;
+      // A referendum held in a dependent territory alone is filed under the territory (ballot-scope.mjs, ownTerritory).
+      const filed = (type === 'referendum' && ownTerritory([...x.jurs])) || country;
+      if (type === 'referendum') {
+        if (NOT_HELD.has(title) || offYear(title, x.date)) { leftOut.notHeld.push(`${x.date} ${title}`); continue; }
+        if (belowState({ title, country: filed, jurs: [...x.jurs], jurState: x.jurState })) { leftOut.belowState.push(`${x.date} ${filed}: ${title}`); continue; }
+      }
+      const had = events.length;
+      add({ date: x.date, country: filed, title, type, status: 'declared', source: x.source }, 'wikidata');
+      if (country === 'International' && events.length > had) homeless.push([events.at(-1), id.split('/').pop()]);
       n++;
     }
     console.log(`Wikidata ${k.type} ${k.cls}: ${n}`);
   } catch (err) { skipped(`Wikidata ${k.type} ${k.cls}`, err); }
 }
+// The class's country for an item that has none of its own: one country, and one the calendar knows.
+if (homeless.length) {
+  try {
+    const rows = await sparql(`SELECT ?e ?ccLabel WHERE { VALUES ?e { ${[...new Set(homeless.map(([, q]) => `wd:${q}`))].join(' ')} }
+      ?e wdt:P31 ?c. ?c wdt:P17 ?cc. SERVICE wikibase:label { bd:serviceParam wikibase:language "en,mul". } }`);
+    const of = new Map();
+    for (const r of rows) { const q = r.e.value.split('/').pop(); (of.get(q) || of.set(q, new Set()).get(q)).add(normaliseCountry(r.ccLabel.value)); }
+    let placed = 0;
+    for (const [e, q] of homeless) {
+      const cs = [...(of.get(q) || [])];
+      if (e && cs.length === 1 && isKnownCountry(cs[0])) { e.country = cs[0]; placed++; }
+    }
+    console.log(`Wikidata items with no country: ${homeless.length}, ${placed} placed by their class's country`);
+  } catch (err) { skipped('Wikidata class countries', err); }
+}
+console.log(`Wikidata referendums left out: ${leftOut.belowState.length} below the state, ${leftOut.notHeld.length} never held on the day Wikidata gives`);
 
 // ---- Resignations: office-holders whose term ended with "resignation" (P39 with end cause Q796919)
 const OFFICE_OK = /\b(?:President|Prime Minister|Premier|Chancellor|Minister|Secretary|First Minister|Governor|Monarch|King|Queen|Emperor|Pope|Speaker|Director|Head|Leader|Chief|Attorney General|Commissioner|Taoiseach|Chair(?:man|person|woman)?|High Representative|Secretary-General)\b/i;
@@ -314,7 +359,30 @@ try {
 
 // ---- Ballots: one record per vote and round, with the best date known; then the expected events whose day has passed
 // are held or dropped (outlook.mjs).
-const resolved = resolveExpected(mergeBallots(events, { today: TODAY, undated, calendarsFrom }), TODAY);
+// The Atlas's votes known only to a later year take a vote's lost date away (Fiji's referendum of 9 December 2026); a
+// vote dated by its legal deadline, as its article's lead (summary-cache.json) gives it, is expected.
+// Two titles that open one article (a redirect) for one election or summit: the record under the article's own title
+// stays (outlook.mjs, sameArticle). Where the Wikipedia API does not answer, the records stay as they are.
+const ballotsDropped = [];
+const LEADS = new URL('./summary-cache.json', import.meta.url);
+const leads = existsSync(LEADS) ? JSON.parse(readFileSync(LEADS, 'utf8')) : {};
+let redirects = new Map();
+try {
+  const linked = [...new Set(events.filter(e => /^(?:election|referendum|summit)$/.test(e.type) && /en\.wikipedia\.org\/wiki\//.test(e.source || ''))
+    .map(e => { try { return articleTitle(e.source).split('#')[0]; } catch { return null; } }).filter(t => t && !/^\d{4} in /.test(t)))];
+  const resolved = await resolveTitles(linked);
+  redirects = new Map([...resolved].filter(([, r]) => r.to && !/^(?:List of|Elections in|\d{4} in) /.test(r.to)).map(([t, r]) => [t, r.to]));
+  const before = events.length, kept = sameArticle(events, redirects, ballotsDropped);
+  events.length = 0;
+  events.push(...kept);
+  console.log(`Wikipedia redirects: ${redirects.size} of ${linked.length} titles lead to another article; ${before - kept.length} records under them give way`);
+} catch (err) { skipped('Wikipedia redirects', err); }
+const merged = mergeBallots(events, { today: TODAY, undated, calendarsFrom, later: atlasDir ? atlasLater(atlasDir) : [], dropped: ballotsDropped, leads, redirects });
+for (const d of ballotsDropped) console.log(`Ballots: ${d.date} ${d.country}, ${d.title}: left out, ${d.why}`);
+leftOut.datesGone = ballotsDropped.filter(d => /puts the vote in/.test(d.why)).map(d => `${d.date} ${d.country}: ${d.title}`);
+const deadlines = markDeadlines(merged, leads, TODAY);
+console.log(`Ballots dated by their deadline, now expected: ${deadlines}`);
+const resolved = resolveExpected(merged, TODAY);
 events.length = 0;
 events.push(...resolved);
 
@@ -340,7 +408,12 @@ const articleKey = s => {
   return t.replace(/_/g, ' ').toLowerCase().replace(/\bvisits\b/g, 'visit').replace(/[^\p{L}\p{N}]+/gu, ' ').trim();
 };
 const sameSummary = (a, b) => !!a.summary && !!b.summary && a.summary.slice(0, 160) === b.summary.slice(0, 160);
-const dupOf = (e, window) => (byKey.get(`${e.type}|${e.source}`) || []).some(x => x.date === e.date || (x.via !== e.via && days(x.date, e.date) <= window))
+// A Wikidata vote whose article is a Retrospective vote of the same year is that vote, on the Retrospective's day: the
+// Retrospective dates its votes from checked sources, and Wikidata's date can be wrong at normal rank ("1998 Portuguese
+// abortion referendum": Wikidata Q2105455 gives 8 June 1998; Wikipedia: "On 28 June 1998 a referendum on a new abortion
+// law was conducted in Portugal", read 26 November 2026; follow-up of 26 November 2026).
+const sameVote = (x, e) => e.via === 'wikidata' && x.via === 'retro' && /^(?:election|referendum)$/.test(e.type) && x.date.slice(0, 4) === e.date.slice(0, 4);
+const dupOf = (e, window) => (byKey.get(`${e.type}|${e.source}`) || []).some(x => x.date === e.date || (x.via !== e.via && days(x.date, e.date) <= window) || sameVote(x, e))
   || (e.type === 'summit' && (byKey.get(`summit|${e.country}`) || []).some(x => (x.via !== e.via || sameSummary(x, e)) && days(x.date, e.date) <= 1));
 const renamed = e => (byKey.get(`${e.type}|title|${articleKey(e.source)}`) || []).find(x => x.source !== e.source && days(x.date, e.date) <= 31);
 const kept = [];
@@ -390,7 +463,10 @@ refuseIfLost(lostEvents(previous, all, { from: NEWS_FROM, today: TODAY, to: shif
 mkdirSync(DATA, { recursive: true });
 const decades = new Map();
 for (const e of all) { const d = e.date.slice(0, 3) + '0s'; (decades.get(d) || decades.set(d, []).get(d)).push(e); }
-for (const [d, list] of decades) writeFileSync(new URL(`${d}.json`, DATA), JSON.stringify({ generated: new Date().toISOString(), decade: d, events: list }));
+// What the build left out, over the whole calendar, in every decade's file: the page's Sources count it (q/calendar.html).
+const leftOutCounts = Object.fromEntries(Object.entries(leftOut).map(([k, v]) => [k, v.length]));
+for (const [k, v] of Object.entries(leftOut)) for (const x of v) console.log(`Left out (${k}): ${x}`);
+for (const [d, list] of decades) writeFileSync(new URL(`${d}.json`, DATA), JSON.stringify({ generated: new Date().toISOString(), decade: d, leftOut: leftOutCounts, events: list }));
 writeHeads('Realtime and Historical Calendars', { quiet: true }); // calendar/data/upcoming.json in step (enrich-summaries.mjs writes it again)
 
 const TYPES = ['election', 'referendum', 'party', 'leader', 'inauguration', 'resignation', 'coup', 'conflict', 'ceasefire', 'assassination', 'crisis', 'protest', 'treaty', 'summit', 'sanctions', 'vote', 'court'];

@@ -7,7 +7,7 @@ import { readFileSync, statSync } from 'node:fs';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { SEED } from '../science/scripts/progress-seed.mjs';
-import { DISCIPLINE_IDS, BASIS, parseRef, nameMatches, yearOf, yearLabel, parsePoint, span, covers, EDUCATION_YEARS, distanceKm, choosePlace, eventInstitutions, seedProblems } from '../science/scripts/progress-lib.mjs';
+import { DISCIPLINE_IDS, BASIS, parseRef, nameMatches, yearOf, yearLabel, parsePoint, span, covers, EDUCATION_YEARS, distanceKm, firstYear, choosePlace, eventInstitutions, seedProblems } from '../science/scripts/progress-lib.mjs';
 import { progress, ADAPTERS } from '../lake/scripts/adapters.mjs';
 import { pageTest, launch } from './tools/pages.mjs';
 
@@ -146,6 +146,128 @@ test('lake adapter: breakthroughs, scientists and institutions with deep links',
   const newton = sci.find(x => x.key.qid === 'Q935' && x.url.endsWith('#y=1687&e=principia'));
   assert.ok(newton, 'Newton links to the Principia');
   assert.ok(has(newton, 'Discipline', 'Physics') && newton.tags.some(([f, v]) => f === 'Institution' && /Cambridge/.test(v)));
+});
+
+// ---- The corrections of build 4 of ChatGPT's confirmed page faults (vm-workflows/chatgpt-taskmaster/CONFIRMED.md,
+// progress-4 to progress-11, 25 November 2026), checked on the built data here so that the monthly refresh
+// (progress-refresh.yml, which runs this file before it commits) fails rather than commit data that loses them.
+// The placing rules themselves are tested in tests/corrections-4.test.mjs.
+const cache = JSON.parse(readFileSync(join(ROOT, 'science/scripts/progress-cache.json'), 'utf8'));
+const ev = id => { const e = data.events.find(x => x.id === id); assert.ok(e, `no event ${id}`); return e; };
+// The earliest inception Wikidata gives for a place, by the build's own rule (firstYear in progress-lib.mjs).
+const founded = q => { const ys = (cache.items[q]?.c?.P571 || []).filter(s => s.y != null).map(firstYear).filter(y => y != null); return ys.length ? Math.min(...ys) : null; };
+
+test('progress-4: no breakthrough placed through its discoverer sits at a place founded after its year', () => {
+  // Only the rules that go through the people: a site, a place set by hand or a fallback town may carry a later
+  // municipal or refounding date (Saqqara, the Pantheon, Cheongju) and is right all the same.
+  const PERSON = ['shared-institution', 'institution-at-time', 'institution', 'work-location', 'education', 'birthplace'];
+  const bad = data.events.filter(e => PERSON.includes(e.positionBasis) && founded(e.place.q) != null && founded(e.place.q) > e.y)
+    .map(e => `${e.y} ${e.id}: ${e.place.n} (founded ${founded(e.place.q)})`);
+  assert.deepEqual(bad, []);
+  assert.equal(ev('historiae-animalium').place.n, 'Zurich');          // not the University of Zurich (1833)
+  assert.notEqual(ev('mauveine').place.q, 'Q189022');                 // not Imperial College London (1907)
+  assert.notEqual(ev('brocas-area').place.n, 'École pratique des hautes études'); // founded 1868
+  assert.notEqual(ev('avogadro').place.n, 'University of Turin');      // his chair there from 1820
+});
+
+test('progress-4: no card lists an institution founded after its year', () => {
+  // Goethe University Frankfurt (1914) for Salvarsan in 1909, the University of Palermo (1806) for Ceres in 1801.
+  const bad = data.events.flatMap(e => e.inst.filter(q => founded(q) != null && founded(q) > e.y)
+    .map(q => `${e.y} ${e.id}: ${data.institutions[q]?.name || q} (founded ${founded(q)})`));
+  assert.deepEqual(bad, []);
+});
+
+test('progress-4 and progress-5: places set by hand where Wikidata’s facts would mislead', () => {
+  const AT = {
+    'tycho-supernova': 'Q1335155',   // Herrevad Abbey, not Uraniborg (1576)
+    'haber-process': 'Q1040',        // Karlsruhe, not BASF
+    'lac-operon': 'Q391083',         // Institut Pasteur, not the Collège de France (Jacob from 1964)
+    'difference-engine': 'Q84',      // London, not Cambridge (Babbage's post 1827-1839)
+    'de-motu-cordis': 'Q164946',     // St Bartholomew's Hospital, not Oxford
+    'fraunhofer-lines': 'Q503628',   // Benediktbeuern, not LMU Munich
+    'daguerreotype': 'Q90',          // Paris, not Cormeilles-en-Parisis
+    'lovelace-notes': 'Q84',         // London, not Cambridge
+    'antiseptic-surgery': 'Q5566905',// Glasgow Royal Infirmary, not Edinburgh
+    'phonograph': 'Q20657326',       // Menlo Park, not Cooper Union
+    'rocket-equation': 'Q2837',      // Kaluga, not Borovsk
+    'optical-fibre': 'Q852729',      // Harlow, not Imperial College
+    'pulsars': 'Q2402680',           // Mullard Radio Astronomy Observatory, not her college
+    'rotation-curves': 'Q1043963',   // the Carnegie Institution, not Georgetown
+    'ct-scanner': 'Q678138',         // Hayes, not Cambridge
+    'artemisinin': 'Q1073814',       // the Academy of Traditional Chinese Medicine, not Peking University
+    'stm': 'Q1474431',               // IBM's Zurich laboratory, not ETH Zurich
+    'prions': 'Q1061104',            // UCSF, not Berkeley
+    'pcr': 'Q5065711',               // Cetus Corporation (Emeryville), not Berkeley
+    'cobe': 'Q52152', 'jwst': 'Q52152', // Goddard Space Flight Center, not the University of Maryland
+    'vitruvius': 'Q220',             // Rome, not Italy or the Roman Republic
+    'ice-age': 'Q69345',             // Neuchâtel, where Agassiz spoke in July 1837
+    // Danzig: Wikipedia "Daniel Gabriel Fahrenheit": he "began experimenting with mercury thermometers in 1713" while
+    // living there (1712-1714), and "In 1714, Fahrenheit left Danzig for Berlin and Dresden". Not The Hague (from 1736).
+    'fahrenheit': 'Q1792',
+    // Wikipedia "Stethoscope": invented "in 1816 by René Laennec at the Necker-Enfants Malades Hospital in Paris". Not
+    // the Paris Medical Faculty (an undated Wikidata post: he was made professor of medicine only in 1823).
+    'stethoscope': 'Q3145188',
+    // Paris, where he died in 1832; not the École Normale Supérieure, which expelled him from 4 January 1831
+    // (Wikipedia "Évariste Galois"; Wikidata's dated P69 ends in 1830).
+    'galois-theory': 'Q90',
+    // Wikipedia "Discovery of penicillin": "While working at St Mary's Hospital, London, in 1928". Not Imperial College
+    // (Fleming's undated Wikidata employer).
+    'penicillin': 'Q3495342',
+    // Wikipedia "Streptomycin": first isolated on 19 October 1943 by Schatz in Waksman's laboratory at Rutgers
+    // University. Not Temple University (Schatz's undated Wikidata employer, a later post).
+    'streptomycin': 'Q499451',
+  };
+  for (const [id, q] of Object.entries(AT)) {
+    assert.equal(ev(id).place.q, q, `${id}: ${ev(id).place.n}`);
+    assert.equal(ev(id).positionBasis, 'curated', id);
+  }
+  assert.ok(Object.keys(AT).every(id => SEED.find(s => s.id === id).at), 'each is set by hand in the seed');
+});
+
+test('progress-6: people are named as the seed spells them where the Wikidata label is not their Wikipedia title', () => {
+  assert.equal(data.people.Q7229.name, 'Marie-Anne Paulze Lavoisier');
+  assert.equal(data.people.Q84284.name, 'Christian Doppler');
+  assert.equal(data.people.Q76468.name, 'Hans Lipperhey');
+  assert.equal(data.people.Q139518.name, 'Zacharias Janssen');
+  assert.equal(data.people.Q935.name, 'Isaac Newton');
+  // A label that is the person's Wikipedia title stays, whatever the seed's spelling.
+  assert.equal(data.people.Q234357.name, 'Stanisław Ulam');
+  assert.equal(data.people.Q157250.name, 'Harry Kroto');
+  assert.equal(data.people.Q494615.name, 'Chang Yŏngsil');
+  assert.equal(data.people.Q6209774.name, 'Joe Farman');
+  assert.deepEqual(Object.values(data.people).map(p => p.name).filter(n => /\(|\)/.test(n)), [], 'no disambiguator such as "(physicist)"');
+});
+
+test('progress-7: the Chinese breakthroughs of 850, 1040 and 1637 are in China, not the People’s Republic', () => {
+  for (const id of ['gunpowder', 'movable-type', 'tiangong-kaiwu']) assert.deepEqual([ev(id).place.q, ev(id).place.n], ['Q29520', 'China'], id);
+  assert.deepEqual(data.events.filter(e => e.y < 1949 && e.place.q === 'Q148').map(e => e.id), []);
+  assert.equal(ev('vitruvius').place.n, 'Rome');
+});
+
+test('progress-8: institutions and places under the names they had in the year', () => {
+  assert.equal(ev('boolean-algebra').place.n, 'Queen\'s College Cork');            // University College Cork from 1908
+  assert.equal(ev('weather-fronts').place.n, 'Geophysical Institute, Bergen');      // the University of Bergen from 1946
+  assert.equal(ev('reusable-rocket').place.n, 'Cape Canaveral Air Force Station');  // Space Force Station from December 2020
+  assert.equal(ev('fahrenheit').place.n, 'Danzig');                                 // the name his Wikipedia article uses
+  assert.equal(ev('stethoscope').place.n, 'Necker Hospital');                       // merged with the Enfants Malades in 1920
+  assert.equal(ev('artemisinin').place.n, 'Academy of Traditional Chinese Medicine'); // renamed in 1985 and 2005
+  assert.equal(ev('rotation-curves').place.n, 'Carnegie Institution of Washington');  // Carnegie Institution for Science from 2007
+  assert.equal(ev('stm').place.n, 'IBM Zurich Research Laboratory');                 // later IBM Research – Zurich
+  // The Friedrich Wilhelm University from 1828 until 1945, Humboldt University only from 1949 (Wikipedia "Humboldt
+  // University of Berlin"); written as the page already names Q20266330, its 1828 Wikidata item.
+  const hu = data.events.filter(e => e.place.q === 'Q152087' && e.y < 1949);
+  assert.ok(hu.length >= 5, hu.map(e => e.id).join(', '));
+  for (const e of hu) assert.equal(e.place.n, 'Frederick William University Berlin', e.id);
+  assert.equal(data.institutions.Q20266330?.name, 'Frederick William University Berlin');
+  assert.notEqual(ev('michelson-morley').place.q, 'Q1047060');                     // not Case Western Reserve (1967)
+  assert.notEqual(ev('pulsars').place.q, 'Q1195404');                              // not Murray Edwards College (New Hall until 2008)
+});
+
+test('progress-9 to progress-11: titles and the year that match the linked articles', () => {
+  assert.equal(ev('telescope').t, 'Lipperhey seeks a patent for the telescope'); // the States General did not award it
+  assert.deepEqual([ev('ice-age').y, ev('ice-age').t], [1837, 'Agassiz proposes an ice age']); // Neuchâtel, July 1837
+  assert.equal(ev('tcp-ip').t, 'Cerf and Kahn design a protocol to join networks'); // TCP and IP split only in 1978
+  assert.ok(!data.events.some(e => /^The telescope is patented$|^TCP\/IP joins/.test(e.t)));
 });
 
 const BASE = (process.env.JDPI_URL || '').replace(/\/$/, '');

@@ -17,7 +17,10 @@
 // link written before this change (c=365) still opens the same country; nothing is joined by them.
 // The order of steps (nothing is written until every step has worked):
 // 1. Reads the ACD file (version 26.1), Cliopatria's two files of the years, qids.json and Natural Earth's countries.
-// 2. UCDP: one war per conflict_id with an intensity per active year (1 minor, 2 war); its places (`loc`, the location)
+// 2. UCDP: one war per conflict_id with an intensity and a type per active year (`years`: [year, intensity (1 minor,
+//    2 war), type_of_conflict (1–4, wars.json `types`)], since a conflict's type can change from year to year: Cuba
+//    is a civil conflict in 1953 and 1956–58 and an internationalised one in 1961; `type` stays one name, the type of
+//    its last year, for the readers that take one: battlefield-history-2, 25 November 2026); its places (`loc`, the location)
 //    and its state parties by year (`statesYears`, the governments on either side), each UCDP name read as a Q-id
 //    through VM's crosswalk (omni/scripts/ucdp-places.mjs); a name the crosswalk cannot read stops the build.
 // 3. Wikidata: the wars of 1926–1945 (wars-1926.mjs), at level 3 for every active year ("a war Wikidata lists").
@@ -143,7 +146,8 @@ const byId = new Map();
 for (const r of acd) (byId.get(r.conflict_id) || byId.set(r.conflict_id, []).get(r.conflict_id)).push(r);
 const wars = [];
 // A war's places: the sources' (`loc`), unless history-fought.mjs has its own: `loc`, `where` (names for places the
-// map has no shape for) and places by year (`locYears`; a year it does not list keeps the sources', own(year)).
+// map has no shape for, with `whereYears`, the same by year, where they differ by year) and places by year (`locYears`;
+// a year it does not list keeps the sources', own(year)).
 function place(id, loc, years, own) {
   const f = FOUGHT_IN[id];
   if (!f) {
@@ -151,7 +155,7 @@ function place(id, loc, years, own) {
     const by = Object.fromEntries(years.map(y => [y, own(y)]));
     return new Set(Object.values(by).map(l => l.join())).size > 1 ? { loc, locYears: by } : { loc };
   }
-  const where = f.where ? { where: f.where } : {};
+  const where = { ...(f.where ? { where: f.where } : {}), ...(f.whereYears ? { whereYears: f.whereYears } : {}) };
   if (!f.years) return { loc: f.loc, ...where };
   const locYears = Object.fromEntries(years.map(y => [y, f.years[y] || own(y)]));
   return { loc: [...new Set(Object.values(locYears).flat())], locYears, ...where };
@@ -167,7 +171,7 @@ for (const [id, rows] of byId) {
   wars.push({
     id: 'u' + id, src: 'ucdp', name, type: UCDP_TYPE[last.type_of_conflict],
     aim: last.incompatibility === '1' ? 'territory' : last.incompatibility === '2' ? 'government' : 'territory and government',
-    years: rows.map(r => [+r.year, +r.intensity_level]),
+    years: rows.map(r => [+r.year, +r.intensity_level, +r.type_of_conflict]),
     ...place('u' + id, [...new Set(rows.flatMap(locQs))], rows.map(r => +r.year), own),
     sideA: sides('side_a'), sideB: sides('side_b'),
     states: [...new Set(rows.flatMap(partyQs))],
@@ -195,7 +199,7 @@ for (const w of listed) {
   wars.push({
     id: w.q, src: 'wikidata', q: w.q, name: w.n, type: cap(classes[w.cls[0]]?.labels?.en?.value) || 'War', years,
     span: w.from === w.to ? `${w.from}` : `${w.from}–${w.to}`,
-    loc: p.loc, ...(p.locYears ? { locYears: p.locYears } : {}), ...(where.length ? { where } : {}),
+    loc: p.loc, ...(p.locYears ? { locYears: p.locYears } : {}), ...(where.length ? { where } : {}), ...(p.whereYears ? { whereYears: p.whereYears } : {}),
     sideA: [], sideB: [], states: [...new Set([...w.states, ...p.loc])],
     statesYears: Object.fromEntries(years.map(([y]) => [y, [...new Set([...w.states, ...(p.locYears?.[y] || p.loc)])]])),
     start: w.start, end: w.end, wiki: w.wiki,
@@ -318,6 +322,8 @@ const sources = {
 const warsDoc = { generated: new Date().toISOString(), format: 'vm-battlefield-wars/2', firstYear: FIRST, ucdpFrom: UCDP_FROM, lastYear: LAST,
   files: { 'ucdp-acd': { file: acdPath.split(/[\\/]/).pop(), sha256: sha256(acdBuf), url: 'https://ucdp.uu.se/downloads/ucdpprio/ucdp-prio-acd-261-csv.zip' } },
   levels: { 1: 'Minor conflict: 25 to 999 battle-related deaths in the year (UCDP)', 2: 'War: 1,000 or more battle-related deaths in the year (UCDP)', 3: 'A war Wikidata lists, 1926–1945; its intensity is not coded' },
+  // A UCDP conflict's type in each year (the third element of its `years`; UCDP's type_of_conflict); `type` is its last year's.
+  types: UCDP_TYPE,
   sources, oldIds, oldWithin, oldGone, wars };
 const placesDoc = { generated: warsDoc.generated, format: 'vm-battlefield-places/2', borders: BORDER_FILES, bordersTo: BORDERS_TO,
   about: PLACES_ABOUT, places, rows: Object.fromEntries([...rowQs].map(([id, runs]) => [id, runs.length === 1 && runs[0][2] ? runs[0][2] : runs])), points, unplaced, oldCountries: oldC };

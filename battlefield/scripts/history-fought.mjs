@@ -4,8 +4,10 @@
 // and locations for a war of 1926–1945 are often missing or name a region.
 // Keys are war ids in wars.json (u<UCDP id>, or a Wikidata Q-id for 1926–1945). Places are VM's place keys, Wikidata
 // Q-ids (battlefield/scripts/history-places.mjs; never a Gleditsch–Ward number). `loc`: where the fighting was;
-// `where`: what the war's places are called when the map has no shape for them; `years`: places by year, for a war
-// that moved (World War II, a government fighting abroad); the years not listed keep the sources'.
+// `where`: what the war's places are called when the map has no shape for them, over all its years (a war's record);
+// `whereYears`: the same names by year, where they differ by year (World War II's Pearl Harbor and the Aleutians), so a
+// year or a period names only its own; `years`: places by year, for a war that moved (World War II, a government
+// fighting abroad); the years not listed keep the sources'.
 // From 1989 the UCDP entries follow the countries that the UCDP Georeferenced Event Dataset (GED v26.1) places each
 // conflict's events in; check-fought.mjs repeats that check and prints the entries.
 // VM's own work. Re-keyed from Gleditsch–Ward numbers to Q-ids on 20 November 2026 (stage J1) by hand, place by place;
@@ -74,6 +76,24 @@ export const FOUGHT_IN = {
   u442: { years: { 2010: ['Q912'] } },      // Mauritania: AQIM, in Mali
   u13902: { years: { 2015: ['Q43', 'Q858'], 2016: ['Q43', 'Q796', 'Q858'], 2017: ['Q858'] } }, // Turkey: Islamic State, also in Syria and Iraq
 
+  // ---- UCDP/PRIO internal conflicts fought outside the government's state. UCDP's location is "the government side of
+  // a conflict, and should not be interpreted as the geographical location of the conflict" (ACD codebook v26.1, 3.1),
+  // so these few are placed where Wikidata places the war (read 25 November 2026; battlefield-history-3): the
+  // Israeli–Palestinian conflict (Q151622) at Palestine (P276 Q23792), kept in Israel too; the South African Border War
+  // (Q1993848) in Namibia (P17 and P276 Q1030), which Cliopatria draws within South Africa to 1989, so it is named under
+  // the map; the Western Sahara War (Q1093550) in Western Sahara (P276 Q6250), which no Cliopatria row holds after
+  // 1975 (in 1975 it lies in Spain's row, so it is named under the map then too), kept in Morocco and Mauritania too,
+  // since Polisario "also raided cities and towns in Morocco and Mauritania proper" (English Wikipedia's "Western Sahara
+  // War", read 26 November 2026: the raids on Nouakchott and on the Zouerate iron mines);
+  // the Indonesian occupation of East Timor (Q2665403) in Timor-Leste (P276 Q574, read 26 November 2026; English
+  // Wikipedia's article gives its location as East Timor), which Cliopatria draws within Portugal in 1975 and
+  // Indonesia from 1976, so it is named under the map.
+  u234: { loc: ['Q801', 'Q23792'] },        // Israel: Palestine
+  u298: { loc: ['Q1030'] },                 // South Africa: Namibia, 1966–89
+  u331: { loc: ['Q6250', 'Q1028'] },        // Morocco: Western Sahara, 1975–89
+  u428: { loc: ['Q6250', 'Q1025'] },        // Mauritania: Western Sahara, 1975–78
+  u330: { loc: ['Q574'] },                  // Indonesia: East Timor, 1975–99
+
   // ---- UCDP/PRIO places the map has no shape for in those years
   u207: { loc: ['Q193714'] },              // Israel 1946: Mandatory Palestine (no free border holds it, so it is named under the map)
   u226: { loc: ['Q668'], where: ['Hyderabad'] }, // Hyderabad – India 1948: Hyderabad lies within India on this map
@@ -84,7 +104,14 @@ export const FOUGHT_IN = {
   Q1551794: { loc: ['Q148'] },              // Japan's invasion of Manchuria, 1931–33
   Q170314: { loc: ['Q148'] },               // Second Sino-Japanese War
   Q188925: { loc: ['Q711'] },               // Khalkhin Gol 1939: Mongolia
-  Q362: { years: byYear(WW2), where: ['Pearl Harbor (1941)', 'the Aleutian Islands (1942–43)'] }, // World War II
+  // World War II. Its named places by year (battlefield-history-6, 25 November 2026), from their own Wikidata items: the
+  // attack on Pearl Harbor (Q52418, P585 7 December 1941) and the Aleutian Islands campaign (Q249708, P580 3 June 1942
+  // to P582 15 August 1943); `where` keeps them with their years for the war's record.
+  Q362: { years: byYear(WW2), where: ['Pearl Harbor (1941)', 'the Aleutian Islands (1942–43)'], whereYears: byYear([[1941, 1941, ['Pearl Harbor']], [1942, 1943, ['the Aleutian Islands']]]) },
+  // Actions in Inner Mongolia, 1933–36 (battlefield-history-4): Wikidata (Q4211700) gives only its location, Chahar
+  // (Q1058919), whose country (P17) is Q865 to 1948, the Republic of China; THEN reads Q865 as Taiwan under Japan, so
+  // the war is placed in China by hand here, and wars-1926.mjs LOCATION_IN keeps Japan out of its states.
+  Q4211700: { loc: ['Q148'] },
   Q134949: { loc: ['Q33'] },                // Winter War 1939–40: Finland
   Q3938020: { loc: ['Q851'] },              // Ikhwan Revolt 1927–30: Nejd (Cliopatria's Kingdom of Hejaz and Nejd)
   Q1073476: { loc: ['Q148'] },              // Northern Expedition: China

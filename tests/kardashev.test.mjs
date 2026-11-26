@@ -251,7 +251,8 @@ test('one step (the handles together) is as before the period read every step', 
   }));
   assert.deepEqual(one, {
     discs: 12, gone: 0, key: true, band: 'hidden', aria: "Circles on each power's capital, sized by its share of world energy capture",
-    caption: "(a) Each power's capital, its circle sized by its estimated share of world energy capture and coloured by region. (b) The shares of the sixteen largest powers over time, stacked, with everyone else in grey.",
+    // Review of 25 November 2026 (kardashev-1): the chart draws every power, so its grey is the list's "Everyone else".
+    caption: "(a) Each power's capital, its circle sized by its estimated share of world energy capture and coloured by region. (b) Every power's share over time, stacked by region, with everyone else in grey.",
   });
   const song = await page.locator('#panel').innerText();
   assert.match(song, /In 1100\n/i); // innerText: the CSS upper-cases the heading
@@ -448,8 +449,9 @@ test('over a period the table fits its panel at 1440 by 900 and the map keeps it
 // the powers at 200 BC, 100 BC, AD 1, 100 (~30%) and 200 (~20%), so over 100 to 1400 two of the five are within the period. (b) Over a
 // period the table's two heading rows each stuck at the top on their own, so scrolled, the second lay over the first;
 // they now stick as one block. (c) The map's names were placed by their widths in the fallback font when the data came
-// before the web font, and stayed so until a redraw (at 390 by 844, 500 BC: "Zhou and the Warring States"); they are
-// placed again once the font is in. The font is held here until the names are drawn, as on a slow connection.
+// before the web font, and stayed so until a redraw (at 390 by 844, checked at 300 BC, where "Zhou and the Warring
+// States" stands; until 25 November 2026 at 500 BC, where the name is now "Zhou", the Warring States being dated from
+// 475 BC, and where the names no longer move once the font is in); they are placed again once the font is in. The font is held here until the names are drawn, as on a slow connection.
 test('a period lists a power\'s shares once, the table\'s two heading rows stay apart when scrolled, and names are placed again with the web font', pageTest, async t => {
   const browser = await launch({ args: ['--mute-audio'] });
   t.after(() => browser.close());
@@ -482,7 +484,7 @@ test('a period lists a power\'s shares once, the table\'s two heading rows stay 
   }
   await page.close();
   // (c) the web font held until the names are drawn.
-  for (const [w, h, hash] of [[390, 844, 'y=-500'], [1440, 900, 'y=1400&f=100']]) {
+  for (const [w, h, hash] of [[390, 844, 'y=-300'], [1440, 900, 'y=1400&f=100']]) {
     const slow = await browser.newPage({ viewport: { width: w, height: h } });
     slow.on('pageerror', e => errors.push(e.message));
     let release; const held = new Promise(r => { release = r; });

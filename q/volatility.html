@@ -330,7 +330,7 @@ function metricList() {
   const list = [
     { id: 'score', label: 'GVI score', span: 'Mean GVI', get: c => c.cur.score, fmt: f1, group: 'Index', scale: 'gvi' },
     { id: 'avg7', label: '7-day average', span: '7-day average to the last day', get: c => c.cur.avg7, fmt: f1, group: 'Index', scale: 'gvi' },
-    { id: 'change7', label: '7-day change', span: 'Change over the period (last week vs first)', get: c => c.cur.change7, fmt: sgn, group: 'Index', scale: 'div' },
+    { id: 'change7', label: '7-day change', span: 'Change over the period (last week vs first; the halves, when shorter than two weeks)', get: c => c.cur.change7, fmt: sgn, group: 'Index', scale: 'div' },
     { id: 'vol30', label: '30-day volatility (std. dev.)', span: 'Volatility over the period (std. dev.)', get: c => c.cur.vol30, fmt: f1, group: 'Index' },
     { id: 'peak30', label: '30-day peak', span: 'Peak over the period', get: c => c.cur.peak30, fmt: f1, group: 'Index', scale: 'gvi' },
     { id: 'high30', label: 'High-band days (30 days)', span: 'High-band days in the period', get: c => c.cur.high30, fmt: int, group: 'Index' },
@@ -434,7 +434,7 @@ function renderTable() {
   const cols = [['rank', '#', 'num'], ['name', 'Country', ''], ['metric', m.label, 'num'], ['band', 'Band', ''], ['change7', per() ? 'Δ' : '7d Δ', 'num'], ['rankChange', 'Rank Δ', 'num'], ['events', 'Events', 'num']];
   if (m.id === 'score') cols.splice(2, 1, ['metric', per() ? 'Mean GVI' : 'GVI', 'num']);
   $('#rank-note').textContent = per()
-    ? `Tick up to four countries to compare them. Over ${when()}: the mean of the days scored, the change from the first week to the last (Δ), the rank on the last day against the first (Rank Δ) and all the events. Countries scored on no day of the period are left out unless “Scored only” is cleared.`
+    ? `Tick up to four countries to compare them. Over ${when()}: the mean of the days scored, the change from the first week to the last (Δ; the halves, when shorter than two weeks, leaving out the middle day when the days are odd in number), the rank on the last day against the first (Rank Δ) and all the events. Countries scored on no day of the period are left out unless “Scored only” is cleared.`
     : 'Tick up to four countries to compare them. Countries without a score had too few events or sources that day; their event counts and tone are still shown.';
   $('#thead').innerHTML = '<th title="Tick up to four countries to compare them">Cmp</th>' + cols.map(([k, l, cl]) => `<th class="${cl}" aria-sort="${sortKey === k ? (sortDir > 0 ? 'ascending' : 'descending') : 'none'}"><button type="button" class="sort" data-sort="${k}">${esc(l)}${sortKey === k ? (sortDir > 0 ? ' ↑' : ' ↓') : ''}</button></th>`).join('');
   const val = (c, k) => ({ rank: c.cur.rank ? -c.cur.rank : null, name: c.name, metric: m.get(c), band: c.cur.score, change7: c.cur.change7, rankChange: c.cur.rankChange, events: c.cur.events })[k];
@@ -449,14 +449,15 @@ function renderTable() {
   $('#thead').querySelectorAll('[data-sort]').forEach(th => th.onclick = () => { const k = th.dataset.sort; sortDir = sortKey === k ? -sortDir : k === 'name' ? 1 : -1; sortKey = k; renderTable(); });
   $('#rows').querySelectorAll('[data-cmp]').forEach(cb => cb.onchange = () => toggleCompare(cb.dataset.cmp, cb.checked));
 }
-// The biggest changes: over the last week against the one before, or over a period, its last week against its first.
+// The biggest changes: over the last week against the one before, or over a period, its last week against its first
+// (its halves when shorter than two weeks).
 function renderMovers() {
   const p = per(), avg = c => (p ? c.cur.score : c.cur.avg7), head = p ? 'Mean' : '7d avg';
   $('#movers-title').textContent = `Biggest movers · ${p ? when() : '7 days'}`;
   const l = C.filter(c => c.cur.change7 != null && avg(c) != null).sort((a, b) => b.cur.change7 - a.cur.change7);
   const row = c => `<tr><td><a class="cname" href="#country=${c.iso3}">${esc(c.name)}</a></td><td class="num">${avg(c).toFixed(1)}</td><td class="num ${c.cur.change7 > 0 ? 'up' : 'down'}">${c.cur.change7 > 0 ? '▲ +' : '▼ '}${c.cur.change7.toFixed(1)}</td></tr>`;
   $('#movers').innerHTML = l.length ? `<table class="prp-table"><thead><tr><th>Rising</th><th class="num">${head}</th><th class="num">Δ</th></tr></thead><tbody>${l.slice(0, 6).map(row).join('')}</tbody></table>
-    <table class="prp-table"><thead><tr><th>Easing</th><th class="num">${head}</th><th class="num">Δ</th></tr></thead><tbody>${l.slice(-6).reverse().map(row).join('')}</tbody></table>` : `<div class="prp-empty">${p ? 'Needs scores in the first and last days of the period.' : 'Needs two weeks of scores.'}</div>`;
+    <table class="prp-table"><thead><tr><th>Easing</th><th class="num">${head}</th><th class="num">Δ</th></tr></thead><tbody>${l.slice(-6).reverse().map(row).join('')}</tbody></table>` : `<div class="prp-empty">${p ? 'Needs scores in the first and last weeks of the period (its halves, when shorter than two weeks).' : 'Needs two weeks of scores.'}</div>`;
 }
 // Two small panels on one time axis (no dual axis): mean GVI above, located events below.
 function renderGlobal() {
@@ -521,7 +522,7 @@ function renderProfile() {
   // on the latest day.
   const stats = per() ? [
     ['Mean GVI', k.score == null ? '–' : k.score.toFixed(1), `<span class="band ${bandOf(k.score)}">${bandOf(k.score) === 'none' ? 'not scored' : bandOf(k.score)}</span>${k.rank ? ` · rank ${k.rank} of ${C.filter(x => x.cur.score != null).length}` : ''}`],
-    ['Change over the period', k.change7 == null ? '–' : `${k.change7 > 0 ? '+' : ''}${k.change7.toFixed(1)}`, 'last week vs first'],
+    ['Change over the period', k.change7 == null ? '–' : `${k.change7 > 0 ? '+' : ''}${k.change7.toFixed(1)}`, 'last week vs first; the halves, when shorter than two weeks'],
     ['Volatility over the period', k.vol30 == null ? '–' : k.vol30.toFixed(1), `peak ${k.peak30 == null ? '–' : k.peak30.toFixed(1)} · ${k.high30} high-band days`],
     ['Events', fmtN(k.events), `${fmtN(k.events7)} a day`],
     ['Articles', fmtN(L?.articles), L ? `${fmtN(L.sources)} distinct sources, latest day` : 'latest day only'],

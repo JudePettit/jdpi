@@ -44,7 +44,27 @@ const RAW_CLEAN = [
   /^\s*(?:<p>\s*)?Author\(s\):[\s\S]*?(?:<br\s*\/?>|<\/p>)/i,              // APS: "Author(s): A, B and C<br/>"
   /^\s*<p>\s*by\s[^<]{2,2000}<\/p>/i,                                      // PLOS: "<p>by A, B, C</p>"
   /<p>\s*\[[^\]]{3,80}\]\s*Published[^<]*<\/p>/gi,                         // APS: "<p>[Phys. Rev. Lett. 137, 180401] Published …</p>"
+  // The Guardian: a list of links after the standfirst, to its live page ("Business live – latest updates") or to
+  // related stories, and its "Get our … email, free app or daily news podcast" line.
+  /<ul>\s*(?:<li>\s*(?:<p>\s*)?<a\b[^>]*>(?:(?!<\/a>)[\s\S]){1,300}<\/a>\s*(?:<\/p>\s*)?<\/li>\s*)+<\/ul>/gi,
+  /<ul>\s*<li>\s*(?:<p>\s*)?(?:<strong>\s*)?Get our\b(?:(?!<\/li>)[\s\S]){0,800}<\/li>\s*<\/ul>/gi,
 ];
+// A paragraph that ends without a stop (the Guardian's standfirst: "… pose problems this winter</p><p>Andy Burnham
+// faces …") gets one where the next block begins, so it does not run into the article's first sentence. Summaries
+// only: plain() also cleans titles and bylines, which must not gain a full stop.
+const PARA_END = /<\/p>\s*(?=<(?:p|ul|ol|blockquote|h[1-6])\b)/gi;
+// A footnote mark after the stop ("… to speak to you today.<sup>1</sup>") does not hide it, and Chinese and Japanese
+// stops count as stops ("… 授权翻译。").
+const endsSentence = html => {
+  const t = html.replace(/^[^<]*>/, '').replace(/<sup\b[^>]*>[\s\S]*?<\/sup>/gi, '').replace(/<[^>]*>/g, '').trimEnd();
+  return !t || /[.!?:;,…。！？：；，][’”"')\]」』]*$/.test(t);
+};
+// The stop goes in as a mark and becomes "." once the tags are gone, so it closes up to the last word ("counts.", not
+// "counts ."). An empty or picture-only paragraph after one without a stop is marked as well, since it adds no text:
+// a run of marks makes one stop.
+const STOP_MARK = '\u0001';
+const endParagraphs = html => html.replace(PARA_END, (m, at, all) => (endsSentence(all.slice(Math.max(0, at - 400), at)) ? m : STOP_MARK + m));
+const placeStops = s => s.replace(/(?:\s*\u0001)+/g, '.');
 const TEXT_CLEAN = [
   /^[^.;|]{2,100}?,\s*Published online:\s*[^;|]{4,40}[;|]\s*(?:\|\s*)?(?:doi:\s*\S+)?\s*/i,   // Nature: "Nature, Published online: …; doi:…"
   /^(?:[A-Z][^.]{1,120}?),\s*(?:Volume\s+\d+[^.]*|EarlyView|Early View|Ahead of Print|Accepted Manuscript|Just Accepted)\.?\s*/,  // "Science, Volume 394, Issue 6822, Page 419-422, October 2026."
@@ -62,7 +82,7 @@ export function summarise(candidates, title = '') {
     if (!raw) continue;
     let html = decode(String(raw));
     for (const re of RAW_CLEAN) html = html.replace(re, ' ');
-    let s = plain(html);
+    let s = placeStops(plain(endParagraphs(html)));
     for (let pass = 0; pass < 2; pass++) for (const re of TEXT_CLEAN) s = s.replace(re, '').trim();
     if (tk && titleKey(s).startsWith(tk)) s = s.slice(Math.min(s.length, title.length)).replace(/^[\s.:;,–—-]+/, '');
     if (s.length < 25 || titleKey(s) === tk || /^(?:by\s|doi:)/i.test(s)) continue;

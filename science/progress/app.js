@@ -99,10 +99,25 @@ const offset = e => { const k = e._slot || 0, r = 4.4 * Math.sqrt(k), a = k * 2.
 const sx = e => transform.applyX(e._xy[0]) + offset(e)[0];
 const sy = e => transform.applyY(e._xy[1]) + offset(e)[1];
 const radius = e => (e.id === state.sel ? 7 : isRecent(e) ? 4.8 : 3.1);
+// A label sits to the right of its dot. One that would run past the map's right edge goes to the dot's left instead,
+// and one too long for either side keeps to the right, pulled in to end at the edge. The length is measured each time
+// the labels are placed: it is 0 while the map's tab is hidden, so setView places them again when the map comes back,
+// and it grows when the web font replaces the fallback, so they are placed again once the fonts have loaded.
+const LABEL_PAD = 2; // the label's halo (a 3.2px stroke) reaches about 1.6px beyond its letters
+function placeLabel(node, e) {
+  const x = sx(e), gap = radius(e) + 5, w = node.getComputedTextLength();
+  let anchor = 'start', at = x + gap;
+  if (w && at + w > W - LABEL_PAD) {
+    if (x - gap - w >= LABEL_PAD) { anchor = 'end'; at = x - gap; }
+    else at = Math.max(LABEL_PAD, W - LABEL_PAD - w);
+  }
+  node.setAttribute('text-anchor', anchor);
+  node.setAttribute('x', at);
+}
 function placeDots() {
   if (!gDots) return;
   gDots.selectAll('circle.dot').attr('cx', sx).attr('cy', sy);
-  gLabels.selectAll('text').attr('x', e => sx(e) + radius(e) + 5).attr('y', e => sy(e) + 4);
+  gLabels.selectAll('text').attr('y', e => sy(e) + 4).each(function (e) { placeLabel(this, e); });
 }
 function renderMap() {
   if (!projection) return;
@@ -287,7 +302,7 @@ function setView(v, { push = true } = {}) {
   }
   $('#tooltip').hidden = true;
   $('.work').dataset.view = state.view;
-  if (state.view === 'map') resize();
+  if (state.view === 'map') { resize(); placeDots(); } // labels drawn while the map was hidden are measured again
   renderPeople(); renderList();
   if (push) writeHash();
 }
@@ -452,7 +467,7 @@ window.jdpiDocumentary = {
     if (state.view !== 'map') setView('map');
     state.off.clear(); state.sel = null;
     if (state.fromStop) setPeriod(null, state.year, { push: false }); // the whole of history, whatever period was set
-    yield { text: `Five thousand years of discovery, from the first written numbers to the latest telescopes: ${EVENTS.length} breakthroughs, each placed where it happened.`, el: $('#year-big'), focus: { reset: true } };
+    yield { text: `Five thousand years of discovery, from the first written numbers to the latest telescopes: ${EVENTS.length} breakthroughs, each placed where it happened, or as near as the sources allow.`, el: $('#year-big'), focus: { reset: true } };
     for (const [a, b, name] of ERAS) {
       if (a > D.lastYear) break;
       const list = EVENTS.filter(e => e.y >= a && e.y <= Math.min(b, D.lastYear));
@@ -483,9 +498,12 @@ const fmtDay = iso => new Date(iso).toLocaleDateString('en-GB', { day: 'numeric'
     STOPS = buildStops(data.firstYear, data.lastYear);
     $('#status').innerHTML = `<span><b>${EVENTS.length}</b> breakthroughs</span><span><b>${Object.keys(data.people).length}</b> scientists</span>`
       + `<span><b>${Object.keys(data.institutions).length}</b> institutions</span><span>Coverage <b>${esc(yearText(data.firstYear))}–${data.lastYear}</b></span>`
-      + `<span>Facts <b>Wikidata (CC0)</b></span>${data.generated ? `<span>Built <b>${esc(fmtDay(data.generated))}</b></span>` : ''}`;
+      + `<span>People and places <b>Wikidata (CC0)</b></span>${data.generated ? `<span>Built <b>${esc(fmtDay(data.generated))}</b></span>` : ''}`;
     if (!world) $('#caption').textContent = 'The world outline could not be loaded; breakthroughs are still placed by their coordinates.';
     setupLegend(); setupTimeline(); setupSearch(); setupMap(world || { type: 'Topology', objects: { land: { type: 'GeometryCollection', geometries: [] } }, arcs: [] });
+    // The labels were first measured in the fallback font; the web font is wider, so they are placed again once it is in.
+    document.fonts?.ready.then(() => placeDots());
+    document.fonts?.addEventListener?.('loadingdone', () => placeDots());
     applyHash();
     window.addEventListener('hashchange', applyHash);
     window.addEventListener('prp:themechange', () => renderMap());

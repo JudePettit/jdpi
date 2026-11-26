@@ -1,0 +1,78 @@
+/* Retrospective Battlefield: the two charts above the table (trends.js; addition HD-13, 25 November 2026). Every
+   colour is a design/prp.css token, so the light and dark themes both work; SVG fills are written as var(--…). The
+   types take four of the categorical tokens, named in the key in words, in stacking order: blue, amber, pink and
+   green, the one set of four of the eight that the dataviz palette validator passes on every pair (any two types can
+   touch when one is absent) in light and in dark, for normal sight and under deutan, protan and tritan simulation
+   (worst pair: dark amber against green, protan ΔE 6.9, which the 1 px surface gap and the key carry). */
+.trends {
+  --t-civil: var(--prp-cat-1); --t-intl: var(--prp-cat-4); --t-inter: var(--prp-cat-5); --t-colonial: var(--prp-cat-6);
+  flex: none; margin-bottom: 12px; padding: 10px 14px 10px; color: var(--prp-text-2);
+}
+.trends-head { display: grid; gap: 2px; }
+.trends-title { margin: 0; color: var(--prp-text); font: 600 var(--prp-fs)/1.3 var(--prp-font-ui); }
+.trends-readout { margin: 0; min-height: 1.45em; color: var(--prp-text-2); font: var(--prp-fs-xs)/1.45 var(--prp-font-mono); }
+/* The live region screen readers hear when the period changes; it is not seen (trends.js). */
+.trends-live { position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
+.trends-nodeaths { margin: 6px 0 0; color: var(--prp-text-2); font-size: 12px; line-height: 1.5; }
+.trends-charts { display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); gap: 8px 18px; margin-top: 6px; }
+.trend { min-width: 0; }
+.trend figcaption { margin: 0 0 3px; max-width: none; font-size: 12px; }
+.trend svg { display: block; width: 100%; height: 116px; overflow: visible; border-radius: var(--prp-radius-sm); }
+.trend svg:focus { outline: none; }
+.trend svg:focus-visible { outline: 2px solid var(--prp-focus); outline-offset: 2px; }
+.trend .tick text { fill: var(--prp-muted); font: 10px var(--prp-font-mono); }
+.trend .tick line { stroke: var(--prp-line-soft); }
+.trend g.x .tick line { stroke: var(--prp-line-strong); }
+.trend rect.period { fill: var(--prp-accent-soft); stroke: var(--prp-accent); stroke-width: 1; stroke-dasharray: 2 2; }
+.trend .layer.t3 rect { fill: var(--t-civil); }
+.trend .layer.t4 rect { fill: var(--t-intl); }
+.trend .layer.t2 rect { fill: var(--t-inter); }
+.trend .layer.t1 rect { fill: var(--t-colonial); }
+.trend g.bars rect.out { opacity: .32; }
+.trend g.split line { stroke: var(--prp-text-2); stroke-width: 1; stroke-dasharray: 3 2; opacity: .7; }
+.trend g.split text { fill: var(--prp-muted); font: 10px var(--prp-font-mono); }
+.trend g.uncoded rect { fill: url(#trend-hatch); stroke: var(--prp-line-strong); stroke-width: .6; }
+.trend g.uncoded text { fill: var(--prp-muted); font: 10px var(--prp-font-mono); }
+.trend #trend-hatch path { stroke: var(--prp-line-strong); stroke-width: 1; }
+.trend path.band { fill: var(--prp-text-2); opacity: .2; }
+.trend path.best { fill: none; stroke: var(--prp-text); stroke-width: 1.6; }
+.trend line.cursor { stroke: var(--prp-text); stroke-width: 1; opacity: 0; }
+.trend line.cursor.on { opacity: .6; }
+.trend circle.cursor { r: 3.2px; fill: var(--prp-text); stroke: var(--prp-surface); stroke-width: 1.5; }
+.trend-key { display: flex; flex-wrap: wrap; gap: 2px 12px; margin: 4px 0 0; padding: 0; list-style: none; color: var(--prp-text-2); font-size: 11.5px; line-height: 1.4; }
+.trend-key li { display: flex; align-items: center; gap: 5px; }
+.trend-key li.trend-key-order { color: var(--prp-muted); }
+.trend-key .sw { flex: none; width: 11px; height: 11px; border-radius: 2px; box-shadow: inset 0 0 0 1px var(--prp-map-border); }
+.trend-key .sw.t3 { background: var(--t-civil); }
+.trend-key .sw.t4 { background: var(--t-intl); }
+.trend-key .sw.t2 { background: var(--t-inter); }
+.trend-key .sw.t1 { background: var(--t-colonial); }
+.trend-key .sw.unc { background: repeating-linear-gradient(135deg, var(--prp-line-strong) 0 1px, transparent 1px 4px); }
+.trend-key .sw.line { height: 2px; border-radius: 0; background: var(--prp-text); box-shadow: none; }
+.trend-key .sw.band { background: color-mix(in srgb, var(--prp-text-2) 20%, transparent); box-shadow: none; }
+.trends-caveat { margin: 8px 0 0; color: var(--prp-text-2); font-size: 12px; line-height: 1.5; }
+.trends-caveat b { color: var(--prp-text); }
+.trends-src { margin: 3px 0 0; color: var(--prp-muted); font-size: 11.5px; line-height: 1.5; }
+.trends-data { margin-top: 6px; font-size: 12px; }
+.trends-data summary { cursor: pointer; color: var(--prp-link); }
+.trends-data summary:focus-visible { outline: 2px solid var(--prp-focus); outline-offset: 2px; }
+.trends-tablewrap { max-height: 260px; overflow: auto; margin-top: 6px; border: 1px solid var(--prp-line-soft); border-radius: var(--prp-radius-sm); }
+.trends-data table { font-size: 12px; }
+.trends-data caption { padding: 6px 10px; caption-side: top; text-align: left; color: var(--prp-muted); font-size: 11.5px; }
+.trends-data th[scope="row"] { position: static; padding: 5px 10px; background: none; color: var(--prp-text); font: 600 12px var(--prp-font-mono); text-transform: none; letter-spacing: 0; border-bottom: 1px solid var(--prp-line-soft); }
+.trends-data td { padding: 5px 10px; }
+.trends-data td.uncoded, .trends-data td.none { color: var(--prp-muted); }
+.trends-data tr.in td, .trends-data tr.in th { background: var(--prp-accent-soft); }
+.trends-data tr.now th { box-shadow: inset 3px 0 0 var(--prp-accent); }
+
+/* On a wide screen the page fills one screen; while the table view shows, it grows by the charts' height
+   (--trends-room, set by trends.js), so the table and the note under it keep the room they had. */
+@media (min-width: 901px) {
+  .screen:has(#view-table:not([hidden])) { height: calc(max(100vh, 680px) + var(--trends-room, 0px)); }
+  .jdpi-returnbar + .screen:has(#view-table:not([hidden])) { height: calc(max(calc(100vh - 36px), 644px) + var(--trends-room, 0px)); }
+}
+@media (max-width: 900px) {
+  .trends { padding: 10px 12px; }
+  .trends-charts { grid-template-columns: minmax(0, 1fr); }
+  .trend svg { height: 128px; }
+}

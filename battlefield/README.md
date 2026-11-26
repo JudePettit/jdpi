@@ -55,6 +55,24 @@ are Wikidata items; no Correlates of War value, CShapes border or Gleditsch–Wa
   `--names-only` rewrites only places.json's dated names (`was`, `stateFrom`) by the same functions, from Wikidata
   read then, for a change to `NAMED_AS` or `STATE_FROM` without the UCDP file.
 - **Wikipedia links:** titles live in `scripts/history-wiki.mjs`. Wars without a title link to a Wikipedia search.
+- **Charts above the table (since 25 November 2026, the owner's addition HD-13):** `history/trends.js` and
+  `history/trends.css`, drawn with the page's d3. Figure 2 counts each year's conflicts in `history/data/wars.json` by
+  the type UCDP gives the conflict in that year (the third element of `years`), stacked from 1946; 1926–1945 is one
+  strip marked "not coded", never zero. Figure 3 is UCDP's battle deaths each year from 1989 (Battle-Related Deaths
+  Dataset 26.1, conflict level, CC BY 4.0): the best estimate as a line in the band from the summed lows to the summed
+  highs, read from the Omni-Map's `omni/data/layers/conflict-territory/conflicts.json` the first time the table view
+  opens. Neither file is written by this page; both are rebuilt by their own jobs, and the years and versions in the
+  source line beside the charts are written from them when the charts are drawn. If the layer cannot be read, Figure 2
+  and the table are still drawn and a note says the battle deaths are missing. Both charts follow the timeline's year
+  or period and are sliders for the keyboard and screen readers (arrow keys, PageUp/PageDown, Home, End; Enter shows
+  the year); the live region speaks only when the period changes, never on a pointer's hover. "The figures, year by
+  year" gives every number they draw. The types' colours (the categorical tokens 1, 4, 5 and 6, with a 1 px surface
+  gap between segments) pass the dataviz palette validator on every pair in both themes (dark amber against green at
+  its warning level, which the gap and the key carry). Beside them, the caveat:
+  battle deaths in state-based conflicts only, from 1989; one-sided and non-state violence are not in them; a
+  conflict of 25 deaths counts the same as a world war. On a wide screen the page grows by the charts' height while
+  the table view shows, so the table keeps its room; trends.css repeats styles.css's two screen heights, and a test
+  fails if they part. Tests: `tests/addition-conflict-trend.test.mjs`.
 
 ## War Focus (`battlefield/focus/`)
 - **Battle deaths by month:** UCDP's Georeferenced Event Dataset (GED v26.1, CC BY 4.0) from 1989; PRIO's Battle

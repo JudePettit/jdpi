@@ -45,6 +45,25 @@ test('soft-news filter classifies sport, entertainment and lifestyle but keeps h
   for (const [t, u, want] of cases) assert.equal(categorize(t, u), want, t);
 });
 
+// Continental football championships are sport (build 10, front-pages-23): on 25 November 2026 a Court of Arbitration
+// for Sport ruling on the Africa Cup of Nations stood tenth among the Daily Synopsis's "major political stories".
+// "Euro" and "CAS" stay out of the terms: matched without regard to case, they would take euro-zone economics and the
+// Chinese Academy of Sciences out of the news.
+test('soft-news filter knows the continental football championships', () => {
+  const cases = [
+    ['Senegal reinstated as AFCON champions as Morocco vows to fight on', 'https://www.euronews.com/2026/11/24/cas-awards-senegal-afcon-title-after-successful-appeal', 'sports'],
+    ['Senegal reinstated as Afcon champions', 'https://morningstaronline.co.uk/article/cas-reinstates-senegal-afcon-champions', 'sports'],
+    ['CAS reinstates Senegal as 2025 AFCON champions', 'https://www.dw.com/en/cas-reinstates-senegal-as-2025-afcon-champions/a-80021027', 'sports'],
+    ['Morocco to host the Africa Cup of Nations again', 'https://x.com/world/a', 'sports'],
+    ['Argentina win the Copa América', 'https://x.com/world/a', 'sports'],
+    ['Argentina win the Copa America', 'https://x.com/world/a', 'sports'],
+    ['Euro slides as euro zone inflation cools', 'https://x.com/markets/a', 'news'],
+    ['Chinese Academy of Sciences (CAS) opens a quantum lab', 'https://x.com/world/a', 'news'],
+    ['AFCON host faces corruption investigation', 'https://x.com/world/a', 'news'],
+  ];
+  for (const [t, u, want] of cases) assert.equal(categorize(t, u), want, t);
+});
+
 // The store's checks, shared by the data test (this checkout's file) and the live-data test (a deployed copy). The
 // feed thresholds are the build's own, so a store the build would have refused to write fails here too. At least 100
 // stories per position: the smallest position had 237 even in the first store, built from a single run, so a store

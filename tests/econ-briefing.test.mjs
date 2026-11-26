@@ -174,6 +174,43 @@ test('feeds: author lists are cleaned or refused', () => {
   assert.match(dp.summary, /demand forces—both/, 'TeX dashes become real ones');
 });
 
+// The Guardian's standfirst (build 10, front-pages-26) is a paragraph with no full stop, followed by a list of links
+// (its live page, related stories, its newsletter line) and then the article. Joined as they came, every Guardian
+// summary on 25 November 2026 ran one into the next: "… pose problems this winter Andy Burnham faces …", "… ‘You
+// snooze, you lose’ Business live – latest updates Booming demand …". The items below have the feed's own shape
+// (theguardian.com/business/economics/rss, 25 November 2026), shortened from the feed; item 5's closing stop is added,
+// to test a paragraph that already ends one. The last three descriptions are made-up cases in the shape of other feeds
+// (Econbrowser's empty paragraph, a speech's footnote mark, Eos's Chinese translations).
+test('feeds: a Guardian standfirst ends with a stop and its links list goes', () => {
+  const item = (n, description) => `<item><title>Guardian item ${n}</title><link>https://www.theguardian.com/business/2026/nov/25/item-${n}</link><description>${description.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</description><pubDate>Wed, 25 Nov 2026 10:00:00 GMT</pubDate></item>`;
+  const items = parseEconFeed(`<rss><channel>${[
+    item(1, '<p>Kristalina Georgieva says countries needed to be ready for tech rollout, adding: ‘You snooze, you lose’</p><ul><li><p><a href="https://www.theguardian.com/business/live/2026/nov/19/latest-news-updates">Business live – latest updates</a></p></li></ul><p>Booming demand for artificial intelligence will force the world’s most powerful central banks to raise interest rates.</p> <a href="https://www.theguardian.com/world/x">Continue reading...</a>'),
+    item(2, '<p>‘Raising growth in every postcode’ has been the PM’s rallying cry but deep regional disparities and rising energy bills pose problems this winter</p><p>Andy Burnham faces two, related problems: Britain faces deep regional disparities and it is entering the coldest months of the year.</p>'),
+    item(3, '<p>Wage rates climb about 1 percentage point faster than before pandemic, triggering warnings of a sixth RBA rate rise</p><ul><li><p><strong>Get our </strong><a href="https://www.theguardian.com/email-newsletters">daily political email</a><strong>, </strong><a href="https://www.theguardian.com/app">free app</a><strong> or </strong><a href="https://www.theguardian.com/podcast">daily news podcast</a></p></li></ul><p>Wages grew at their fastest pace since late 2023 over the three months to September.</p>'),
+    item(4, '<p>A record breaking IPO has raised billions for the AI frontier lab</p><ul><li><p><a href="https://www.theguardian.com/technology/2026/nov/19/anthropic-public-trading-ipo"><strong>Anthropic closes first day of public trading at $1.3tn valuation after largest-ever IPO</strong></a></p></li><li><p><a href="https://www.theguardian.com/technology/2026/nov/19/x"><strong>A second related story</strong></a></p></li></ul><p>In the end, Anthropic’s much-anticipated IPO more than lived up to the hype.</p>'),
+    item(5, '<p>Labor has been complacent. But deep cuts would come at least six months too late.</p><p>A pivot towards austerity would come far too late in the battle against inflation.</p>'),
+  ].join('')}</channel></rss>`);
+  const s = items.map(i => i.summary);
+  assert.match(s[0], /you lose’\. Booming demand for artificial intelligence/);
+  assert.match(s[1], /this winter\. Andy Burnham faces two/);
+  assert.match(s[2], /rate rise\. Wages grew at their fastest pace/);
+  assert.match(s[3], /the AI frontier lab\. In the end, Anthropic’s/);
+  assert.match(s[4], /six months too late\. A pivot/, 'a paragraph that ends with a stop gets no second one');
+  const more = parseEconFeed(`<rss><channel>${[
+    item(6, '<p>Standfirst without a stop</p><p><img src="x.png"></p><p>The article begins here and goes on.</p>'),
+    item(7, '<p>Thank you for inviting me to speak to you today.<sup>1</sup></p><p>The theme of my remarks is the economy.</p>'),
+    item(8, '<p>本文是Eos文章的授权翻译。</p><p>当社区民众参与水质监测时，科学家可以获得更多数据。</p>'),
+  ].join('')}</channel></rss>`).map(i => i.summary);
+  assert.match(more[0], /without a stop\. The article/, 'an empty or picture-only paragraph between makes no second stop');
+  assert.match(more[1], /today\.¹ The theme/, 'a footnote mark after the stop does not hide it');
+  assert.match(more[2], /授权翻译。 当社区/, 'a Chinese full stop is a stop');
+  assert.doesNotMatch(more[2], /。\./);
+  for (const t of [...s, ...more]) {
+    assert.doesNotMatch(t, /Business live|latest updates|Get our|daily news podcast|Anthropic closes first day|related story/, t);
+    assert.doesNotMatch(t, /\.\.|\s\.|\u0001/, t);
+  }
+});
+
 test('feeds: strict feeds drop off-topic items, skip lists drop furniture, news keeps no byline', () => {
   const seen = '2026-10-28T06:00:00.000Z';
   const ps = SRC.get('ps');

@@ -18,6 +18,7 @@
 import { oldCountry } from './old-countries.js';
 import { placeName } from './names.js';
 import { OLD_NUMBERS } from '../focus/old-numbers.mjs';
+import { mountTrends } from './trends.js';
 
 const W = 1000, H = 600, DOT_R = 3.2;
 const state = { year: 2025, from: 2025, selected: null, war: null, data: null, places: null, focus: {}, view: 'map', note: null,
@@ -119,8 +120,36 @@ function activeSpan(w, a, b) {
   return `${first === last ? first : `${first}–${end}`} · ${ys.length} yr${ys.length > 1 ? 's' : ''}`;
 }
 // The places a war was fought in during the period, each by its name of the year; `where` names places the map has no
-// shape for.
-const placesIn = (w, a, b) => [...new Set([...yearsIn(w, a, b).flatMap(([y]) => locIn(w, y).map(q => nameOf(q, y))), ...(w.where || [])])];
+// shape for, those of the period's years where the war has them by year (`whereYears`: World War II's Pearl Harbor in
+// 1941 and the Aleutians in 1942–43, never in 1939).
+const whereIn = (w, a, b) => (w.whereYears ? yearsIn(w, a, b).flatMap(([y]) => w.whereYears[y] || []) : w.where || []);
+const placesIn = (w, a, b) => [...new Set([...yearsIn(w, a, b).flatMap(([y]) => locIn(w, y).map(q => nameOf(q, y))), ...whereIn(w, a, b)])];
+// A UCDP conflict's type in a year, the third element of its `years` (UCDP's type_of_conflict, named by wars.json
+// `types`), since UCDP types each year apart (Cuba: a civil conflict in 1953 and 1956–58, an internationalised one in
+// 1961); a war of 1926–1945 keeps Wikidata's class. `w.type` is the last year's type, for the readers that take one.
+const typeOfYear = (w, [, , t]) => (t && state.data.types?.[t]) || w.type;
+// The types a war had in the years of the period, in the order met; a war not active in it, those of all its years.
+function typesIn(w, a, b) {
+  const ys = yearsIn(w, a, b);
+  return [...new Set((ys.length ? ys : w.years).map(yy => typeOfYear(w, yy)))];
+}
+const typeText = (w, a = state.from, b = state.year) => typesIn(w, a, b).join(' / ');
+// Years as runs: [1953, 1956, 1957, 1958, 1961] → "1953, 1956–58 and 1961".
+function runsText(ys) {
+  const runs = [];
+  for (const y of ys) { const r = runs.at(-1); if (r && y === r[1] + 1) r[1] = y; else runs.push([y, y]); }
+  const t = runs.map(([f, l]) => (f === l ? `${f}` : `${f}–${String(l).slice(0, 2) === String(f).slice(0, 2) ? String(l).slice(2) : l}`));
+  return t.length > 1 ? `${t.slice(0, -1).join(', ')} and ${t.at(-1)}` : t[0];
+}
+const withArticle = s => `${/^[aeiou]/i.test(s) ? 'an' : 'a'} ${s}`;
+// "UCDP types it as a civil conflict in 1953 and 1956–58 and as an internationalised civil conflict in 1961.", for a
+// conflict whose type changed; '' when it kept one.
+function typesSentence(w) {
+  const types = typesIn(w, state.data.firstYear, state.data.lastYear);
+  if (types.length < 2) return '';
+  const parts = types.map(t => `as ${withArticle(t.toLowerCase())} in ${runsText(w.years.filter(yy => typeOfYear(w, yy) === t).map(([y]) => y))}`);
+  return ` UCDP types it ${parts.length > 1 ? `${parts.slice(0, -1).join(', ')} and ${parts.at(-1)}` : parts[0]}.`;
+}
 // "Costa Rica: no armed conflict of 25 or more battle deaths recorded by UCDP/PRIO in 1990." (design/prp-mapkit.js):
 // from 1946 UCDP/PRIO's record, before it VM's list from Wikidata, and a period across 1946 names both.
 const NO_CONFLICT = { what: 'armed conflict of 25 or more battle deaths', source: 'UCDP/PRIO' };
@@ -149,7 +178,13 @@ function warQuery(w) {
   const b = w.sideB.filter(s => !/^Government of/.test(s)).slice(0, 2).join(' ');
   return `${w.name.split(':')[0]} ${b || 'war'} ${w.years[0][0]}`;
 }
-const span = w => w.src === 'wikidata' ? w.span : `${w.years[0][0]}–${w.years.at(-1)[0] >= state.data.lastYear ? 'ongoing' : w.years.at(-1)[0]}`;
+// A war's span: Wikidata's start and end for a war of 1926–1945; a UCDP conflict's first to last year with the count of
+// its active years, since UCDP's record can have gaps ("1967–ongoing · 9 yrs": Biafra, 1967–70 and 2021–25).
+function span(w) {
+  if (w.src === 'wikidata') return w.span;
+  const first = w.years[0][0], last = w.years.at(-1)[0], n = w.years.length, end = last >= state.data.lastYear ? 'ongoing' : last;
+  return `${first === last && end !== 'ongoing' ? first : `${first}–${end}`} · ${n} yr${n > 1 ? 's' : ''}`;
+}
 // UCDP's thresholds for a conflict, in battle deaths: a war, and an armed conflict.
 const WAR_DEATHS = 1000, CONFLICT_DEATHS = 25;
 const levelLabel = l => l === 2 ? 'War · 1,000+ deaths this year' : l === 3 ? 'War on Wikidata’s list · its intensity is not coded' : 'Minor conflict · 25–999 deaths this year';
@@ -335,7 +370,7 @@ document.addEventListener('keydown', e => { if (e.key === 'Escape') closePopout(
 // was active in it ("War · 1939–45 · 7 yrs").
 function warCard(w) {
   const a = state.from, b = state.year, l = peakIn(w, a, b);
-  return `<div class="war${state.war === w ? ' sel' : ''}" data-level="${l}" data-id="${w.id}" role="button" tabindex="0"><div class="who"><span>${esc(w.name)}</span>${l ? `<span class="lvl l${l}">${LEVEL_WORD[l]} · ${a === b ? b : activeSpan(w, a, b)}</span>` : ''}</div><div class="meta">${esc(w.type)} · ${span(w)}</div></div>`;
+  return `<div class="war${state.war === w ? ' sel' : ''}" data-level="${l}" data-id="${w.id}" role="button" tabindex="0"><div class="who"><span>${esc(w.name)}</span>${l ? `<span class="lvl l${l}">${LEVEL_WORD[l]} · ${a === b ? b : activeSpan(w, a, b)}</span>` : ''}</div><div class="meta">${esc(typeText(w, a, b))} · ${span(w)}</div></div>`;
 }
 function wireCards(root, open) {
   root.querySelectorAll('.war[data-id]').forEach(el => {
@@ -379,9 +414,12 @@ function warDetail(w) {
   const firstIn = (q, of) => w.years.find(([yy]) => of(w, yy).includes(q))?.[0] ?? w.years[0][0];
   const places = [...new Set([...w.loc.map(q => nameOf(q, firstIn(q, locIn))), ...(w.where || [])])];
   const parties = w.states.filter(q => !w.loc.includes(q)).map(q => nameOf(q, firstIn(q, statesIn)));
+  // A UCDP conflict of one type over its years is named by it; one whose type changed, as a conflict, with its types by
+  // year after (battlefield-history-2).
+  const allTypes = typesIn(w, state.data.firstYear, state.data.lastYear);
   const intro = w.src === 'wikidata'
     ? `Wikidata lists ${esc(w.name)} as ${/^[aeiou]/i.test(w.type) ? 'an' : 'a'} ${esc(w.type.toLowerCase())}, ${esc(wdDates(w))}${places.length ? `, fought in ${esc(places.join(', '))}` : ''}. No free source codes how intense it was, and VM gives no battle-death total for it.`
-    : `UCDP records this ${esc(w.type.toLowerCase())} over ${esc(w.aim)}${places.length ? ` in ${esc(places.join(', '))}` : ''}, active in ${activeYears} year${activeYears > 1 ? 's' : ''} between ${w.years[0][0]} and ${w.years.at(-1)[0]}${warYears ? `, ${warYears} of them at war level (1,000+ battle deaths)` : ''}.`;
+    : `UCDP records this ${esc(allTypes.length > 1 ? 'conflict' : allTypes[0].toLowerCase())} over ${esc(w.aim)}${places.length ? ` in ${esc(places.join(', '))}` : ''}, active in ${activeYears} year${activeYears > 1 ? 's' : ''} between ${w.years[0][0]} and ${w.years.at(-1)[0]}${warYears ? `, ${warYears} of them at war level (1,000+ battle deaths)` : ''}.${esc(typesSentence(w))}`;
   const years = y - a + 1, atWar = ys.filter(([, x]) => x === 2).length;
   const shown = a === y
     ? (l ? `<p><span class="tag ${TAG[l]}">${y}</span>${levelLabel(l)}</p>` : `<p class="empty">Not active in ${y}.</p>`)
@@ -394,7 +432,7 @@ function warDetail(w) {
     ? `<div class="sides"><b>States taking part (Wikidata’s participants)</b>${seeMoreText(parties.length ? parties : places, 10, `${w.name} · states taking part`)}</div>`
     : `<div class="sides"><b>Side A</b>${seeMoreText(w.sideA, 8, `${w.name} · side A`)}<b>Side B</b>${seeMoreText(w.sideB, 8, `${w.name} · side B`)}</div>`;
   return `<button class="close" id="close-war" aria-label="Back to the ${a === y ? 'year' : 'period'}">×</button>
-    <h2>${esc(w.name)}</h2><p class="sub">${esc(w.type)} · ${span(w)}</p>
+    <h2>${esc(w.name)}</h2><p class="sub">${esc(typeText(w, a, y))} · ${span(w)}</p>
     <p>${intro}</p>
     ${shown}
     ${unplaced ? `<p class="note unplaced-note">${unplaced}</p>` : ''}
@@ -467,16 +505,33 @@ function renderKpis() {
 }
 
 /* ---------------------------------------------------------------- table view */
+// The two charts above the table (trends.js): conflicts by type each year, and UCDP's battle deaths from 1989 out of
+// the Omni-Map's conflict layer, fetched the first time the table view opens. They follow the year or period shown;
+// a click or Enter on a chart shows that year.
+let trends = null, trendsLoad = null;
+function renderTrends() {
+  if (trends) { trends.update({ from: state.from, to: state.year }); return; }
+  // If the layer cannot be read (a 404, or Pages' HTML page for a missing path, which r.json() refuses), the types
+  // chart and the table are still drawn from wars.json, and trends.js leaves out the deaths chart with a note.
+  trendsLoad ||= fetch('../../omni/data/layers/conflict-territory/conflicts.json').then(r => { if (!r.ok) throw new Error(`conflicts.json: ${r.status}`); return r.json(); })
+    .catch(err => { console.error(err); return null; })
+    .then(layer => {
+      trends = mountTrends($('#trends'), { data: state.data, layer, pick: y => setPeriod(null, y) });
+      trends.update({ from: state.from, to: state.year });
+    })
+    .catch(err => { console.error(err); $('#trends-readout').textContent = 'Could not draw the charts.'; });
+}
 // The conflicts of the year or period as a table: the list view of what the map shows.
 function renderTable() {
   if (state.view !== 'table' || !state.data) return;
+  renderTrends();
   const a = state.from, y = state.year, list = warsInPeriod(a, y);
   renderUnplaced(a, y);
   $('#table-title').textContent = `Armed conflicts ${a === y ? `in ${y}` : `${a}–${y}`} · ${list.length}`;
   $('#th-year').textContent = a === y ? `In ${y}` : `${a}–${y}`;
   $('#table-rows').innerHTML = list.map(w => {
     const l = peakIn(w, a, y), places = placesIn(w, a, y);
-    return `<tr data-id="${w.id}"${state.war === w ? ' class="sel"' : ''}><td><button type="button" class="rowbtn">${esc(w.name)}</button></td><td class="mono">${esc(w.type)}</td>
+    return `<tr data-id="${w.id}"${state.war === w ? ' class="sel"' : ''}><td><button type="button" class="rowbtn">${esc(w.name)}</button></td><td class="mono">${esc(typeText(w, a, y))}</td>
       <td><span class="lvl l${l}">${LEVEL_WORD[l]}</span>${a === y ? '' : `<span class="cell-sub">${activeSpan(w, a, y)}</span>`}</td><td class="mono">${span(w)}</td>
       <td class="wrap">${esc(places.slice(0, 4).join(', '))}${places.length > 4 ? ` +${places.length - 4}` : ''}</td></tr>`;
   }).join('') || `<tr><td colspan="5" class="empty">No conflicts recorded in ${periodText()}.</td></tr>`;
@@ -588,7 +643,7 @@ function readHash() {
 
 function setupSearch() {
   const input = $('#search'), list = $('#search-results');
-  const index = state.data.wars.map(w => ({ label: w.name, sub: `${w.type} · ${span(w)}`, key: `${w.name} ${w.sideA.join(' ')} ${w.sideB.join(' ')}`.toLowerCase(), war: w.id }));
+  const index = state.data.wars.map(w => ({ label: w.name, sub: `${typesIn(w, state.data.firstYear, state.data.lastYear).join(' / ')} · ${span(w)}`, key: `${w.name} ${w.sideA.join(' ')} ${w.sideB.join(' ')}`.toLowerCase(), war: w.id }));
   // Places, each opening in the first year a war touched it when the year shown is outside its years.
   const firstYear = new Map();
   for (const w of state.data.wars) for (const [y] of w.years) for (const q of [...locIn(w, y), ...statesIn(w, y)]) if (!firstYear.has(q) || firstYear.get(q) > y) firstYear.set(q, y);

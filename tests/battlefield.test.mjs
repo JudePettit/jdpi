@@ -306,8 +306,11 @@ const TODAY_RIGHT = ['Q233', 'Q252', 'Q262', 'Q423', 'Q574', 'Q668', 'Q685', 'Q6
 // in 1942); and places named only as a war's location: Kenya (Kenya Colony), Cyprus (British Cyprus, Q15240466, crown
 // colony), Cambodia (French Protectorate of Cambodia, Q3173090, protectorate only), Laos (history-places.mjs PASSED_OVER),
 // Angola, Guinea-Bissau (Portuguese Guinea, Q2002279) and Mozambique (Portuguese overseas provinces), Cameroon (French
-// Cameroons) and Mauritania (French West Africa, Q210682). A state that is gone (South Yemen) is never "today’s".
-const TODAY_ALL = [...TODAY_RIGHT, 'Q833', 'Q854', 'Q114', 'Q229', 'Q424', 'Q819', 'Q916', 'Q1007', 'Q1009', 'Q1025', 'Q1029'];
+// Cameroons) and Mauritania (French West Africa, Q210682); and Namibia, where South Africa: Namibia is placed from 25
+// November 2026 (battlefield-history-3): Namibia (Q1030) dates from 1990, and before then the territory was South-West
+// Africa (Q953068), a League of Nations mandate from 1920 that the UN General Assembly ended in 1966 (Resolution 2145)
+// and South Africa held until 1990. A state that is gone (South Yemen) is never "today’s".
+const TODAY_ALL = [...TODAY_RIGHT, 'Q833', 'Q854', 'Q114', 'Q229', 'Q424', 'Q819', 'Q916', 'Q1007', 'Q1009', 'Q1025', 'Q1029', 'Q1030'];
 const REVIEWED = ['Q115', 'Q148', 'Q233', 'Q252', 'Q262', 'Q423', 'Q574', 'Q668', 'Q685', 'Q691', 'Q796', 'Q817', 'Q822', 'Q833', 'Q836', 'Q842', 'Q854', 'Q929', 'Q948', 'Q974', 'Q986', 'Q1000', 'Q1019', 'Q1041', 'Q1045', 'Q1049', 'Q34754', 'Q267584'];
 test('Retrospective data: places are named by the state of the year: the tables’ exact shape, each earlier name and its last year', async () => {
   const { NAMED_AS, STATE_FROM, EARLIER_STATE, PASSED_OVER, isEarlierState, endOf, earlierNames } = await import('../battlefield/scripts/history-places.mjs');
@@ -921,10 +924,12 @@ test('Retrospective: places off Cliopatria’s rows are named, never drawn on to
     assert.match(await page.locator('#unplaced').innerText(), /^VM cannot place this on a free border for 1991: .*Georgia/);
     // 1967: South Vietnam and South Yemen, which no free border holds that year, named under the map, and Angola, then
     // a Portuguese colony, as today's Angola. South Yemen began 1967 as the Federation of South Arabia (Wikidata ends it
-    // on 30 November 1967), so the year keeps that name (second review, 25 November 2026).
+    // on 30 November 1967), so the year keeps that name (second review, 25 November 2026). Palestine, where Israel:
+    // Palestine is placed from 25 November 2026 (battlefield-history-3), has no free border in any year, so it is named
+    // too; 2016 has nothing to name (1998 names Timor-Leste, where Indonesia: East Timor is placed from 26 November 2026).
     await go('#y=1967', () => !document.querySelector('#unplaced').hidden);
-    assert.match(await page.locator('#unplaced').innerText(), /^VM cannot place this on a free border for 1967: Federation of South Arabia, South Vietnam,.*today’s Angola/);
-    await go('#y=2000', () => document.querySelector('#unplaced').hidden);
+    assert.match(await page.locator('#unplaced').innerText(), /^VM cannot place this on a free border for 1967: Federation of South Arabia, Palestine, South Vietnam,.*today’s Angola/);
+    await go('#y=2016', () => document.querySelector('#unplaced').hidden);
     // 1938: the Arab revolt in Palestine is in Mandatory Palestine, named; nothing is drawn as Israel, which came in
     // 1948. The caption says the borders are one a year.
     await go('#y=1938', () => /1938/.test(document.querySelector('#unplaced').textContent));

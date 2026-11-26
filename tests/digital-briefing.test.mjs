@@ -218,6 +218,47 @@ test('feeds: skip rules, strict feeds, bylines and dates stamped at noon', () =>
   assert.equal(future.published, SEEN, 'dates more than 36 hours ahead count as undated');
 });
 
+// arXiv's author lines (build 10, front-pages-25): each author's affiliation follows the name in brackets, commas and
+// all, and accented letters come as TeX. Split inside the brackets, "Haimeng Zhang (IBM Quantum" was stored as a byline;
+// undecoded, "Timo L\"ohr" was shown as it came. The lines below are taken, some shortened or joined, from arXiv's feeds
+// of 25 November 2026 (rss.arxiv.org quant-ph, cs.LG, cs.AI, cs.CR) and from author lines the store held that day;
+// 'Mart\'{\i}nez' is a made-up case for an accent on a dotless i, and the Google DeepMind line a made-up case for
+// affiliations written in camel case.
+test('feeds: arXiv bylines lose their affiliations and read their TeX accents', async () => {
+  const { texAccents, tidyStoredAuthors } = await import('../digital/scripts/briefing-feeds.mjs');
+  const qici = 'QICI Quantum Information and Computation Initiative, School of Computing and Data Science, The University of Hong Kong, Pokfulam Road, Hong Kong SAR, China';
+  const cao = `Yue Cao (${qici}), Tianfeng Feng (${qici}), Jonathan Allcock (Tencent Quantum Laboratory, Shenzhen, China), Chenfeng Cao (HK Institute of Quantum Science and Technology, The University of Hong Kong, Pokfulam Road, Hong Kong SAR, China)`;
+  assert.equal(formatAuthors([cao]), 'Yue Cao, Tianfeng Feng, Jonathan Allcock et al.');
+  assert.equal(authorCount([cao]), 4, 'an affiliation’s commas do not count as authors');
+  assert.equal(formatAuthors(['Haimeng Zhang (IBM Quantum, IBM T.J. Watson Research Center, Yorktown Heights']), 'Haimeng Zhang', 'a bracket the feed left open goes too');
+  assert.equal(formatAuthors(['Jonathan Legrand (MONC, IMB), Aguirre Mimoun (Centre m{\\\'e}dico chirurgical Magellan)']), 'Jonathan Legrand and Aguirre Mimoun');
+  assert.equal(formatAuthors(['Paul Hofman, Clemens Damke, Timo L\\"ohr']), 'Paul Hofman, Clemens Damke and Timo Löhr');
+  assert.equal(formatAuthors(['Mirela Selimovi\\\'{c}, Mikl\\\'{o}s Horv\\\'{a}th']), 'Mirela Selimović and Miklós Horváth');
+  assert.equal(formatAuthors(['Stefano Markidis, Erik {\\AA}sgrim']), 'Stefano Markidis and Erik Åsgrim');
+  assert.equal(formatAuthors(['\\.Ipek Abas{\\i}kele\\c{s} Turgut, Edip G\\"um\\"u\\c{s}']), 'İpek Abasıkeleş Turgut and Edip Gümüş');
+  assert.equal(formatAuthors(['Lazar Milikic, Gordan {\\DJ}uri\\\'c, Viktor Kun\\v{c}ak']), 'Lazar Milikic, Gordan Đurić and Viktor Kunčak');
+  assert.equal(texAccents('{\\dj}, {\\DH}, {\\dh}, {\\TH}, {\\th}, {\\NG}, {\\ng}, $\\theta$'), 'đ, Ð, ð, Þ, þ, Ŋ, ŋ, $\\theta$', 'the other T1 letters, and \\theta left alone');
+  assert.equal(formatAuthors(['Ada Smith (Google DeepMind), Bob Jones (Google DeepMind)']), 'Ada Smith and Bob Jones', 'affiliations in camel case are not names run together');
+  assert.equal(texAccents('Bart{\\l}omiej Twardowski, S{\\o}ren Hauberg, Jan Por\\k{e}ba, Sanja \\v{S}\\\'cepanovi\\\'c, Mari Carmen Ba\\~nuls, \\\'Alvaro Arroyo, Pietro Li\\`o'),
+    'Bartłomiej Twardowski, Søren Hauberg, Jan Poręba, Sanja Šćepanović, Mari Carmen Bañuls, Álvaro Arroyo, Pietro Liò');
+  assert.equal(texAccents('Alberto Mart\\\'{\\i}nez'), 'Alberto Martínez', 'an accent on a dotless i is an í');
+  assert.equal(texAccents('Ada Lovelace'), 'Ada Lovelace');
+  // Lines stored before the fix are read again when the store rolls forward.
+  assert.equal(tidyStoredAuthors('Paul Hofman, Clemens Damke, Timo L\\"ohr et al.'), 'Paul Hofman, Clemens Damke, Timo Löhr et al.');
+  assert.equal(tidyStoredAuthors('Ali Srour (CEDRIC - ROC), Farzad Veisi (CEDRIC - ROC) et al.'), 'Ali Srour, Farzad Veisi et al.');
+  assert.equal(tidyStoredAuthors('Haimeng Zhang (IBM Quantum'), '', 'a line split inside its brackets is not sure of its names');
+  // The two papers' titles, addresses and author lines as the store held them on 25 November 2026; their published
+  // date (24 November 2026 in the store) is moved to sit inside the store window of SEEN.
+  const prev = [
+    { id: 'a1', source: 'arxiv-lg', kind: 'preprint', tier: 3, type: 'paper', fields: ['ai'], title: 'probly: Uncertainty-Aware Machine Learning', url: 'https://arxiv.org/abs/2611.29762', summary: '', authors: 'Paul Hofman, Clemens Damke, Timo L\\"ohr et al.', published: '2026-10-27T00:00:00.000Z' },
+    { id: 'a2', source: 'arxiv-quantph', kind: 'preprint', tier: 3, type: 'paper', fields: ['quantum'], title: 'A Frequency-Learning Interpolation-Based Coordinate Descent Method to Optimize Parameterized Quantum Circuits on Quantum Hardware', url: 'https://arxiv.org/abs/2611.29019', summary: '', authors: 'Haimeng Zhang (IBM Quantum', published: '2026-10-27T00:00:00.000Z' },
+  ];
+  const out = mergeStore({ prevItems: prev, freshItems: [], sources: SOURCES, now: Date.parse(SEEN) });
+  const by = new Map(out.map(i => [i.id, i]));
+  assert.equal(by.get('a1')?.authors, 'Paul Hofman, Clemens Damke, Timo Löhr et al.');
+  assert.ok(by.has('a2') && by.get('a2').authors === undefined, 'a broken stored byline goes, the paper stays');
+});
+
 test('store: duplicates merge, and stale, skipped, off-topic and retired items leave', () => {
   const now = Date.parse(SEEN);
   const base = { kind: 'news', tier: 4, type: 'news', summary: '', fields: [] };

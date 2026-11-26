@@ -19,6 +19,11 @@ const SPORT_TERMS = [
   'touchdown', 'hat-trick', 'hat trick', 'transfer window', 'quarter-final', 'semi-final', 'playoff', 'play-off',
   'head coach', 'striker', 'midfielder', 'goalkeeper', 'quarterback', 'batsman', 'derby win', 'title race',
   "Ballon d'Or", 'Monday Night Football', 'Sunday Night Football', 'Thursday Night Football', 'fantasy football',
+  // Continental football championships ("Senegal reinstated as AFCON champions", 24 November 2026). Not "Euro" or
+  // "CAS": the terms are matched without regard to case, so they would catch euro-zone economics and the Chinese
+  // Academy of Sciences. Copa America both with its accent and without, as many English-language feeds write it: the
+  // match does not fold accents.
+  'AFCON', 'Africa Cup of Nations', 'Copa América', 'Copa America',
 ];
 const ENT_TERMS = [
   'Oscars', 'Oscar nominations', 'Grammys', 'Grammy', 'Emmys', 'Golden Globes', 'Baftas', 'Brit Awards', 'Met Gala',

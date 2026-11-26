@@ -99,7 +99,39 @@ const GOVUK = /^(Policy paper|Guidance|Research and analysis|Research|Press rele
 const titleCase = n => (/\p{Ll}/u.test(n) ? n : n.toLowerCase().replace(/(^|[\s'’-])(\p{L})/gu, (_, a, b) => a + b.toUpperCase()));
 // Words that mark an affiliation or a site account rather than a person.
 const NOT_A_PERSON = /@|https?:|webmaster|\bstaff\b|\beditor|universit|institut|\bschool\b|college|department|research|bureau|\bteam\b|\bdesk\b|\bnews\b|insights|\binc\b|\bltd\b|foundation|laborator|technolog|\blab\b/i;
-const splitNames = t => t.split(/\s*(?:;|,(?!\s*(?:Jr|Sr|III|II)\b)|\s&\s|\band\b)\s*/);
+// arXiv writes accented letters in its author lists as TeX ("Timo L\"ohr", "Mihailo Ili\'c", "Fran\c{c}ois",
+// "{\AA}sgrim"). design/prp-tex.js reads mathematics between dollar signs only, so the text accents are read here: an
+// accent command puts its combining mark on the letter, and a letter command ("\o", "\l", "\ss", "{\i}") is the letter.
+const TEX_ACCENT = { "'": '́', '`': '̀', '^': '̂', '"': '̈', '~': '̃', '=': '̄', '.': '̇',
+  u: '̆', v: '̌', H: '̋', c: '̧', k: '̨', r: '̊', d: '̣', b: '̱' };
+const TEX_LETTER = { i: 'ı', j: 'ȷ', o: 'ø', O: 'Ø', l: 'ł', L: 'Ł', ss: 'ß', ae: 'æ', AE: 'Æ', oe: 'œ', OE: 'Œ', aa: 'å', AA: 'Å',
+  DJ: 'Đ', dj: 'đ', DH: 'Ð', dh: 'ð', TH: 'Þ', th: 'þ', NG: 'Ŋ', ng: 'ŋ' };
+const accented = (cmd, base) => (base.replace(/^\\/, '') + TEX_ACCENT[cmd]).normalize('NFC');
+/** TeX text accents in a name → the accented letters ("L\"ohr" → "Löhr", "Fran\c{c}ois" → "François"). */
+export function texAccents(s) {
+  s = String(s ?? '');
+  if (!s.includes('\\')) return s;
+  return s
+    .replace(/\\(['`^"~=.])\s*(?:\{\s*(\\[ij]|[A-Za-z])\s*\}|(\\[ij](?![A-Za-z])|[A-Za-z]))/g, (_, c, a, b) => accented(c, a ?? b))
+    .replace(/\\([uvHckrdb])(?:\s*\{\s*(\\[ij]|[A-Za-z])\s*\}|\s+([A-Za-z]))/g, (_, c, a, b) => accented(c, a ?? b))
+    .replace(/\\(ss|ae|AE|oe|OE|aa|AA|DJ|dj|DH|dh|TH|th|NG|ng|[ijoOlL])(?![A-Za-z])\s*/g, (_, n) => TEX_LETTER[n])
+    .replace(/\{([^{}\\]*)\}/g, '$1');
+}
+// arXiv puts each author's affiliation after the name in brackets, commas and all ("Haimeng Zhang (IBM Quantum, …),
+// …"): the brackets go before the list is split, a pair inside a pair as well, and so does one the feed left open.
+const dropAffiliations = t => {
+  let s = String(t ?? '');
+  for (let pass = 0; pass < 5 && /\([^()]*\)/.test(s); pass++) s = s.replace(/\s*\([^()]*\)/g, '');
+  return s.replace(/\s*\([^()]*$/, '');
+};
+const splitNames = t => dropAffiliations(texAccents(t)).split(/\s*(?:;|,(?!\s*(?:Jr|Sr|III|II)\b)|\s&\s|\band\b)\s*/);
+/** A stored author line read again: TeX accents decoded and whole bracketed affiliations taken out; '' when a bracket
+ *  is left open, which only a line split inside the brackets (before 25 November 2026) has, so its names are not sure. */
+export const tidyStoredAuthors = s => {
+  let t = texAccents(s);
+  for (let pass = 0; pass < 5 && /\([^()]*\)/.test(t); pass++) t = t.replace(/\s*\([^()]*\)/g, '');
+  return /[()]/.test(t) ? '' : t.replace(/\s+/g, ' ').trim();
+};
 
 /**
  * A display string for a list of author names: "A", "A and B", "A, B and C", or "A, B, C et al." for more; '' when the
@@ -110,7 +142,8 @@ const splitNames = t => t.split(/\s*(?:;|,(?!\s*(?:Jr|Sr|III|II)\b)|\s&\s|\band\
 export function formatAuthors(raw, outlet = '') {
   const names = [];
   for (const r of raw) {
-    const t = txt(r);
+    // Accents read and bracketed affiliations gone first, so "(Google DeepMind)" is not taken for names run together.
+    const t = dropAffiliations(texAccents(txt(r)));
     if (!t) continue;
     // One field holding several names run together with their affiliations is not usable.
     if ((t.match(/\p{Ll}{3}\p{Lu}\p{Ll}{2}/gu) || []).length >= 2) return '';
@@ -373,6 +406,7 @@ export function mergeStore({ prevItems = [], freshItems = [], sources, now, keep
     const st = standing(i, byId);
     const item = { ...i, kind: st.kind, tier: st.tier, fields: fieldsOf, type: ['news', 'official'].includes(st.kind) ? 'news' : i.type };
     if (!keepsByline(s)) delete item.authors;
+    else if (item.authors) { const a = tidyStoredAuthors(item.authors); if (a) item.authors = a; else delete item.authors; } // lines stored before the accents and brackets were read
     const also = (i.also || []).filter(a => byId.has(a));
     if (also.length) item.also = also; else delete item.also;
     pool.push(item);

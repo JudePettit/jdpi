@@ -12,13 +12,17 @@
 //   · not also of a class in NOT_CLASSES (a coup attempt, a mutiny, a massacre, a series of wars…), and not in
 //     LEFT_OUT (VM's reasons beside each);
 //   · not part of (P361, up to three steps) another war on the list: the list names the whole war once (World War II,
-//     not its Eastern Front), so National Analysis counts it once;
+//     not its Eastern Front), so National Analysis counts it once; War Focus's own wars (below, `keep`) are listed even
+//     inside a larger listed war (the Northern Expedition, the Japanese invasion of Manchuria, the Second Sino-Japanese
+//     War, the Winter War and the Battles of Khalkhin Gol), so each of those is counted with its whole
+//     (battlefield-history-5);
 //   · with at least one state VM can place: a country (P17), a location (P276) that is a state or lies in exactly one
-//     state (Wikidata's P17 of the location), or a participant (P710) that is a state, or a place VM gives it by hand
-//     (history-fought.mjs). A location that spans several states (a region: the Gran Chaco, the Iberian Peninsula) is
-//     named in `where` and never spread to the states it spans, so no state is called a place of a war, or counted
-//     by National Analysis, because a region it shares was (fixer, 20 November 2026; until then the Chaco War was
-//     placed in Argentina and Brazil, and the Spanish Civil War in Portugal, Andorra and France).
+//     state (Wikidata's P17 of the location, or LOCATION_IN's state for it), or a participant (P710) that is a state,
+//     or a place VM gives it by hand (history-fought.mjs). A location that spans several states (a region: the Gran
+//     Chaco, the Iberian Peninsula) is named in `where` and never spread to the states it spans, so no state is
+//     called a place of a war, or counted by National Analysis, because a region it shares was (fixer, 20 November
+//     2026; until then the Chaco War was placed in Argentina and Brazil, and the Spanish Civil War in Portugal, Andorra
+//     and France).
 // A war's dates are Wikidata's start and end (P580, P582; else its one date, P585), each at the precision Wikidata
 // gives it: "1932-09-09" to the day, "1932-09" to the month, "1932" to the year (`start`, `end`).
 // War Focus's own wars of 1926–1945 are always on the list (VM's editorial choice; by their Q-ids in
@@ -49,6 +53,12 @@ export const THEN = {
   Q801: 'Q193714', Q23792: 'Q193714',               // Israel (from 1948) and Palestine, 1926–1945: Mandatory Palestine
 };
 const then = q => THEN[q] || q;
+/** A war's location whose country Wikidata gives as an item THEN would misread, as the state it lay in (VM's own, by
+    hand): used in place of the location's country (P17), as given here; it is not passed through THEN or the state
+    test. Chahar (Q1058919), a province of the Republic of China to 1948, has P17 Q865, which THEN reads as Taiwan
+    under Japan: Actions in Inner Mongolia (Q4211700) would be placed in Japan (battlefield-history-4, 25 November
+    2026). */
+export const LOCATION_IN = { Q1058919: 'Q148' };
 /** Items left out by VM, with why (VM's own text). */
 export const LEFT_OUT = {
   Q611027: 'a gang war in New York between Mafia families, not a war between armed forces',
@@ -158,7 +168,7 @@ export function selectWars({ items, things, isPlace, keep = new Set(), warTree =
     for (const c of claimIds(e, 'P17')) if (isState(c)) where.add(key(c));
     for (const l of claimIds(e, 'P276')) {
       if (isState(l)) { where.add(key(l)); continue; }
-      const cs = [...new Set(claimIds(things[l], 'P17').filter(isState).map(key))];
+      const cs = LOCATION_IN[l] ? [LOCATION_IN[l]] : [...new Set(claimIds(things[l], 'P17').filter(isState).map(key))];
       if (cs.length === 1) where.add(cs[0]); else placeNames.push(label(l));
     }
     for (const p of claimIds(e, 'P710')) if (isState(p)) parties.add(key(p));

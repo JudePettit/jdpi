@@ -313,10 +313,13 @@ test('page: the pictures\' own page lists every one with its words and the credi
     p.on('pageerror', e => errors.push(e.message));
     await p.goto(`${BASE}/design/vitruvius/index.html`, { waitUntil: 'networkidle' });
     assert.ok((await p.textContent('body')).includes(SENTENCE));
-    // The pictures load lazily: walk down the page so every one is asked for, then check each drew.
+    // The pictures load lazily (45 of 53 wait below the first screen). A quick walk down the page can pass one before
+    // the browser asks for it, and the deploy's run of 26 November 2026 timed out here: so ask for every one, then
+    // check each drew.
     await p.waitForSelector('figure img');
-    for (let y = 0, h = await p.evaluate(() => document.body.scrollHeight); y < h; y += 600) await p.evaluate(y => scrollTo(0, y), y);
-    await p.waitForFunction(() => [...document.querySelectorAll('figure img')].every(i => i.complete), null, { timeout: 15000 });
+    assert.ok(await p.$$eval('figure img', imgs => imgs.some(i => i.loading === 'lazy')), 'pictures below the first screen wait until they are near');
+    await p.$$eval('figure img', imgs => imgs.forEach(i => { i.loading = 'eager'; }));
+    await p.waitForFunction(() => [...document.querySelectorAll('figure img')].every(i => i.complete), null, { timeout: 30000 });
     const shown = await p.$$eval('figure img', imgs => imgs.map(i => [i.getAttribute('alt'), i.complete && i.naturalWidth > 0]));
     assert.equal(shown.length, index.pictures.filter(p => !['future', 'strip'].includes(p.kind)).length);
     assert.ok(shown.every(([alt, ok]) => alt.length > 10 && ok));

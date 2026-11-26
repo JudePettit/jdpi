@@ -1,0 +1,1761 @@
+{
+ "format": "vm-daily-synopsis-day/1",
+ "day": "2026-11-26",
+ "input": "2026-11-26-f40f663dbae2",
+ "generated": "2026-11-26T02:55:17.488Z",
+ "updated": "2026-11-26T02:55:17.488Z",
+ "window": {
+  "from": "2026-11-25T01:44:44.079Z",
+  "to": "2026-11-26T01:44:44.079Z"
+ },
+ "storeGenerated": "2026-11-26T01:44:44.079Z",
+ "authorship": "rules",
+ "model": null,
+ "label": {
+  "text": "This digest was assembled by rules, with no AI model: Vitruvian Manager’s code picked the stories and grouped the outlets’ own headlines beneath them, and no person checked it. The linked reports are the sources.",
+  "five": "The 5 Sided Analysis under each story lays out the outlets’ own headlines by side, far left to far right, by rules alone.",
+  "notProof": "A side with no headline here was not found among Vitruvian Manager’s outlets, which is not proof that the side did not report it.",
+  "meta": "Assembled by rules, with no AI model; no person checked it"
+ },
+ "rule": {
+  "minOutlets": 3,
+  "minSides": 2,
+  "cap": 10,
+  "fiveMinSides": 3,
+  "fiveNeedsLeftAndRight": true
+ },
+ "sides": [
+  {
+   "key": "far_left",
+   "label": "Far left"
+  },
+  {
+   "key": "left",
+   "label": "Left"
+  },
+  {
+   "key": "centre",
+   "label": "Centre"
+  },
+  {
+   "key": "right",
+   "label": "Right"
+  },
+  {
+   "key": "far_right",
+   "label": "Far right"
+  }
+ ],
+ "written": {
+  "status": "missing",
+  "note": "The written digest is not available for this day.",
+  "attempts": []
+ },
+ "lead": null,
+ "stories": [
+  {
+   "id": "s1",
+   "rank": 1,
+   "outlets": 19,
+   "lead": "s1-28",
+   "headlines": [
+    {
+     "id": "s1-1",
+     "side": "far_left",
+     "outlet": "Common Dreams",
+     "outletId": "commondreams",
+     "caution": false,
+     "access": "free",
+     "headline": "Army Detonates Nearly Five Tons of Lead Azide in Iowa town",
+     "url": "https://www.commondreams.org/newswire/army-detonates-nearly-five-tons-of-lead-azide-in-iowa-town",
+     "published": "2026-11-25T19:24:30.000Z"
+    },
+    {
+     "id": "s1-2",
+     "side": "far_left",
+     "outlet": "World Socialist Web Site",
+     "outletId": "wsws",
+     "caution": false,
+     "access": "free",
+     "headline": "Army blows up nearly 10,000 pounds of lead azide in Iowa and declares “success” an hour later",
+     "url": "https://www.wsws.org/en/articles/2026/11/26/lpfk-n26.html",
+     "published": "2026-11-26T00:50:07.000Z"
+    },
+    {
+     "id": "s1-3",
+     "side": "far_left",
+     "outlet": "Truthout",
+     "outletId": "truthout",
+     "caution": false,
+     "access": "free",
+     "headline": "Despite Environmental Worries, Army Blasts Off 68 Barrels of Lead Azide in Iowa",
+     "url": "https://truthout.org/articles/despite-environmental-worries-army-blasts-off-68-barrels-of-lead-azide-in-iowa/",
+     "published": "2026-11-25T16:06:46.000Z"
+    },
+    {
+     "id": "s1-4",
+     "side": "far_left",
+     "outlet": "Novara Media",
+     "outletId": "novara",
+     "caution": true,
+     "access": "free",
+     "headline": "US Military Set to Detonate Toxic Lead Bomb in Iowa",
+     "url": "https://novaramedia.com/2026/11/25/us-military-set-to-detonate-toxic-lead-bomb-in-iowa/",
+     "published": "2026-11-25T12:28:43.000Z"
+    },
+    {
+     "id": "s1-5",
+     "side": "far_left",
+     "outlet": "Common Dreams",
+     "outletId": "commondreams",
+     "caution": false,
+     "access": "free",
+     "headline": "Statement Condemning the US Military’s Lead Explosion in Iowa",
+     "url": "https://www.commondreams.org/newswire/statement-condemning-the-us-militarys-lead-explosion-in-iowa",
+     "published": "2026-11-25T19:23:17.000Z"
+    },
+    {
+     "id": "s1-6",
+     "side": "left",
+     "outlet": "Democracy Now!",
+     "outletId": "democracynow",
+     "caution": false,
+     "access": "free",
+     "headline": "\"Disaster Waiting to Happen\": Iowa Declares Emergency as U.S. Army Detonates 5 Tons of Lead Azide",
+     "url": "http://www.democracynow.org/2026/11/25/iowa_ammo_detonation_lead_azide",
+     "published": "2026-11-25T13:19:05.000Z"
+    },
+    {
+     "id": "s1-7",
+     "side": "left",
+     "outlet": "The Independent",
+     "outletId": "independent",
+     "caution": true,
+     "access": "free",
+     "headline": "Everything you need to know about the U.S. Army’s 5-ton lead azide explosion in Iowa today",
+     "url": "https://www.independent.co.uk/news/world/americas/us-army-iowa-lead-azide-b3091231.html",
+     "published": "2026-11-25T09:18:57.000Z"
+    },
+    {
+     "id": "s1-8",
+     "side": "left",
+     "outlet": "The Independent",
+     "outletId": "independent",
+     "caution": true,
+     "access": "free",
+     "headline": "Watch: Moment almost 10,000lbs of lead azide blown up by US Army in Iowa",
+     "url": "https://www.independent.co.uk/tv/news/iowa-lead-azide-explosion-video-b3091547.html",
+     "published": "2026-11-25T15:19:28.000Z"
+    },
+    {
+     "id": "s1-9",
+     "side": "left",
+     "outlet": "The Independent",
+     "outletId": "independent",
+     "caution": true,
+     "access": "free",
+     "headline": "US Army explodes 5 tons of lead in Iowa with blast felt for miles and residents waiting for environmental impacts",
+     "url": "https://www.independent.co.uk/news/world/americas/us-politics/iowa-explosion-army-evacuation-safe-b3091493.html",
+     "published": "2026-11-25T15:38:37.000Z"
+    },
+    {
+     "id": "s1-10",
+     "side": "centre",
+     "outlet": "Axios",
+     "outletId": "axios",
+     "caution": false,
+     "access": "unknown",
+     "headline": "Army detonates Iowa explosives amid toxic lead fears",
+     "url": "https://www.axios.com/2026/11/25/iowa-army-lead-detonation",
+     "published": "2026-11-25T16:16:41.000Z"
+    },
+    {
+     "id": "s1-11",
+     "side": "centre",
+     "outlet": "The Hill",
+     "outletId": "thehill",
+     "caution": false,
+     "access": "free",
+     "headline": "Watch live: Army briefs on Iowa lead azide detonation",
+     "url": "https://thehill.com/homenews/state-watch/6242738-watch-live-army-iowa-lead-azide-detonation-briefing/",
+     "published": "2026-11-25T16:35:34.000Z"
+    },
+    {
+     "id": "s1-12",
+     "side": "centre",
+     "outlet": "Deutsche Welle",
+     "outletId": "dw",
+     "caution": false,
+     "access": "free",
+     "headline": "US Army detonates unstable lead-based explosives in Iowa",
+     "url": "https://www.dw.com/en/us-army-detonates-unstable-lead-based-explosives-in-iowa/a-80043319?maca=en-rss-en-all-1573-rdf",
+     "published": "2026-11-25T15:38:00.000Z"
+    },
+    {
+     "id": "s1-13",
+     "side": "centre",
+     "outlet": "The Hill",
+     "outletId": "thehill",
+     "caution": false,
+     "access": "free",
+     "headline": "Army detonates explosives in Iowa amid toxic lead risks",
+     "url": "https://thehill.com/policy/energy-environment/6240967-army-lead-explosives-iowa-epa/",
+     "published": "2026-11-25T15:17:31.000Z"
+    },
+    {
+     "id": "s1-14",
+     "side": "centre",
+     "outlet": "UPI",
+     "outletId": "upi",
+     "caution": false,
+     "access": "free",
+     "headline": "Army detonates lead azide stockpile in Middletown, Iowa",
+     "url": "https://www.upi.com/Top_News/US/2026/11/25/army-detonate-lead-azide-middletown-iowa/2291795617850/",
+     "published": "2026-11-25T15:21:00.000Z"
+    },
+    {
+     "id": "s1-15",
+     "side": "centre",
+     "outlet": "France 24",
+     "outletId": "france24",
+     "caution": false,
+     "access": "free",
+     "headline": "US army to detonate stockpile of unstable bomb-making chemicals in Iowa",
+     "url": "https://www.france24.com/en/video/20261125-us-army-to-detonate-stockpile-of-unstable-bomb-making-chemicals-in-iowa",
+     "published": "2026-11-25T13:16:49.000Z"
+    },
+    {
+     "id": "s1-16",
+     "side": "centre",
+     "outlet": "Euronews",
+     "outletId": "euronews",
+     "caution": false,
+     "access": "free",
+     "headline": "US Army detonates toxic explosives in Iowa despite contamination fears",
+     "url": "https://www.euronews.com/2026/11/25/us-army-detonates-toxic-explosives-in-iowa-despite-contamination-fears",
+     "published": "2026-11-25T17:55:45.000Z"
+    },
+    {
+     "id": "s1-17",
+     "side": "centre",
+     "outlet": "France 24",
+     "outletId": "france24",
+     "caution": false,
+     "access": "free",
+     "headline": "US Army detonates lead explosives in Iowa despite contamination fears",
+     "url": "https://www.france24.com/en/americas/20261125-us-army-detonates-lead-explosives-iowa-despite-community-backlash",
+     "published": "2026-11-25T16:08:10.000Z"
+    },
+    {
+     "id": "s1-18",
+     "side": "centre",
+     "outlet": "The Hill",
+     "outletId": "thehill",
+     "caution": false,
+     "access": "free",
+     "headline": "Army plan to detonate lead azide in Iowa ‘insane’: Attorney",
+     "url": "https://thehill.com/homenews/state-watch/6241997-911-attorney-iowa-lead-azide-detonation-insane/",
+     "published": "2026-11-25T13:30:46.000Z"
+    },
+    {
+     "id": "s1-19",
+     "side": "centre",
+     "outlet": "France 24",
+     "outletId": "france24",
+     "caution": false,
+     "access": "free",
+     "headline": "Iowa: Toxic dust fears as US Army blows up 10,000 pounds of explosives",
+     "url": "https://www.france24.com/en/video/20261125-iowa-toxic-dust-fears-as-us-army-blows-up-10-000-pounds-of-explosives",
+     "published": "2026-11-25T16:14:40.000Z"
+    },
+    {
+     "id": "s1-20",
+     "side": "centre",
+     "outlet": "BBC News",
+     "outletId": "bbc",
+     "caution": false,
+     "access": "free",
+     "headline": "US Army says controlled blast of explosives in Iowa was 'huge success'",
+     "url": "https://www.bbc.co.uk/news/articles/cwg7l5ve251ko",
+     "published": "2026-11-26T00:23:05.000Z"
+    },
+    {
+     "id": "s1-21",
+     "side": "centre",
+     "outlet": "The Hill",
+     "outletId": "thehill",
+     "caution": false,
+     "access": "free",
+     "headline": "Live updates: Army detonates lead azide in Iowa; Trump administration rolls out new tariffs on China, EU",
+     "url": "https://thehill.com/homenews/administration/6241678-live-updates-trump-army-lead-azide-thanksgiving-2026/",
+     "published": "2026-11-25T15:20:08.000Z"
+    },
+    {
+     "id": "s1-22",
+     "side": "centre",
+     "outlet": "The Hill",
+     "outletId": "thehill",
+     "caution": false,
+     "access": "free",
+     "headline": "Acting Army Secretary calls Iowa lead detonation a ‘HUGE success’",
+     "url": "https://thehill.com/policy/energy-environment/6242772-army-iowa-lead-detonation/",
+     "published": "2026-11-25T16:23:58.000Z"
+    },
+    {
+     "id": "s1-23",
+     "side": "centre",
+     "outlet": "Deutsche Welle",
+     "outletId": "dw",
+     "caution": false,
+     "access": "free",
+     "headline": "US plans new tariffs on EU, China and 12 others",
+     "url": "https://www.dw.com/en/us-plans-new-tariffs-on-eu-china-and-12-others/a-80050872?maca=en-rss-en-all-1573-rdf",
+     "published": "2026-11-25T14:54:00.000Z"
+    },
+    {
+     "id": "s1-24",
+     "side": "centre",
+     "outlet": "CNBC",
+     "outletId": "cnbc",
+     "caution": false,
+     "access": "free",
+     "headline": "U.S. proposes new tariffs on 14 trading partners, including China and the EU",
+     "url": "https://www.cnbc.com/2026/11/25/us-tariffs-trump-section-301.html",
+     "published": "2026-11-25T16:02:52.000Z"
+    },
+    {
+     "id": "s1-25",
+     "side": "right",
+     "outlet": "Washington Examiner",
+     "outletId": "washingtonexaminer",
+     "caution": false,
+     "access": "paid",
+     "headline": "WATCH LIVE: Army updates public on Iowa lead azide detonation",
+     "url": "https://www.washingtonexaminer.com/policy/defense/4815189/watch-live-army-update-public-iowa-lead-azide-detonation/",
+     "published": "2026-11-25T16:59:09.000Z"
+    },
+    {
+     "id": "s1-26",
+     "side": "right",
+     "outlet": "New York Post",
+     "outletId": "nypost",
+     "caution": true,
+     "access": "free",
+     "headline": "Iowa explosion: What the US Army is hiding from you | The Low Down",
+     "url": "https://nypost.com/video/iowa-explosion-what-the-us-army-is-hiding-from-you-the-low-down/",
+     "published": "2026-11-25T16:53:15.000Z"
+    },
+    {
+     "id": "s1-27",
+     "side": "right",
+     "outlet": "Washington Examiner",
+     "outletId": "washingtonexaminer",
+     "caution": false,
+     "access": "paid",
+     "headline": "Trump administration announces new tariffs on 14 countries, including China and Japan",
+     "url": "https://www.washingtonexaminer.com/news/white-house/4814966/new-trump-administration-tariffs-china-eu/",
+     "published": "2026-11-25T16:03:30.000Z"
+    },
+    {
+     "id": "s1-28",
+     "side": "far_right",
+     "outlet": "The Gateway Pundit",
+     "outletId": "gatewaypundit",
+     "caution": true,
+     "access": "free",
+     "headline": "JUST IN: U.S. Army Detonates Nearly FIVE TONS of Lead Azide in Iowa (VIDEO)",
+     "url": "https://www.thegatewaypundit.com/2026/11/just-u-s-army-detonates-nearly-five-tons/",
+     "published": "2026-11-25T15:55:55.000Z"
+    },
+    {
+     "id": "s1-29",
+     "side": "far_right",
+     "outlet": "Breitbart",
+     "outletId": "breitbart",
+     "caution": true,
+     "access": "free",
+     "headline": "U.S. Army Set to Detonate Iowa Stockpile of Bomb-Making Chemicals",
+     "url": "https://www.breitbart.com/politics/2026/11/25/u-s-army-set-to-detonate-iowa-stockpile-of-bomb-making-chemicals/",
+     "published": "2026-11-25T11:55:44.000Z"
+    },
+    {
+     "id": "s1-30",
+     "side": "far_right",
+     "outlet": "One America News",
+     "outletId": "oann",
+     "caution": true,
+     "access": "unknown",
+     "headline": "Army prepares for detonation of several tons of bomb-making materials in Iowa today",
+     "url": "https://news.google.com/rss/articles/CBMitAFBVV95cUxQMm5NRm1KUjE3WlF1dnJpX2ZCVmRaT3oxSFdja29JSHNFRlV0eHpPWkZaVU1uZVVqXzdRQmxCT3p1VkdaSmE1QVJ6R0dLNGs5Q2hwYTZoX29uNm1KZUk1a3VjM2J0ZnAxSW9YUmp5cktSRy1DVFJFVlF1U1BRUkdSbzZkLWg4dWNqRDVUUGhPVHdoUGpSU1I0bjFjb3hMNGFvbXY1RGlHSFNjSFNkdkdwbWFTLXE?oc=5",
+     "published": "2026-11-25T14:55:20.000Z"
+    }
+   ],
+   "sentences": null,
+   "five": {
+    "sides": [
+     {
+      "key": "far_left",
+      "label": "Far left",
+      "outlets": 4,
+      "headlines": [
+       "s1-1",
+       "s1-2",
+       "s1-3",
+       "s1-4",
+       "s1-5"
+      ]
+     },
+     {
+      "key": "left",
+      "label": "Left",
+      "outlets": 2,
+      "headlines": [
+       "s1-6",
+       "s1-7",
+       "s1-8",
+       "s1-9"
+      ]
+     },
+     {
+      "key": "centre",
+      "label": "Centre",
+      "outlets": 8,
+      "headlines": [
+       "s1-10",
+       "s1-11",
+       "s1-12",
+       "s1-13",
+       "s1-14",
+       "s1-15",
+       "s1-16",
+       "s1-17",
+       "s1-18",
+       "s1-19",
+       "s1-20",
+       "s1-21",
+       "s1-22",
+       "s1-23",
+       "s1-24"
+      ]
+     },
+     {
+      "key": "right",
+      "label": "Right",
+      "outlets": 2,
+      "headlines": [
+       "s1-25",
+       "s1-26",
+       "s1-27"
+      ]
+     },
+     {
+      "key": "far_right",
+      "label": "Far right",
+      "outlets": 3,
+      "headlines": [
+       "s1-28",
+       "s1-29",
+       "s1-30"
+      ]
+     }
+    ],
+    "eligible": true,
+    "written": null,
+    "status": "missing",
+    "note": "The written comparison is not available for this story."
+   }
+  },
+  {
+   "id": "s2",
+   "rank": 2,
+   "outlets": 16,
+   "lead": "s2-5",
+   "headlines": [
+    {
+     "id": "s2-1",
+     "side": "far_left",
+     "outlet": "Truthout",
+     "outletId": "truthout",
+     "caution": false,
+     "access": "free",
+     "headline": "Abrego Garcia Self-Deports to Spain After 20-Month Battle With Trump Admin",
+     "url": "https://truthout.org/articles/abrego-garcia-self-deports-to-spain-after-20-month-battle-with-trump-admin/",
+     "published": "2026-11-25T16:35:12.000Z"
+    },
+    {
+     "id": "s2-2",
+     "side": "left",
+     "outlet": "Vox",
+     "outletId": "vox",
+     "caution": false,
+     "access": "paid",
+     "headline": "Kilmar Abrego Garcia’s deportation saga ends on his terms",
+     "url": "https://www.vox.com/today-explained-newsletter/512193/kilmar-abrego-garcia-self-deportation-spain-trump",
+     "published": "2026-11-25T21:25:00.000Z"
+    },
+    {
+     "id": "s2-3",
+     "side": "left",
+     "outlet": "The New Republic",
+     "outletId": "newrepublic",
+     "caution": false,
+     "access": "paid",
+     "headline": "To Get Justice, Kilmar Ábrego García Had to Leave Trump’s America",
+     "url": "https://newrepublic.com/article/218371/kilmar-abrego-garcia-video-leaves-trump-america",
+     "published": "2026-11-25T16:30:36.000Z"
+    },
+    {
+     "id": "s2-4",
+     "side": "left",
+     "outlet": "The Independent",
+     "outletId": "independent",
+     "caution": true,
+     "access": "free",
+     "headline": "A timeline of key events in Kilmar Ábrego García's fight with the Trump administration",
+     "url": "https://www.independent.co.uk/news/world/europe/el-salvador-tennessee-maryland-chris-van-hollen-trump-b3091611.html",
+     "published": "2026-11-25T16:04:44.000Z"
+    },
+    {
+     "id": "s2-5",
+     "side": "centre",
+     "outlet": "UPI",
+     "outletId": "upi",
+     "caution": false,
+     "access": "free",
+     "headline": "Kilmar Abrego Garcia voluntarily moves to Spain",
+     "url": "https://www.upi.com/Top_News/US/2026/11/25/Abrego-Garcia-leaves-US-for-Spain/2891795607503/",
+     "published": "2026-11-25T15:13:13.000Z"
+    },
+    {
+     "id": "s2-6",
+     "side": "centre",
+     "outlet": "The Hill",
+     "outletId": "thehill",
+     "caution": false,
+     "access": "free",
+     "headline": "Kilmar Abrego Garcia arrives in Spain after self-deporting",
+     "url": "https://thehill.com/policy/international/6242020-kilmar-abrego-garcia-self-deport-spain-arrival/",
+     "published": "2026-11-25T14:06:23.000Z"
+    },
+    {
+     "id": "s2-7",
+     "side": "centre",
+     "outlet": "BBC News",
+     "outletId": "bbc",
+     "caution": false,
+     "access": "free",
+     "headline": "Kilmar Ábrego García arrives in Spain, ending Trump deportation battle",
+     "url": "https://www.bbc.co.uk/news/articles/c6808pyy5dl9o",
+     "published": "2026-11-25T12:42:11.000Z"
+    },
+    {
+     "id": "s2-8",
+     "side": "centre",
+     "outlet": "The Hill",
+     "outletId": "thehill",
+     "caution": false,
+     "access": "free",
+     "headline": "Abrego Garcia sees victory in Spain arrival after Trump deportation push",
+     "url": "https://thehill.com/homenews/administration/6243654-kilmar-abrego-garcia-trump-administration-deportation-case/",
+     "published": "2026-11-25T21:18:34.000Z"
+    },
+    {
+     "id": "s2-9",
+     "side": "right",
+     "outlet": "The Daily Caller",
+     "outletId": "dailycaller",
+     "caution": true,
+     "access": "free",
+     "headline": "Kilmar Abrego Garcia Self-Deports After 20 Months As Face Of Trump’s Deportation Campaign",
+     "url": "https://dailycaller.com/2026/11/24/kilmar-abrego-garcia-self-deports-spain-ms13",
+     "published": "2026-11-25T03:37:06.000Z"
+    },
+    {
+     "id": "s2-10",
+     "side": "right",
+     "outlet": "Reason",
+     "outletId": "reason",
+     "caution": false,
+     "access": "free",
+     "headline": "What So Many People Got Wrong about the Kilmar Abrego Garcia Case",
+     "url": "https://reason.com/2026/11/25/what-so-many-people-got-wrong-about-the-kilmar-abrego-garcia-case/",
+     "published": "2026-11-25T20:45:15.000Z"
+    },
+    {
+     "id": "s2-11",
+     "side": "far_right",
+     "outlet": "American Greatness",
+     "outletId": "amgreatness",
+     "caution": true,
+     "access": "free",
+     "headline": "Kilmar Abrego Garcia Self-Deports to Spain, DHS Says He Will ‘NEVER’ Return",
+     "url": "https://amgreatness.com/2026/11/25/kilmar-abrego-garcia-self-deports-to-spain-dhs-he-will-never-return/",
+     "published": "2026-11-25T10:47:57.000Z"
+    },
+    {
+     "id": "s2-12",
+     "side": "far_right",
+     "outlet": "TheBlaze",
+     "outletId": "blaze",
+     "caution": true,
+     "access": "unknown",
+     "headline": "Kilmar Abrego Garcia self-deports — and DHS is 'delighted' about it",
+     "url": "https://www.theblaze.com/news/kilmar-garcia-self-deports-spain",
+     "published": "2026-11-25T22:15:00.000Z"
+    },
+    {
+     "id": "s2-13",
+     "side": "far_right",
+     "outlet": "One America News",
+     "outletId": "oann",
+     "caution": true,
+     "access": "unknown",
+     "headline": "DHS ‘delighted to announce’ that Kilmar Abrego Garcia self-deported to Spain",
+     "url": "https://news.google.com/rss/articles/CBMiqAFBVV95cUxNWFc4YmtGSElabVVRT2tQWTdFTFBjOTZjMlJHQTNvV1NNU01tcXRJR1lPWFI2TjVObHRodml0MUkzcjY4Z0FDZEJ0ajNRX3I4ZXQ4R3ZyckU2RU0xU2RiRERWN0x0TWpSeDh3aFJ3SEJsUTh5aXFFQnVJNjBKdmR4WTN3U3BILWVWQk9MSWY1ZVBQejhBUnZCYWo4RVBmV3NPTzBEcVA3emY?oc=5",
+     "published": "2026-11-25T15:45:00.000Z"
+    },
+    {
+     "id": "s2-14",
+     "side": "far_right",
+     "outlet": "Breitbart",
+     "outletId": "breitbart",
+     "caution": true,
+     "access": "free",
+     "headline": "Kilmar Abrego Garcia Avoids Deportation to Liberia by Leaving for Spain Voluntarily",
+     "url": "https://www.breitbart.com/immigration/2026/11/24/kilmar-abrego-garcia-avoids-deportation-liberia-leaving-spain/",
+     "published": "2026-11-25T02:53:18.000Z"
+    },
+    {
+     "id": "s2-15",
+     "side": "far_right",
+     "outlet": "ZeroHedge",
+     "outletId": "zerohedge",
+     "caution": true,
+     "access": "free",
+     "headline": "Kilmar Abrego Garcia Is Gone... But His Lawyer Says He's Coming Back",
+     "url": "https://www.zerohedge.com/political/kilmar-abrego-garcia-gone-his-lawyer-says-hes-coming-back",
+     "published": "2026-11-25T13:00:00.000Z"
+    },
+    {
+     "id": "s2-16",
+     "side": "far_right",
+     "outlet": "WND",
+     "outletId": "wnd",
+     "caution": true,
+     "access": "free",
+     "headline": "'You made this demon very uncomfortable': Watch top Democrat melt down when confronted over Kilmar Abrego Garcia",
+     "url": "https://news.google.com/rss/articles/CBMigwFBVV95cUxPeHRFUDVWZE0yOXNERXFNSFZ0X2RDcFA5N3lyeHprSzRia25UX0xWVWlQTkJ6TWNIYmRFWUZ0MWxBY1BLbzlzcC11M3lLZ1BUaVFkZXg5NFVDQ3A4Tkp5Y1hQTld3c1ZvQ2c1ZDI4bkFmamJXd2FxZHZwT3JBU0ZNV3RMbw?oc=5",
+     "published": "2026-11-25T18:49:42.000Z"
+    },
+    {
+     "id": "s2-17",
+     "side": "far_right",
+     "outlet": "The Federalist",
+     "outletId": "federalist",
+     "caution": true,
+     "access": "free",
+     "headline": "Sen. Chris Van Hollen Just Can’t Quit Alleged ‘Human Trafficker’ Kilmar Abrego Garcia",
+     "url": "https://thefederalist.com/2026/11/25/sen-chris-van-hollen-just-cant-quit-alleged-human-trafficker-kilmar-abrego-garcia/",
+     "published": "2026-11-25T16:58:42.000Z"
+    },
+    {
+     "id": "s2-18",
+     "side": "far_right",
+     "outlet": "Breitbart",
+     "outletId": "breitbart",
+     "caution": true,
+     "access": "free",
+     "headline": "Senate Leadership Challenger Chris Van Hollen Praises Deal for MS-13 Suspect Abrego Garcia",
+     "url": "https://www.breitbart.com/immigration/2026/11/24/senate-democrat-leader-hopeful-chris-van-hollen-hails-abrego-garcia-departure-victory/",
+     "published": "2026-11-25T03:54:50.000Z"
+    }
+   ],
+   "sentences": null,
+   "five": {
+    "sides": [
+     {
+      "key": "far_left",
+      "label": "Far left",
+      "outlets": 1,
+      "headlines": [
+       "s2-1"
+      ]
+     },
+     {
+      "key": "left",
+      "label": "Left",
+      "outlets": 3,
+      "headlines": [
+       "s2-2",
+       "s2-3",
+       "s2-4"
+      ]
+     },
+     {
+      "key": "centre",
+      "label": "Centre",
+      "outlets": 3,
+      "headlines": [
+       "s2-5",
+       "s2-6",
+       "s2-7",
+       "s2-8"
+      ]
+     },
+     {
+      "key": "right",
+      "label": "Right",
+      "outlets": 2,
+      "headlines": [
+       "s2-9",
+       "s2-10"
+      ]
+     },
+     {
+      "key": "far_right",
+      "label": "Far right",
+      "outlets": 7,
+      "headlines": [
+       "s2-11",
+       "s2-12",
+       "s2-13",
+       "s2-14",
+       "s2-15",
+       "s2-16",
+       "s2-17",
+       "s2-18"
+      ]
+     }
+    ],
+    "eligible": true,
+    "written": null,
+    "status": "missing",
+    "note": "The written comparison is not available for this story."
+   }
+  },
+  {
+   "id": "s3",
+   "rank": 3,
+   "outlets": 8,
+   "lead": "s3-2",
+   "headlines": [
+    {
+     "id": "s3-1",
+     "side": "left",
+     "outlet": "The Independent",
+     "outletId": "independent",
+     "caution": true,
+     "access": "free",
+     "headline": "Huawei guilty in US of stealing trade secrets in landmark case",
+     "url": "https://www.independent.co.uk/asia/china/huawei-guilty-trump-us-iran-trade-secrets-b3091109.html",
+     "published": "2026-11-25T05:50:38.000Z"
+    },
+    {
+     "id": "s3-2",
+     "side": "centre",
+     "outlet": "Deutsche Welle",
+     "outletId": "dw",
+     "caution": false,
+     "access": "free",
+     "headline": "US jury convicts Huawei of violating sanctions, stealing trade secrets",
+     "url": "https://www.dw.com/en/us-jury-convicts-huawei-of-violating-sanctions-stealing-trade-secrets/a-80042172?maca=en-rss-en-all-1573-rdf",
+     "published": "2026-11-25T02:01:00.000Z"
+    },
+    {
+     "id": "s3-3",
+     "side": "centre",
+     "outlet": "CNBC",
+     "outletId": "cnbc",
+     "caution": false,
+     "access": "free",
+     "headline": "U.S. jury convicts Huawei in a criminal trial over fraud and trade secrets",
+     "url": "https://www.cnbc.com/2026/11/25/huawei-fraud-trade-trial.html",
+     "published": "2026-11-25T02:43:33.000Z"
+    },
+    {
+     "id": "s3-4",
+     "side": "centre",
+     "outlet": "The Hill",
+     "outletId": "thehill",
+     "caution": false,
+     "access": "free",
+     "headline": "Huawei found guilty in trade secrets theft case",
+     "url": "https://thehill.com/policy/technology/6242450-huawei-guilty-iran-sanctions-trade-secrets/",
+     "published": "2026-11-25T15:33:43.000Z"
+    },
+    {
+     "id": "s3-5",
+     "side": "centre",
+     "outlet": "UPI",
+     "outletId": "upi",
+     "caution": false,
+     "access": "free",
+     "headline": "U.S. jury convicts Huawei of fraud, Iran sanctions violations",
+     "url": "https://www.upi.com/Top_News/US/2026/11/25/jury-convicts-Huawei/3151795587204/",
+     "published": "2026-11-25T07:07:25.000Z"
+    },
+    {
+     "id": "s3-6",
+     "side": "right",
+     "outlet": "The American Conservative",
+     "outletId": "amconmag",
+     "caution": false,
+     "access": "free",
+     "headline": "Huawei Guilty of Theft, Fraud, and Sanctions Violations",
+     "url": "https://www.theamericanconservative.com/huawei-guilty-of-theft-fraud-and-sanctions-violations/",
+     "published": "2026-11-25T14:30:00.000Z"
+    },
+    {
+     "id": "s3-7",
+     "side": "far_right",
+     "outlet": "American Greatness",
+     "outletId": "amgreatness",
+     "caution": true,
+     "access": "free",
+     "headline": "Jury Convicts Chinese Tech Giant Huawei of Stealing American Trade Secrets",
+     "url": "https://amgreatness.com/2026/11/25/jury-convicts-chinese-tech-giant-huawei-of-stealing-american-trade-secrets/",
+     "published": "2026-11-25T10:47:45.000Z"
+    },
+    {
+     "id": "s3-8",
+     "side": "far_right",
+     "outlet": "The Gateway Pundit",
+     "outletId": "gatewaypundit",
+     "caution": true,
+     "access": "free",
+     "headline": "Chinese Tech Giant Huawei CONVICTED in Massive U.S. Criminal Trial for Iran Sanctions Busting, Bank Fraud, Money Laundering, and Stealing American Trade Secrets",
+     "url": "https://www.thegatewaypundit.com/2026/11/chinese-tech-giant-huawei-convicted-massive-u-s/",
+     "published": "2026-11-25T14:45:51.000Z"
+    },
+    {
+     "id": "s3-9",
+     "side": "far_right",
+     "outlet": "The Gateway Pundit",
+     "outletId": "gatewaypundit",
+     "caution": true,
+     "access": "free",
+     "headline": "Watch Live: Chinese Tech Giant Huawei CONVICTED in Massive U.S. Criminal Trial for Iran Sanctions Busting, Bank Fraud, Money Laundering, and Stealing American Trade Secrets and More! The WAR Zone Podcast With Wayne Allyn Root Presented by The Gateway Pundit",
+     "url": "https://www.thegatewaypundit.com/2026/11/watch-live-chinese-tech-giant-huawei-convicted-massive/",
+     "published": "2026-11-25T21:29:54.000Z"
+    }
+   ],
+   "sentences": null,
+   "five": {
+    "sides": [
+     {
+      "key": "far_left",
+      "label": "Far left",
+      "outlets": 0,
+      "headlines": []
+     },
+     {
+      "key": "left",
+      "label": "Left",
+      "outlets": 1,
+      "headlines": [
+       "s3-1"
+      ]
+     },
+     {
+      "key": "centre",
+      "label": "Centre",
+      "outlets": 4,
+      "headlines": [
+       "s3-2",
+       "s3-3",
+       "s3-4",
+       "s3-5"
+      ]
+     },
+     {
+      "key": "right",
+      "label": "Right",
+      "outlets": 1,
+      "headlines": [
+       "s3-6"
+      ]
+     },
+     {
+      "key": "far_right",
+      "label": "Far right",
+      "outlets": 2,
+      "headlines": [
+       "s3-7",
+       "s3-8",
+       "s3-9"
+      ]
+     }
+    ],
+    "eligible": true,
+    "written": null,
+    "status": "missing",
+    "note": "The written comparison is not available for this story."
+   }
+  },
+  {
+   "id": "s4",
+   "rank": 4,
+   "outlets": 8,
+   "lead": "s4-8",
+   "headlines": [
+    {
+     "id": "s4-1",
+     "side": "left",
+     "outlet": "The Independent",
+     "outletId": "independent",
+     "caution": true,
+     "access": "free",
+     "headline": "Will weather ground Macy’s Thanksgiving Parade balloons? Official floats start time change",
+     "url": "https://www.independent.co.uk/news/world/americas/macys-thanksgiving-parade-balloons-weather-start-time-b3091468.html",
+     "published": "2026-11-25T14:14:01.000Z"
+    },
+    {
+     "id": "s4-2",
+     "side": "left",
+     "outlet": "The Independent",
+     "outletId": "independent",
+     "caution": true,
+     "access": "free",
+     "headline": "Macy’s sidesteps how Thanksgiving Day Parade push impacts participants",
+     "url": "https://www.independent.co.uk/news/world/americas/macys-thanksgiving-parade-postponed-weather-b3091779.html",
+     "published": "2026-11-26T00:07:58.000Z"
+    },
+    {
+     "id": "s4-3",
+     "side": "left",
+     "outlet": "The Independent",
+     "outletId": "independent",
+     "caution": true,
+     "access": "free",
+     "headline": "Long-lost Macy’s parade balloon is back with ‘age spots’ after disappearing 95 years ago",
+     "url": "https://www.independent.co.uk/news/world/americas/macys-thanksgiving-parade-balloons-hippo-floated-away-b3091681.html",
+     "published": "2026-11-25T18:09:43.000Z"
+    },
+    {
+     "id": "s4-4",
+     "side": "centre",
+     "outlet": "BBC News",
+     "outletId": "bbc",
+     "caution": false,
+     "access": "free",
+     "headline": "Macy's postpones Thanksgiving parade due to weather",
+     "url": "https://www.bbc.co.uk/news/articles/cwkgr38l2g9yo",
+     "published": "2026-11-25T23:57:03.000Z"
+    },
+    {
+     "id": "s4-5",
+     "side": "centre",
+     "outlet": "CNBC",
+     "outletId": "cnbc",
+     "caution": false,
+     "access": "free",
+     "headline": "Macy's postpones Thanksgiving Day Parade due to severe weather",
+     "url": "https://www.cnbc.com/2026/11/25/macys-thanksgiving-day-parade-postponed.html",
+     "published": "2026-11-25T22:26:56.000Z"
+    },
+    {
+     "id": "s4-6",
+     "side": "centre",
+     "outlet": "The Hill",
+     "outletId": "thehill",
+     "caution": false,
+     "access": "free",
+     "headline": "New York delays Macy’s Thanksgiving parade because of severe weather",
+     "url": "https://thehill.com/homenews/state-watch/6243709-nyc-macys-parade-set-saturday/",
+     "published": "2026-11-25T21:08:16.000Z"
+    },
+    {
+     "id": "s4-7",
+     "side": "centre",
+     "outlet": "Axios",
+     "outletId": "axios",
+     "caution": false,
+     "access": "unknown",
+     "headline": "Macy's Thanksgiving parade postponed for the first time in the event's history",
+     "url": "https://www.axios.com/2026/11/25/macys-thanksgiving-parade-2026-balloons-weather",
+     "published": "2026-11-25T21:28:25.000Z"
+    },
+    {
+     "id": "s4-8",
+     "side": "far_right",
+     "outlet": "The Gateway Pundit",
+     "outletId": "gatewaypundit",
+     "caution": true,
+     "access": "free",
+     "headline": "JUST IN: Macy’s 100th Thanksgiving Day Parade Postponed Due to Weather",
+     "url": "https://www.thegatewaypundit.com/2026/11/macys-100th-thanksgiving-day-parade-postponed/",
+     "published": "2026-11-25T21:45:20.000Z"
+    },
+    {
+     "id": "s4-9",
+     "side": "far_right",
+     "outlet": "Breitbart",
+     "outletId": "breitbart",
+     "caution": true,
+     "access": "free",
+     "headline": "Macy's 100th Thanksgiving Day Parade Postponed Due to Severe Weather",
+     "url": "https://www.breitbart.com/weather/2026/11/25/macys-100th-thanksgiving-day-parade-postponed-due-to-severe-weather/",
+     "published": "2026-11-25T22:14:00.000Z"
+    },
+    {
+     "id": "s4-10",
+     "side": "far_right",
+     "outlet": "One America News",
+     "outletId": "oann",
+     "caution": true,
+     "access": "unknown",
+     "headline": "Macy’s 100th Thanksgiving Day Parade postponed to Sat. due to severe weather",
+     "url": "https://news.google.com/rss/articles/CBMiqAFBVV95cUxOd1JLR25RRFcteUpWSWk1aUtqaWw2TGI3eUU2c01Ndjdab3VpX2Y4VzB2WjlncUc1d0JkZ09YbFV3QlNRcHBtWkN1cnNDejJwVEZlMV9xVV8wU3ZQbV9JY1lZaDdCVTBZVXlnSHFvdkViemhlbUZ2TUhQMjc5M3FHLXp0NF9TZ1F4UzM4dzhSdFZyMGw3MW1TWmNQWk1BMk0yWnFlckVGOE0?oc=5",
+     "published": "2026-11-25T21:28:27.000Z"
+    },
+    {
+     "id": "s4-11",
+     "side": "far_right",
+     "outlet": "Breitbart",
+     "outletId": "breitbart",
+     "caution": true,
+     "access": "free",
+     "headline": "Could Weather Cancel Macy’s 100th Thanksgiving Day Parade? It Has Happened Before",
+     "url": "https://www.breitbart.com/environment/2026/11/25/could-weather-cancel-macys-100th-thanksgiving-day-parade-it-has-happened-before/",
+     "published": "2026-11-25T15:04:20.000Z"
+    }
+   ],
+   "sentences": null,
+   "five": {
+    "sides": [
+     {
+      "key": "far_left",
+      "label": "Far left",
+      "outlets": 0,
+      "headlines": []
+     },
+     {
+      "key": "left",
+      "label": "Left",
+      "outlets": 1,
+      "headlines": [
+       "s4-1",
+       "s4-2",
+       "s4-3"
+      ]
+     },
+     {
+      "key": "centre",
+      "label": "Centre",
+      "outlets": 4,
+      "headlines": [
+       "s4-4",
+       "s4-5",
+       "s4-6",
+       "s4-7"
+      ]
+     },
+     {
+      "key": "right",
+      "label": "Right",
+      "outlets": 0,
+      "headlines": []
+     },
+     {
+      "key": "far_right",
+      "label": "Far right",
+      "outlets": 3,
+      "headlines": [
+       "s4-8",
+       "s4-9",
+       "s4-10",
+       "s4-11"
+      ]
+     }
+    ],
+    "eligible": true,
+    "written": null,
+    "status": "missing",
+    "note": "The written comparison is not available for this story."
+   }
+  },
+  {
+   "id": "s5",
+   "rank": 5,
+   "outlets": 7,
+   "lead": "s5-3",
+   "headlines": [
+    {
+     "id": "s5-1",
+     "side": "left",
+     "outlet": "The Independent",
+     "outletId": "independent",
+     "caution": true,
+     "access": "free",
+     "headline": "Small plane plunges 10,000 feet per minute off Mississippi coast, killing six including two children",
+     "url": "https://www.independent.co.uk/news/world/americas/mississippi-plane-crash-cessna-gulf-b3091251.html",
+     "published": "2026-11-25T09:41:54.000Z"
+    },
+    {
+     "id": "s5-2",
+     "side": "left",
+     "outlet": "The Independent",
+     "outletId": "independent",
+     "caution": true,
+     "access": "free",
+     "headline": "Six Mississippi plane crash victims named after fatal wreck on family trip",
+     "url": "https://www.independent.co.uk/news/world/americas/brent-stokes-mississippi-plane-crash-victims-florida-b3091735.html",
+     "published": "2026-11-25T19:43:18.000Z"
+    },
+    {
+     "id": "s5-3",
+     "side": "centre",
+     "outlet": "BBC News",
+     "outletId": "bbc",
+     "caution": false,
+     "access": "free",
+     "headline": "Two children among six dead after plane crash off Mississippi coast",
+     "url": "https://www.bbc.co.uk/news/articles/c6z74l1017zpo",
+     "published": "2026-11-25T07:08:22.000Z"
+    },
+    {
+     "id": "s5-4",
+     "side": "centre",
+     "outlet": "UPI",
+     "outletId": "upi",
+     "caution": false,
+     "access": "free",
+     "headline": "6 dead in plane crash off Mississippi coast",
+     "url": "https://www.upi.com/Top_News/US/2026/11/25/6-dead-mississippi-plane-crash/6431795614772/",
+     "published": "2026-11-25T14:02:14.000Z"
+    },
+    {
+     "id": "s5-5",
+     "side": "centre",
+     "outlet": "The Hill",
+     "outletId": "thehill",
+     "caution": false,
+     "access": "free",
+     "headline": "Plane crash off the coast of Mississippi kills 6, including 2 children",
+     "url": "https://thehill.com/homenews/state-watch/6241831-plane-crash-off-the-coast-of-mississippi-kills-6-including-2-children/",
+     "published": "2026-11-25T13:06:28.000Z"
+    },
+    {
+     "id": "s5-6",
+     "side": "centre",
+     "outlet": "UPI",
+     "outletId": "upi",
+     "caution": false,
+     "access": "free",
+     "headline": "Coast Guard searches for 6 after plane crashes off Mississippi coast",
+     "url": "https://www.upi.com/Top_News/US/2026/11/24/Mississippi-plane-crash/7531795571782/",
+     "published": "2026-11-25T02:17:46.000Z"
+    },
+    {
+     "id": "s5-7",
+     "side": "centre",
+     "outlet": "Sky News",
+     "outletId": "skynews",
+     "caution": false,
+     "access": "unknown",
+     "headline": "Two children among six dead in plane crash",
+     "url": "https://news.sky.com/story/divers-find-bodies-of-six-people-including-two-children-after-us-plane-crash-13616273",
+     "published": "2026-11-25T06:38:00.000Z"
+    },
+    {
+     "id": "s5-8",
+     "side": "right",
+     "outlet": "Daily Mail",
+     "outletId": "dailymail",
+     "caution": false,
+     "access": "free",
+     "headline": "Plane carrying four adults and two children crashes off Mississippi as the desperate search for survivors begins",
+     "url": "https://www.dailymail.com/news/article-16320079/Plane-four-adults-two-children-crashes-Mississippi.html?ns_mchannel=rss&ns_campaign=1490",
+     "published": "2026-11-25T02:08:20.000Z"
+    },
+    {
+     "id": "s5-9",
+     "side": "far_right",
+     "outlet": "Breitbart",
+     "outletId": "breitbart",
+     "caution": true,
+     "access": "free",
+     "headline": "Divers Recover Bodies of Three Adults and Three Minors from Small Plane Crash Off Mississippi Coast",
+     "url": "https://www.breitbart.com/local/2026/11/25/divers-recover-bodies-of-three-adults-and-three-minors-from-small-plane-crash-off-mississippi-coast/",
+     "published": "2026-11-25T21:55:50.000Z"
+    }
+   ],
+   "sentences": null,
+   "five": {
+    "sides": [
+     {
+      "key": "far_left",
+      "label": "Far left",
+      "outlets": 0,
+      "headlines": []
+     },
+     {
+      "key": "left",
+      "label": "Left",
+      "outlets": 1,
+      "headlines": [
+       "s5-1",
+       "s5-2"
+      ]
+     },
+     {
+      "key": "centre",
+      "label": "Centre",
+      "outlets": 4,
+      "headlines": [
+       "s5-3",
+       "s5-4",
+       "s5-5",
+       "s5-6",
+       "s5-7"
+      ]
+     },
+     {
+      "key": "right",
+      "label": "Right",
+      "outlets": 1,
+      "headlines": [
+       "s5-8"
+      ]
+     },
+     {
+      "key": "far_right",
+      "label": "Far right",
+      "outlets": 1,
+      "headlines": [
+       "s5-9"
+      ]
+     }
+    ],
+    "eligible": true,
+    "written": null,
+    "status": "missing",
+    "note": "The written comparison is not available for this story."
+   }
+  },
+  {
+   "id": "s6",
+   "rank": 6,
+   "outlets": 5,
+   "lead": "s6-4",
+   "headlines": [
+    {
+     "id": "s6-1",
+     "side": "left",
+     "outlet": "The Atlantic",
+     "outletId": "atlantic",
+     "caution": false,
+     "access": "metered",
+     "headline": "What Is Chris Van Hollen Doing?",
+     "url": "https://www.theatlantic.com/politics/2026/11/van-hollen-schumer-democrats-senate-leader/689553/",
+     "published": "2026-11-25T10:00:00.000Z"
+    },
+    {
+     "id": "s6-2",
+     "side": "centre",
+     "outlet": "The Hill",
+     "outletId": "thehill",
+     "caution": false,
+     "access": "free",
+     "headline": "Jackson, progressive Maine senator-elect, backs Van Hollen for leader",
+     "url": "https://thehill.com/homenews/senate/6243237-troy-jackson-chris-van-hollen-support-senate-leadership-race/",
+     "published": "2026-11-25T18:38:58.000Z"
+    },
+    {
+     "id": "s6-3",
+     "side": "right",
+     "outlet": "National Review",
+     "outletId": "nationalreview",
+     "caution": false,
+     "access": "unknown",
+     "headline": "Chris Van Hollen’s Anti-Israel Turn",
+     "url": "https://www.nationalreview.com/article/chris-van-hollen-s-anti-israel-turn",
+     "published": "2026-11-25T11:00:00.000Z"
+    },
+    {
+     "id": "s6-4",
+     "side": "far_right",
+     "outlet": "Breitbart",
+     "outletId": "breitbart",
+     "caution": true,
+     "access": "free",
+     "headline": "Maine Democrat Senator-Elect Troy Jackson Backs Chris Van Hollen to Oust Chuck Schumer as Majority Leader",
+     "url": "https://www.breitbart.com/politics/2026/11/25/maine-democrat-senator-elect-troy-jackson-backs-chris-van-hollen-to-oust-chuck-schumer-as-majority-leader/",
+     "published": "2026-11-25T22:01:34.000Z"
+    },
+    {
+     "id": "s6-5",
+     "side": "far_right",
+     "outlet": "The National Pulse",
+     "outletId": "nationalpulse",
+     "caution": true,
+     "access": "free",
+     "headline": "DATA: Democrats Want Van Hollen Over Schumer for Senate Leader by More Than 2-to-1.",
+     "url": "https://thenationalpulse.com/2026/11/25/data-democrats-want-van-hollen-over-schumer-for-senate-leader-by-more-than-2-to-1/",
+     "published": "2026-11-25T18:25:06.000Z"
+    }
+   ],
+   "sentences": null,
+   "five": {
+    "sides": [
+     {
+      "key": "far_left",
+      "label": "Far left",
+      "outlets": 0,
+      "headlines": []
+     },
+     {
+      "key": "left",
+      "label": "Left",
+      "outlets": 1,
+      "headlines": [
+       "s6-1"
+      ]
+     },
+     {
+      "key": "centre",
+      "label": "Centre",
+      "outlets": 1,
+      "headlines": [
+       "s6-2"
+      ]
+     },
+     {
+      "key": "right",
+      "label": "Right",
+      "outlets": 1,
+      "headlines": [
+       "s6-3"
+      ]
+     },
+     {
+      "key": "far_right",
+      "label": "Far right",
+      "outlets": 2,
+      "headlines": [
+       "s6-4",
+       "s6-5"
+      ]
+     }
+    ],
+    "eligible": true,
+    "written": null,
+    "status": "missing",
+    "note": "The written comparison is not available for this story."
+   }
+  },
+  {
+   "id": "s7",
+   "rank": 7,
+   "outlets": 5,
+   "lead": "s7-1",
+   "headlines": [
+    {
+     "id": "s7-1",
+     "side": "left",
+     "outlet": "The Independent",
+     "outletId": "independent",
+     "caution": true,
+     "access": "free",
+     "headline": "Why Australia’s security pact with Solomon Islands is such a big blow to China",
+     "url": "https://www.independent.co.uk/news/world/australasia/australia-solomon-islands-china-security-pact-b3091105.html",
+     "published": "2026-11-25T03:47:13.000Z"
+    },
+    {
+     "id": "s7-2",
+     "side": "left",
+     "outlet": "The New York Times",
+     "outletId": "nyt",
+     "caution": false,
+     "access": "paid",
+     "headline": "Solomon Islands Enters Security Treaty With Australia, in a Blow to China",
+     "url": "https://www.nytimes.com/2026/11/24/world/asia/solomon-islands-security-treaty-australia-china.html",
+     "published": "2026-11-25T05:24:36.000Z"
+    },
+    {
+     "id": "s7-3",
+     "side": "centre",
+     "outlet": "UPI",
+     "outletId": "upi",
+     "caution": false,
+     "access": "free",
+     "headline": "Solomon Islands signs security pact with Canberra, ditches China",
+     "url": "https://www.upi.com/Top_News/World-News/2026/11/25/Australia-Solomon-Islands-sign-treaty/9361795598194/",
+     "published": "2026-11-25T11:52:06.000Z"
+    },
+    {
+     "id": "s7-4",
+     "side": "centre",
+     "outlet": "BBC News",
+     "outletId": "bbc",
+     "caution": false,
+     "access": "free",
+     "headline": "Solomon Islands ends controversial security pact with China for Australian treaty",
+     "url": "https://www.bbc.co.uk/news/articles/ckdd1z2gvlgno",
+     "published": "2026-11-25T03:15:12.000Z"
+    },
+    {
+     "id": "s7-5",
+     "side": "centre",
+     "outlet": "Deutsche Welle",
+     "outletId": "dw",
+     "caution": false,
+     "access": "free",
+     "headline": "Australia, Solomon Islands sign sweeping pact seen as countering China",
+     "url": "https://www.dw.com/en/australia-solomon-islands-sign-sweeping-pact-seen-as-countering-china/a-80043646?maca=en-rss-en-all-1573-rdf",
+     "published": "2026-11-25T10:51:00.000Z"
+    }
+   ],
+   "sentences": null,
+   "five": {
+    "sides": [
+     {
+      "key": "far_left",
+      "label": "Far left",
+      "outlets": 0,
+      "headlines": []
+     },
+     {
+      "key": "left",
+      "label": "Left",
+      "outlets": 2,
+      "headlines": [
+       "s7-1",
+       "s7-2"
+      ]
+     },
+     {
+      "key": "centre",
+      "label": "Centre",
+      "outlets": 3,
+      "headlines": [
+       "s7-3",
+       "s7-4",
+       "s7-5"
+      ]
+     },
+     {
+      "key": "right",
+      "label": "Right",
+      "outlets": 0,
+      "headlines": []
+     },
+     {
+      "key": "far_right",
+      "label": "Far right",
+      "outlets": 0,
+      "headlines": []
+     }
+    ],
+    "eligible": false,
+    "written": null,
+    "status": "not-eligible",
+    "note": "No written comparison for this story: one is written only when at least three of the five sides carried it, one left of centre and one right of centre."
+   }
+  },
+  {
+   "id": "s8",
+   "rank": 8,
+   "outlets": 4,
+   "lead": "s8-1",
+   "headlines": [
+    {
+     "id": "s8-1",
+     "side": "far_left",
+     "outlet": "Jacobin",
+     "outletId": "jacobin",
+     "caution": false,
+     "access": "free",
+     "headline": "Grand Theft Auto Grew Up. America Didn’t.",
+     "url": "https://jacobin.com/2026/11/gta-rockstar-morality-violence-trump",
+     "published": "2026-11-25T17:04:08.982Z"
+    },
+    {
+     "id": "s8-2",
+     "side": "left",
+     "outlet": "The Atlantic",
+     "outletId": "atlantic",
+     "caution": false,
+     "access": "metered",
+     "headline": "I’m Not Going to Play Grand Theft Auto VI",
+     "url": "https://www.theatlantic.com/family/2026/11/gta-vi-grand-theft-auto-art/689572/",
+     "published": "2026-11-25T14:00:00.000Z"
+    },
+    {
+     "id": "s8-3",
+     "side": "right",
+     "outlet": "The Daily Caller",
+     "outletId": "dailycaller",
+     "caution": true,
+     "access": "free",
+     "headline": "Gamers Tried To Bootleg Grand Theft Auto VI Using AI ‘Agent Swarms.’ It Didn’t End Well",
+     "url": "https://dailycaller.com/2026/11/25/grand-theft-auto-vi-artifical-intelligence-agents-reverse-engineer-pc-game",
+     "published": "2026-11-25T20:57:53.000Z"
+    },
+    {
+     "id": "s8-4",
+     "side": "right",
+     "outlet": "Daily Mail",
+     "outletId": "dailymail",
+     "caution": false,
+     "access": "free",
+     "headline": "Grand Theft Auto VI players are going to strip clubs to request lap dances straight from the game - as one asks Spearmint Rhino 'can your performers dance like the girls in Jack of Hearts?'",
+     "url": "https://www.dailymail.com/sciencetech/article-16321187/Grand-Theft-Auto-VI-players-strip-clubs.html?ns_mchannel=rss&ns_campaign=1490",
+     "published": "2026-11-25T13:52:10.000Z"
+    }
+   ],
+   "sentences": null,
+   "five": {
+    "sides": [
+     {
+      "key": "far_left",
+      "label": "Far left",
+      "outlets": 1,
+      "headlines": [
+       "s8-1"
+      ]
+     },
+     {
+      "key": "left",
+      "label": "Left",
+      "outlets": 1,
+      "headlines": [
+       "s8-2"
+      ]
+     },
+     {
+      "key": "centre",
+      "label": "Centre",
+      "outlets": 0,
+      "headlines": []
+     },
+     {
+      "key": "right",
+      "label": "Right",
+      "outlets": 2,
+      "headlines": [
+       "s8-3",
+       "s8-4"
+      ]
+     },
+     {
+      "key": "far_right",
+      "label": "Far right",
+      "outlets": 0,
+      "headlines": []
+     }
+    ],
+    "eligible": true,
+    "written": null,
+    "status": "missing",
+    "note": "The written comparison is not available for this story."
+   }
+  },
+  {
+   "id": "s9",
+   "rank": 9,
+   "outlets": 4,
+   "lead": "s9-2",
+   "headlines": [
+    {
+     "id": "s9-1",
+     "side": "left",
+     "outlet": "The Independent",
+     "outletId": "independent",
+     "caution": true,
+     "access": "free",
+     "headline": "One dead as police storm Colombian supermarket after armed men hold 30 people hostage",
+     "url": "https://www.independent.co.uk/news/world/americas/columbia-hostage-cartagena-supermarket-exito-b3091232.html",
+     "published": "2026-11-25T09:29:40.000Z"
+    },
+    {
+     "id": "s9-2",
+     "side": "centre",
+     "outlet": "UPI",
+     "outletId": "upi",
+     "caution": false,
+     "access": "free",
+     "headline": "Colombia rescues all hostages held at Cartagena supermarket",
+     "url": "https://www.upi.com/Top_News/World-News/2026/11/25/latam-colombia-cartagena-hostages-rescued/1711795616841/",
+     "published": "2026-11-25T14:54:03.000Z"
+    },
+    {
+     "id": "s9-3",
+     "side": "centre",
+     "outlet": "France 24",
+     "outletId": "france24",
+     "caution": false,
+     "access": "free",
+     "headline": "Colombian authorities rescue all hostages held at Cartagena supermarket",
+     "url": "https://www.france24.com/en/video/20261125-colombian-authorities-rescue-all-hostages-held-at-cartagena-supermarket",
+     "published": "2026-11-25T13:56:39.000Z"
+    },
+    {
+     "id": "s9-4",
+     "side": "centre",
+     "outlet": "BBC News",
+     "outletId": "bbc",
+     "caution": false,
+     "access": "free",
+     "headline": "Colombian police storm supermarket to free 20 held hostage for 17 hours",
+     "url": "https://www.bbc.co.uk/news/articles/ckp80mjr9emyo",
+     "published": "2026-11-25T16:20:14.000Z"
+    },
+    {
+     "id": "s9-5",
+     "side": "centre",
+     "outlet": "France 24",
+     "outletId": "france24",
+     "caution": false,
+     "access": "free",
+     "headline": "Colombia: Security forces rescue hostages in supermarket siege",
+     "url": "https://www.france24.com/en/video/20261125-colombia-security-forces-rescue-hostages-in-supermarket-siege",
+     "published": "2026-11-25T16:08:44.000Z"
+    }
+   ],
+   "sentences": null,
+   "five": {
+    "sides": [
+     {
+      "key": "far_left",
+      "label": "Far left",
+      "outlets": 0,
+      "headlines": []
+     },
+     {
+      "key": "left",
+      "label": "Left",
+      "outlets": 1,
+      "headlines": [
+       "s9-1"
+      ]
+     },
+     {
+      "key": "centre",
+      "label": "Centre",
+      "outlets": 3,
+      "headlines": [
+       "s9-2",
+       "s9-3",
+       "s9-4",
+       "s9-5"
+      ]
+     },
+     {
+      "key": "right",
+      "label": "Right",
+      "outlets": 0,
+      "headlines": []
+     },
+     {
+      "key": "far_right",
+      "label": "Far right",
+      "outlets": 0,
+      "headlines": []
+     }
+    ],
+    "eligible": false,
+    "written": null,
+    "status": "not-eligible",
+    "note": "No written comparison for this story: one is written only when at least three of the five sides carried it, one left of centre and one right of centre."
+   }
+  },
+  {
+   "id": "s10",
+   "rank": 10,
+   "outlets": 4,
+   "lead": "s10-2",
+   "headlines": [
+    {
+     "id": "s10-1",
+     "side": "left",
+     "outlet": "The New York Times",
+     "outletId": "nyt",
+     "caution": false,
+     "access": "paid",
+     "headline": "North Korea Kicks Out Swiss Diplomats in Spat Linked to Ukraine War",
+     "url": "https://www.nytimes.com/2026/11/25/world/asia/north-korea-switzerland-diplomats.html",
+     "published": "2026-11-25T17:00:24.000Z"
+    },
+    {
+     "id": "s10-2",
+     "side": "centre",
+     "outlet": "UPI",
+     "outletId": "upi",
+     "caution": false,
+     "access": "free",
+     "headline": "North Korea expels Swiss envoy over children’s camp sanctions",
+     "url": "https://www.upi.com/Top_News/World-News/2026/11/25/North-Korea-Switzerland-expel-envoy-Ukraine-sanctions-camp/4841795594516/",
+     "published": "2026-11-25T08:46:35.000Z"
+    },
+    {
+     "id": "s10-3",
+     "side": "centre",
+     "outlet": "Deutsche Welle",
+     "outletId": "dw",
+     "caution": false,
+     "access": "free",
+     "headline": "North Korea expels Swiss envoy over sanctions on camp accused of indoctrinating Ukrainian children",
+     "url": "https://www.dw.com/en/north-korea-expels-swiss-envoy-over-sanctions-on-camp-accused-of-indoctrinating-ukrainian-children/a-80043648?maca=en-rss-en-all-1573-rdf",
+     "published": "2026-11-25T11:12:00.000Z"
+    },
+    {
+     "id": "s10-4",
+     "side": "centre",
+     "outlet": "BBC News",
+     "outletId": "bbc",
+     "caution": false,
+     "access": "free",
+     "headline": "North Korea expels Swiss diplomat in sanctions row",
+     "url": "https://www.bbc.co.uk/news/articles/cq0l34e4kkr5o",
+     "published": "2026-11-25T21:51:17.000Z"
+    }
+   ],
+   "sentences": null,
+   "five": {
+    "sides": [
+     {
+      "key": "far_left",
+      "label": "Far left",
+      "outlets": 0,
+      "headlines": []
+     },
+     {
+      "key": "left",
+      "label": "Left",
+      "outlets": 1,
+      "headlines": [
+       "s10-1"
+      ]
+     },
+     {
+      "key": "centre",
+      "label": "Centre",
+      "outlets": 3,
+      "headlines": [
+       "s10-2",
+       "s10-3",
+       "s10-4"
+      ]
+     },
+     {
+      "key": "right",
+      "label": "Right",
+      "outlets": 0,
+      "headlines": []
+     },
+     {
+      "key": "far_right",
+      "label": "Far right",
+      "outlets": 0,
+      "headlines": []
+     }
+    ],
+    "eligible": false,
+    "written": null,
+    "status": "not-eligible",
+    "note": "No written comparison for this story: one is written only when at least three of the five sides carried it, one left of centre and one right of centre."
+   }
+  }
+ ]
+}

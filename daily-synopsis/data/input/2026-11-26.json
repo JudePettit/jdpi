@@ -1,0 +1,1402 @@
+{
+ "format": "vm-daily-synopsis-input/1",
+ "day": "2026-11-26",
+ "id": "2026-11-26-f40f663dbae2",
+ "generated": "2026-11-26T02:55:17.488Z",
+ "window": {
+  "from": "2026-11-25T01:44:44.079Z",
+  "to": "2026-11-26T01:44:44.079Z"
+ },
+ "storeGenerated": "2026-11-26T01:44:44.079Z",
+ "rule": {
+  "minOutlets": 3,
+  "minSides": 2,
+  "cap": 10,
+  "fiveMinSides": 3,
+  "fiveNeedsLeftAndRight": true
+ },
+ "sides": [
+  {
+   "key": "far_left",
+   "label": "Far left"
+  },
+  {
+   "key": "left",
+   "label": "Left"
+  },
+  {
+   "key": "centre",
+   "label": "Centre"
+  },
+  {
+   "key": "right",
+   "label": "Right"
+  },
+  {
+   "key": "far_right",
+   "label": "Far right"
+  }
+ ],
+ "stories": [
+  {
+   "id": "s1",
+   "rank": 1,
+   "outlets": 19,
+   "sides": {
+    "far_left": 4,
+    "left": 2,
+    "centre": 8,
+    "right": 2,
+    "far_right": 3
+   },
+   "written5": true,
+   "lead": "s1-28",
+   "items": [
+    {
+     "id": "s1-1",
+     "side": "far_left",
+     "outlet": "Common Dreams",
+     "outletId": "commondreams",
+     "caution": false,
+     "access": "free",
+     "headline": "Army Detonates Nearly Five Tons of Lead Azide in Iowa town",
+     "url": "https://www.commondreams.org/newswire/army-detonates-nearly-five-tons-of-lead-azide-in-iowa-town",
+     "published": "2026-11-25T19:24:30.000Z",
+     "summary": "oday, the U.S. Army detonated nearly five tons of lead azide, a toxic chemical used in explosives, at the Iowa Army Ammunition Plant. Iowa Environmental groups say they will stay involved to make sure cleanup is comprehensive, and to hold t"
+    },
+    {
+     "id": "s1-2",
+     "side": "far_left",
+     "outlet": "World Socialist Web Site",
+     "outletId": "wsws",
+     "caution": false,
+     "access": "free",
+     "headline": "Army blows up nearly 10,000 pounds of lead azide in Iowa and declares “success” an hour later",
+     "url": "https://www.wsws.org/en/articles/2026/11/26/lpfk-n26.html",
+     "published": "2026-11-26T00:50:07.000Z",
+     "summary": "Brushing aside mass opposition and a legal challenge, the Trump administration declared success before a single post-blast soil sample had been analyzed, an expression of the ruling elite’s contempt for the health of working people."
+    },
+    {
+     "id": "s1-3",
+     "side": "far_left",
+     "outlet": "Truthout",
+     "outletId": "truthout",
+     "caution": false,
+     "access": "free",
+     "headline": "Despite Environmental Worries, Army Blasts Off 68 Barrels of Lead Azide in Iowa",
+     "url": "https://truthout.org/articles/despite-environmental-worries-army-blasts-off-68-barrels-of-lead-azide-in-iowa/",
+     "published": "2026-11-25T16:06:46.000Z",
+     "summary": "Some scientists urged residents to collect soil from before the blast, to compare with samples after the detonation."
+    },
+    {
+     "id": "s1-4",
+     "side": "far_left",
+     "outlet": "Novara Media",
+     "outletId": "novara",
+     "caution": true,
+     "access": "free",
+     "headline": "US Military Set to Detonate Toxic Lead Bomb in Iowa",
+     "url": "https://novaramedia.com/2026/11/25/us-military-set-to-detonate-toxic-lead-bomb-in-iowa/",
+     "published": "2026-11-25T12:28:43.000Z",
+     "summary": "Children, pregnant women and chronically ill people in Iowa are being advised to evacuate as the US army prepares to blow up a stockpile of munitions laced with lead on Wednesday. Nearly five tonnes of unstable bomb-making chemicals stored"
+    },
+    {
+     "id": "s1-5",
+     "side": "far_left",
+     "outlet": "Common Dreams",
+     "outletId": "commondreams",
+     "caution": false,
+     "access": "free",
+     "headline": "Statement Condemning the US Military’s Lead Explosion in Iowa",
+     "url": "https://www.commondreams.org/newswire/statement-condemning-the-us-militarys-lead-explosion-in-iowa",
+     "published": "2026-11-25T19:23:17.000Z",
+     "summary": "CODEPINK condemns the US Army’s reckless detonation of nearly five tons of unstable lead azide at the Iowa Army Ammunition Plant, which is now blanketing southeastern Iowa in a toxic plume of lead dust stretching for miles. This is not an i"
+    },
+    {
+     "id": "s1-6",
+     "side": "left",
+     "outlet": "Democracy Now!",
+     "outletId": "democracynow",
+     "caution": false,
+     "access": "free",
+     "headline": "\"Disaster Waiting to Happen\": Iowa Declares Emergency as U.S. Army Detonates 5 Tons of Lead Azide",
+     "url": "http://www.democracynow.org/2026/11/25/iowa_ammo_detonation_lead_azide",
+     "published": "2026-11-25T13:19:05.000Z",
+     "summary": "The U.S. Army detonated nearly five tons of highly unstable lead-based explosives at an ammunition plant in southeastern Iowa on Wednesday, potentially sending toxic lead dust and other deadly contaminants spewing across communities and far"
+    },
+    {
+     "id": "s1-7",
+     "side": "left",
+     "outlet": "The Independent",
+     "outletId": "independent",
+     "caution": true,
+     "access": "free",
+     "headline": "Everything you need to know about the U.S. Army’s 5-ton lead azide explosion in Iowa today",
+     "url": "https://www.independent.co.uk/news/world/americas/us-army-iowa-lead-azide-b3091231.html",
+     "published": "2026-11-25T09:18:57.000Z",
+     "summary": "The U.S. Army plans to detonate the nation’s entire stockpile of lead azide in a small Iowa town"
+    },
+    {
+     "id": "s1-8",
+     "side": "left",
+     "outlet": "The Independent",
+     "outletId": "independent",
+     "caution": true,
+     "access": "free",
+     "headline": "Watch: Moment almost 10,000lbs of lead azide blown up by US Army in Iowa",
+     "url": "https://www.independent.co.uk/tv/news/iowa-lead-azide-explosion-video-b3091547.html",
+     "published": "2026-11-25T15:19:28.000Z",
+     "summary": "A huge cloud of smoke rose into the air after the US Army detonated nearly 10,000 pounds (4,500 kg) of degraded lead azide in Iowa on Wednesday (November 25)."
+    },
+    {
+     "id": "s1-9",
+     "side": "left",
+     "outlet": "The Independent",
+     "outletId": "independent",
+     "caution": true,
+     "access": "free",
+     "headline": "US Army explodes 5 tons of lead in Iowa with blast felt for miles and residents waiting for environmental impacts",
+     "url": "https://www.independent.co.uk/news/world/americas/us-politics/iowa-explosion-army-evacuation-safe-b3091493.html",
+     "published": "2026-11-25T15:38:37.000Z",
+     "summary": "Officials indicated the blast had been a success, with Donald Trump stating that it exceeded expectations"
+    },
+    {
+     "id": "s1-10",
+     "side": "centre",
+     "outlet": "Axios",
+     "outletId": "axios",
+     "caution": false,
+     "access": "unknown",
+     "headline": "Army detonates Iowa explosives amid toxic lead fears",
+     "url": "https://www.axios.com/2026/11/25/iowa-army-lead-detonation",
+     "published": "2026-11-25T16:16:41.000Z",
+     "summary": "The Army detonated 68 drums of unstable lead azide on an Iowa plant Wednesday after multiple delays, a court challenge and presidential intervention . The big picture: Elected officials slammed the military over communication shortfalls ahe"
+    },
+    {
+     "id": "s1-11",
+     "side": "centre",
+     "outlet": "The Hill",
+     "outletId": "thehill",
+     "caution": false,
+     "access": "free",
+     "headline": "Watch live: Army briefs on Iowa lead azide detonation",
+     "url": "https://thehill.com/homenews/state-watch/6242738-watch-live-army-iowa-lead-azide-detonation-briefing/",
+     "published": "2026-11-25T16:35:34.000Z",
+     "summary": "Army officials will brief reporters Wednesday following the planned controlled detonation of 68 barrels of unstable lead-based explosives in Iowa, an operation that sparked widespread concerns over public health and safety. The explosion at"
+    },
+    {
+     "id": "s1-12",
+     "side": "centre",
+     "outlet": "Deutsche Welle",
+     "outletId": "dw",
+     "caution": false,
+     "access": "free",
+     "headline": "US Army detonates unstable lead-based explosives in Iowa",
+     "url": "https://www.dw.com/en/us-army-detonates-unstable-lead-based-explosives-in-iowa/a-80043319?maca=en-rss-en-all-1573-rdf",
+     "published": "2026-11-25T15:38:00.000Z",
+     "summary": "The US Army says a controlled blast is the safest way to deal with explosive chemicals that began crystallizing in storage. US President Donald Trump said \"mitigation efforts have far exceeded expectations.\""
+    },
+    {
+     "id": "s1-13",
+     "side": "centre",
+     "outlet": "The Hill",
+     "outletId": "thehill",
+     "caution": false,
+     "access": "free",
+     "headline": "Army detonates explosives in Iowa amid toxic lead risks",
+     "url": "https://thehill.com/policy/energy-environment/6240967-army-lead-explosives-iowa-epa/",
+     "published": "2026-11-25T15:17:31.000Z",
+     "summary": "The Army detonated a set of explosives in Iowa on Wednesday, a controversial move that is expected to spew toxic lead into the air. The government has said the detonation was necessary to prevent an accidental explosion, though critics have"
+    },
+    {
+     "id": "s1-14",
+     "side": "centre",
+     "outlet": "UPI",
+     "outletId": "upi",
+     "caution": false,
+     "access": "free",
+     "headline": "Army detonates lead azide stockpile in Middletown, Iowa",
+     "url": "https://www.upi.com/Top_News/US/2026/11/25/army-detonate-lead-azide-middletown-iowa/2291795617850/",
+     "published": "2026-11-25T15:21:00.000Z",
+     "summary": "Iowans are preparing for the U.S. Army to detonate a stockpile of lead azide on Wednesday morning, with recommendations to shelter inside or evacuate."
+    },
+    {
+     "id": "s1-15",
+     "side": "centre",
+     "outlet": "France 24",
+     "outletId": "france24",
+     "caution": false,
+     "access": "free",
+     "headline": "US army to detonate stockpile of unstable bomb-making chemicals in Iowa",
+     "url": "https://www.france24.com/en/video/20261125-us-army-to-detonate-stockpile-of-unstable-bomb-making-chemicals-in-iowa",
+     "published": "2026-11-25T13:16:49.000Z",
+     "summary": "The US military will on Wednesday detonate some 10,000 pounds of unstable and degraded explosive material in Iowa, where local residents were urged to evacuate amid concerns over possible toxic lead contamination. US officials say the 68 dr"
+    },
+    {
+     "id": "s1-16",
+     "side": "centre",
+     "outlet": "Euronews",
+     "outletId": "euronews",
+     "caution": false,
+     "access": "free",
+     "headline": "US Army detonates toxic explosives in Iowa despite contamination fears",
+     "url": "https://www.euronews.com/2026/11/25/us-army-detonates-toxic-explosives-in-iowa-despite-contamination-fears",
+     "published": "2026-11-25T17:55:45.000Z",
+     "summary": "The controlled explosion of five tonnes of hazardous material has raised concerns over lead pollution and its potential impact on public health and the environment."
+    },
+    {
+     "id": "s1-17",
+     "side": "centre",
+     "outlet": "France 24",
+     "outletId": "france24",
+     "caution": false,
+     "access": "free",
+     "headline": "US Army detonates lead explosives in Iowa despite contamination fears",
+     "url": "https://www.france24.com/en/americas/20261125-us-army-detonates-lead-explosives-iowa-despite-community-backlash",
+     "published": "2026-11-25T16:08:10.000Z",
+     "summary": "The US Army on Wednesday blew up 5 tons of lead-based explosives at an ammunition plant in Iowa despite community backlash over fears of environmental contamination. The detonation was postponed three times, but got the green light after a"
+    },
+    {
+     "id": "s1-18",
+     "side": "centre",
+     "outlet": "The Hill",
+     "outletId": "thehill",
+     "caution": false,
+     "access": "free",
+     "headline": "Army plan to detonate lead azide in Iowa ‘insane’: Attorney",
+     "url": "https://thehill.com/homenews/state-watch/6241997-911-attorney-iowa-lead-azide-detonation-insane/",
+     "published": "2026-11-25T13:30:46.000Z",
+     "summary": "An attorney representing victims of the Sept. 11, 2001, terrorist attacks who suffered from toxic exposure called the U.S. Army’s plans to detonate more than 60 barrels of lead azide in Iowa “insane.” The detonation at the Iowa Army Ammunit"
+    },
+    {
+     "id": "s1-19",
+     "side": "centre",
+     "outlet": "France 24",
+     "outletId": "france24",
+     "caution": false,
+     "access": "free",
+     "headline": "Iowa: Toxic dust fears as US Army blows up 10,000 pounds of explosives",
+     "url": "https://www.france24.com/en/video/20261125-iowa-toxic-dust-fears-as-us-army-blows-up-10-000-pounds-of-explosives",
+     "published": "2026-11-25T16:14:40.000Z",
+     "summary": "An enormous explosion rang out across rural Iowa Tuesday as the US military carried out the controlled detonation of some 10,000 pounds of lead azide. US officials say the material, which was once used as a detonator in munitions, had becom"
+    },
+    {
+     "id": "s1-20",
+     "side": "centre",
+     "outlet": "BBC News",
+     "outletId": "bbc",
+     "caution": false,
+     "access": "free",
+     "headline": "US Army says controlled blast of explosives in Iowa was 'huge success'",
+     "url": "https://www.bbc.co.uk/news/articles/cwg7l5ve251ko",
+     "published": "2026-11-26T00:23:05.000Z",
+     "summary": "Despite widespread concern from residents ahead of the blast, officials say that lead readings in the area so far have been promising."
+    },
+    {
+     "id": "s1-21",
+     "side": "centre",
+     "outlet": "The Hill",
+     "outletId": "thehill",
+     "caution": false,
+     "access": "free",
+     "headline": "Live updates: Army detonates lead azide in Iowa; Trump administration rolls out new tariffs on China, EU",
+     "url": "https://thehill.com/homenews/administration/6241678-live-updates-trump-army-lead-azide-thanksgiving-2026/",
+     "published": "2026-11-25T15:20:08.000Z",
+     "summary": "The Army detonated a degraded stockpile of lead-based munitions in Iowa on Wednesday morning, proceeding with the controlled explosion despite the public health fears that initially pushed back the plans. The Army has argued the controlled"
+    },
+    {
+     "id": "s1-22",
+     "side": "centre",
+     "outlet": "The Hill",
+     "outletId": "thehill",
+     "caution": false,
+     "access": "free",
+     "headline": "Acting Army Secretary calls Iowa lead detonation a ‘HUGE success’",
+     "url": "https://thehill.com/policy/energy-environment/6242772-army-iowa-lead-detonation/",
+     "published": "2026-11-25T16:23:58.000Z",
+     "summary": "Acting Army Secretary Adam Telle called the detonation of lead-containing munitions in Iowa a “HUGE success” in a Wednesday post on the social platform X. “The Army’s controlled, mitigated detonation exceeded all expectations and was a HUGE"
+    },
+    {
+     "id": "s1-23",
+     "side": "centre",
+     "outlet": "Deutsche Welle",
+     "outletId": "dw",
+     "caution": false,
+     "access": "free",
+     "headline": "US plans new tariffs on EU, China and 12 others",
+     "url": "https://www.dw.com/en/us-plans-new-tariffs-on-eu-china-and-12-others/a-80050872?maca=en-rss-en-all-1573-rdf",
+     "published": "2026-11-25T14:54:00.000Z",
+     "summary": "The Trump administration is planning new import duties of up to 20% to counter excessive manufacturing abroad. The measures could put further pressure on US consumers already struggling with high living costs."
+    },
+    {
+     "id": "s1-24",
+     "side": "centre",
+     "outlet": "CNBC",
+     "outletId": "cnbc",
+     "caution": false,
+     "access": "free",
+     "headline": "U.S. proposes new tariffs on 14 trading partners, including China and the EU",
+     "url": "https://www.cnbc.com/2026/11/25/us-tariffs-trump-section-301.html",
+     "published": "2026-11-25T16:02:52.000Z",
+     "summary": "The new levies seek to counter foreign trade practices deemed unfair, discriminatory or burdensome to U.S. commerce."
+    },
+    {
+     "id": "s1-25",
+     "side": "right",
+     "outlet": "Washington Examiner",
+     "outletId": "washingtonexaminer",
+     "caution": false,
+     "access": "paid",
+     "headline": "WATCH LIVE: Army updates public on Iowa lead azide detonation",
+     "url": "https://www.washingtonexaminer.com/policy/defense/4815189/watch-live-army-update-public-iowa-lead-azide-detonation/",
+     "published": "2026-11-25T16:59:09.000Z",
+     "summary": "The Army is providing an update to the public on the detonation of 5 tons of lead azide at the Iowa Army Ammunition Plant that took place earlier Wednesday morning. The press conference is scheduled to start imminently at 11:55 a.m. Wednesd"
+    },
+    {
+     "id": "s1-26",
+     "side": "right",
+     "outlet": "New York Post",
+     "outletId": "nypost",
+     "caution": true,
+     "access": "free",
+     "headline": "Iowa explosion: What the US Army is hiding from you | The Low Down",
+     "url": "https://nypost.com/video/iowa-explosion-what-the-us-army-is-hiding-from-you-the-low-down/",
+     "published": "2026-11-25T16:53:15.000Z",
+     "summary": "TMZ and the New York Post livestream a controlled explosion in Iowa as the US Army detonates lead azide during a scheduled disposal, despite a legal battle over potential health and environmental impacts from the dust."
+    },
+    {
+     "id": "s1-27",
+     "side": "right",
+     "outlet": "Washington Examiner",
+     "outletId": "washingtonexaminer",
+     "caution": false,
+     "access": "paid",
+     "headline": "Trump administration announces new tariffs on 14 countries, including China and Japan",
+     "url": "https://www.washingtonexaminer.com/news/white-house/4814966/new-trump-administration-tariffs-china-eu/",
+     "published": "2026-11-25T16:03:30.000Z",
+     "summary": "The Trump administration put forth a new plan to impose tariffs on imports from 14 U.S. trade partners, including China, the European Union, Japan, and Taiwan, escalating a global trade war. Chinese imports will face a 20% levy, but it coul"
+    },
+    {
+     "id": "s1-28",
+     "side": "far_right",
+     "outlet": "The Gateway Pundit",
+     "outletId": "gatewaypundit",
+     "caution": true,
+     "access": "free",
+     "headline": "JUST IN: U.S. Army Detonates Nearly FIVE TONS of Lead Azide in Iowa (VIDEO)",
+     "url": "https://www.thegatewaypundit.com/2026/11/just-u-s-army-detonates-nearly-five-tons/",
+     "published": "2026-11-25T15:55:55.000Z",
+     "summary": "The long-feared and anticipated detonation of toxic lead azide in America's heartland has finally happened. The post JUST IN: U.S. Army Detonates Nearly FIVE TONS of Lead Azide in Iowa (VIDEO) appeared first on The Gateway Pundit ."
+    },
+    {
+     "id": "s1-29",
+     "side": "far_right",
+     "outlet": "Breitbart",
+     "outletId": "breitbart",
+     "caution": true,
+     "access": "free",
+     "headline": "U.S. Army Set to Detonate Iowa Stockpile of Bomb-Making Chemicals",
+     "url": "https://www.breitbart.com/politics/2026/11/25/u-s-army-set-to-detonate-iowa-stockpile-of-bomb-making-chemicals/",
+     "published": "2026-11-25T11:55:44.000Z",
+     "summary": "The U.S. Army will detonate several tons of highly-volatile bomb-making chemicals in Middleton, Iowa, at 9 a.m. local time Wednesday. The post U.S. Army Set to Detonate Iowa Stockpile of Bomb-Making Chemicals appeared first on Breitbart ."
+    },
+    {
+     "id": "s1-30",
+     "side": "far_right",
+     "outlet": "One America News",
+     "outletId": "oann",
+     "caution": true,
+     "access": "unknown",
+     "headline": "Army prepares for detonation of several tons of bomb-making materials in Iowa today",
+     "url": "https://news.google.com/rss/articles/CBMitAFBVV95cUxQMm5NRm1KUjE3WlF1dnJpX2ZCVmRaT3oxSFdja29JSHNFRlV0eHpPWkZaVU1uZVVqXzdRQmxCT3p1VkdaSmE1QVJ6R0dLNGs5Q2hwYTZoX29uNm1KZUk1a3VjM2J0ZnAxSW9YUmp5cktSRy1DVFJFVlF1U1BRUkdSbzZkLWg4dWNqRDVUUGhPVHdoUGpSU1I0bjFjb3hMNGFvbXY1RGlHSFNjSFNkdkdwbWFTLXE?oc=5",
+     "published": "2026-11-25T14:55:20.000Z",
+     "summary": "Army prepares for detonation of several tons of bomb-making materials in Iowa today One America News Network"
+    }
+   ]
+  },
+  {
+   "id": "s2",
+   "rank": 2,
+   "outlets": 16,
+   "sides": {
+    "far_left": 1,
+    "left": 3,
+    "centre": 3,
+    "right": 2,
+    "far_right": 7
+   },
+   "written5": true,
+   "lead": "s2-5",
+   "items": [
+    {
+     "id": "s2-1",
+     "side": "far_left",
+     "outlet": "Truthout",
+     "outletId": "truthout",
+     "caution": false,
+     "access": "free",
+     "headline": "Abrego Garcia Self-Deports to Spain After 20-Month Battle With Trump Admin",
+     "url": "https://truthout.org/articles/abrego-garcia-self-deports-to-spain-after-20-month-battle-with-trump-admin/",
+     "published": "2026-11-25T16:35:12.000Z",
+     "summary": "The Department of Homeland Security had tried to deport the Maryland resident to a third country for months."
+    },
+    {
+     "id": "s2-2",
+     "side": "left",
+     "outlet": "Vox",
+     "outletId": "vox",
+     "caution": false,
+     "access": "paid",
+     "headline": "Kilmar Abrego Garcia’s deportation saga ends on his terms",
+     "url": "https://www.vox.com/today-explained-newsletter/512193/kilmar-abrego-garcia-self-deportation-spain-trump",
+     "published": "2026-11-25T21:25:00.000Z",
+     "summary": "This story appeared in Today, Explained, a daily newsletter that helps you understand the most compelling news and stories of the day. Subscribe here. Kilmar Abrego Garcia, a Maryland man who was wrongly deported and then indicted by the Tr"
+    },
+    {
+     "id": "s2-3",
+     "side": "left",
+     "outlet": "The New Republic",
+     "outletId": "newrepublic",
+     "caution": false,
+     "access": "paid",
+     "headline": "To Get Justice, Kilmar Ábrego García Had to Leave Trump’s America",
+     "url": "https://newrepublic.com/article/218371/kilmar-abrego-garcia-video-leaves-trump-america",
+     "published": "2026-11-25T16:30:36.000Z",
+     "summary": "In the end, Kilmar Ábrego García ’s extraordinary 20-month struggle against Donald Trump’s crazed persecution and vilification campaign against him concluded with a single, quiet gesture. As Ábrego García stood in Dulles Airport, a federal"
+    },
+    {
+     "id": "s2-4",
+     "side": "left",
+     "outlet": "The Independent",
+     "outletId": "independent",
+     "caution": true,
+     "access": "free",
+     "headline": "A timeline of key events in Kilmar Ábrego García's fight with the Trump administration",
+     "url": "https://www.independent.co.uk/news/world/europe/el-salvador-tennessee-maryland-chris-van-hollen-trump-b3091611.html",
+     "published": "2026-11-25T16:04:44.000Z",
+     "summary": "Kilmar Ábrego García has been a focal point in the debate over President Donald Trump’s immigration policies"
+    },
+    {
+     "id": "s2-5",
+     "side": "centre",
+     "outlet": "UPI",
+     "outletId": "upi",
+     "caution": false,
+     "access": "free",
+     "headline": "Kilmar Abrego Garcia voluntarily moves to Spain",
+     "url": "https://www.upi.com/Top_News/US/2026/11/25/Abrego-Garcia-leaves-US-for-Spain/2891795607503/",
+     "published": "2026-11-25T15:13:13.000Z",
+     "summary": "Kilmar Ábrego García has left United States of his own accord, pausing for now a 20-month battle with the Trump administration to avoid deportation."
+    },
+    {
+     "id": "s2-6",
+     "side": "centre",
+     "outlet": "The Hill",
+     "outletId": "thehill",
+     "caution": false,
+     "access": "free",
+     "headline": "Kilmar Abrego Garcia arrives in Spain after self-deporting",
+     "url": "https://thehill.com/policy/international/6242020-kilmar-abrego-garcia-self-deport-spain-arrival/",
+     "published": "2026-11-25T14:06:23.000Z",
+     "summary": "Salvadoran migrant Kilmar Abrego Garcia arrived in Spain on Wednesday, ending a long legal and political battle over his status that became a proxy debate for the Trump administration’s immigration agenda. Abrego Garcia self-deported to Spa"
+    },
+    {
+     "id": "s2-7",
+     "side": "centre",
+     "outlet": "BBC News",
+     "outletId": "bbc",
+     "caution": false,
+     "access": "free",
+     "headline": "Kilmar Ábrego García arrives in Spain, ending Trump deportation battle",
+     "url": "https://www.bbc.co.uk/news/articles/c6808pyy5dl9o",
+     "published": "2026-11-25T12:42:11.000Z",
+     "summary": "His deportation to and return from El Salvador became a flashpoint in the debate the US president's immigration agenda."
+    },
+    {
+     "id": "s2-8",
+     "side": "centre",
+     "outlet": "The Hill",
+     "outletId": "thehill",
+     "caution": false,
+     "access": "free",
+     "headline": "Abrego Garcia sees victory in Spain arrival after Trump deportation push",
+     "url": "https://thehill.com/homenews/administration/6243654-kilmar-abrego-garcia-trump-administration-deportation-case/",
+     "published": "2026-11-25T21:18:34.000Z",
+     "summary": "The departure of Kilmar Abrego Garcia to Spain late Tuesday ends an effort of more than a year by the Trump team to deport him to Africa, with both sides claiming victory in the unusual immigration case. His exit caps a nightmarish period f"
+    },
+    {
+     "id": "s2-9",
+     "side": "right",
+     "outlet": "The Daily Caller",
+     "outletId": "dailycaller",
+     "caution": true,
+     "access": "free",
+     "headline": "Kilmar Abrego Garcia Self-Deports After 20 Months As Face Of Trump’s Deportation Campaign",
+     "url": "https://dailycaller.com/2026/11/24/kilmar-abrego-garcia-self-deports-spain-ms13",
+     "published": "2026-11-25T03:37:06.000Z",
+     "summary": ""
+    },
+    {
+     "id": "s2-10",
+     "side": "right",
+     "outlet": "Reason",
+     "outletId": "reason",
+     "caution": false,
+     "access": "free",
+     "headline": "What So Many People Got Wrong about the Kilmar Abrego Garcia Case",
+     "url": "https://reason.com/2026/11/25/what-so-many-people-got-wrong-about-the-kilmar-abrego-garcia-case/",
+     "published": "2026-11-25T20:45:15.000Z",
+     "summary": "It's defensible to portray his prolonged stay in the U.S. as a reflection of America's immigration quagmire. Just not for the reasons you might think."
+    },
+    {
+     "id": "s2-11",
+     "side": "far_right",
+     "outlet": "American Greatness",
+     "outletId": "amgreatness",
+     "caution": true,
+     "access": "free",
+     "headline": "Kilmar Abrego Garcia Self-Deports to Spain, DHS Says He Will ‘NEVER’ Return",
+     "url": "https://amgreatness.com/2026/11/25/kilmar-abrego-garcia-self-deports-to-spain-dhs-he-will-never-return/",
+     "published": "2026-11-25T10:47:57.000Z",
+     "summary": "The El Salvador native at the center of a months-long legal fight paid for his own flight out of the country. Source"
+    },
+    {
+     "id": "s2-12",
+     "side": "far_right",
+     "outlet": "TheBlaze",
+     "outletId": "blaze",
+     "caution": true,
+     "access": "unknown",
+     "headline": "Kilmar Abrego Garcia self-deports — and DHS is 'delighted' about it",
+     "url": "https://www.theblaze.com/news/kilmar-garcia-self-deports-spain",
+     "published": "2026-11-25T22:15:00.000Z",
+     "summary": "The long, bitter saga of Kilmar Abrego Garcia has come to an end after the Salvadoran man self-deported to Spain, according to the Department of Homeland Security. Garcia, an illegal alien dubbed a \"Maryland man\" by the press, was nabbed by"
+    },
+    {
+     "id": "s2-13",
+     "side": "far_right",
+     "outlet": "One America News",
+     "outletId": "oann",
+     "caution": true,
+     "access": "unknown",
+     "headline": "DHS ‘delighted to announce’ that Kilmar Abrego Garcia self-deported to Spain",
+     "url": "https://news.google.com/rss/articles/CBMiqAFBVV95cUxNWFc4YmtGSElabVVRT2tQWTdFTFBjOTZjMlJHQTNvV1NNU01tcXRJR1lPWFI2TjVObHRodml0MUkzcjY4Z0FDZEJ0ajNRX3I4ZXQ4R3ZyckU2RU0xU2RiRERWN0x0TWpSeDh3aFJ3SEJsUTh5aXFFQnVJNjBKdmR4WTN3U3BILWVWQk9MSWY1ZVBQejhBUnZCYWo4RVBmV3NPTzBEcVA3emY?oc=5",
+     "published": "2026-11-25T15:45:00.000Z",
+     "summary": "DHS ‘delighted to announce’ that Kilmar Abrego Garcia self-deported to Spain One America News Network"
+    },
+    {
+     "id": "s2-14",
+     "side": "far_right",
+     "outlet": "Breitbart",
+     "outletId": "breitbart",
+     "caution": true,
+     "access": "free",
+     "headline": "Kilmar Abrego Garcia Avoids Deportation to Liberia by Leaving for Spain Voluntarily",
+     "url": "https://www.breitbart.com/immigration/2026/11/24/kilmar-abrego-garcia-avoids-deportation-liberia-leaving-spain/",
+     "published": "2026-11-25T02:53:18.000Z",
+     "summary": "Kilmar Ábrego García voluntarily left the United States for Spain on Tuesday under a deal that spared him forced deportation to Africa and could affect whether he can return under a future president. The post Kilmar Ábrego García Avoids Dep"
+    },
+    {
+     "id": "s2-15",
+     "side": "far_right",
+     "outlet": "ZeroHedge",
+     "outletId": "zerohedge",
+     "caution": true,
+     "access": "free",
+     "headline": "Kilmar Abrego Garcia Is Gone... But His Lawyer Says He's Coming Back",
+     "url": "https://www.zerohedge.com/political/kilmar-abrego-garcia-gone-his-lawyer-says-hes-coming-back",
+     "published": "2026-11-25T13:00:00.000Z",
+     "summary": "Kilmar Abrego Garcia Is Gone... But His Lawyer Says He's Coming Back Kilmar Abrego Garcia, the Salvadoran migrant whose wrongful deportation to El Salvador's CECOT mega-prison made him the left's poster child for due process, left the Unite"
+    },
+    {
+     "id": "s2-16",
+     "side": "far_right",
+     "outlet": "WND",
+     "outletId": "wnd",
+     "caution": true,
+     "access": "free",
+     "headline": "'You made this demon very uncomfortable': Watch top Democrat melt down when confronted over Kilmar Abrego Garcia",
+     "url": "https://news.google.com/rss/articles/CBMigwFBVV95cUxPeHRFUDVWZE0yOXNERXFNSFZ0X2RDcFA5N3lyeHprSzRia25UX0xWVWlQTkJ6TWNIYmRFWUZ0MWxBY1BLbzlzcC11M3lLZ1BUaVFkZXg5NFVDQ3A4Tkp5Y1hQTld3c1ZvQ2c1ZDI4bkFmamJXd2FxZHZwT3JBU0ZNV3RMbw?oc=5",
+     "published": "2026-11-25T18:49:42.000Z",
+     "summary": "'You made this demon very uncomfortable': Watch top Democrat melt down when confronted over Kilmar Abrego Garcia WorldNetDaily"
+    },
+    {
+     "id": "s2-17",
+     "side": "far_right",
+     "outlet": "The Federalist",
+     "outletId": "federalist",
+     "caution": true,
+     "access": "free",
+     "headline": "Sen. Chris Van Hollen Just Can’t Quit Alleged ‘Human Trafficker’ Kilmar Abrego Garcia",
+     "url": "https://thefederalist.com/2026/11/25/sen-chris-van-hollen-just-cant-quit-alleged-human-trafficker-kilmar-abrego-garcia/",
+     "published": "2026-11-25T16:58:42.000Z",
+     "summary": "Kilmar Abrego Garcia, the “Maryland father” who was really a Salvadoran illegal alien and has been accused of being a “human smuggler, wife beater, gang member, and child predator,” self-deported to Spain on Tuesday following removal orders"
+    },
+    {
+     "id": "s2-18",
+     "side": "far_right",
+     "outlet": "Breitbart",
+     "outletId": "breitbart",
+     "caution": true,
+     "access": "free",
+     "headline": "Senate Leadership Challenger Chris Van Hollen Praises Deal for MS-13 Suspect Abrego Garcia",
+     "url": "https://www.breitbart.com/immigration/2026/11/24/senate-democrat-leader-hopeful-chris-van-hollen-hails-abrego-garcia-departure-victory/",
+     "published": "2026-11-25T03:54:50.000Z",
+     "summary": "Sen. Chris Van Hollen (D-MD), who is vying to lead Senate Democrats, celebrated illegal migrant Kilmar Ábrego García’s voluntary departure from the U.S. Tuesday. The post Senate Leadership Challenger Chris Van Hollen Praises Deal for MS-13"
+    }
+   ]
+  },
+  {
+   "id": "s3",
+   "rank": 3,
+   "outlets": 8,
+   "sides": {
+    "far_left": 0,
+    "left": 1,
+    "centre": 4,
+    "right": 1,
+    "far_right": 2
+   },
+   "written5": true,
+   "lead": "s3-2",
+   "items": [
+    {
+     "id": "s3-1",
+     "side": "left",
+     "outlet": "The Independent",
+     "outletId": "independent",
+     "caution": true,
+     "access": "free",
+     "headline": "Huawei guilty in US of stealing trade secrets in landmark case",
+     "url": "https://www.independent.co.uk/asia/china/huawei-guilty-trump-us-iran-trade-secrets-b3091109.html",
+     "published": "2026-11-25T05:50:38.000Z",
+     "summary": "Huawei lawyers say company was acquitted in more serious racketeering charge"
+    },
+    {
+     "id": "s3-2",
+     "side": "centre",
+     "outlet": "Deutsche Welle",
+     "outletId": "dw",
+     "caution": false,
+     "access": "free",
+     "headline": "US jury convicts Huawei of violating sanctions, stealing trade secrets",
+     "url": "https://www.dw.com/en/us-jury-convicts-huawei-of-violating-sanctions-stealing-trade-secrets/a-80042172?maca=en-rss-en-all-1573-rdf",
+     "published": "2026-11-25T02:01:00.000Z",
+     "summary": "Huawei was found guilty of 10 out of 12 charges levelled against it. The company said it plans to appeal the verdict."
+    },
+    {
+     "id": "s3-3",
+     "side": "centre",
+     "outlet": "CNBC",
+     "outletId": "cnbc",
+     "caution": false,
+     "access": "free",
+     "headline": "U.S. jury convicts Huawei in a criminal trial over fraud and trade secrets",
+     "url": "https://www.cnbc.com/2026/11/25/huawei-fraud-trade-trial.html",
+     "published": "2026-11-25T02:43:33.000Z",
+     "summary": "Huawei was found guilty of bank fraud, money laundering and trade secret theft conspiracy in a U.S. trial."
+    },
+    {
+     "id": "s3-4",
+     "side": "centre",
+     "outlet": "The Hill",
+     "outletId": "thehill",
+     "caution": false,
+     "access": "free",
+     "headline": "Huawei found guilty in trade secrets theft case",
+     "url": "https://thehill.com/policy/technology/6242450-huawei-guilty-iran-sanctions-trade-secrets/",
+     "published": "2026-11-25T15:33:43.000Z",
+     "summary": "A federal jury has found Chinese tech giant Huawei Technologies and its subsidiaries guilty of violating U.S. sanctions on Iran, stealing American trade secrets and money laundering. “No person or company is above the law,” Attorney General"
+    },
+    {
+     "id": "s3-5",
+     "side": "centre",
+     "outlet": "UPI",
+     "outletId": "upi",
+     "caution": false,
+     "access": "free",
+     "headline": "U.S. jury convicts Huawei of fraud, Iran sanctions violations",
+     "url": "https://www.upi.com/Top_News/US/2026/11/25/jury-convicts-Huawei/3151795587204/",
+     "published": "2026-11-25T07:07:25.000Z",
+     "summary": "A federal jury in New York City has convicted Chinese tech giant Huawei and three of its subsidiaries on a range of charges, from conspiring to steal U.S. trade secrets to violating U.S. sanctions on Iran."
+    },
+    {
+     "id": "s3-6",
+     "side": "right",
+     "outlet": "The American Conservative",
+     "outletId": "amconmag",
+     "caution": false,
+     "access": "free",
+     "headline": "Huawei Guilty of Theft, Fraud, and Sanctions Violations",
+     "url": "https://www.theamericanconservative.com/huawei-guilty-of-theft-fraud-and-sanctions-violations/",
+     "published": "2026-11-25T14:30:00.000Z",
+     "summary": "State of the Union: The Chinese telecom giant was convicted on most charges, but acquitted of racketeering. The post Huawei Guilty of Theft, Fraud, and Sanctions Violations appeared first on The American Conservative ."
+    },
+    {
+     "id": "s3-7",
+     "side": "far_right",
+     "outlet": "American Greatness",
+     "outletId": "amgreatness",
+     "caution": true,
+     "access": "free",
+     "headline": "Jury Convicts Chinese Tech Giant Huawei of Stealing American Trade Secrets",
+     "url": "https://amgreatness.com/2026/11/25/jury-convicts-chinese-tech-giant-huawei-of-stealing-american-trade-secrets/",
+     "published": "2026-11-25T10:47:45.000Z",
+     "summary": "The company was found guilty on 10 of 12 counts but acquitted of racketeering conspiracy. Source"
+    },
+    {
+     "id": "s3-8",
+     "side": "far_right",
+     "outlet": "The Gateway Pundit",
+     "outletId": "gatewaypundit",
+     "caution": true,
+     "access": "free",
+     "headline": "Chinese Tech Giant Huawei CONVICTED in Massive U.S. Criminal Trial for Iran Sanctions Busting, Bank Fraud, Money Laundering, and Stealing American Trade Secrets",
+     "url": "https://www.thegatewaypundit.com/2026/11/chinese-tech-giant-huawei-convicted-massive-u-s/",
+     "published": "2026-11-25T14:45:51.000Z",
+     "summary": "A federal jury in Brooklyn delivered a decisive blow Tuesday against Communist China’s premier telecommunications juggernaut, convicting Huawei Technologies and three of its subsidiaries on 10 of 12 criminal counts in a sprawling case that"
+    },
+    {
+     "id": "s3-9",
+     "side": "far_right",
+     "outlet": "The Gateway Pundit",
+     "outletId": "gatewaypundit",
+     "caution": true,
+     "access": "free",
+     "headline": "Watch Live: Chinese Tech Giant Huawei CONVICTED in Massive U.S. Criminal Trial for Iran Sanctions Busting, Bank Fraud, Money Laundering, and Stealing American Trade Secrets and More! The WAR Zone Podcast With Wayne Allyn Root Presented by The Gateway Pundit",
+     "url": "https://www.thegatewaypundit.com/2026/11/watch-live-chinese-tech-giant-huawei-convicted-massive/",
+     "published": "2026-11-25T21:29:54.000Z",
+     "summary": "CLICK HERE TO WATCH RIGHT NOW! The post Watch Live: Chinese Tech Giant Huawei CONVICTED in Massive U.S. Criminal Trial for Iran Sanctions Busting, Bank Fraud, Money Laundering, and Stealing American Trade Secrets and More! The WAR Zone Podc"
+    }
+   ]
+  },
+  {
+   "id": "s4",
+   "rank": 4,
+   "outlets": 8,
+   "sides": {
+    "far_left": 0,
+    "left": 1,
+    "centre": 4,
+    "right": 0,
+    "far_right": 3
+   },
+   "written5": true,
+   "lead": "s4-8",
+   "items": [
+    {
+     "id": "s4-1",
+     "side": "left",
+     "outlet": "The Independent",
+     "outletId": "independent",
+     "caution": true,
+     "access": "free",
+     "headline": "Will weather ground Macy’s Thanksgiving Parade balloons? Official floats start time change",
+     "url": "https://www.independent.co.uk/news/world/americas/macys-thanksgiving-parade-balloons-weather-start-time-b3091468.html",
+     "published": "2026-11-25T14:14:01.000Z",
+     "summary": "The Macy’s Thanksgiving Day Parade in New York City is once again facing its eternal foe: wind"
+    },
+    {
+     "id": "s4-2",
+     "side": "left",
+     "outlet": "The Independent",
+     "outletId": "independent",
+     "caution": true,
+     "access": "free",
+     "headline": "Macy’s sidesteps how Thanksgiving Day Parade push impacts participants",
+     "url": "https://www.independent.co.uk/news/world/americas/macys-thanksgiving-parade-postponed-weather-b3091779.html",
+     "published": "2026-11-26T00:07:58.000Z",
+     "summary": "The decision was made for the safety of the performers and spectators, a network source told The Independent"
+    },
+    {
+     "id": "s4-3",
+     "side": "left",
+     "outlet": "The Independent",
+     "outletId": "independent",
+     "caution": true,
+     "access": "free",
+     "headline": "Long-lost Macy’s parade balloon is back with ‘age spots’ after disappearing 95 years ago",
+     "url": "https://www.independent.co.uk/news/world/americas/macys-thanksgiving-parade-balloons-hippo-floated-away-b3091681.html",
+     "published": "2026-11-25T18:09:43.000Z",
+     "summary": "In the parade's early years, the helium-filled balloons weren’t packed up and stored for next year"
+    },
+    {
+     "id": "s4-4",
+     "side": "centre",
+     "outlet": "BBC News",
+     "outletId": "bbc",
+     "caution": false,
+     "access": "free",
+     "headline": "Macy's postpones Thanksgiving parade due to weather",
+     "url": "https://www.bbc.co.uk/news/articles/cwkgr38l2g9yo",
+     "published": "2026-11-25T23:57:03.000Z",
+     "summary": "The was the first time ever that the iconic celebration - known for its massive balloons floating past the city's skyscrapers - was delayed because of storms."
+    },
+    {
+     "id": "s4-5",
+     "side": "centre",
+     "outlet": "CNBC",
+     "outletId": "cnbc",
+     "caution": false,
+     "access": "free",
+     "headline": "Macy's postpones Thanksgiving Day Parade due to severe weather",
+     "url": "https://www.cnbc.com/2026/11/25/macys-thanksgiving-day-parade-postponed.html",
+     "published": "2026-11-25T22:26:56.000Z",
+     "summary": "Macy's announced Wednesday that its annual Thanksgiving Day Parade is being postponed to Saturday due to severe weather."
+    },
+    {
+     "id": "s4-6",
+     "side": "centre",
+     "outlet": "The Hill",
+     "outletId": "thehill",
+     "caution": false,
+     "access": "free",
+     "headline": "New York delays Macy’s Thanksgiving parade because of severe weather",
+     "url": "https://thehill.com/homenews/state-watch/6243709-nyc-macys-parade-set-saturday/",
+     "published": "2026-11-25T21:08:16.000Z",
+     "summary": "Macy’s pushed the Macy’s Thanksgiving Day Parade in New York to Saturday because of a severe storm moving up the East Coast, which is likely to bring heavy rain and wind to the New York City area Thursday. “The safety of our participants an"
+    },
+    {
+     "id": "s4-7",
+     "side": "centre",
+     "outlet": "Axios",
+     "outletId": "axios",
+     "caution": false,
+     "access": "unknown",
+     "headline": "Macy's Thanksgiving parade postponed for the first time in the event's history",
+     "url": "https://www.axios.com/2026/11/25/macys-thanksgiving-parade-2026-balloons-weather",
+     "published": "2026-11-25T21:28:25.000Z",
+     "summary": "The Macy's Thanksgiving Day Parade has been postponed for the first time in the event's history, the retailer confirmed Wednesday. Why it matters: Macy's was expected to celebrate its 100th Thanksgiving Day Parade with a record 100 inflatab"
+    },
+    {
+     "id": "s4-8",
+     "side": "far_right",
+     "outlet": "The Gateway Pundit",
+     "outletId": "gatewaypundit",
+     "caution": true,
+     "access": "free",
+     "headline": "JUST IN: Macy’s 100th Thanksgiving Day Parade Postponed Due to Weather",
+     "url": "https://www.thegatewaypundit.com/2026/11/macys-100th-thanksgiving-day-parade-postponed/",
+     "published": "2026-11-25T21:45:20.000Z",
+     "summary": "Macy's postponed its 100th Thanksgiving Day Parade to Saturday due to weather. The post JUST IN: Macy’s 100th Thanksgiving Day Parade Postponed Due to Weather appeared first on The Gateway Pundit ."
+    },
+    {
+     "id": "s4-9",
+     "side": "far_right",
+     "outlet": "Breitbart",
+     "outletId": "breitbart",
+     "caution": true,
+     "access": "free",
+     "headline": "Macy's 100th Thanksgiving Day Parade Postponed Due to Severe Weather",
+     "url": "https://www.breitbart.com/weather/2026/11/25/macys-100th-thanksgiving-day-parade-postponed-due-to-severe-weather/",
+     "published": "2026-11-25T22:14:00.000Z",
+     "summary": "Macy's 100th Thanksgiving Day Parade will be postponed until Saturday due to severe weather — its first cancellation since World War II. The post Macy’s 100th Thanksgiving Day Parade Postponed Due to Severe Weather appeared first on Breitba"
+    },
+    {
+     "id": "s4-10",
+     "side": "far_right",
+     "outlet": "One America News",
+     "outletId": "oann",
+     "caution": true,
+     "access": "unknown",
+     "headline": "Macy’s 100th Thanksgiving Day Parade postponed to Sat. due to severe weather",
+     "url": "https://news.google.com/rss/articles/CBMiqAFBVV95cUxOd1JLR25RRFcteUpWSWk1aUtqaWw2TGI3eUU2c01Ndjdab3VpX2Y4VzB2WjlncUc1d0JkZ09YbFV3QlNRcHBtWkN1cnNDejJwVEZlMV9xVV8wU3ZQbV9JY1lZaDdCVTBZVXlnSHFvdkViemhlbUZ2TUhQMjc5M3FHLXp0NF9TZ1F4UzM4dzhSdFZyMGw3MW1TWmNQWk1BMk0yWnFlckVGOE0?oc=5",
+     "published": "2026-11-25T21:28:27.000Z",
+     "summary": "Macy’s 100th Thanksgiving Day Parade postponed to Sat. due to severe weather One America News Network"
+    },
+    {
+     "id": "s4-11",
+     "side": "far_right",
+     "outlet": "Breitbart",
+     "outletId": "breitbart",
+     "caution": true,
+     "access": "free",
+     "headline": "Could Weather Cancel Macy’s 100th Thanksgiving Day Parade? It Has Happened Before",
+     "url": "https://www.breitbart.com/environment/2026/11/25/could-weather-cancel-macys-100th-thanksgiving-day-parade-it-has-happened-before/",
+     "published": "2026-11-25T15:04:20.000Z",
+     "summary": "This year’s Macy’s Thanksgiving Day Parade will be the 100th edition of the much-applauded public celebration but already early weather forecasts are casting doubt on whether or not it will go ahead fully as planned. The post Could Weather"
+    }
+   ]
+  },
+  {
+   "id": "s5",
+   "rank": 5,
+   "outlets": 7,
+   "sides": {
+    "far_left": 0,
+    "left": 1,
+    "centre": 4,
+    "right": 1,
+    "far_right": 1
+   },
+   "written5": true,
+   "lead": "s5-3",
+   "items": [
+    {
+     "id": "s5-1",
+     "side": "left",
+     "outlet": "The Independent",
+     "outletId": "independent",
+     "caution": true,
+     "access": "free",
+     "headline": "Small plane plunges 10,000 feet per minute off Mississippi coast, killing six including two children",
+     "url": "https://www.independent.co.uk/news/world/americas/mississippi-plane-crash-cessna-gulf-b3091251.html",
+     "published": "2026-11-25T09:41:54.000Z",
+     "summary": "A small plane crashed Tuesday off the coast of Mississippi, killing the six people, including two children, on board"
+    },
+    {
+     "id": "s5-2",
+     "side": "left",
+     "outlet": "The Independent",
+     "outletId": "independent",
+     "caution": true,
+     "access": "free",
+     "headline": "Six Mississippi plane crash victims named after fatal wreck on family trip",
+     "url": "https://www.independent.co.uk/news/world/americas/brent-stokes-mississippi-plane-crash-victims-florida-b3091735.html",
+     "published": "2026-11-25T19:43:18.000Z",
+     "summary": "Their family issued a statement saying that the six relatives ‘died doing what they love’"
+    },
+    {
+     "id": "s5-3",
+     "side": "centre",
+     "outlet": "BBC News",
+     "outletId": "bbc",
+     "caution": false,
+     "access": "free",
+     "headline": "Two children among six dead after plane crash off Mississippi coast",
+     "url": "https://www.bbc.co.uk/news/articles/c6z74l1017zpo",
+     "published": "2026-11-25T07:08:22.000Z",
+     "summary": "Divers found the bodies of four adults and two boys, aged 8 and 10, in the fuselage, the US Coast Guard said."
+    },
+    {
+     "id": "s5-4",
+     "side": "centre",
+     "outlet": "UPI",
+     "outletId": "upi",
+     "caution": false,
+     "access": "free",
+     "headline": "6 dead in plane crash off Mississippi coast",
+     "url": "https://www.upi.com/Top_News/US/2026/11/25/6-dead-mississippi-plane-crash/6431795614772/",
+     "published": "2026-11-25T14:02:14.000Z",
+     "summary": "A small plane crashed off the coast of Mississippi, killing 6 people, the U.S. Coast Guard said. There were four adults and two children aboard."
+    },
+    {
+     "id": "s5-5",
+     "side": "centre",
+     "outlet": "The Hill",
+     "outletId": "thehill",
+     "caution": false,
+     "access": "free",
+     "headline": "Plane crash off the coast of Mississippi kills 6, including 2 children",
+     "url": "https://thehill.com/homenews/state-watch/6241831-plane-crash-off-the-coast-of-mississippi-kills-6-including-2-children/",
+     "published": "2026-11-25T13:06:28.000Z",
+     "summary": "Six people, including two children, have been found dead after a plane crashed off the coast of Mississippi Tuesday, according to the U.S. Coast Guard."
+    },
+    {
+     "id": "s5-6",
+     "side": "centre",
+     "outlet": "UPI",
+     "outletId": "upi",
+     "caution": false,
+     "access": "free",
+     "headline": "Coast Guard searches for 6 after plane crashes off Mississippi coast",
+     "url": "https://www.upi.com/Top_News/US/2026/11/24/Mississippi-plane-crash/7531795571782/",
+     "published": "2026-11-25T02:17:46.000Z",
+     "summary": "U.S. Coast Guard rescue crews were searching waters off the Mississippi coast for a downed Cessna with six people, including two children, aboard."
+    },
+    {
+     "id": "s5-7",
+     "side": "centre",
+     "outlet": "Sky News",
+     "outletId": "skynews",
+     "caution": false,
+     "access": "unknown",
+     "headline": "Two children among six dead in plane crash",
+     "url": "https://news.sky.com/story/divers-find-bodies-of-six-people-including-two-children-after-us-plane-crash-13616273",
+     "published": "2026-11-25T06:38:00.000Z",
+     "summary": "Divers have found the bodies of six people, including two children, after a plane crashed off the coast of Mississippi on Tuesday, according to the US Coast Guard."
+    },
+    {
+     "id": "s5-8",
+     "side": "right",
+     "outlet": "Daily Mail",
+     "outletId": "dailymail",
+     "caution": false,
+     "access": "free",
+     "headline": "Plane carrying four adults and two children crashes off Mississippi as the desperate search for survivors begins",
+     "url": "https://www.dailymail.com/news/article-16320079/Plane-four-adults-two-children-crashes-Mississippi.html?ns_mchannel=rss&ns_campaign=1490",
+     "published": "2026-11-25T02:08:20.000Z",
+     "summary": "Authorities are desperately searching for four adults and two children who were onboard a small plane when it crashed off the coast of Mississippi on Tuesday."
+    },
+    {
+     "id": "s5-9",
+     "side": "far_right",
+     "outlet": "Breitbart",
+     "outletId": "breitbart",
+     "caution": true,
+     "access": "free",
+     "headline": "Divers Recover Bodies of Three Adults and Three Minors from Small Plane Crash Off Mississippi Coast",
+     "url": "https://www.breitbart.com/local/2026/11/25/divers-recover-bodies-of-three-adults-and-three-minors-from-small-plane-crash-off-mississippi-coast/",
+     "published": "2026-11-25T21:55:50.000Z",
+     "summary": "Six people, including two children and a teenager, were killed when a small plane crashed Tuesday off the coast of Mississippi, according to the U.S. Coast Guard. The post Divers Recover Bodies of Three Adults and Three Minors from Small Pl"
+    }
+   ]
+  },
+  {
+   "id": "s6",
+   "rank": 6,
+   "outlets": 5,
+   "sides": {
+    "far_left": 0,
+    "left": 1,
+    "centre": 1,
+    "right": 1,
+    "far_right": 2
+   },
+   "written5": true,
+   "lead": "s6-4",
+   "items": [
+    {
+     "id": "s6-1",
+     "side": "left",
+     "outlet": "The Atlantic",
+     "outletId": "atlantic",
+     "caution": false,
+     "access": "metered",
+     "headline": "What Is Chris Van Hollen Doing?",
+     "url": "https://www.theatlantic.com/politics/2026/11/van-hollen-schumer-democrats-senate-leader/689553/",
+     "published": "2026-11-25T10:00:00.000Z",
+     "summary": "Americans are clamoring for change. Is the Democratic caucus?"
+    },
+    {
+     "id": "s6-2",
+     "side": "centre",
+     "outlet": "The Hill",
+     "outletId": "thehill",
+     "caution": false,
+     "access": "free",
+     "headline": "Jackson, progressive Maine senator-elect, backs Van Hollen for leader",
+     "url": "https://thehill.com/homenews/senate/6243237-troy-jackson-chris-van-hollen-support-senate-leadership-race/",
+     "published": "2026-11-25T18:38:58.000Z",
+     "summary": "Troy Jackson, the progressive senator-elect from Maine who defeated Sen. Susan Collins (R-Maine), announced Wednesday that he will support Sen. Chris Van Hollen (D-Md.) to become the next Senate majority leader. “I’ve talked with Mainers ab"
+    },
+    {
+     "id": "s6-3",
+     "side": "right",
+     "outlet": "National Review",
+     "outletId": "nationalreview",
+     "caution": false,
+     "access": "unknown",
+     "headline": "Chris Van Hollen’s Anti-Israel Turn",
+     "url": "https://www.nationalreview.com/article/chris-van-hollen-s-anti-israel-turn",
+     "published": "2026-11-25T11:00:00.000Z",
+     "summary": "The Maryland senator has become an unlikely opponent of the Jewish state — and that’s boosted his fortunes in the Democratic Party."
+    },
+    {
+     "id": "s6-4",
+     "side": "far_right",
+     "outlet": "Breitbart",
+     "outletId": "breitbart",
+     "caution": true,
+     "access": "free",
+     "headline": "Maine Democrat Senator-Elect Troy Jackson Backs Chris Van Hollen to Oust Chuck Schumer as Majority Leader",
+     "url": "https://www.breitbart.com/politics/2026/11/25/maine-democrat-senator-elect-troy-jackson-backs-chris-van-hollen-to-oust-chuck-schumer-as-majority-leader/",
+     "published": "2026-11-25T22:01:34.000Z",
+     "summary": "Sen.-elect Troy Jackson (D-ME), a longtime skeptic of Senate Democrat Leader Chuck Schumer (D-NY), announced Wednesday that he will vote for Sen. Chris Van Hollen (D-MD) in the upcoming Senate Democrat leadership election, citing their shar"
+    },
+    {
+     "id": "s6-5",
+     "side": "far_right",
+     "outlet": "The National Pulse",
+     "outletId": "nationalpulse",
+     "caution": true,
+     "access": "free",
+     "headline": "DATA: Democrats Want Van Hollen Over Schumer for Senate Leader by More Than 2-to-1.",
+     "url": "https://thenationalpulse.com/2026/11/25/data-democrats-want-van-hollen-over-schumer-for-senate-leader-by-more-than-2-to-1/",
+     "published": "2026-11-25T18:25:06.000Z",
+     "summary": "Many more grassroots Democrats want Chris Van Hollen to lead their party in the Senate over Chuck Schumer, according to new polling."
+    }
+   ]
+  },
+  {
+   "id": "s7",
+   "rank": 7,
+   "outlets": 5,
+   "sides": {
+    "far_left": 0,
+    "left": 2,
+    "centre": 3,
+    "right": 0,
+    "far_right": 0
+   },
+   "written5": false,
+   "lead": "s7-1",
+   "items": [
+    {
+     "id": "s7-1",
+     "side": "left",
+     "outlet": "The Independent",
+     "outletId": "independent",
+     "caution": true,
+     "access": "free",
+     "headline": "Why Australia’s security pact with Solomon Islands is such a big blow to China",
+     "url": "https://www.independent.co.uk/news/world/australasia/australia-solomon-islands-china-security-pact-b3091105.html",
+     "published": "2026-11-25T03:47:13.000Z",
+     "summary": "The deal will see Australia take a greater role in Solomon Islands' police and border force"
+    },
+    {
+     "id": "s7-2",
+     "side": "left",
+     "outlet": "The New York Times",
+     "outletId": "nyt",
+     "caution": false,
+     "access": "paid",
+     "headline": "Solomon Islands Enters Security Treaty With Australia, in a Blow to China",
+     "url": "https://www.nytimes.com/2026/11/24/world/asia/solomon-islands-security-treaty-australia-china.html",
+     "published": "2026-11-25T05:24:36.000Z",
+     "summary": "A 2022 Solomon Islands agreement with China had raised concerns it would enable Beijing to establish a military presence on the Pacific island. The new accord precludes such bases."
+    },
+    {
+     "id": "s7-3",
+     "side": "centre",
+     "outlet": "UPI",
+     "outletId": "upi",
+     "caution": false,
+     "access": "free",
+     "headline": "Solomon Islands signs security pact with Canberra, ditches China",
+     "url": "https://www.upi.com/Top_News/World-News/2026/11/25/Australia-Solomon-Islands-sign-treaty/9361795598194/",
+     "published": "2026-11-25T11:52:06.000Z",
+     "summary": "The Solomon Islands inked a security treaty with Australia after opting not to renew a divisive 2022 pact with China that was due to expire in April."
+    },
+    {
+     "id": "s7-4",
+     "side": "centre",
+     "outlet": "BBC News",
+     "outletId": "bbc",
+     "caution": false,
+     "access": "free",
+     "headline": "Solomon Islands ends controversial security pact with China for Australian treaty",
+     "url": "https://www.bbc.co.uk/news/articles/ckdd1z2gvlgno",
+     "published": "2026-11-25T03:15:12.000Z",
+     "summary": "Solomon Islands leader Matthew Wale said his country would no longer be a point of regional uncertainty."
+    },
+    {
+     "id": "s7-5",
+     "side": "centre",
+     "outlet": "Deutsche Welle",
+     "outletId": "dw",
+     "caution": false,
+     "access": "free",
+     "headline": "Australia, Solomon Islands sign sweeping pact seen as countering China",
+     "url": "https://www.dw.com/en/australia-solomon-islands-sign-sweeping-pact-seen-as-countering-china/a-80043646?maca=en-rss-en-all-1573-rdf",
+     "published": "2026-11-25T10:51:00.000Z",
+     "summary": "Australia will become the Solomon Islands' primary security partner, while the archipelago will reject any foreign power trying to \"interfere\" on its \"sensitive\" infrastructure."
+    }
+   ]
+  },
+  {
+   "id": "s8",
+   "rank": 8,
+   "outlets": 4,
+   "sides": {
+    "far_left": 1,
+    "left": 1,
+    "centre": 0,
+    "right": 2,
+    "far_right": 0
+   },
+   "written5": true,
+   "lead": "s8-1",
+   "items": [
+    {
+     "id": "s8-1",
+     "side": "far_left",
+     "outlet": "Jacobin",
+     "outletId": "jacobin",
+     "caution": false,
+     "access": "free",
+     "headline": "Grand Theft Auto Grew Up. America Didn’t.",
+     "url": "https://jacobin.com/2026/11/gta-rockstar-morality-violence-trump",
+     "published": "2026-11-25T17:04:08.982Z",
+     "summary": "The United States under Donald Trump has turned into a parody of itself, descending further and further into juvenilia. Grand Theft Auto VI, meanwhile, has turned more darkly serious and morally complex."
+    },
+    {
+     "id": "s8-2",
+     "side": "left",
+     "outlet": "The Atlantic",
+     "outletId": "atlantic",
+     "caution": false,
+     "access": "metered",
+     "headline": "I’m Not Going to Play Grand Theft Auto VI",
+     "url": "https://www.theatlantic.com/family/2026/11/gta-vi-grand-theft-auto-art/689572/",
+     "published": "2026-11-25T14:00:00.000Z",
+     "summary": "For all its lofty aspirations, the latest GTA is still a video game."
+    },
+    {
+     "id": "s8-3",
+     "side": "right",
+     "outlet": "The Daily Caller",
+     "outletId": "dailycaller",
+     "caution": true,
+     "access": "free",
+     "headline": "Gamers Tried To Bootleg Grand Theft Auto VI Using AI ‘Agent Swarms.’ It Didn’t End Well",
+     "url": "https://dailycaller.com/2026/11/25/grand-theft-auto-vi-artifical-intelligence-agents-reverse-engineer-pc-game",
+     "published": "2026-11-25T20:57:53.000Z",
+     "summary": "‘GTA 6 reached fully in game on pc’"
+    },
+    {
+     "id": "s8-4",
+     "side": "right",
+     "outlet": "Daily Mail",
+     "outletId": "dailymail",
+     "caution": false,
+     "access": "free",
+     "headline": "Grand Theft Auto VI players are going to strip clubs to request lap dances straight from the game - as one asks Spearmint Rhino 'can your performers dance like the girls in Jack of Hearts?'",
+     "url": "https://www.dailymail.com/sciencetech/article-16321187/Grand-Theft-Auto-VI-players-strip-clubs.html?ns_mchannel=rss&ns_campaign=1490",
+     "published": "2026-11-25T13:52:10.000Z",
+     "summary": "Spearmint Rhino, which operates a global chain of strip clubs, has reported a surge in requests for lap dances that replicate the ones found in the game's strip clubs."
+    }
+   ]
+  },
+  {
+   "id": "s9",
+   "rank": 9,
+   "outlets": 4,
+   "sides": {
+    "far_left": 0,
+    "left": 1,
+    "centre": 3,
+    "right": 0,
+    "far_right": 0
+   },
+   "written5": false,
+   "lead": "s9-2",
+   "items": [
+    {
+     "id": "s9-1",
+     "side": "left",
+     "outlet": "The Independent",
+     "outletId": "independent",
+     "caution": true,
+     "access": "free",
+     "headline": "One dead as police storm Colombian supermarket after armed men hold 30 people hostage",
+     "url": "https://www.independent.co.uk/news/world/americas/columbia-hostage-cartagena-supermarket-exito-b3091232.html",
+     "published": "2026-11-25T09:29:40.000Z",
+     "summary": "The captors, whose identity was not given, had originally taken about 30 hostages"
+    },
+    {
+     "id": "s9-2",
+     "side": "centre",
+     "outlet": "UPI",
+     "outletId": "upi",
+     "caution": false,
+     "access": "free",
+     "headline": "Colombia rescues all hostages held at Cartagena supermarket",
+     "url": "https://www.upi.com/Top_News/World-News/2026/11/25/latam-colombia-cartagena-hostages-rescued/1711795616841/",
+     "published": "2026-11-25T14:54:03.000Z",
+     "summary": "Colombian security forces rescued all remaining hostages unharmed after a failed robbery led to an overnight siege at a Cartagena supermarket."
+    },
+    {
+     "id": "s9-3",
+     "side": "centre",
+     "outlet": "France 24",
+     "outletId": "france24",
+     "caution": false,
+     "access": "free",
+     "headline": "Colombian authorities rescue all hostages held at Cartagena supermarket",
+     "url": "https://www.france24.com/en/video/20261125-colombian-authorities-rescue-all-hostages-held-at-cartagena-supermarket",
+     "published": "2026-11-25T13:56:39.000Z",
+     "summary": "Security forces rescued all the hostages held for nearly a day at a supermarket in the northern Colombian tourist city of Cartagena, President Abelardo de la Espriella said early Wednesday. The president said that the men were “common crimi"
+    },
+    {
+     "id": "s9-4",
+     "side": "centre",
+     "outlet": "BBC News",
+     "outletId": "bbc",
+     "caution": false,
+     "access": "free",
+     "headline": "Colombian police storm supermarket to free 20 held hostage for 17 hours",
+     "url": "https://www.bbc.co.uk/news/articles/ckp80mjr9emyo",
+     "published": "2026-11-25T16:20:14.000Z",
+     "summary": "One gunman was killed in the operation to free around 20 shoppers and employees after a 17-hour hostage ordeal."
+    },
+    {
+     "id": "s9-5",
+     "side": "centre",
+     "outlet": "France 24",
+     "outletId": "france24",
+     "caution": false,
+     "access": "free",
+     "headline": "Colombia: Security forces rescue hostages in supermarket siege",
+     "url": "https://www.france24.com/en/video/20261125-colombia-security-forces-rescue-hostages-in-supermarket-siege",
+     "published": "2026-11-25T16:08:44.000Z",
+     "summary": "Some 25 people being held hostage by gunmen in a supermarket in Cartagena, Colombia, were freed Tuesday after security forces stormed the building. One assailant was killed during the operation but no hostages were injured."
+    }
+   ]
+  },
+  {
+   "id": "s10",
+   "rank": 10,
+   "outlets": 4,
+   "sides": {
+    "far_left": 0,
+    "left": 1,
+    "centre": 3,
+    "right": 0,
+    "far_right": 0
+   },
+   "written5": false,
+   "lead": "s10-2",
+   "items": [
+    {
+     "id": "s10-1",
+     "side": "left",
+     "outlet": "The New York Times",
+     "outletId": "nyt",
+     "caution": false,
+     "access": "paid",
+     "headline": "North Korea Kicks Out Swiss Diplomats in Spat Linked to Ukraine War",
+     "url": "https://www.nytimes.com/2026/11/25/world/asia/north-korea-switzerland-diplomats.html",
+     "published": "2026-11-25T17:00:24.000Z",
+     "summary": "The move followed Switzerland’s decision to impose sanctions on an international youth camp in North Korea, which is accused of hosting Ukrainian children for indoctrination."
+    },
+    {
+     "id": "s10-2",
+     "side": "centre",
+     "outlet": "UPI",
+     "outletId": "upi",
+     "caution": false,
+     "access": "free",
+     "headline": "North Korea expels Swiss envoy over children’s camp sanctions",
+     "url": "https://www.upi.com/Top_News/World-News/2026/11/25/North-Korea-Switzerland-expel-envoy-Ukraine-sanctions-camp/4841795594516/",
+     "published": "2026-11-25T08:46:35.000Z",
+     "summary": "North Korea on Wednesday ordered the head of Switzerland's diplomatic office in Pyongyang to leave the country within 48 hours and called for the office to close."
+    },
+    {
+     "id": "s10-3",
+     "side": "centre",
+     "outlet": "Deutsche Welle",
+     "outletId": "dw",
+     "caution": false,
+     "access": "free",
+     "headline": "North Korea expels Swiss envoy over sanctions on camp accused of indoctrinating Ukrainian children",
+     "url": "https://www.dw.com/en/north-korea-expels-swiss-envoy-over-sanctions-on-camp-accused-of-indoctrinating-ukrainian-children/a-80043648?maca=en-rss-en-all-1573-rdf",
+     "published": "2026-11-25T11:12:00.000Z",
+     "summary": "North Korea has ordered Switzerland to close its newly reopened diplomatic office. The dispute centers on Swiss sanctions against a camp accused of indoctrinating Ukrainian children from Russian-occupied territories."
+    },
+    {
+     "id": "s10-4",
+     "side": "centre",
+     "outlet": "BBC News",
+     "outletId": "bbc",
+     "caution": false,
+     "access": "free",
+     "headline": "North Korea expels Swiss diplomat in sanctions row",
+     "url": "https://www.bbc.co.uk/news/articles/cq0l34e4kkr5o",
+     "published": "2026-11-25T21:51:17.000Z",
+     "summary": "Swiss officials said relations would be kept through North Korea's embassy in Bern, and its own embassy in Beijing."
+    }
+   ]
+  }
+ ]
+}

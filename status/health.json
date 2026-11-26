@@ -1,7 +1,33 @@
 {
-  "generated": "2026-11-24T20:17:05.037Z",
-  "ok": true,
-  "problems": 0,
-  "failing": [],
-  "run": "https://github.com/JudePettit/jdpi/actions/runs/45479125374"
+  "generated": "2026-11-25T19:29:45.555Z",
+  "ok": false,
+  "problems": 5,
+  "failing": [
+    {
+      "name": "Scientific Briefing",
+      "what": "science/briefing/data/stories.json",
+      "detail": "16 h old, limit 15 h (briefings-refresh.yml)"
+    },
+    {
+      "name": "Scientific, Economics and Digital Briefings refresh",
+      "what": "briefings-refresh.yml",
+      "detail": "last scheduled run failure on 2026-11-25 18:12 UTC: https://github.com/JudePettit/jdpi/actions/runs/45672727470"
+    },
+    {
+      "name": "OSINT sanctions index refresh",
+      "what": "sanctions-refresh.yml",
+      "detail": "last scheduled run failure on 2026-11-25 17:56 UTC: https://github.com/JudePettit/jdpi/actions/runs/45669993603"
+    },
+    {
+      "name": "Economics Briefing on the site",
+      "what": "live econ/briefing/data/stories.json",
+      "detail": "the site serves a copy 15 h older than the repository"
+    },
+    {
+      "name": "Digital Briefing on the site",
+      "what": "live digital/briefing/data/stories.json",
+      "detail": "the site serves a copy 15 h older than the repository"
+    }
+  ],
+  "run": "https://github.com/JudePettit/jdpi/actions/runs/45685701712"
 }

@@ -9,7 +9,50 @@ export const decode = s => String(s || '')
   .replace(/&#x([0-9a-f]+);/gi, (_, h) => String.fromCodePoint(parseInt(h, 16)))
   .replace(/&#(\d+);/g, (_, d) => String.fromCodePoint(+d))
   .replace(/&([a-z][a-z0-9]{1,7});/gi, (m, n) => ENT[n] ?? ENT[n.toLowerCase()] ?? m);
-const strip = s => decode(decode(s)).replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim();
+const untag = s => s.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim();
+const strip = s => untag(decode(decode(s)));
+
+// The Guardian puts a list of links between its standfirst and the article: to its live page ("Follow our Australia
+// politics live blog for latest updates", "Business live – latest updates"), to related stories, or to a sign-up ("Get
+// our daily political email, free app or daily news podcast", "Sign up for the Breaking News US email"). A list made
+// only of such items goes; a list with any other item stays.
+const LIST = /<ul\b[^>]*>((?:(?!<\/?ul\b)[\s\S])*)<\/ul>/gi;
+const LI = /<li\b[^>]*>([\s\S]*?)<\/li>/gi;
+const A = /<a\b[^>]*>([\s\S]*?)<\/a>/gi;
+const bareLinks = h => /<a\b/i.test(h) && !untag(h.replace(A, ' ')).replace(/[\s,.;:–—|•·-]+/g, '');
+const linksOnly = li => bareLinks(li) || (/<a\b/i.test(li) && /^(?:Get our|Sign up)\b/i.test(untag(li)));
+export const dropLinkLists = html => html.replace(LIST, (m, inner) => {
+  const items = [...inner.matchAll(LI)].map(x => x[1]);
+  return items.length && !inner.replace(LI, '').trim() && items.every(linksOnly) ? ' ' : m;
+});
+// It also puts such a link in a paragraph of its own: a related story or a sign-up after a bullet ("• Don’t get This
+// is India delivered to your inbox? Sign up here"), or a sign-up alone ("Sign up for Guardian Australia’s Politics,
+// really newsletter here"). A paragraph made only of links goes when it opens with a bullet or a link says "Sign up";
+// a bullet before words of the article's own (a warning, say) stays.
+const PARA = /<p\b[^>]*>((?:(?!<\/?p\b)[\s\S])*)<\/p>/gi;
+export const dropLinkParagraphs = html => html.replace(PARA, (m, inner) => (bareLinks(inner)
+  && (/^•/.test(untag(inner)) || [...inner.matchAll(A)].some(x => /\bSign up\b/i.test(untag(x[1])))) ? ' ' : m));
+// A paragraph that ends without a stop (the Guardian's standfirst: "… cannot secure short-term backing</p><p>Norse
+// Atlantic Airways …") gets one where the next block begins, so it does not run into the article's first sentence. A
+// footnote mark after the stop does not hide it, and Chinese and Japanese stops count. The stop goes in as a mark and
+// becomes "." once the tags are gone, so it closes up to the last word; an empty paragraph after one without a stop is
+// marked as well, and a run of marks makes one stop. Summaries only: titles must not gain a full stop. (The same rule
+// as the Scientific Briefing's summarise() in science/scripts/briefing-feeds.mjs.)
+const PARA_END = /<\/p>\s*(?=<(?:p|ul|ol|blockquote|h[1-6])\b)/gi;
+const endsSentence = html => {
+  const t = html.replace(/^[^<]*>/, '').replace(/<sup\b[^>]*>[\s\S]*?<\/sup>/gi, '').replace(/<[^>]*>/g, '').trimEnd();
+  return !t || /[.!?:;,…。！？：；，][’”"')\]」』]*$/.test(t);
+};
+const STOP_MARK = '\u0001';
+const endParagraphs = html => html.replace(PARA_END, (m, at, all) => (endsSentence(all.slice(Math.max(0, at - 400), at)) ? m : STOP_MARK + m));
+// Tags inside a line of text (a link, bold, italic) go without a space, as a browser shows them, so that "senator
+// </a><strong><a>Leah Blyth</a></strong><a> to her party</a>." does not read "to her party ." Block tags, line breaks and
+// footnote marks still part words.
+const INLINE = /<\/?(?:a|b|strong|em|i|u|span|abbr|cite|q|small|mark)\b[^>]*>/gi;
+/** A feed item's description as plain text: the Guardian's lists and paragraphs of links after the standfirst
+ *  dropped, and a stop where a paragraph without one is joined to the next. */
+export const describe = s => untag(endParagraphs(dropLinkParagraphs(dropLinkLists(decode(decode(s)).replaceAll(STOP_MARK, ''))))
+  .replace(INLINE, '')).replace(/(?:\s*\u0001)+/g, '.');
 const tag = (block, name) => { const m = block.match(new RegExp(`<${name}(?:\\s[^>]*)?>([\\s\\S]*?)</${name}>`, 'i')); return m ? m[1] : ''; };
 const attr = (block, name, a) => { const m = block.match(new RegExp(`<${name}\\b[^>]*\\b${a}=["']([^"']+)["']`, 'i')); return m ? decode(m[1]) : ''; };
 
@@ -38,7 +81,7 @@ export function parseFeed(xml) {
       link = attr(alt, 'link', 'href') || strip(tag(b, 'guid'));
     }
     const date = strip(tag(b, 'pubDate') || tag(b, 'dc:date') || tag(b, 'published') || tag(b, 'updated'));
-    const summary = strip(tag(b, 'description') || tag(b, 'summary') || tag(b, 'content')).slice(0, 320);
+    const summary = describe(tag(b, 'description') || tag(b, 'summary') || tag(b, 'content')).slice(0, 320);
     const url = canonicalUrl(link);
     if (!title || !url) continue;
     const t = Date.parse(date);

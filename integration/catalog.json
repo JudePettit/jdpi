@@ -1,5 +1,5 @@
 {
-  "generated": "2026-11-26T09:33:10.989Z",
+  "generated": "2026-11-26T11:14:58.293Z",
   "name": "Vitruvian Manager data catalogue",
   "publisher": "JDP-Iq",
   "description": "Every public dataset in Vitruvian Manager (VM, by JDP-Iq), with its fields, size, licence and sources. Read-only; no keys. Files are static JSON on this site; the MCP server (/mcp) and the JSON API (/api/v1/) query them with row and size caps.",
@@ -69,7 +69,7 @@
       "title": "Geopolitical Volatility: latest scores",
       "module": "rt",
       "submodule": "volatility",
-      "description": "The Geopolitical Volatility Index (0–100) for every country on the latest day (2026-11-24), with its five components: conflict & security (35%), political/diplomatic escalation (20%), civil unrest (20%), economic disruption (10%) and cross-border spread (15%). It measures news coverage of events, not events on the ground.",
+      "description": "The Geopolitical Volatility Index (0–100) for every country on the latest day (2026-11-25), with its five components: conflict & security (35%), political/diplomatic escalation (20%), civil unrest (20%), economic disruption (10%) and cross-border spread (15%). It measures news coverage of events, not events on the ground.",
       "url": "integration/data/volatility-latest.json",
       "format": "json",
       "records": "records",
@@ -155,20 +155,20 @@
       "sources": [
         "GDELT 2.0 event exports, all 96 quarter-hour files a day (the GDELT Project)"
       ],
-      "updated": "2026-11-25",
+      "updated": "2026-11-26",
       "refresh": "daily",
       "page": "q/volatility.html",
       "derivedFrom": [
         "volatility/data/index.json"
       ],
-      "bytes": 63990
+      "bytes": 62519
     },
     {
       "id": "volatility-daily",
       "title": "Geopolitical Volatility: daily scores",
       "module": "rt",
       "submodule": "volatility",
-      "description": "Daily Geopolitical Volatility Index scores and components for every country over the last 60 days, for trends and comparisons.",
+      "description": "Daily Geopolitical Volatility Index scores and components for every country over the last 61 days, for trends and comparisons.",
       "urls": [
         "integration/data/volatility-daily/0.json",
         "integration/data/volatility-daily/1.json",
@@ -248,18 +248,18 @@
           "description": "Coverage level: high, medium or low"
         }
       ],
-      "rows": 12686,
+      "rows": 12905,
       "licence": "Index © JDP-Iq (method gvi-1.2-q96); GDELT data free to use with attribution to the GDELT Project.",
       "sources": [
         "GDELT 2.0 event exports (the GDELT Project)"
       ],
-      "updated": "2026-11-25",
+      "updated": "2026-11-26",
       "refresh": "daily",
       "page": "q/volatility.html",
       "derivedFrom": [
         "volatility/data/index.json"
       ],
-      "bytes": 2331047
+      "bytes": 2371256
     },
     {
       "id": "volatility-global",
@@ -292,18 +292,18 @@
           "description": "Quarter-hour GDELT files processed (96 is a full day)"
         }
       ],
-      "rows": 60,
+      "rows": 61,
       "licence": "Index © JDP-Iq; GDELT data free to use with attribution to the GDELT Project.",
       "sources": [
         "GDELT 2.0 event exports (the GDELT Project)"
       ],
-      "updated": "2026-11-25",
+      "updated": "2026-11-26",
       "refresh": "daily",
       "page": "q/volatility.html",
       "derivedFrom": [
         "volatility/data/index.json"
       ],
-      "bytes": 4165
+      "bytes": 4231
     },
     {
       "id": "realtime-wars",
@@ -386,13 +386,13 @@
       "sources": [
         "UCDP Candidate Events Dataset v26.01.26.09 (Hegre, H. et al. (2020). Introducing the UCDP Candidate Events Dataset. Research & Politics 7(3). Data: Uppsala Conflict Data Program, ucdp.uu.se.)"
       ],
-      "updated": "2026-11-17",
+      "updated": "2026-11-26",
       "refresh": "weekly",
       "page": "q/battlefield.html",
       "derivedFrom": [
         "battlefield/data/realtime.json"
       ],
-      "bytes": 47064
+      "bytes": 47184
     },
     {
       "id": "realtime-war-months",
@@ -455,13 +455,13 @@
       "sources": [
         "UCDP Candidate Events Dataset v26.01.26.09 (Hegre, H. et al. (2020). Introducing the UCDP Candidate Events Dataset. Research & Politics 7(3). Data: Uppsala Conflict Data Program, ucdp.uu.se.)"
       ],
-      "updated": "2026-11-17",
+      "updated": "2026-11-26",
       "refresh": "weekly",
       "page": "q/battlefield.html?view=archive",
       "derivedFrom": [
         "battlefield/data/realtime.json"
       ],
-      "bytes": 240894
+      "bytes": 240056
     },
     {
       "id": "realtime-conflict-cells",
@@ -524,13 +524,13 @@
       "sources": [
         "UCDP Candidate Events Dataset v26.01.26.09 (Hegre, H. et al. (2020). Introducing the UCDP Candidate Events Dataset. Research & Politics 7(3). Data: Uppsala Conflict Data Program, ucdp.uu.se.)"
       ],
-      "updated": "2026-11-17",
+      "updated": "2026-11-26",
       "refresh": "weekly",
       "page": "q/battlefield.html",
       "derivedFrom": [
         "battlefield/data/realtime.json"
       ],
-      "bytes": 1223238
+      "bytes": 1220568
     },
     {
       "id": "national-countries",
@@ -2334,14 +2334,14 @@
         "UCDP/PRIO Armed Conflict Dataset v26.1 (Davies, Pettersson & Öberg 2026; Gleditsch et al. 2002), CC BY 4.0",
         "Wikidata (CC0): the name of each place and state, by its Q-id (battlefield/history/data/places.json)"
       ],
-      "updated": "2026-11-21",
+      "updated": "2026-11-26",
       "refresh": "static",
       "page": "battlefield/history/index.html",
       "derivedFrom": [
         "battlefield/history/data/wars.json",
         "battlefield/history/data/places.json"
       ],
-      "bytes": 145409
+      "bytes": 145452
     },
     {
       "id": "war-focus-wars",
@@ -2434,15 +2434,15 @@
       "sources": [
         "UCDP Georeferenced Event Dataset v26.1 and candidate events (Sundberg & Melander 2013; Davies et al. 2026), CC BY 4.0",
         "PRIO Battle Deaths Dataset v3.1 (Lacina & Gleditsch 2005), its years 1946–1988 only; its page states no licence, and VM keeps these years until its owner decides",
+        "UCDP Battle-Related Deaths Dataset v26.1, conflict level (Davies et al. 2026), CC BY 4.0: 1989–2008",
         "Wikidata (CC0): battles, sieges and operations that are part of each war",
         "Cliopatria v0.2.1 (Bennett et al. 2025), CC BY 4.0: one border a year",
-        "English Wikipedia (CC BY-SA 4.0): the casualty fields of each battle’s infobox, at the revision named; figures taken as facts, with at most a few words of its own",
-        "UCDP Battle-Related Deaths Dataset v26.1, conflict level (Davies et al. 2026), CC BY 4.0: 1989–2008"
+        "English Wikipedia (CC BY-SA 4.0): the casualty fields of each battle’s infobox and, where the page says so, its dates, at the revision named; figures and dates taken as facts, with at most a few words of its own"
       ],
-      "updated": "2026-11-17",
+      "updated": "2026-11-26",
       "refresh": "monthly",
       "page": "battlefield/focus/index.html",
-      "bytes": 19132
+      "bytes": 19181
     },
     {
       "id": "war-focus-battles",
@@ -2607,19 +2607,19 @@
           "description": "figure, zero (a source records none), parts (counted through its parts), unread (figures VM could not read surely from the article) or none"
         }
       ],
-      "rows": 4235,
+      "rows": 4241,
       "licence": "Wikidata CC0; the figure_ columns from English Wikipedia infoboxes, CC BY-SA 4.0 (the figures as facts, each article named at its revision in the figures files).",
       "sources": [
         "Wikidata (CC0): battles, sieges and operations that are part of each war",
         "English Wikipedia (CC BY-SA 4.0): the casualty fields of each battle's infobox, at the revision named"
       ],
-      "updated": "2026-11-17",
+      "updated": "2026-11-26",
       "refresh": "monthly",
       "page": "battlefield/focus/index.html",
       "derivedFrom": [
         "battlefield/focus/data/wars/*.json"
       ],
-      "bytes": 2995202
+      "bytes": 2999387
     },
     {
       "id": "war-focus-monthly-deaths",
@@ -2670,12 +2670,12 @@
       "sources": [
         "UCDP Georeferenced Event Dataset v26.1 and candidate events (Sundberg & Melander 2013; Davies et al. 2026), CC BY 4.0",
         "PRIO Battle Deaths Dataset v3.1 (Lacina & Gleditsch 2005), its years 1946–1988 only; its page states no licence, and VM keeps these years until its owner decides",
+        "UCDP Battle-Related Deaths Dataset v26.1, conflict level (Davies et al. 2026), CC BY 4.0: 1989–2008",
         "Wikidata (CC0): battles, sieges and operations that are part of each war",
         "Cliopatria v0.2.1 (Bennett et al. 2025), CC BY 4.0: one border a year",
-        "English Wikipedia (CC BY-SA 4.0): the casualty fields of each battle’s infobox, at the revision named; figures taken as facts, with at most a few words of its own",
-        "UCDP Battle-Related Deaths Dataset v26.1, conflict level (Davies et al. 2026), CC BY 4.0: 1989–2008"
+        "English Wikipedia (CC BY-SA 4.0): the casualty fields of each battle’s infobox and, where the page says so, its dates, at the revision named; figures and dates taken as facts, with at most a few words of its own"
       ],
-      "updated": "2026-11-17",
+      "updated": "2026-11-26",
       "refresh": "monthly",
       "page": "battlefield/focus/index.html",
       "derivedFrom": [
@@ -2741,10 +2741,10 @@
         "McEvedy & Jones, Maddison: populations",
         "Energy Institute Statistical Review, as Our World in Data presents it (from 1900)"
       ],
-      "updated": "2026-10-26",
+      "updated": "2026-11-26",
       "refresh": "static",
       "page": "kardashev/index.html",
-      "bytes": 54158
+      "bytes": 69850
     },
     {
       "id": "kardashev-shares",
@@ -2797,20 +2797,20 @@
           "description": "Kardashev rating of the power alone"
         }
       ],
-      "rows": 349,
+      "rows": 348,
       "licence": "Vitruvian Manager’s own estimates (© JDP-Iq), shaped after books with no open licence (Ian Morris 2010 and 2013; McEvedy & Jones) and Maddison’s populations (CC BY 4.0); from 1900, primary energy from the Energy Institute’s Statistical Review through Our World in Data, under the Energy Institute’s own terms, which could not be read (its page refused VM’s reader on 20 November 2026). Kept until VM’s owner decides.",
       "sources": [
         "Ian Morris, Why the West Rules — For Now (2010) and The Measure of Civilization (2013)",
         "McEvedy & Jones, Maddison: populations",
         "Energy Institute Statistical Review, as Our World in Data presents it (from 1900)"
       ],
-      "updated": "2026-10-26",
+      "updated": "2026-11-26",
       "refresh": "static",
       "page": "kardashev/index.html",
       "derivedFrom": [
         "kardashev/data/energy.json"
       ],
-      "bytes": 62052
+      "bytes": 61880
     },
     {
       "id": "kardashev-world",
@@ -2850,7 +2850,7 @@
         "McEvedy & Jones, Maddison: populations",
         "Energy Institute Statistical Review, as Our World in Data presents it (from 1900)"
       ],
-      "updated": "2026-10-26",
+      "updated": "2026-11-26",
       "refresh": "static",
       "page": "kardashev/index.html",
       "derivedFrom": [
@@ -3404,13 +3404,13 @@
         "Wikidata (CC0), via wbgetentities; selection, titles and notes by Vitruvian Manager",
         "Natural Earth (public domain) for the map"
       ],
-      "updated": "2026-11-15",
+      "updated": "2026-11-26",
       "refresh": "monthly",
       "page": "science/progress/index.html",
       "derivedFrom": [
         "science/progress/data/events.json"
       ],
-      "bytes": 299080
+      "bytes": 298061
     },
     {
       "id": "science-progress-people",
@@ -3478,13 +3478,13 @@
       "sources": [
         "Wikidata (CC0), via wbgetentities; selection, titles and notes by Vitruvian Manager"
       ],
-      "updated": "2026-11-15",
+      "updated": "2026-11-26",
       "refresh": "monthly",
       "page": "science/progress/index.html",
       "derivedFrom": [
         "science/progress/data/events.json"
       ],
-      "bytes": 320231
+      "bytes": 319960
     },
     {
       "id": "science-progress-institutions",
@@ -3527,18 +3527,18 @@
           "description": "Wikipedia article"
         }
       ],
-      "rows": 1187,
+      "rows": 1194,
       "licence": "Wikidata CC0.",
       "sources": [
         "Wikidata (CC0), via wbgetentities; selection, titles and notes by Vitruvian Manager"
       ],
-      "updated": "2026-11-15",
+      "updated": "2026-11-26",
       "refresh": "monthly",
       "page": "science/progress/index.html",
       "derivedFrom": [
         "science/progress/data/events.json"
       ],
-      "bytes": 242606
+      "bytes": 244044
     },
     {
       "id": "prp-submodules",

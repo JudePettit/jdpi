@@ -14,7 +14,7 @@ Global Headline Tracker: outlets. The most-read news outlets of each covered cou
 
 ### volatility-latest
 
-Geopolitical Volatility: latest scores. The Geopolitical Volatility Index (0–100) for every country on the latest day (2026-11-24), with its five components: conflict & security (35%), political/diplomatic escalation (20%), civil unrest (20%), economic disruption (10%) and cross-border spread (15%). It measures news coverage of events, not events on the ground.
+Geopolitical Volatility: latest scores. The Geopolitical Volatility Index (0–100) for every country on the latest day (2026-11-25), with its five components: conflict & security (35%), political/diplomatic escalation (20%), civil unrest (20%), economic disruption (10%) and cross-border spread (15%). It measures news coverage of events, not events on the ground.
 
 - Rows: 236 · refresh: daily · licence: Index © JDP-Iq (method gvi-1.2-q96); GDELT data free to use with attribution to the GDELT Project.
 - File: https://jdpi.pages.dev/integration/data/volatility-latest.json (records at `records`)
@@ -22,9 +22,9 @@ Geopolitical Volatility: latest scores. The Geopolitical Volatility Index (0–1
 
 ### volatility-daily
 
-Geopolitical Volatility: daily scores. Daily Geopolitical Volatility Index scores and components for every country over the last 60 days, for trends and comparisons.
+Geopolitical Volatility: daily scores. Daily Geopolitical Volatility Index scores and components for every country over the last 61 days, for trends and comparisons.
 
-- Rows: 12,686 · refresh: daily · licence: Index © JDP-Iq (method gvi-1.2-q96); GDELT data free to use with attribution to the GDELT Project.
+- Rows: 12,905 · refresh: daily · licence: Index © JDP-Iq (method gvi-1.2-q96); GDELT data free to use with attribution to the GDELT Project.
 - Files: https://jdpi.pages.dev/integration/data/volatility-daily/0.json, https://jdpi.pages.dev/integration/data/volatility-daily/1.json, https://jdpi.pages.dev/integration/data/volatility-daily/2.json (+10 more) (records at `records`)
 - Fields: `date` (date), `iso3` (string), `name` (string), `score` (number), `conflict` (number), `political` (number), `unrest` (number), `economic` (number), `spread` (number), `events` (number), `tone` (number), `coverage` (string)
 
@@ -32,7 +32,7 @@ Geopolitical Volatility: daily scores. Daily Geopolitical Volatility Index score
 
 Geopolitical Volatility: global mean. The world mean of the Geopolitical Volatility Index each day, with the number of GDELT events and quarter-hour files processed.
 
-- Rows: 60 · refresh: daily · licence: Index © JDP-Iq; GDELT data free to use with attribution to the GDELT Project.
+- Rows: 61 · refresh: daily · licence: Index © JDP-Iq; GDELT data free to use with attribution to the GDELT Project.
 - File: https://jdpi.pages.dev/integration/data/volatility-global.json (records at `records`)
 - Fields: `date` (date), `mean_score` (number), `events` (number), `files` (number)
 
@@ -212,7 +212,7 @@ War Focus: major wars. The major wars of the last hundred years that War Focus f
 
 War Focus: battles, sieges and operations. Every battle, siege and operation that Wikidata records as part of a War Focus war, with dates at the precision Wikidata gives, deaths or casualties where known, and coordinates where mapped. Where a whole and its parts are both listed (the atomic bombings of Hiroshima and Nagasaki, and each bombing), part_of and parts link them, and deaths_counted_once gives the figure War Focus shows for each, each death once: the figure recorded for the item itself where there is one, else the sum of its parts' (figure_from says which). To total a war's battles without counting a death twice, add deaths_counted_once over the rows with no part_of; adding deaths over every row counts a whole and its parts both. That total is of mixed kinds (recorded counts, estimates and disputed figures: see figure_deaths_kind) and is not the war's toll, which is its deaths by month (war-focus-monthly-deaths): War Focus never adds battle figures into it. A part of two wholes is counted under part_of; also_part_of names the others. Where Wikidata gives no figure, the figure_ columns give the one War Focus reads from the battle's English Wikipedia infobox (BF-08), with its kind (recorded, estimate or disputed), its range and whether it is a lower bound; deaths and casualties stay Wikidata's own. The revision of each article read, each side's figures and every Wikidata statement are in battlefield/focus/data/figures/<war_id>.json.
 
-- Rows: 4,235 · refresh: monthly · licence: Wikidata CC0; the figure_ columns from English Wikipedia infoboxes, CC BY-SA 4.0 (the figures as facts, each article named at its revision in the figures files).
+- Rows: 4,241 · refresh: monthly · licence: Wikidata CC0; the figure_ columns from English Wikipedia infoboxes, CC BY-SA 4.0 (the figures as facts, each article named at its revision in the figures files).
 - Files: https://jdpi.pages.dev/integration/data/war-focus-battles/0.json, https://jdpi.pages.dev/integration/data/war-focus-battles/1.json, https://jdpi.pages.dev/integration/data/war-focus-battles/2.json (+8 more) (records at `records`)
 - Fields: `war_id` (string), `war` (string), `qid` (string), `name` (string), `description` (string), `start` (date), `end` (date), `precision` (string), `deaths` (number), `casualties` (number), `lat` (number), `lon` (number), `wikipedia` (string), `part_of` (string), `also_part_of` (array), `parts` (array), `deaths_counted_once` (number), `figure_from` (string), `figure_deaths_low` (number), `figure_deaths_high` (number), `figure_deaths_kind` (string), `figure_deaths_source` (string), `figure_deaths_at_least` (boolean), `figure_casualties_low` (number), `figure_casualties_high` (number), `figure_casualties_kind` (string), `figure_casualties_source` (string), `figure_state` (string)
 
@@ -236,7 +236,7 @@ Kardashev Tracker: powers. The empires and countries the Kardashev Tracker follo
 
 Kardashev Tracker: shares of world energy. Each power's population, energy capture per person and share of humanity's energy capture, century by century from 2000 BC (then 1850, 1900, 1950, 2000 and 2025), with its own Kardashev rating. "Rest of world" rows complete each year.
 
-- Rows: 349 · refresh: static · licence: Vitruvian Manager’s own estimates (© JDP-Iq), shaped after books with no open licence (Ian Morris 2010 and 2013; McEvedy & Jones) and Maddison’s populations (CC BY 4.0); from 1900, primary energy from the Energy Institute’s Statistical Review through Our World in Data, under the Energy Institute’s own terms, which could not be read (its page refused VM’s reader on 20 November 2026). Kept until VM’s owner decides.
+- Rows: 348 · refresh: static · licence: Vitruvian Manager’s own estimates (© JDP-Iq), shaped after books with no open licence (Ian Morris 2010 and 2013; McEvedy & Jones) and Maddison’s populations (CC BY 4.0); from 1900, primary energy from the Energy Institute’s Statistical Review through Our World in Data, under the Energy Institute’s own terms, which could not be read (its page refused VM’s reader on 20 November 2026). Kept until VM’s owner decides.
 - File: https://jdpi.pages.dev/integration/data/kardashev-shares.json (records at `records`)
 - Fields: `year` (number), `polity_id` (string), `polity` (string), `population` (number), `kcal_per_person_day` (number), `watts` (number), `share` (number), `kardashev` (number)
 
@@ -312,7 +312,7 @@ Invention Timeline: people. The scientists, inventors and thinkers behind the In
 
 Invention Timeline: institutions. Universities, laboratories, companies and academies linked to the Invention Timeline, with coordinates (Wikidata).
 
-- Rows: 1,187 · refresh: monthly · licence: Wikidata CC0.
+- Rows: 1,194 · refresh: monthly · licence: Wikidata CC0.
 - File: https://jdpi.pages.dev/integration/data/science-progress-institutions.json (records at `records`)
 - Fields: `qid` (string), `name` (string), `description` (string), `lat` (number), `lon` (number), `wikipedia` (string)
 

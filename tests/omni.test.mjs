@@ -27,7 +27,7 @@ import { freshnessLine } from '../design/prp-freshness.js';
 import { resolve, windowFor, frameFor, yearsNote, yearsText, ownYears } from '../design/vm-click.js';
 import { formatSpan } from '../design/vm-dates.js';
 import { yearText, readYear, ticksFor, playSteps, playStep, playSpan, nextStop, keepFiles } from '../omni/lib/time.js';
-import { pageTest, launch, launchOptions } from './tools/pages.mjs';
+import { pageTest, launch, launchOptions, openFresh } from './tools/pages.mjs';
 import '../design/prp-focus.js';
 import '../design/prp-map.js';
 
@@ -753,9 +753,9 @@ test('page: the review\'s findings on the Omni-Map itself (S1, S3, S4, S5, S6, S
     const cited = JSON.parse(z['citation.csl.json'])[0].URL;
     assert.match(cited, /&ds=cliopatria@v0\.2\.1,.*&pin=[0-9a-f]{12}$/, 'S6');
     assert.match(await page.textContent('#apa'), /&pin=[0-9a-f]{12}$/);
-    // S6: the cited address, opened, says it is a saved view's and offers the bundle.
-    await page.goto(`${BASE}/omni/index.html#${cited.split('#')[1]}`, { waitUntil: 'domcontentloaded' });
-    await page.reload({ waitUntil: 'domcontentloaded' });
+    // S6: the cited address, opened, says it is a saved view's and offers the bundle. (Opened in a new document, as a
+    // reader opens it: a hash-only goto and a reload could open the page's rewrite of it instead, tests/tools/pages.mjs.)
+    await openFresh(page, `${BASE}/omni/index.html#${cited.split('#')[1]}`);
     await ready(page, 1494);
     assert.match(await page.textContent('#pins-note'), new RegExp(`saved view \\(pin ${meta.pin}\\)`));
 
@@ -868,7 +868,18 @@ test('page: in Neo Book a click on a tagged name opens the map; a second click n
   try {
     const page = await browser.newPage({ viewport: { width: 1440, height: 900 }, acceptDownloads: true });
     const errors = watch(page);
-    await page.goto(`${BASE}/bibliotheca/neo/index.html#book=the-prince&ch=3&p=c03-p03`, { waitUntil: 'domcontentloaded' });
+    // 27 November 2026, once, on a machine under heavy load: this goto failed with net::ERR_ABORTED. A reader found it is
+    // the message of a navigation the browser dropped, thought not a timeout, a download or the page navigating away;
+    // none of that is proved, and the cause is not found. One lead is not yet probed: tests/tools/serve.mjs answers
+    // /bibliotheca/neo/index.html with a 308 to /bibliotheca/neo/, so this goto is two requests, and a starved server or
+    // network service could drop the second. Should it come again, the failure says how long the goto took, where the
+    // page was left, and each request that failed on the way (its address and the browser's reason).
+    const t0 = Date.now(), dropped = [];
+    const onFailed = r => dropped.push(`${r.url()} (${r.failure()?.errorText || 'no reason given'})`);
+    page.on('requestfailed', onFailed);
+    await page.goto(`${BASE}/bibliotheca/neo/index.html#book=the-prince&ch=3&p=c03-p03`, { waitUntil: 'domcontentloaded' })
+      .catch(e => { throw new Error(`${e.message.split('\n')[0]} (after ${Date.now() - t0} ms; the page is at ${page.url()}; failed on the way: ${dropped.join('; ') || 'none'})`, { cause: e }); });
+    page.off('requestfailed', onFailed);
     await page.waitForSelector('#c03-p03 a.term[data-qid="Q236853"]', { timeout: 30000 });
     await page.locator('#c03-p03 a.term[data-qid="Q236853"]').first().click();
     await page.waitForFunction(() => window.omniState?.frame === 1494, null, { timeout: 60000 });
@@ -1231,9 +1242,10 @@ test('page: the heading gives the clicked entry\'s own years, a slow borders fil
     assert.equal(await page.textContent('#time-year'), '1514');
     assert.equal(await page.textContent('#play-note'), '', 'said no more once drawn');
     await page.unroute(slow);
-    // R6: the page's own view, with no address.
-    await page.goto(`${BASE}/omni/index.html`, { waitUntil: 'domcontentloaded' });
-    await page.reload({ waitUntil: 'domcontentloaded' });
+    // R6: the page's own view, with no address. (Each address below is opened in a new document, as a reader opens it:
+    // a goto and a reload could open the page's own rewrite of it instead, which leaves out what it cannot read, at=0
+    // say, and so has nothing to note; tests/tools/pages.mjs, openFresh.)
+    await openFresh(page, `${BASE}/omni/index.html`);
     const held = heldNow(), bc = held.from < 0;
     await ready(page, held.from <= 1400 && 1400 <= held.to ? 1400 : held.from);
     assert.match(await page.textContent('#frame-why'), new RegExp(`^Opens on ${yearText(held.from <= 1400 && 1400 <= held.to ? 1400 : held.from, { bc })}; the slider holds every year VM holds, ${formatSpan(held.from, held.to)}\\.$`));
@@ -1244,8 +1256,7 @@ test('page: the heading gives the clicked entry\'s own years, a slow borders fil
       ['vr=1&t=0..10&at=5&show=frame&step=y&base=plain&fill=borders', held.from <= 5 ? 5 : held.from, /This address's years \(0\.\.10\) include a year 0, which does not exist \(1 BC is followed by AD 1\), so the slider shows every year VM holds/],
       [`vr=1&t=${held.from}..${held.to}&at=${held.to + 2}&show=frame&step=y&base=plain&fill=borders`, held.to, /is outside its own years .*, so it opens on .*, the last of them\./],
     ]) {
-      await page.goto(`${BASE}/omni/index.html#${hash}`, { waitUntil: 'domcontentloaded' });
-      await page.reload({ waitUntil: 'domcontentloaded' });
+      await openFresh(page, `${BASE}/omni/index.html#${hash}`);
       await ready(page, at);
       assert.match(await page.textContent('#focus-body'), says, hash);
     }

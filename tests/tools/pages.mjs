@@ -48,6 +48,17 @@ export async function settled(page, more) {
   if (more) await more(page);
 }
 
+/** Opens `url` in a new document, every time. A goto from a page to the same page with another hash is a same-document
+    navigation: the old document reads the new hash, and a page that writes its address back in its own form
+    (history.replaceState: Omni writes its recipe) can rewrite it, without the parts it could not read, before a reload
+    that follows, which then opens the rewritten address (27 November 2026: Omni's note on an address naming year 0
+    missing, the reload having opened the address with at=0 left out). about:blank first makes the goto a new document,
+    which reads the address exactly as given, as a visitor's pasted address or bookmark is read. */
+export async function openFresh(page, url, options = { waitUntil: 'domcontentloaded' }) {
+  await page.goto('about:blank');
+  return page.goto(url, options);
+}
+
 /** Moves the pointer to (x, y), checks that it is on the thumb of the input `input` (a selector), presses, and checks
     that the input took the press. A missed press fails here, naming what was under the pointer, and not later as a
     drag that changed nothing. The caller then makes its moves and releases. */

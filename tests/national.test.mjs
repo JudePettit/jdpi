@@ -492,14 +492,14 @@ test('page: the leaders\' source names the hand-built lists, San Marino\'s count
       assert.equal(smr.value, String(by.SMR.leadership.leaders100));
       assert.equal(smr.notes[0], 'Two hold the office together, for 6 months at a time; each person is counted', `${width}: ${smr.notes.join(' | ')}`);
       assert.ok(t.months === 6 && !/\bterms\b/.test(smr.notes[0]), `${width}: no count of terms`);
-      assert.match(smr.notes.at(-1), /^Political Retrospective: its own list of this state’s leaders, built by hand from at least two of Wikidata, Wikipedia’s lists of office holders and rulers\.org$/);
+      assert.match(smr.notes.at(-1), /^Political Retrospective: its own list of this state’s leaders, built by hand from Wikidata, Wikipedia’s lists and articles and the state’s official acts and records$/);
       for (const label of ['Average time in office', 'Longest-serving leader', 'Irregular seizures of power']) assert.match((await stat(label)).notes.at(-1), /^Political Retrospective: its own list/, `${width}: ${label}`);
       assert.match((await stat('Elections and referendums')).notes.at(-1), /^Political Retrospective \(Archigos and Wikidata\)/, 'the elections are not from the lists');
       const sources = await page.textContent('.prp-sources p');
       // Read from the data: on 17 November 2026, "the 11 states … (Andorra, Antigua and Barbuda, …, St. Lucia and St.
       // Vincent and the Grenadines)".
       const listed = Object.values(by).filter(c => c.leadership?.leaderLists).map(c => c.name).sort();
-      assert.ok(sources.includes(`for the leaders of the ${listed.length} states Archigos does not cover (${listed.slice(0, -1).join(', ')} and ${listed.at(-1)}), its own lists, built by hand from at least two of Wikidata, Wikipedia's lists of office holders and rulers.org;`), sources);
+      assert.ok(sources.includes(`for the leaders of the ${listed.length} states Archigos does not cover (${listed.slice(0, -1).join(', ')} and ${listed.at(-1)}), its own lists, built by hand from Wikidata, Wikipedia's lists and articles and each state's official acts and records;`), sources);
       stat = await open('DEU');
       const de = await stat('Leaders in the last 100 years');
       assert.deepEqual([de.value, de.notes.length], [String(by.DEU.leadership.leaders100), 1], `${width}: Germany's count, with its source only`);
@@ -1495,9 +1495,20 @@ test('page NA-05 review: years shown honestly, movers like for like, failures sa
   phone.on('pageerror', e => errors.push(e.message));
   await phone.goto(`${BASE}/q/national#map`, { waitUntil: 'domcontentloaded', timeout: 30000 });
   await phone.waitForFunction(() => window.__naDrawn, null, { timeout: 20000 });
-  const pt = await phone.locator('#years .prp-period-track').boundingBox(), lb = await phone.locator('#yr-lbl').boundingBox(), pb = await phone.locator('#yr-play').boundingBox();
+  // The return bar (36 px, in the page's flow) and the load handler's scroll to the top arrive after the first draw and
+  // move the whole page. Three boxes read in three calls could straddle either (27 November 2026: Play 36 px off the
+  // label's line on a busy machine, the bar having come between the two reads). So the test waits for them, then reads
+  // the three boxes in one go, all of one layout: the layout a visitor keeps.
+  await settled(phone, naStrip);
+  const { pt, lb, pb } = await phone.evaluate(() => {
+    const r = s => { const b = document.querySelector(s).getBoundingClientRect(); return { y: b.y, width: b.width, height: b.height }; };
+    return { pt: r('#years .prp-period-track'), lb: r('#yr-lbl'), pb: r('#yr-play') };
+  });
   assert.ok(pt.width > 320, `the phone's track: ${pt.width} px`);
-  assert.ok(Math.abs((pb.y + pb.height / 2) - (lb.y + lb.height / 2)) < 20, 'Play on the label\'s line');
+  // (A box that is not rendered reads as zeros here, where boundingBox() gave null and failed: Play and the label must be
+  // drawn, so two hidden ones cannot pass as on one line.)
+  assert.ok(lb.height > 0 && pb.height > 0, `the label and Play are drawn: heights ${lb.height} and ${pb.height} px`);
+  assert.ok(Math.abs((pb.y + pb.height / 2) - (lb.y + lb.height / 2)) < 20, `Play on the label's line (Play's middle at ${pb.y + pb.height / 2} px, the label's at ${lb.y + lb.height / 2} px)`);
   assert.ok(await phone.evaluate(() => document.documentElement.scrollWidth <= innerWidth));
   assert.deepEqual(errors, []);
 });
@@ -1635,6 +1646,159 @@ test('page: while a country\'s profile loads, the one before is dimmed and inert
   assert.equal(await page.textContent('#ccount'), '1');
   await page.unroute('**/national/data/series/GUY.json');
   assert.deepEqual(errors, []);
+});
+
+// The third readers (27 November 2026): a profile asked for on a first open (no profile shown yet) whose years' files
+// fail. The profile went back to the country it showed, and with none shown it drew nothing: the tab named no country,
+// the panel said "Choose a country on the map or in the list." and the address named France. Now France is drawn at the
+// years the slider has gone back to, or, where it has none to go back to, the panel says France's figures could not
+// load. The years' files are held at a gate the test opens, then fail.
+test('page: a first open whose years\' files fail draws the country at the years shown, or says it could not load', pageTest, async t => {
+  const { page, errors, open } = await naPage(t);
+  // (a) A year is asked for, France is clicked while its files load, and they fail once France's own files are in.
+  await open('#map&measure=wb:SP.DYN.LE00.IN');
+  let release;
+  const held = new Promise(res => { release = res; });
+  await page.route('**/national/data/years/**', async r => { await held; await r.abort(); });
+  await page.focus('#yr');
+  await page.keyboard.press('ArrowLeft');
+  await page.waitForFunction(() => document.querySelector('#mapbox').getAttribute('aria-busy') === 'true', null, { timeout: 20000 });
+  await page.click('#rows tr[data-iso="FRA"] a.cname');
+  await page.waitForFunction(() => document.querySelector('#profile').getAttribute('aria-busy') === 'true', null, { timeout: 20000 });
+  assert.equal(await page.textContent('#pname'), ' · France · loading…');
+  // The profile's own files, by the very promises renderProfile awaits (top-level functions of the page's classic
+  // script): once they are in, it waits on the years' files alone when they fail.
+  await page.evaluate(() => Promise.all([series('FRA'), standins(), govAll()]));
+  release();
+  await page.waitForFunction(() => /could not load/.test(document.querySelector('#tnote').textContent), null, { timeout: 20000 });
+  await page.waitForFunction(() => document.querySelector('#profile h2')?.textContent === 'France' && document.querySelector('#profile').getAttribute('aria-busy') === 'false', null, { timeout: 20000 })
+    .catch(async () => assert.fail(`France is not drawn: the panel reads "${(await page.textContent('#profile')).trim().slice(0, 80)}", the tab "${await page.textContent('#pname')}"`));
+  assert.equal(await page.textContent('#pname'), ' · France');
+  assert.equal(await page.$eval('#profile', el => el.inert), false);
+  assert.match(await page.evaluate(() => location.hash), /^#country=FRA/);
+  assert.equal(await page.textContent('#yrlabel'), 'Latest', 'the slider has gone back to the view last drawn');
+  // (b) An address that asks for France in 2010 whose years' file fails the first time it is asked for, and only then:
+  // no view to go back to, so the panel says France's figures could not load, as the note does. The page does not ask
+  // again on its own (until 27 November 2026 the profile asked again at once and, the failure having passed, drew 2010
+  // under a note saying 2010 could not load, beside a map left undrawn). The reader's retry draws the map and the
+  // profile at 2010 together, and the note goes.
+  await page.unroute('**/national/data/years/**');
+  const tried = new Map();
+  await page.route('**/national/data/years/**', r => { const u = r.request().url(); tried.set(u, (tried.get(u) || 0) + 1); return tried.get(u) === 1 ? r.abort() : r.continue(); });
+  await page.goto('about:blank');
+  await page.goto(`${BASE}/q/national#country=FRA&year=2010`, { waitUntil: 'domcontentloaded', timeout: 30000 });
+  await page.waitForFunction(() => /The figures for 2010 could not load/.test(document.querySelector('#tnote').textContent), null, { timeout: 20000 });
+  await page.waitForFunction(() => /The figures for France, 2010, could not load/.test(document.querySelector('#profile').textContent) && document.querySelector('#profile').getAttribute('aria-busy') === 'false', null, { timeout: 20000 })
+    .catch(async () => assert.fail(`the panel does not say France's figures could not load: it reads "${(await page.textContent('#profile')).trim().slice(0, 80)}", the tab "${await page.textContent('#pname')}", the note "${await page.textContent('#tnote')}"`));
+  assert.equal(await page.textContent('#pname'), ' · France');
+  assert.equal(await page.$eval('#profile', el => el.inert), false);
+  assert.match(await page.evaluate(() => location.hash), /^#country=FRA/);
+  assert.equal(await page.$('#profile h2'), null, 'no figures are drawn for years the note says could not load');
+  // The retry: the Profile tab pressed again.
+  await page.click('#tab-btn-profile');
+  await page.waitForFunction(() => document.querySelector('#profile h2')?.textContent === 'France' && document.querySelector('#profile').getAttribute('aria-busy') === 'false', null, { timeout: 20000 })
+    .catch(async () => assert.fail(`the retry does not draw France: the panel reads "${(await page.textContent('#profile')).trim().slice(0, 80)}"`));
+  assert.equal(await page.evaluate(() => window.__naDrawn?.view), '2010', 'the map is drawn at 2010 too');
+  assert.ok(await page.$$eval('#rows tr', rs => rs.length) > 100, 'the table has its rows');
+  assert.doesNotMatch(await page.textContent('#tnote'), /could not load/, 'and the note no longer says 2010 could not load');
+  assert.equal(await page.textContent('#yrlabel'), '2010');
+  // (c) A later move, made with the Profile tab closed, replaces the years that fail with years already held (Latest):
+  // when the failure comes, France is drawn at Latest, not said to have failed at Latest.
+  await page.unroute('**/national/data/years/**');
+  await open('#map&measure=wb:SP.DYN.LE00.IN');
+  let release2;
+  const held2 = new Promise(res => { release2 = res; });
+  await page.route('**/national/data/years/**', async r => { await held2; await r.abort(); });
+  await page.focus('#yr');
+  await page.keyboard.press('ArrowLeft');
+  await page.waitForFunction(() => document.querySelector('#mapbox').getAttribute('aria-busy') === 'true', null, { timeout: 20000 });
+  await page.click('#rows tr[data-iso="FRA"] a.cname');
+  await page.waitForFunction(() => document.querySelector('#profile').getAttribute('aria-busy') === 'true', null, { timeout: 20000 });
+  await page.evaluate(() => Promise.all([series('FRA'), standins(), govAll()]));
+  await page.click('#tab-btn-map');
+  const t0 = await page.evaluate(() => window.__naDrawn.at);
+  await page.click('#yr-latest');
+  await page.waitForFunction(a => window.__naDrawn.at > a && window.__naDrawn.view === 'Latest', t0, { timeout: 20000 });
+  release2();
+  await page.waitForFunction(() => document.querySelector('#profile').getAttribute('aria-busy') === 'false', null, { timeout: 20000 });
+  assert.equal(await page.textContent('#pname'), ' · France');
+  assert.equal(await page.$eval('#profile', el => el.inert), false);
+  assert.equal(await page.evaluate(() => document.querySelector('#profile h2')?.textContent || document.querySelector('#profile').textContent.trim().slice(0, 80)), 'France');
+  await page.click('#tab-btn-profile');
+  await page.waitForFunction(() => document.querySelector('#profile h2')?.textContent === 'France' && document.querySelector('#profile').getAttribute('aria-busy') === 'false', null, { timeout: 20000 });
+  assert.equal(await page.textContent('#yrlabel'), 'Latest');
+  await page.unroute('**/national/data/years/**');
+  assert.deepEqual(errors, []);
+});
+
+// The fourth readers (27 November 2026): Germany's profile shown, the address moves to France at years whose files fail
+// (a pasted address, back or forward, a Master Index tag, Kino). The slider went back to Latest and the address named
+// France, but the panel and the tab kept Germany. Now France is drawn at the years gone back to, which are held.
+test('page: an address moved to another country at years that fail draws that country at the years gone back to', pageTest, async t => {
+  const { page, errors, open } = await naPage(t);
+  await open('#country=DEU');
+  await page.waitForFunction(() => document.querySelector('#profile h2')?.textContent === 'Germany' && document.querySelector('#profile').getAttribute('aria-busy') === 'false', null, { timeout: 20000 });
+  // (An indicator in 2010 needs its layer, which Latest never asks for, so the move cannot be met from files held.)
+  await page.route('**/national/data/years/**', r => r.abort());
+  await page.evaluate(() => { location.hash = '#country=FRA&year=2010&measure=wb:SP.DYN.LE00.IN'; });
+  await page.waitForFunction(() => /The figures for 2010 could not load/.test(document.querySelector('#tnote').textContent), null, { timeout: 20000 });
+  await page.waitForFunction(() => document.querySelector('#profile h2')?.textContent === 'France' && document.querySelector('#profile').getAttribute('aria-busy') === 'false', null, { timeout: 20000 })
+    .catch(async () => assert.fail(`France is not drawn: the panel's heading is "${await page.textContent('#profile h2')}", the tab "${await page.textContent('#pname')}", the address "${await page.evaluate(() => location.hash)}"`));
+  assert.equal(await page.textContent('#pname'), ' · France');
+  assert.equal(await page.$eval('#profile', el => el.inert), false);
+  assert.match(await page.evaluate(() => location.hash), /^#country=FRA(&|$)/);
+  assert.doesNotMatch(await page.evaluate(() => location.hash), /year=2010/, 'the address names the years drawn');
+  assert.equal(await page.textContent('#yrlabel'), 'Latest');
+  await page.unroute('**/national/data/years/**');
+  assert.deepEqual(errors, []);
+});
+
+// The third readers (27 November 2026): a profile that throws while it is drawn (here France's series with one
+// indicator's values made strings, so formatting one throws; a data file of a shape the code does not expect, or a
+// fault in it) left the panel dimmed, busy and inert, the tab saying "France · loading…", and nothing saying why. Now the
+// panel goes back to the country it showed, or says France's profile could not be drawn, and the error still reaches
+// the console. The doctored series is the test's own, served by a route; the committed file is not touched.
+test('page: a profile that throws while it is drawn is not left dimmed and inert, and the failure is said', pageTest, async t => {
+  const { page, errors, open } = await naPage(t);
+  const ser = JSON.parse(readFileSync(new URL('../national/data/series/FRA.json', import.meta.url), 'utf8'));
+  // Life expectancy, by name, not the file's first key (a rebuild may reorder the keys): a row the profile draws in every
+  // year, its value formatted by fmtVal, so a string there throws. The test checks the data still makes it so.
+  const code = 'SP.DYN.LE00.IN';
+  assert.ok(read('national/data/index.json').indicators.some(i => i.code === code), `${code} is one of the profile's indicators`);
+  assert.ok(ser[code]?.some(p => p[0] === 2010 && typeof p[1] === 'number'), `France's series holds a value of ${code} for 2010`);
+  ser[code] = ser[code].map(p => [p[0], 'x' + p[1]]);
+  await page.route('**/national/data/series/FRA.json', r => r.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(ser) }));
+  const idle = () => page.waitForFunction(() => document.querySelector('#profile').getAttribute('aria-busy') === 'false', null, { timeout: 20000 })
+    .catch(async () => assert.fail(`the panel is left busy: the tab reads "${await page.textContent('#pname')}", inert ${await page.$eval('#profile', el => el.inert)}`));
+  // From Ireland's profile: France is asked for by its row in the table (the page's own click handler).
+  await open('#country=IRL&year=2010');
+  await page.waitForFunction(() => document.querySelector('#profile h2')?.textContent === 'Ireland' && document.querySelector('#profile').getAttribute('aria-busy') === 'false', null, { timeout: 20000 });
+  await page.$eval('#rows tr[data-iso="FRA"] a.cname', a => a.click());
+  await page.waitForFunction(() => /The profile of France, 2010, could not be drawn/.test(document.querySelector('#tnote').textContent), null, { timeout: 20000 })
+    .catch(async () => assert.fail(`the note does not say France's profile could not be drawn: it reads "${await page.textContent('#tnote')}"`));
+  await idle();
+  assert.equal(await page.$eval('#profile', el => el.inert), false);
+  assert.equal(await page.textContent('#pname'), ' · Ireland', 'the tab names the profile shown');
+  assert.equal(await page.textContent('#profile h2'), 'Ireland');
+  assert.match(await page.evaluate(() => location.hash), /(^#|&)country=IRL(&|$)/);
+  // The note does not outlive its years: moved on the Map tab, where no profile is drawn, the slider clears it (as it
+  // clears every note of the reader's last action, before the new years are drawn), so no line naming France and 2010
+  // stays under a map of 2011.
+  await page.click('#tab-btn-map');
+  const t0 = await page.evaluate(() => window.__naDrawn.at);
+  await page.focus('#yr');
+  await page.keyboard.press('ArrowRight');
+  await page.waitForFunction(a => window.__naDrawn.at > a && window.__naDrawn.view === '2011', t0, { timeout: 20000 });
+  assert.doesNotMatch(await page.textContent('#tnote'), /could not be drawn/, 'the map drawn at 2011 clears the note on France\'s profile of 2010');
+  // A first open of France: no profile to go back to, so the panel says so under France's name.
+  await open('#country=FRA&year=2010');
+  await page.waitForFunction(() => /The profile of France, 2010, could not be drawn/.test(document.querySelector('#profile').textContent), null, { timeout: 20000 })
+    .catch(async () => assert.fail(`the panel does not say France's profile could not be drawn: it reads "${(await page.textContent('#profile')).trim().slice(0, 80)}"`));
+  await idle();
+  assert.equal(await page.$eval('#profile', el => el.inert), false);
+  assert.equal(await page.textContent('#pname'), ' · France');
+  await page.unroute('**/national/data/series/FRA.json');
+  assert.ok(errors.length >= 2 && errors.every(m => /toFixed/.test(m)), `the error is thrown on, to the console, and is the one made: ${JSON.stringify(errors)}`);
 });
 
 // NA-03 (15 Nov 2026): a Wikidata label that carries its holder's realm is shown as the name alone, in the build and

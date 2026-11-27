@@ -29,23 +29,40 @@ const json = rel => JSON.parse(text(rel));
 const read = new Map(), war = id => read.get(id) || read.set(id, json(`../battlefield/focus/data/wars/${id}.json`)).get(id);
 const battle = (id, q) => war(id).battles.find(b => b.q === q);
 const WARS = readdirSync(new URL('../battlefield/focus/data/wars/', import.meta.url)).filter(f => f.endsWith('.json')).map(f => f.slice(0, -5));
+// What Wikidata and Wikipedia said on 27 November 2026 is pinned below only for the files built that day. War Focus is
+// built again on the 2nd of each month (warfocus-refresh.yml) from what the sources then say, and the deploy that
+// follows runs this file: an item or an article edited between two builds is no fault of the build, and must not hold
+// back the deploy (as a pinned election date held back four refreshes on 27 November 2026). After a later build the
+// rules are still tested here by fixture, and the shape of the built files whatever the day.
+const AS_BUILT = json('../battlefield/focus/data/index.json').generated.slice(0, 10) === '2026-11-27';
+const LATER = 'the files are a later build than 27 November 2026, and the sources may say otherwise now';
 
 test('war-focus-dates: the Markale massacres, the Al-Shati airstrike and the bombing of Hankou keep both their dates', () => {
-  const markale = battle('bosnian-war', 'Q1482369');
-  assert.deepEqual(markale.pts, ['1994-02-05', '1995-08-28']);
-  assert.deepEqual([markale.s, markale.e, markale.p], ['1994-02-05', '1995-08-28', null]);
-  const shati = battle('gaza-war', 'Q122998566');
-  assert.deepEqual(shati.pts, ['2023-10-09', '2023-10-12']);
-  assert.deepEqual([shati.s, shati.e], ['2023-10-09', '2023-10-12']);
-  const hankou = battle('second-sino-japanese', 'Q20039579');
-  assert.deepEqual(hankou.pts, ['1939-10-03', '1939-10-14']);
+  if (AS_BUILT) {
+    const markale = battle('bosnian-war', 'Q1482369');
+    assert.deepEqual(markale.pts, ['1994-02-05', '1995-08-28']);
+    assert.deepEqual([markale.s, markale.e, markale.p], ['1994-02-05', '1995-08-28', null]);
+    const shati = battle('gaza-war', 'Q122998566');
+    assert.deepEqual(shati.pts, ['2023-10-09', '2023-10-12']);
+    assert.deepEqual([shati.s, shati.e], ['2023-10-09', '2023-10-12']);
+    const hankou = battle('second-sino-japanese', 'Q20039579');
+    assert.deepEqual(hankou.pts, ['1939-10-03', '1939-10-14']);
+  }
   // One battle, one set of dates, in every war that lists it (Hankou is in the Second World War's file too).
   const copies = new Map();
   for (const id of WARS) for (const b of war(id).battles) (copies.get(b.q) || copies.set(b.q, []).get(b.q)).push({ id, b });
+  let several = 0;
   for (const [q, l] of copies) {
     if (!l.some(x => x.b.pts)) continue;
+    several++;
     for (const x of l) assert.deepEqual(x.b.pts, l[0].b.pts, `${q}: ${x.id} gives ${x.b.pts} where ${l[0].id} gives ${l[0].b.pts}`);
+    // Whatever the build's day: several dates are two or more, each later than the one before; the battle runs from
+    // the first to the last, and its end is not called unrecorded.
+    const { pts, s, e, u } = l[0].b, cut = (d, as) => String(d).slice(0, as.length);
+    assert.ok(pts.length > 1 && pts.every((d, i) => !i || pts[i - 1] < d), `${q}: ${pts}`);
+    assert.deepEqual([cut(s, pts[0]), cut(e, pts.at(-1)), u ?? null], [pts[0], pts.at(-1), null], `${q}: ${s} to ${e}, ${pts}`);
   }
+  assert.ok(several >= 1, 'War Focus holds a battle of several dates');
 });
 
 test('war-focus-dates: every battle both pages hold has the same separate dates on War Focus as on the Omni-Map', () => {
@@ -53,17 +70,17 @@ test('war-focus-dates: every battle both pages hold has the same separate dates 
   const rows = layer.rows.filter(r => /^wf-/.test(r.war || ''));
   const by = new Map(rows.map(r => [r.q, r]));
   const from = r => r.dates?.map(d => String(d.from));
-  // The battles named in this part, on both pages whenever either is built: Markale, Al-Shati, the Ardenne Abbey
-  // massacre and the atomic bombings of Hiroshima and Nagasaki (Wikidata, read 27 November 2026).
+  // Only while the two pages were built from Wikidata within two days of each other: War Focus is rebuilt on the 2nd of
+  // each month (warfocus-refresh.yml) and the Omni-Map's battles layer by hand, so a Wikidata edit between the two
+  // builds is no fault of either page, and must not hold back the refresh's deploy.
+  const wfBuilt = Date.parse(json('../battlefield/focus/data/index.json').generated), omBuilt = Date.parse(layer.built);
+  if (Math.abs(wfBuilt - omBuilt) > 2 * 864e5) return;
+  // The battles named in this part: Markale, Al-Shati, the Ardenne Abbey massacre and the atomic bombings of Hiroshima
+  // and Nagasaki (Wikidata, read 27 November 2026).
   for (const [id, q] of [['bosnian-war', 'Q1482369'], ['gaza-war', 'Q122998566'], ['ww2', 'Q22947455'], ['ww2', 'Q488']]) {
     assert.ok(battle(id, q)?.pts?.length > 1, `${q}: War Focus gives its dates`);
     assert.deepEqual(from(by.get(q)), battle(id, q).pts, `${q}: the Omni-Map gives the same`);
   }
-  // Every other battle, only while the two pages were built from Wikidata within two days of each other: War Focus is
-  // rebuilt on the 2nd of each month (warfocus-refresh.yml) and the Omni-Map's battles layer by hand, so a Wikidata edit
-  // between the two builds is no fault of either page, and must not hold back the refresh's deploy.
-  const wfBuilt = Date.parse(json('../battlefield/focus/data/index.json').generated), omBuilt = Date.parse(layer.built);
-  if (Math.abs(wfBuilt - omBuilt) > 2 * 864e5) return;
   let n = 0;
   for (const r of rows) {
     const b = battle(r.war.slice(3), r.q);
@@ -131,8 +148,11 @@ test('war-focus-names: one table; a build fed Wikidata\'s label "Shahadat of Yah
   assert.doesNotMatch(text('../battlefield/focus/scripts/rules.mjs'), /^import /m, 'rules.mjs keeps no imports (the realtime build and its tests read it alone)');
   assert.match(build, /battles: battles\.map\(\(\{ q, n, /);
   assert.doesNotMatch(build, /n: r\.bLabel\?\.value/, 'no name read past the table');
-  // The file holds the name, and the Method says how battles are named.
-  assert.equal(battle('gaza-war', 'Q130549291').n, 'killing of Yahya Sinwar');
+  // The file holds the name whatever Wikidata's label reads on the build's day (while Wikidata keeps the item within
+  // the war), and the Method says how battles are named.
+  const sinwar = battle('gaza-war', 'Q130549291');
+  if (AS_BUILT) assert.ok(sinwar, 'the Gaza war lists it');
+  if (sinwar) assert.equal(sinwar.n, 'killing of Yahya Sinwar');
   assert.match(text('../battlefield/focus/index.html'), /Their names are Wikidata's English labels, except where a label was lately changed away from the title of the battle's English Wikipedia article, when VM keeps the earlier name, as the Omni-Map does \(the killing of Yahya Sinwar, whose English label read ‘Shahadat of Yahya Sinwar’ from 24 to 27 November 2026\)\./);
 });
 
@@ -152,7 +172,7 @@ test('war-focus-dates: a closing "in World War II" does not make a raid of two d
   assert.equal(battleDates({ point: [day('1944-10-15')], name: 'Bombing of Braunschweig in World War II' }).u, 'end');
   assert.match(text('../battlefield/focus/index.html'), /\(the atomic bombings of Hiroshima and Nagasaki: 6 and 9 August 1945\), and a name’s closing ‘in World War II’ says which war it was part of, not that it lasted \(the bombing of Kobe: 4 February and 5 June 1945\);/);
   // The Second World War's file, rebuilt by the page's own build: both raids on both days, drawn in their months only.
-  for (const [q, pts] of [['Q4940711', ['1945-02-04', '1945-06-05']], ['Q4940693', ['1945-06-10', '1945-07-07']]]) {
+  for (const [q, pts] of AS_BUILT ? [['Q4940711', ['1945-02-04', '1945-06-05']], ['Q4940693', ['1945-06-10', '1945-07-07']]] : []) {
     const b = battle('ww2', q);
     assert.deepEqual(b.pts, pts, `${q} ${b.n}`);
     assert.deepEqual([b.s, b.e, b.u ?? null], [pts[0], pts[1], null]);
@@ -165,9 +185,11 @@ test('war-focus-dates: a date Wikidata marks deprecated is not read (Operation O
   for (const p of ['P585', 'P580', 'P582']) assert.match(dates, new RegExp(`p:${p} \\?(\\w+) \\. \\?\\1 psv:${p} \\[[^\\]]*\\] ; wikibase:rank \\?(\\w+) \\. FILTER\\(\\?\\2 != wikibase:DeprecatedRank\\)`), p);
   // Wikidata, read 27 November 2026: Oyster's end 14 April 1969 and Sicily's 17 August 1944 are deprecated (reason
   // Q41755623); neither is shown as Wikidata's end any more.
-  const oyster = battle('ww2', 'Q42886508'), sicily = battle('ww2', 'Q217981');
-  assert.notEqual(oyster.u, 'conflict'); assert.equal(oyster.eW ?? null, null); assert.equal(oyster.s, '1942-12-06');
-  assert.deepEqual([sicily.s, sicily.e, sicily.u ?? null, sicily.eW ?? null], ['1943-07-09', '1943-08-17', null, null]);
+  if (AS_BUILT) {
+    const oyster = battle('ww2', 'Q42886508'), sicily = battle('ww2', 'Q217981');
+    assert.notEqual(oyster.u, 'conflict'); assert.equal(oyster.eW ?? null, null); assert.equal(oyster.s, '1942-12-06');
+    assert.deepEqual([sicily.s, sicily.e, sicily.u ?? null, sicily.eW ?? null], ['1943-07-09', '1943-08-17', null, null]);
+  }
   assert.match(text('../battlefield/focus/index.html'), /Their dates are Wikidata's at the precision it records them, leaving out any Wikidata marks as deprecated;/);
 });
 
@@ -185,7 +207,7 @@ test('war-focus-dates: one unit\'s count is that unit\'s, at least the side\'s, 
   const t = I.readSide('"Several hundred killed" (ISAF claim)<br>8 captured');
   assert.deepEqual([t.cas.low, t.cas.by], [8, undefined]);
   // The two war files that hold it, rebuilt by the page's own build.
-  for (const id of ['second-sino-japanese', 'ww2']) {
+  for (const id of AS_BUILT ? ['second-sino-japanese', 'ww2'] : []) {
     const side = json(`../battlefield/focus/data/figures/${id}.json`).battles.Q17036086.sides[1];
     assert.deepEqual(side.d, { low: 42, high: 42, status: 'fact', atLeast: true }, id);
     assert.ok(side.refs.includes('Aizuwakamatsu City History Research Association 2007'));
@@ -199,12 +221,13 @@ test('war-focus-dates: a {{cite archive}} is cited by its holder (the Swatow Ope
   // English Wikipedia, "Swatow Operation", revision 1386921114 (21 November 2026), casualties1's reference.
   assert.equal(citationOf('{{cite archive |item=同盟旬報第3巻第18号（通号073号）|item-url=https://www.jacar.archives.go.jp/das/meta/M23070014600 |collection=同盟旬報第3巻第18号（通号073号）|access-date=19 November 2026 |institution=Japan Center for Historical Records |pages=7-8}}'), 'Japan Center for Historical Records');
   assert.equal(citationOf('{{cite archive |item-url=https://www.jacar.archives.go.jp/das/meta/M23070014600}}'), 'jacar.archives.go.jp');
+  if (!AS_BUILT) return;
   const sides = json('../battlefield/focus/data/figures/second-sino-japanese.json').battles.Q7654052.sides;
   assert.deepEqual(sides[0].refs, ['Japan Center for Historical Records']);
   assert.ok(!JSON.stringify(sides).includes('a named reference in the article'), 'the reused reference is named');
 });
 
-test('page: War Focus lists each of the three battles on both its dates, and draws it only in their months', pageTest, async () => {
+test('page: War Focus lists each of the three battles on both its dates, and draws it only in their months', AS_BUILT ? pageTest : { skip: LATER }, async () => {
   const browser = await launch({ args: ['--mute-audio'] });
   const page = await browser.newPage({ viewport: { width: 1400, height: 900 } });
   const errors = [];

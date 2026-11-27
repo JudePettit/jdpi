@@ -1,5 +1,5 @@
 {
-  "generated": "2026-11-27T18:21:04.301Z",
+  "generated": "2026-11-27T21:36:46.614Z",
   "name": "Vitruvian Manager data catalogue",
   "publisher": "JDP-Iq",
   "description": "Every public dataset in Vitruvian Manager (VM, by JDP-Iq), with its fields, size, licence and sources. Read-only; no keys. Files are static JSON on this site; the MCP server (/mcp) and the JSON API (/api/v1/) query them with row and size caps.",
@@ -2330,7 +2330,7 @@
         "UCDP/PRIO Armed Conflict Dataset v26.1 (Davies, Pettersson & Öberg 2026; Gleditsch et al. 2002), CC BY 4.0",
         "Wikidata (CC0): the name of each place and state, by its Q-id (battlefield/history/data/places.json)"
       ],
-      "updated": "2026-11-26",
+      "updated": "2026-11-27",
       "refresh": "static",
       "page": "battlefield/history/index.html",
       "derivedFrom": [
@@ -2435,7 +2435,7 @@
         "Cliopatria v0.2.1 (Bennett et al. 2025), CC BY 4.0: one border a year",
         "English Wikipedia (CC BY-SA 4.0): the casualty fields of each battle’s infobox and, where the page says so, its dates, at the revision named; figures and dates taken as facts, with at most a few words of its own"
       ],
-      "updated": "2026-11-26",
+      "updated": "2026-11-27",
       "refresh": "monthly",
       "page": "battlefield/focus/index.html",
       "bytes": 19181
@@ -2613,19 +2613,19 @@
           "description": "figure, zero (a source records none), parts (counted through its parts), unread (figures VM could not read surely from the article) or none"
         }
       ],
-      "rows": 4241,
+      "rows": 4242,
       "licence": "Wikidata CC0; the figure_ columns, and a start or end War Focus takes from the battle's English Wikipedia article, from English Wikipedia, CC BY-SA 4.0 (as facts; each infobox figure's article is named at its revision in the figures files).",
       "sources": [
         "Wikidata (CC0): battles, sieges and operations that are part of each war",
         "English Wikipedia (CC BY-SA 4.0): the casualty fields of each battle's infobox, at the revision named; and a battle's start or end where War Focus takes it from the article (start, end)"
       ],
-      "updated": "2026-11-26",
+      "updated": "2026-11-27",
       "refresh": "monthly",
       "page": "battlefield/focus/index.html",
       "derivedFrom": [
         "battlefield/focus/data/wars/*.json"
       ],
-      "bytes": 3140486
+      "bytes": 3141533
     },
     {
       "id": "war-focus-monthly-deaths",
@@ -2681,7 +2681,7 @@
         "Cliopatria v0.2.1 (Bennett et al. 2025), CC BY 4.0: one border a year",
         "English Wikipedia (CC BY-SA 4.0): the casualty fields of each battle’s infobox and, where the page says so, its dates, at the revision named; figures and dates taken as facts, with at most a few words of its own"
       ],
-      "updated": "2026-11-26",
+      "updated": "2026-11-27",
       "refresh": "monthly",
       "page": "battlefield/focus/index.html",
       "derivedFrom": [

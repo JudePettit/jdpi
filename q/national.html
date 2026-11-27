@@ -131,6 +131,7 @@ details.dt .tbl{max-height:320px;margin-top:8px;border:1px solid var(--prp-line-
 #map .stipple path{fill:url(#nastip);pointer-events:none;stroke:none}
 #nastip circle{fill:var(--prp-text);opacity:.55}
 .mapbox[aria-busy=true] #map{opacity:.55;transition:opacity .2s}
+#profile[aria-busy=true]{opacity:.55;transition:opacity .2s} /* the country before, while the next one's figures load */
 .legend .sw{display:inline-block;width:14px;height:10px;border-radius:2px;vertical-align:-1px;box-shadow:inset 0 0 0 1px var(--prp-line)}
 .legend .sw.hatch{background:repeating-linear-gradient(135deg,var(--prp-map-border) 0 1px,var(--prp-map-nodata) 1px 4px)}
 .legend .sw.dots{background:radial-gradient(circle,color-mix(in srgb,var(--prp-text) 60%,transparent) 1px,transparent 1.4px) 0 0/4px 4px,var(--prp-seq-300)}
@@ -866,14 +867,27 @@ const headSrc = c => {
   if (fixed.length === shown.length) return `VM’s correction of ${SRC.wikidata()}`;
   return `${SRC.wikidata()}; the ${fixed.map(o => OFFICE[o]).join(' and the ')}: VM’s correction`;
 };
+// While another country's figures load, the profile showing is not taken for it: the tab names the country asked for
+// with "loading…" after it, as the map's title does, and the panel is dimmed, aria-busy and inert, so its button and
+// links (the country before's) do nothing. Until 27 November 2026 the tab and the address named the new country at
+// once over the old one's profile, and "+ Add to comparison" there added the old one. The render that draws, or gives
+// up, ends it; one a later render has replaced leaves it to that one.
+function profileWait(c) { $('#pname').textContent = ` · ${c.name} · loading…`; $('#profile').setAttribute('aria-busy', 'true'); $('#profile').inert = true; }
+function profileDone(c) { $('#pname').textContent = c ? ' · ' + c.name : ''; $('#profile').setAttribute('aria-busy', 'false'); $('#profile').inert = false; }
 async function renderProfile() {
   const c = byIso.get(selected);
   if (!c) return;
-  $('#pname').textContent = ' · ' + c.name;
+  if (profileShown === c.iso3) profileDone(c); else profileWait(c);
   const tok = ++profileTok;
   const [s, SI, GOV] = await Promise.all([series(c.iso3).catch(() => null), standins().catch(() => null), govAll()]);
-  try { await ensureData(); } catch { return; } // (rerender() says the figures could not load, and goes back)
-  if (tok !== profileTok || selected !== c.iso3) return;
+  // The years' figures could not load: rerender() says so and goes back, and so does the profile, to the country it shows.
+  try { await ensureData(); } catch {
+    if (tok !== profileTok) return;
+    if (profileShown && selected !== profileShown) { selected = profileShown; writeHash(); }
+    profileDone(byIso.get(profileShown)); return;
+  }
+  if (tok !== profileTok) return;
+  if (selected !== c.iso3) { profileDone(byIso.get(profileShown)); return; } // (the address has moved on: the tab names what is shown until its country is drawn)
   // The country's series could not load: the note says so, and the profile that was showing stays (only its button
   // follows the comparison); a first open draws what index.json and the years' files give, and "could not load" in
   // place of each figure that needed the series.
@@ -961,6 +975,7 @@ async function renderProfile() {
     <div class="prp-panel-head"><b>Latest headlines</b><span class="hint">Global Headline Tracker · free sources lead, paywalls labelled</span></div><div id="stories" class="stories" aria-live="polite"><div class="muted">Loading…</div></div>
   </div>`;
   profileShown = c.iso3;
+  profileDone(c);
   $('#addcmp').onclick = () => { toggleCompare(c.iso3, !compare.includes(c.iso3)); renderProfile(); };
   fillMonthly(c);
   try {

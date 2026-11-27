@@ -584,8 +584,11 @@ test('page: San Marino\'s term in words and the marked ranking, one plural for e
       assert.ok(await page.$('#profile a[href*="battlefield/history/index.html#y=2025&c=Q805"]'), `${width}: the Retrospective Battlefield link, by Wikidata item since 20 November 2026`);
       // The ranking: San Marino's count of leaders, and its average tenure, are marked; no other country's are.
       for (const measure of ['leaders100', 'avgTenure']) {
+        // The ranking of the asked-for measure, not the table before it (a new hash on the same page redraws in place):
+        // the measure chosen, and a draw since this goto (each draw writes a new __naDrawn; a fresh page has none before).
+        await page.evaluate(() => { window.__naBefore = window.__naDrawn; });
         await page.goto(`${BASE}/q/national#map&measure=${measure}`, { waitUntil: 'domcontentloaded', timeout: 30000 });
-        await page.waitForSelector('#rows tr', { timeout: 20000 });
+        await page.waitForFunction(m => document.querySelector('#metric')?.value === m && window.__naDrawn && window.__naDrawn !== window.__naBefore && document.querySelector('#rows tr'), measure, { timeout: 20000 });
         const marked = await page.$$eval('#rows tr', rs => rs.filter(r => r.querySelector('.together')).map(r => [r.dataset.iso, r.querySelector('.together').textContent, r.querySelector('.together').title]));
         assert.deepEqual(marked, [['SMR', 'each holder counted', 'Two hold the office together, for 6 months at a time; each person is counted']], `${width}: ${measure}`);
       }
@@ -753,7 +756,10 @@ test('page: the profile and the Compare table show the same current leader, tagg
   const box = label => page.$$eval('#profile .stat', (ss, l) => { const s = ss.find(x => x.querySelector('span')?.textContent === l); const b = s?.querySelector('b'); return b ? { text: b.textContent.replace(/◈/g, '').trim(), qids: [...s.querySelectorAll('[data-qid]')].map(e => [e.dataset.qid, e.textContent]) } : null; }, label);
   for (const iso of isos) {
     await page.goto(`${BASE}/q/national#country=${iso}`, { waitUntil: 'domcontentloaded', timeout: 30000 });
-    await page.waitForSelector('#profile .stat', { timeout: 20000 });
+    // The country's own profile, not the one before it: a new hash on the same page renders in place, and the profile
+    // that was showing stays until this country's series has loaded (Guyana's box once read Portugal's leader, under
+    // load, 26 November 2026). The heading and the boxes are written together, so both reads are of this country.
+    await page.waitForFunction(n => document.querySelector('#profile h2')?.textContent === n && document.querySelector('#profile .stat'), by[iso].name, { timeout: 20000 });
     profile[iso] = { leader: await box('Current leader'), head: await box('Head of state') };
   }
   await page.goto(`${BASE}/q/national#compare=${isos.join(',')}`, { waitUntil: 'domcontentloaded', timeout: 30000 });
@@ -1463,8 +1469,11 @@ test('page NA-05 review: years shown honestly, movers like for like, failures sa
   // view that was showing, says so, and is asked for again on the next move.
   // (Life expectancy: a year of it needs its own file, which the page has not yet asked for.)
   const LE = 'SP.DYN.LE00.IN', leL = read(YEARS + `wb/${LE}.json`), leFra = PL.yearPick(LAST)(PL.ptsOf(leL, leL.countries.indexOf('FRA')))[1];
-  let fail = true;
-  await page.route('**/national/data/years/**', async r => { if (fail) return r.abort(); await new Promise(res => setTimeout(res, 600)); return r.continue(); });
+  // Once they may load, the files are held until the test has seen the map say "loading", not for a set time, which a
+  // loaded runner's test process can outlast (as X3's did, 26 November 2026).
+  let fail = true, release;
+  const held = new Promise(res => { release = res; });
+  await page.route('**/national/data/years/**', async r => { if (fail) return r.abort(); await held; return r.continue(); });
   await open(`#map&measure=wb:${LE}`);
   await page.focus('#yr');
   await page.keyboard.press('ArrowLeft');
@@ -1474,6 +1483,7 @@ test('page NA-05 review: years shown honestly, movers like for like, failures sa
   fail = false;
   await page.keyboard.press('ArrowLeft');
   await page.waitForFunction(() => document.querySelector('#mapbox').getAttribute('aria-busy') === 'true' && /loading/.test(document.querySelector('#maptitle').textContent));
+  release();
   await page.waitForFunction(y => window.__naDrawn?.view === String(y), LAST);
   assert.equal(await page.getAttribute('#mapbox', 'aria-busy'), 'false');
   assert.equal(await page.getAttribute('#map path.land[data-iso="FRA"]', 'data-v'), leFra ? String(leFra[1]) : null);
@@ -1570,9 +1580,11 @@ test('page NA-05 second review: a render that replaces one still loading leaves 
   const LE = 'SP.DYN.LE00.IN';
   const { page, errors, open } = await naPage(t);
   await open(`#map&measure=wb:${LE}`);
-  let finished;
-  const oldDone = new Promise(res => { finished = res; });
-  await page.route('**/national/data/years/**', async r => { await new Promise(res => setTimeout(res, 1500)); await r.continue(); finished(); });
+  // The year's files are held until the test lets them go, not for a set time: a timer ran out before a loaded runner's
+  // test process looked, so the busy map came and went unseen (26 November 2026), and Latest then replaced nothing.
+  let release;
+  const held = new Promise(res => { release = res; });
+  await page.route('**/national/data/years/**', async r => { await held; await r.continue(); });
   await page.focus('#yr');
   await page.keyboard.press('ArrowLeft');
   await page.waitForFunction(() => document.querySelector('#mapbox').getAttribute('aria-busy') === 'true');
@@ -1580,13 +1592,48 @@ test('page NA-05 second review: a render that replaces one still loading leaves 
   await page.click('#yr-latest');
   await page.waitForFunction(a => window.__naDrawn.at > a && window.__naDrawn.view === 'Latest', t0);
   assert.equal(await page.getAttribute('#mapbox', 'aria-busy'), 'false', 'Latest is drawn, so the map is not busy');
-  await oldDone;
-  await page.waitForTimeout(600);
+  // Only now may the replaced render's files arrive. Once the page holds them (its own ready() for the year's needs:
+  // the pressure file and the layer), the replaced render has gone on from its wait, in the same turn as the last file.
+  // (ready is the page's own: a top-level const of q/national.html's classic script, so a global the wait can call.)
+  release();
+  await page.waitForFunction(code => ready({ pressure: true, codes: [code] }), LE, { timeout: 20000 });
   assert.equal(await page.getAttribute('#mapbox', 'aria-busy'), 'false', 'still not busy once the old request has finished');
   assert.equal(await page.$eval('#map', el => getComputedStyle(el).opacity), '1', 'not dimmed');
   assert.equal(await page.textContent('#yrlabel'), 'Latest');
   assert.doesNotMatch(await page.textContent('#maptitle'), /loading/);
   await page.unroute('**/national/data/years/**');
+  assert.deepEqual(errors, []);
+});
+
+// The second readers (27 November 2026): while the next country's series loads, the profile showing is not taken for
+// it. The tab and the address named Guyana at once over Portugal's profile, and its "+ Add to comparison" added
+// Portugal. Now the tab says Guyana is loading, Portugal's panel is dimmed, busy and inert (a click on its button adds
+// nothing), and once Guyana is drawn the panel and its button are Guyana's. The series is held by a gate the test opens.
+test('page: while a country\'s profile loads, the one before is dimmed and inert, and the tab says which is loading', pageTest, async t => {
+  const { page, errors, open } = await naPage(t);
+  await open('#country=PRT');
+  await page.waitForFunction(() => document.querySelector('#profile h2')?.textContent === 'Portugal' && document.querySelector('#profile').getAttribute('aria-busy') === 'false', null, { timeout: 20000 });
+  assert.equal(await page.textContent('#pname'), ' · Portugal');
+  let release;
+  const held = new Promise(res => { release = res; });
+  await page.route('**/national/data/series/GUY.json', async r => { await held; await r.continue(); });
+  await page.evaluate(() => { location.hash = '#country=GUY'; });
+  await page.waitForFunction(() => document.querySelector('#profile').getAttribute('aria-busy') === 'true', null, { timeout: 20000 });
+  assert.equal(await page.textContent('#pname'), ' · Guyana · loading…', 'the tab says which country is loading');
+  assert.equal(await page.textContent('#profile h2'), 'Portugal', 'the profile before, while Guyana\'s series is held');
+  assert.equal(await page.$eval('#profile', el => el.inert), true, 'inert: its button and links do nothing');
+  await page.waitForFunction(() => getComputedStyle(document.querySelector('#profile')).opacity === '0.55', null, { timeout: 5000 });
+  await page.click('#addcmp', { force: true });
+  assert.equal(await page.$eval('#ccount', el => el.hidden), true, 'a click on the button before adds no country');
+  assert.doesNotMatch(await page.evaluate(() => location.hash), /compare=/);
+  release();
+  await page.waitForFunction(() => document.querySelector('#profile h2')?.textContent === 'Guyana' && document.querySelector('#profile').getAttribute('aria-busy') === 'false', null, { timeout: 20000 });
+  assert.equal(await page.textContent('#pname'), ' · Guyana');
+  assert.equal(await page.$eval('#profile', el => el.inert), false);
+  await page.click('#addcmp');
+  await page.waitForFunction(() => /(^|&)compare=GUY(&|$)/.test(location.hash.slice(1)), null, { timeout: 5000 });
+  assert.equal(await page.textContent('#ccount'), '1');
+  await page.unroute('**/national/data/series/GUY.json');
   assert.deepEqual(errors, []);
 });
 

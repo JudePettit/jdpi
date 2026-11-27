@@ -573,8 +573,12 @@ test('the Vitruvian Manager figure plays while a submodule loads, goes with the 
         for (const n of m.removedNodes) if (n.classList?.contains('vm-loader')) log('removed');
       } }).observe(document.getElementById('frames'), { childList: true });
     });
-    // War Focus is held back 1.2 s so its load is slow for certain: the figure goes up 300 ms in and comes down with the load.
-    await p.route(u => u.pathname.endsWith('/battlefield/focus/index.html'), async route => { await new Promise(r => setTimeout(r, 1200)); await route.continue(); });
+    // War Focus is held back so its load is slow for certain: the figure goes up 300 ms in and comes down with the load.
+    // It is held until the test has looked at the figure, not for a set time, which a loaded runner's test process can
+    // outlast, so the figure came and went unseen (National's busy map was missed that way, 26 November 2026).
+    let release;
+    const gate = new Promise(r => { release = r; });
+    await p.route(u => u.pathname.endsWith('/battlefield/focus/index.html'), async route => { await gate; await route.continue(); });
     await p.evaluate(() => { location.hash = '#/rs/war-focus'; });
     const figure = p.locator('#frames .vm-loader');
     await figure.waitFor({ state: 'attached', timeout: 5000 });
@@ -590,6 +594,7 @@ test('the Vitruvian Manager figure plays while a submodule loads, goes with the 
     assert.ok(look.size >= 112 && look.size <= 160, `size ${look.size}`);
     assert.deepEqual([look.art, look.hidden, look.events], ['Loading', 'true', 'none']);
     assert.ok(look.playing > 5, `the figure is animated (${look.playing} animations)`);
+    release();
     await figure.waitFor({ state: 'detached', timeout: 30000 });
     const log = await p.evaluate(() => loaderLog);
     const at = what => log.find(e => e[0] === what)?.[1];
@@ -612,15 +617,20 @@ test('the Vitruvian Manager figure plays while a submodule loads, goes with the 
     assert.deepEqual(errors, []);
   } finally { await p.close(); }
   // With reduced motion nothing moves: no fade, and the SVG's own rule stops every animation in it (one still frame,
-  // the figure standing in his wheel). The page is held back a moment so the figure can be looked at.
+  // the figure standing in his wheel). The page is held back until the figure has been looked at (a gate, not a timer).
   const still = await browser.newContext({ viewport: { width: 1280, height: 860 }, reducedMotion: 'reduce' });
   try {
     const p = await still.newPage();
-    await p.route(u => u.pathname.endsWith('/science/progress/index.html'), async route => { await new Promise(r => setTimeout(r, 1500)); await route.continue(); });
+    let release;
+    const gate = new Promise(r => { release = r; });
+    await p.route(u => u.pathname.endsWith('/science/progress/index.html'), async route => { await gate; await route.continue(); });
     await p.goto(`${BASE}/#/ns/progress`, { waitUntil: 'domcontentloaded' });
     const figure = p.locator('#frames .vm-loader');
     await figure.waitFor({ state: 'attached', timeout: 10000 });
     assert.deepEqual(await figure.evaluate(el => [el.querySelector(':scope > svg > title')?.textContent, el.getAnimations({ subtree: true }).length]), ['Loading', 0]);
+    // Let the page through, and see it load (the figure down), so nothing is left waiting when the context closes.
+    release();
+    await figure.waitFor({ state: 'detached', timeout: 30000 });
   } finally { await still.close(); }
 });
 

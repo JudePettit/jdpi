@@ -1215,13 +1215,18 @@ test('page: the heading gives the clicked entry\'s own years, a slow borders fil
     // R6: the one reason that applies (the start of the book's era is the reader's to say).
     assert.match(await page.textContent('#frame-why'), /^Opens on 1494, as VM's click chose it: the passage's own year, or the start of the book's era, as the reader's card beside the map says\./);
     // R3: while the file for the slider's new year loads, the note says so and the map's year stays where it is drawn.
+    // The file is held until the test has seen all this, not for a set time, which a loaded runner's test process can
+    // outlast (National's busy map was missed that way, 26 November 2026).
     const slow = /\/omni\/data\/borders\/(?!1400-1499)[^/]+\.topo\.json$/;
-    await page.route(slow, async route => { await new Promise(r => setTimeout(r, 2500)); await route.continue(); });
+    let release;
+    const gate = new Promise(r => { release = r; });
+    await page.route(slow, async route => { await gate; await route.continue(); });
     await page.focus('#year');
     await page.keyboard.press('End');
     await page.waitForFunction(() => /^Loading the borders for 1514…$/.test(document.querySelector('#play-note').textContent), null, { timeout: 5000 });
     assert.equal(await page.textContent('#time-year'), '1494', 'the year shown is the one drawn');
     assert.equal(await page.evaluate(() => window.omniState.frame), 1494);
+    release();
     await ready(page, 1514);
     assert.equal(await page.textContent('#time-year'), '1514');
     assert.equal(await page.textContent('#play-note'), '', 'said no more once drawn');

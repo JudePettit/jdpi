@@ -420,7 +420,8 @@ test('the built calendar: one record per vote, Antonio Saca, the referendums lef
     [['2024-06-30', '2024 French legislative election (first round; second round 7 July)']]);
   assert.deepEqual(ALL.filter(e => e.country === 'Czechia' && e.type === 'election' && /^2025-10/.test(e.date)).map(e => [e.date, e.title]),
     [['2025-10-03', '2025 Czech parliamentary election']]);
-  // Italy's next general election, at most once, and then tentative. Which source dates it is not this test's business:
+  // Italy's next general election, at most once. Which source dates it is not this test's business, nor is its status:
+  // a vote awaited by its deadline is tentative, and becomes declared on the day it is called.
   // until 26 November 2026 the daily build kept Wikipedia's electoral calendar's record (22 December 2027, the last day
   // the vote may be held), and on 27 November the Retrospective's, known to the month (September 2027, to be confirmed);
   // the pinned date and title then failed four refreshes' suites and held their deploys back. That day the calendar
@@ -433,11 +434,18 @@ test('the built calendar: one record per vote, Antonio Saca, the referendums lef
   assert.ok(italy.length <= 1, JSON.stringify(italy));
   for (const [date, title, status] of italy) {
     assert.match(title, /\bgeneral election\b/i);
-    assert.equal(status, 'tentative');
+    assert.match(status, /^(?:tentative|declared)$/);
     assert.ok(date <= '2027-12-22', `not after the last day the vote may be held: ${date}`);
   }
-  assert.deepEqual(ALL.filter(e => e.country === 'Poland' && e.type === 'election' && e.date.startsWith('2027')).map(e => [e.date, e.title, e.status]),
-    [['2027-11-11', 'Next Polish parliamentary election', 'tentative']]);
+  // Poland's next parliamentary election in the same way: until 27 November 2026 this test pinned its day, title and
+  // status as the electoral calendar gave them (11 November 2027, "Next Polish parliamentary election", tentative), and
+  // would have failed every data refresh on the day Wikipedia moved, renamed or undated the vote, as Italy's pin did.
+  const poland = ALL.filter(e => e.country === 'Poland' && e.type === 'election' && e.date.startsWith('2027')).map(e => [e.date, e.title, e.status]);
+  assert.ok(poland.length <= 1, JSON.stringify(poland));
+  for (const [, title, status] of poland) {
+    assert.match(title, /\bparliamentary election\b/i);
+    assert.match(status, /^(?:tentative|declared)$/);
+  }
   assert.deepEqual(ALL.filter(e => e.country === 'Dominican Republic' && e.type === 'election' && e.date.startsWith('2024-05')).map(e => e.date), ['2024-05-19']);
   // 2. The 2004 leader of El Salvador by his name.
   assert.deepEqual(on('2004-06-01', /takes power/).filter(e => e.country === 'El Salvador').map(e => e.title), ['Antonio Saca takes power']);

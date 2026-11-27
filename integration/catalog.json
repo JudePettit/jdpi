@@ -1,5 +1,5 @@
 {
-  "generated": "2026-11-27T08:23:14.546Z",
+  "generated": "2026-11-27T12:18:23.387Z",
   "name": "Vitruvian Manager data catalogue",
   "publisher": "JDP-Iq",
   "description": "Every public dataset in Vitruvian Manager (VM, by JDP-Iq), with its fields, size, licence and sources. Read-only; no keys. Files are static JSON on this site; the MCP server (/mcp) and the JSON API (/api/v1/) query them with row and size caps.",
@@ -69,7 +69,7 @@
       "title": "Geopolitical Volatility: latest scores",
       "module": "rt",
       "submodule": "volatility",
-      "description": "The Geopolitical Volatility Index (0–100) for every country on the latest day (2026-11-25), with its five components: conflict & security (35%), political/diplomatic escalation (20%), civil unrest (20%), economic disruption (10%) and cross-border spread (15%). It measures news coverage of events, not events on the ground.",
+      "description": "The Geopolitical Volatility Index (0–100) for every country on the latest day (2026-11-26), with its five components: conflict & security (35%), political/diplomatic escalation (20%), civil unrest (20%), economic disruption (10%) and cross-border spread (15%). It measures news coverage of events, not events on the ground.",
       "url": "integration/data/volatility-latest.json",
       "format": "json",
       "records": "records",
@@ -155,20 +155,20 @@
       "sources": [
         "GDELT 2.0 event exports, all 96 quarter-hour files a day (the GDELT Project)"
       ],
-      "updated": "2026-11-26",
+      "updated": "2026-11-27",
       "refresh": "daily",
       "page": "q/volatility.html",
       "derivedFrom": [
         "volatility/data/index.json"
       ],
-      "bytes": 62519
+      "bytes": 63595
     },
     {
       "id": "volatility-daily",
       "title": "Geopolitical Volatility: daily scores",
       "module": "rt",
       "submodule": "volatility",
-      "description": "Daily Geopolitical Volatility Index scores and components for every country over the last 61 days, for trends and comparisons.",
+      "description": "Daily Geopolitical Volatility Index scores and components for every country over the last 62 days, for trends and comparisons.",
       "urls": [
         "integration/data/volatility-daily/0.json",
         "integration/data/volatility-daily/1.json",
@@ -248,18 +248,18 @@
           "description": "Coverage level: high, medium or low"
         }
       ],
-      "rows": 12905,
+      "rows": 13124,
       "licence": "Index © JDP-Iq (method gvi-1.2-q96); GDELT data free to use with attribution to the GDELT Project.",
       "sources": [
         "GDELT 2.0 event exports (the GDELT Project)"
       ],
-      "updated": "2026-11-26",
+      "updated": "2026-11-27",
       "refresh": "daily",
       "page": "q/volatility.html",
       "derivedFrom": [
         "volatility/data/index.json"
       ],
-      "bytes": 2371256
+      "bytes": 2411474
     },
     {
       "id": "volatility-global",
@@ -292,18 +292,18 @@
           "description": "Quarter-hour GDELT files processed (96 is a full day)"
         }
       ],
-      "rows": 61,
+      "rows": 62,
       "licence": "Index © JDP-Iq; GDELT data free to use with attribution to the GDELT Project.",
       "sources": [
         "GDELT 2.0 event exports (the GDELT Project)"
       ],
-      "updated": "2026-11-26",
+      "updated": "2026-11-27",
       "refresh": "daily",
       "page": "q/volatility.html",
       "derivedFrom": [
         "volatility/data/index.json"
       ],
-      "bytes": 4231
+      "bytes": 4297
     },
     {
       "id": "realtime-wars",
@@ -732,14 +732,14 @@
         "UCDP/PRIO Armed Conflict Dataset (CC BY 4.0): conflict history since 1946",
         "Kardashev Tracker: energy share"
       ],
-      "updated": "2026-11-26",
+      "updated": "2026-11-27",
       "refresh": "monthly",
       "page": "q/national.html",
       "derivedFrom": [
         "national/data/index.json",
         "volatility/data/index.json"
       ],
-      "bytes": 185025
+      "bytes": 185023
     },
     {
       "id": "national-indicators",
@@ -812,7 +812,7 @@
       "sources": [
         "World Bank World Development Indicators and Worldwide Governance Indicators"
       ],
-      "updated": "2026-11-26",
+      "updated": "2026-11-27",
       "refresh": "monthly",
       "page": "q/national.html",
       "derivedFrom": [
@@ -903,7 +903,7 @@
       "sources": [
         "World Bank World Development Indicators and Worldwide Governance Indicators (CC BY 4.0)"
       ],
-      "updated": "2026-11-26",
+      "updated": "2026-11-27",
       "refresh": "monthly",
       "page": "q/national.html",
       "derivedFrom": [
@@ -983,7 +983,7 @@
       "sources": [
         "World Bank World Development Indicators (CC BY 4.0)"
       ],
-      "updated": "2026-11-26",
+      "updated": "2026-11-27",
       "refresh": "monthly",
       "page": "q/national.html#compare=USA,CHN,RUS,IND",
       "derivedFrom": [
@@ -1413,7 +1413,7 @@
           "description": "The same item at the other outlets that carried it, each { source, url, title, access }"
         }
       ],
-      "rows": 492,
+      "rows": 498,
       "licence": "Titles, links and short summaries © their publishers, quoted for reference; classification and metadata © JDP-Iq.",
       "sources": [
         "RSS and Atom feeds of the journals, working-paper series, central banks, think tanks and economics desks listed in econ-briefing-sources"
@@ -1421,7 +1421,7 @@
       "updated": "2026-11-27",
       "refresh": "6-hourly",
       "page": "econ/briefing/index.html",
-      "bytes": 287391
+      "bytes": 288842
     },
     {
       "id": "econ-briefing-sources",
@@ -1557,7 +1557,7 @@
       "updated": "2026-11-27",
       "refresh": "6-hourly",
       "page": "econ/briefing/index.html",
-      "bytes": 287391
+      "bytes": 288842
     },
     {
       "id": "science-briefing-stories",
@@ -1650,7 +1650,7 @@
           "description": "The same item at the other outlets that carried it, each { source, url, title, access }"
         }
       ],
-      "rows": 1110,
+      "rows": 1061,
       "licence": "Titles, links and short summaries © their publishers, quoted for reference; classification and metadata © JDP-Iq.",
       "sources": [
         "RSS and Atom feeds of the journals and science desks listed in science-briefing-sources (Springer Nature, AAAS, Cell Press, PNAS, APS, Wiley, IOP, AAS, PLOS, NASA, ESA and others)"
@@ -1658,7 +1658,7 @@
       "updated": "2026-11-27",
       "refresh": "6-hourly",
       "page": "science/briefing/index.html",
-      "bytes": 646769
+      "bytes": 628150
     },
     {
       "id": "science-briefing-sources",
@@ -1784,7 +1784,7 @@
       "updated": "2026-11-27",
       "refresh": "6-hourly",
       "page": "science/briefing/index.html",
-      "bytes": 646769
+      "bytes": 628150
     },
     {
       "id": "digital-briefing-stories",
@@ -1882,7 +1882,7 @@
           "description": "The same item at the other outlets that carried it, each { source, url, title, access }"
         }
       ],
-      "rows": 1011,
+      "rows": 1016,
       "licence": "Titles, links and short summaries © their publishers, quoted for reference; classification and metadata © JDP-Iq.",
       "sources": [
         "RSS and Atom feeds of the journals, preprint servers, labs and technology desks listed in digital-briefing-sources"
@@ -1890,7 +1890,7 @@
       "updated": "2026-11-27",
       "refresh": "6-hourly",
       "page": "digital/briefing/index.html",
-      "bytes": 605315
+      "bytes": 607156
     },
     {
       "id": "digital-briefing-sources",
@@ -2036,7 +2036,7 @@
       "updated": "2026-11-27",
       "refresh": "6-hourly",
       "page": "digital/briefing/index.html",
-      "bytes": 605315
+      "bytes": 607156
     },
     {
       "id": "political-calendar",

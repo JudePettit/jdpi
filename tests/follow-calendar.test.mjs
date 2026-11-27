@@ -20,7 +20,7 @@ import { readFileSync, writeFileSync, mkdirSync, mkdtempSync, rmSync } from 'nod
 import { join } from 'node:path';
 import { tmpdir } from 'node:os';
 import { pageTest, launch } from './tools/pages.mjs';
-import { atlasElections, atlasLater, mergeBallots, ballotKind, deadlinesIn, markDeadlines, sameArticle, daysNamed } from '../calendar/scripts/outlook.mjs';
+import { atlasElections, atlasLater, mergeBallots, ballotKind, deadlinesIn, markDeadlines, sameArticle, daysNamed, articleOf, titlesToResolve } from '../calendar/scripts/outlook.mjs';
 import { PARTY_CONTEST, belowState, NOT_HELD, offYear, PLACED, ownTerritory } from '../calendar/scripts/ballot-scope.mjs';
 import { titlesToFetch, cutAtAbbreviation, titleOf } from '../calendar/scripts/enrich-summaries.mjs';
 
@@ -108,6 +108,100 @@ test('1. kin: a placeholder day takes the vote\'s day; a month-only record gives
     'Next_Polish_parliamentary_election': 'Parliamentary elections will be held in Poland by 11 November 2027 at the latest to elect members of the Sejm and Senate.',
   }, '2026-11-26'), 2);
   assert.deepEqual(out.map(e => e.status), ['declared', 'tentative', 'tentative', 'tentative']);
+});
+
+test('1. undated: a placeholder gives way to the calendars\' "Unknown date" by article, through redirects either way', () => {
+  // 27 November 2026: Wikipedia's "2027 national electoral calendar" lists Italy under "Unknown date", linking "2027
+  // Italian general election"; the Retrospective's record links "Next Italian general election", a redirect to it, with
+  // Wikidata's 30 September 2027.
+  const redirects = new Map([['Next Italian general election', '2027 Italian general election']]);
+  const opts = more => ({ today: '2026-11-27', calendarsFrom: 2026, redirects, ...more });
+  const dropped = [];
+  assert.deepEqual(mergeBallots([ev('retro', '2027-09-30', 'Italy', 'Next Italian general election')],
+    opts({ undated: new Set([wiki('2027 Italian general election')]), dropped })), [], 'the record leads to the undated article');
+  assert.equal(dropped.length, 1);
+  assert.match(dropped[0].why, /not yet dated/);
+  // The reverse: the calendar's undated link is the redirect, the record links the article.
+  assert.deepEqual(mergeBallots([ev('retro', '2027-09-30', 'Italy', '2027 Italian general election')],
+    opts({ undated: new Set([wiki('Next Italian general election')]) })), [], 'the undated link leads to the record\'s article');
+  // The raw address still matches with no redirects known (the Wikipedia API did not answer).
+  assert.deepEqual(mergeBallots([ev('retro', '2027-09-30', 'Italy', 'Next Italian general election')],
+    { today: '2026-11-27', undated: new Set([wiki('Next Italian general election')]) }), []);
+  // Not dropped: without the redirect the two addresses are two articles; another country's placeholder; a vote whose
+  // undated link leads to another article; a past vote.
+  const undated = new Set([wiki('2027 Italian general election'), wiki('Next Testland general election')]);
+  assert.deepEqual(rows(mergeBallots([ev('retro', '2027-09-30', 'Italy', 'Next Italian general election')], { today: '2026-11-27', undated })),
+    [['2027-09-01', 'Italy', 'Next Italian general election (date to be confirmed)']]);
+  const kept = mergeBallots([
+    ev('retro', '2027-12-31', 'Malta', 'Next Maltese general election'),
+    ev('retro', '2027-06-30', 'Testland', '2027 Testland general election'),
+    ev('retro', '2026-10-31', 'Testland', 'Next Testland general election'), // past: the rule is for votes to come
+  ], opts({ undated, redirects: new Map([...redirects, ['Next Testland general election', '2028 Testland general election']]) }));
+  assert.deepEqual(kept.map(e => [e.date, e.country, e.title, e.status]), [
+    ['2027-12-01', 'Malta', 'Next Maltese general election (date to be confirmed)', 'tentative'],
+    ['2027-06-01', 'Testland', '2027 Testland general election (date to be confirmed)', 'tentative'],
+    ['2026-10-31', 'Testland', 'Next Testland general election', 'declared'],
+  ]);
+});
+
+test('1. undated, after the second readers: by article and section, type, every hop, either case; the calendars\' days by article', () => {
+  // Ruritania and Testland are made up; each case is one the second readers of 27 November 2026 probed.
+  const base = { today: '2026-11-27', calendarsFrom: 2026 };
+  const ref = (date, title, more = {}) => ev('retro', date, 'Ruritania', title, { type: 'referendum', ...more });
+  const states = list => list.map(e => [e.date, e.title, e.status]);
+  // One article holds two referendums; the calendar lists only November's as undated. June's record stays.
+  const toArticle = new Map([['June 2027 Ruritanian referendum', '2027 Ruritanian referendums'], ['November 2027 Ruritanian referendum', '2027 Ruritanian referendums']]);
+  const toSection = new Map([['June 2027 Ruritanian referendum', 'June'], ['November 2027 Ruritanian referendum', 'November']]);
+  const two = () => [ref('2027-06-30', 'June 2027 Ruritanian referendum'), ref('2027-11-30', 'November 2027 Ruritanian referendum')];
+  const november = new Set([wiki('2027 Ruritanian referendums#November')]);
+  assert.deepEqual(states(mergeBallots(two(), { ...base, undated: november, redirects: toArticle, sections: toSection })),
+    [['2027-06-01', 'June 2027 Ruritanian referendum (date to be confirmed)', 'tentative']]);
+  // With no section known for the redirects, neither record is read as November's: both stay.
+  assert.equal(mergeBallots(two(), { ...base, undated: november, redirects: toArticle }).length, 2);
+  // A record of one section does not give way to an undated link to the whole article (a literal '#' in the address).
+  assert.equal(mergeBallots([ref('2027-06-30', 'June referendum', { source: 'https://en.wikipedia.org/wiki/2027_Ruritanian_referendums#June' })],
+    { ...base, undated: new Set([wiki('2027 Ruritanian referendums')]) }).length, 1);
+  // The same section, written once with %23 and once with '#', is one.
+  assert.deepEqual(mergeBallots([ref('2027-11-30', 'November referendum', { source: 'https://en.wikipedia.org/wiki/2027_Ruritanian_referendums#November' })],
+    { ...base, undated: november }), []);
+  // A referendum's record does not give way to an undated general election, even through a redirect.
+  assert.equal(mergeBallots([ref('2027-06-30', '2027 Ruritanian referendum')],
+    { ...base, undated: new Set([wiki('2027 Ruritanian general election')]), redirects: new Map([['2027 Ruritanian referendum', '2027 Ruritanian general election']]) }).length, 1);
+  // A double redirect, followed hop by hop: the record's R → U → A, the calendar's A; and the record's R → U, the
+  // calendar's U, U → A.
+  const hops = new Map([['Next Testland general election', 'Testland general election, 2027'], ['Testland general election, 2027', '2027 Testland general election']]);
+  const testland = () => [ev('retro', '2027-09-30', 'Testland', 'Next Testland general election')];
+  assert.deepEqual(mergeBallots(testland(), { ...base, undated: new Set([wiki('2027 Testland general election')]), redirects: hops }), []);
+  assert.deepEqual(mergeBallots(testland(), { ...base, undated: new Set([wiki('Testland general election, 2027')]), redirects: hops }), []);
+  // A redirect that loops does not hang the build, and leaves the record as it was.
+  assert.equal(mergeBallots(testland(), { ...base, undated: new Set([wiki('2027 Testland general election')]),
+    redirects: new Map([['Next Testland general election', 'Testland general election, 2027'], ['Testland general election, 2027', 'Next Testland general election']]) }).length, 1);
+  // A lower-case first letter in the calendar's link to the article itself.
+  assert.deepEqual(mergeBallots([ev('retro', '2027-12-31', 'Bahrain', 'Next Bahraini general election')],
+    { ...base, undated: new Set([wiki('next Bahraini general election')]) }), []);
+  // The calendars' days by article: a deadline on 31 December 2027 under a redirect, and the calendar's January vote
+  // under the article it leads to. One record stays, the calendar's; before, the month-only rule (same year) left two.
+  const calendar = ev('list', '2028-01-16', 'Testland', '2028 Testland general election');
+  assert.deepEqual(rows(mergeBallots([ev('retro', '2027-12-31', 'Testland', 'Next Testland general election'), calendar],
+    { ...base, redirects: new Map([['Next Testland general election', '2028 Testland general election']]) })),
+  [['2028-01-16', 'Testland', '2028 Testland general election']]);
+  // ... but a referendum the calendar dates does not take an election's placeholder away through a redirect.
+  assert.equal(mergeBallots([ev('retro', '2027-12-31', 'Testland', 'Next Testland general election'), { ...calendar, type: 'referendum' }],
+    { ...base, redirects: new Map([['Next Testland general election', '2028 Testland general election']]) }).length, 2);
+  // articleOf: the article and section an address opens.
+  assert.equal(articleOf(wiki('Next Italian general election'), new Map([['Next Italian general election', '2027 Italian general election']])), '2027 Italian general election');
+  assert.equal(articleOf('https://en.wikipedia.org/wiki/June_2027_Ruritanian_referendum', toArticle, toSection), '2027 Ruritanian referendums#June');
+  assert.equal(articleOf(wiki('next Bahraini general election')), 'Next Bahraini general election');
+  assert.equal(articleOf('https://example.org/vote'), null);
+  // build-events.mjs sends the calendars' undated links to the Wikipedia API with the votes' and summits' articles,
+  // each as its address spells it and without its section; a link that is itself a redirect then matches.
+  assert.deepEqual(titlesToResolve([
+    ev('retro', '2027-09-30', 'Italy', '2027 Italian general election'),
+    ev('list', '2027-06-30', 'Ruritania', 'x', { type: 'referendum', source: wiki('2027 Ruritanian referendums#June') }),
+    ev('news', '2026-11-01', 'Ruritania', 'x', { type: 'protest', source: wiki('2026 Ruritanian protests') }),
+    ev('list', '2026-11-01', 'Ruritania', 'x', { source: wiki('2026 in Ruritania') }),
+  ], new Set([wiki('Next Italian general election'), wiki('next Bahraini general election'), wiki('2027 Ruritanian referendums#November')])),
+  ['2027 Italian general election', '2027 Ruritanian referendums', 'Next Italian general election', 'next Bahraini general election']);
 });
 
 test('5. the Atlas: an election of Congress is an election, a vote below the state is left out, a year-only vote takes a lost date away', () => {
@@ -326,15 +420,22 @@ test('the built calendar: one record per vote, Antonio Saca, the referendums lef
     [['2024-06-30', '2024 French legislative election (first round; second round 7 July)']]);
   assert.deepEqual(ALL.filter(e => e.country === 'Czechia' && e.type === 'election' && /^2025-10/.test(e.date)).map(e => [e.date, e.title]),
     [['2025-10-03', '2025 Czech parliamentary election']]);
-  // Italy's next general election, once and tentative. Which source dates it is not this test's business: until
-  // 26 November 2026 the daily build kept Wikipedia's electoral calendar's record (22 December 2027, the last day the
-  // vote may be held), and on 27 November the Retrospective's, known to the month (September 2027, to be confirmed);
-  // the pinned date and title then failed four refreshes' suites and held their deploys back.
+  // Italy's next general election, at most once, and then tentative. Which source dates it is not this test's business:
+  // until 26 November 2026 the daily build kept Wikipedia's electoral calendar's record (22 December 2027, the last day
+  // the vote may be held), and on 27 November the Retrospective's, known to the month (September 2027, to be confirmed);
+  // the pinned date and title then failed four refreshes' suites and held their deploys back. That day the calendar
+  // moved Italy to "Unknown date", and the Retrospective's placeholder gives way to it by article (mergeBallots), so a
+  // build made while the calendar leaves the vote undated lists no Italian election in 2027, unless another source dates
+  // it. The title is matched without the country's name: the Political Atlas holds the vote as
+  // "General election (latest)", known to the year (political-atlas/data/countries/europe-west-south.json), and a month
+  // or a day there would make its record the vote's under that title.
   const italy = ALL.filter(e => e.country === 'Italy' && e.type === 'election' && e.date.startsWith('2027')).map(e => [e.date, e.title, e.status]);
-  assert.equal(italy.length, 1, JSON.stringify(italy));
-  assert.match(italy[0][1], /Italian general election/);
-  assert.equal(italy[0][2], 'tentative');
-  assert.ok(italy[0][0] <= '2027-12-22', `not after the last day the vote may be held: ${italy[0][0]}`);
+  assert.ok(italy.length <= 1, JSON.stringify(italy));
+  for (const [date, title, status] of italy) {
+    assert.match(title, /\bgeneral election\b/i);
+    assert.equal(status, 'tentative');
+    assert.ok(date <= '2027-12-22', `not after the last day the vote may be held: ${date}`);
+  }
   assert.deepEqual(ALL.filter(e => e.country === 'Poland' && e.type === 'election' && e.date.startsWith('2027')).map(e => [e.date, e.title, e.status]),
     [['2027-11-11', 'Next Polish parliamentary election', 'tentative']]);
   assert.deepEqual(ALL.filter(e => e.country === 'Dominican Republic' && e.type === 'election' && e.date.startsWith('2024-05')).map(e => e.date), ['2024-05-19']);

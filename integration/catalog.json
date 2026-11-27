@@ -1,5 +1,5 @@
 {
-  "generated": "2026-11-27T12:18:23.387Z",
+  "generated": "2026-11-27T15:18:43.005Z",
   "name": "Vitruvian Manager data catalogue",
   "publisher": "JDP-Iq",
   "description": "Every public dataset in Vitruvian Manager (VM, by JDP-Iq), with its fields, size, licence and sources. Read-only; no keys. Files are static JSON on this site; the MCP server (/mcp) and the JSON API (/api/v1/) query them with row and size caps.",
@@ -1078,7 +1078,7 @@
         "Wikidata (CC0)",
         "Wikipedia Current events portal (CC BY-SA), from January 2026"
       ],
-      "updated": "2026-11-26",
+      "updated": "2026-11-27",
       "refresh": "daily",
       "page": "q/calendar.html?period=contemporary",
       "derivedFrom": [
@@ -1088,7 +1088,7 @@
         "calendar/data/2010s.json",
         "calendar/data/2020s.json"
       ],
-      "bytes": 172926
+      "bytes": 172969
     },
     {
       "id": "intelligence-briefing-stories",
@@ -2120,7 +2120,7 @@
           "description": "month, when the date is known only to the month; absent when the day is known"
         }
       ],
-      "rows": 5849,
+      "rows": 5882,
       "licence": "Summaries from Wikipedia, CC BY-SA 4.0 (credit Wikipedia); facts from Wikidata (CC0) and UCDP/PRIO (CC BY 4.0); compilation © JDP-Iq. Leaders to 2015 after Archigos 4.1 (Goemans, Gleditsch and Chiozza), whose page states no licence: kept with its citation until VM’s owner decides.",
       "sources": [
         "Wikipedia national electoral calendars and lists of summits",
@@ -2130,10 +2130,10 @@
         "Wikidata (CC0)",
         "Wikipedia Current events portal (CC BY-SA), from January 2026"
       ],
-      "updated": "2026-11-26",
+      "updated": "2026-11-27",
       "refresh": "daily",
       "page": "q/calendar.html?period=history",
-      "bytes": 2879674
+      "bytes": 2906383
     },
     {
       "id": "encyclopaedia-entities",

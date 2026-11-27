@@ -8,12 +8,12 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { readHash, writeHash } from '../bibliotheca/neo/lib/hash.js';
+import { readHash, writeHash, readMap } from '../bibliotheca/neo/lib/hash.js';
 import { paragraphHtml, validTerms, termsOnScreen, distinctTerms, termCount, chapterLabel } from '../bibliotheca/neo/lib/text.js';
 import { eraRows, eraFromFacts, bookEra, kardashevStep, kardashevPolity, yearOf, fmtEra, KARDASHEV_STEPS } from '../bibliotheca/neo/lib/era.js';
 import { frameMove } from '../bibliotheca/neo/lib/frame.js';
 import { shellHash } from '../kino/lib/links.js';
-import { pageTest, launch } from './tools/pages.mjs';
+import { pageTest, launch, drawn } from './tools/pages.mjs';
 import { yearsText } from '../design/vm-click.js';
 
 const ROOT = fileURLToPath(new URL('..', import.meta.url));
@@ -323,14 +323,38 @@ async function withFixture(page) {
   await page.route('**/bibliotheca/data/index.json', route => route.fulfill({ json: { generated: SHELF.generated, books: [FIXTURE_ROW, ...SHELF.books] } }));
   await page.route('**/bibliotheca/data/books/fixture-the-prince.json', route => route.fulfill({ json: FIXTURE }));
 }
+// A screen sent away while it loads: in Screens only Neo Book sends the last screen's frame to about:blank (Hold,
+// Escape, the next turn), and a screen still fetching its data then logs "TypeError: Failed to fetch" from its own catch,
+// after its pagehide (seen twice, science/progress and kardashev; races-4/abort-probe.mjs makes it every time). The
+// document is gone and no visitor sees it. An init script in each frame says, at pagehide, how many of its fetches were
+// still under way; watch() lets that many such errors from that screen's folder pass, until a page of that folder is
+// opened again. A screen that is shown and fails to load its data is still an error.
+const SENT_AWAY = () => {
+  if (window === top) return;
+  let n = 0;
+  const get = window.fetch;
+  window.fetch = function (...a) { n++; return get.apply(this, a).finally(() => { n--; }); };
+  console.debug(`__opened ${location.href}`);
+  addEventListener('pagehide', () => { if (n) console.debug(`__sent-away ${n} ${location.href}`); });
+};
+const folderOf = href => href.split(/[?#]/)[0].replace(/[^/]*$/, '');
 // Uncaught errors, and console errors, except a resource on another site that did not load (the fonts, Wikimedia
-// images in an entry: the network, not the page). `only` keeps those whose source matches (inside the shell, this page's).
+// images in an entry: the network, not the page), and the errors of a screen sent away (SENT_AWAY, above). `only` keeps
+// those whose source matches (inside the shell, this page's).
 function watch(page, only = null) {
-  const errors = [];
+  const errors = [], away = new Map();
   page.on('pageerror', e => { if (!only || only.test(e.stack || '')) errors.push(`pageerror: ${e.message}`); });
   page.on('console', m => {
+    if (m.type() === 'debug') {
+      const [word, n, href] = m.text().split(' ');
+      if (word === '__opened') away.delete(folderOf(n));
+      else if (word === '__sent-away') away.set(folderOf(href), +n);
+      return;
+    }
     if (m.type() !== 'error') return;
     const url = m.location()?.url || '';
+    const gone = /^TypeError: Failed to fetch(\n|$)/.test(m.text()) && [...away.keys()].find(f => away.get(f) > 0 && url.startsWith(f));
+    if (gone) { away.set(gone, away.get(gone) - 1); return; }
     if (/Failed to load resource/.test(m.text()) && url && !url.startsWith(BASE)) return;
     if (only && !only.test(url)) return;
     errors.push(`console: ${m.text()} (${url})`);
@@ -352,6 +376,27 @@ async function barShows(page) {
   return h.jsonValue();
 }
 const frameOf = (page, sel) => page.locator(sel).elementHandle().then(h => h.contentFrame());
+// Waits until the page has stood still for `frames` drawn frames (no glide under way and, given `sel`, that element not
+// moved by a reflow either); returns where the page stands.
+const still = (page, frames = 10, sel = null) => page.evaluate(([n, sel]) => new Promise((resolve, reject) => {
+  const at = () => `${Math.round(scrollY)}|${sel ? Math.round(document.querySelector(sel)?.getBoundingClientRect().top ?? -1) : ''}`;
+  let was = at(), same = 0;
+  const give = setTimeout(() => reject(new Error(`the page did not stand still for ${n} frames within 10 s`)), 10000);
+  const f = () => { const now = at(); if (now === was) same++; else { same = 0; was = now; } if (same >= n) { clearTimeout(give); resolve(scrollY); } else requestAnimationFrame(f); };
+  requestAnimationFrame(f);
+}), [frames, sel]);
+// The page's fetches, and the reading of their bodies, still under way (an init script, so it is in place before the
+// page's own): a test that holds a file waits on it for every answer the page asked for to have come and been read.
+// The code that awaited them has then run too, in the same task as the last of them (their promise jobs), before the
+// wait's next check.
+const COUNT_FETCHES = () => {
+  window.__inflight = 0;
+  const count = p => { window.__inflight++; return p.finally(() => { window.__inflight--; }); };
+  const get = window.fetch;
+  window.fetch = function (...a) { return count(get.apply(this, a)); };
+  for (const m of ['json', 'text', 'arrayBuffer', 'blob']) { const read = Response.prototype[m]; Response.prototype[m] = function () { return count(read.call(this)); }; }
+};
+const fetchesDone = page => page.waitForFunction(() => window.__inflight === 0, null, { timeout: 30000 });
 
 test('page: the fixture: terms as links, AR Mode\'s "On screen" follows the terms in view, a term opens its entry, the address follows', PAGE, async () => {
   const browser = await launch();
@@ -362,6 +407,9 @@ test('page: the fixture: terms as links, AR Mode\'s "On screen" follows the term
     await withFixture(page);
     await page.goto(`${BASE}/bibliotheca/neo/#book=fixture-the-prince&ch=3`, { waitUntil: 'domcontentloaded' });
     await page.waitForSelector('#text p.para', { timeout: 20000 });
+    // The connector's return bar comes a moment after the page loads and moves the text down (as reading() waits for
+    // it, below): waited for, so that it does not arrive among the scrolls this test makes.
+    await page.waitForSelector('.prp-returnbar', { state: 'attached', timeout: 8000 }).catch(() => {});
     const ch3 = FIXTURE.chapters.find(c => c.n === 3);
     assert.equal(await page.locator('#shelf').inputValue(), 'fixture-the-prince');
     assert.equal((await page.locator('#chapter-title').innerText()).replace(/\s+/g, ' '), 'III Concerning mixed principalities');
@@ -392,6 +440,11 @@ test('page: the fixture: terms as links, AR Mode\'s "On screen" follows the term
     const top = await barShows(page);
     assert.equal(await page.locator('#terms-count').innerText(), String(top.length));
     assert.equal(await page.textContent('#pane-title'), `${top.length} term${top.length === 1 ? '' : 's'} in view`);
+    // Opening AR Mode pins the reader's paragraph (keepPlace) until the page's next rendering has seen it on screen; a
+    // scroll by script (no wheel, touch, press or key, which let go of the pin) made before that rendering is undone
+    // by the pane's reflow, which holds the pin (27 November 2026, on a loaded machine: back at Q70972 and Q153529).
+    // Every wait above can pass before the page has drawn once, so the test waits for its drawing.
+    await drawn(page);
     await page.evaluate(() => document.getElementById('c03-p07').scrollIntoView({ block: 'center' }));
     const end = await barShows(page);
     assert.ok(end.includes('Q12560'), `the Turk at the end of the excerpt: ${end}`);
@@ -414,9 +467,13 @@ test('page: the fixture: terms as links, AR Mode\'s "On screen" follows the term
     await page.waitForSelector('#pane', { state: 'hidden' });
     await page.keyboard.press('t');
     await page.waitForSelector('#panel-terms:not([hidden])');
-    // At the very end of the page the sources fill the screen: no term in view, and the tab says so.
-    await page.evaluate(() => window.scrollTo(0, document.documentElement.scrollHeight));
+    // At the very end of the page the sources fill the screen: no term in view, and the tab says so. (T has just
+    // opened AR Mode, which pins the paragraph, as above: the page draws before the scroll.)
+    await drawn(page);
+    const foot = await page.evaluate(() => { window.scrollTo(0, document.documentElement.scrollHeight); return scrollY; });
     if (!(await barShows(page)).length) assert.equal(await page.locator('#chips').innerText(), 'No terms in view.');
+    const stayed = await page.evaluate(() => scrollY);
+    assert.ok(stayed >= foot - 1, `the page stayed at the foot, not pulled back to the pinned paragraph (${foot} then ${stayed})`);
     await page.evaluate(() => document.getElementById('c03-p07').scrollIntoView({ block: 'center' }));
     await barShows(page);
 
@@ -536,7 +593,9 @@ test('page: the real book opens at a deep link with the paragraph in place, and 
     await page.goto(`${BASE}/bibliotheca/neo/#book=the-prince&ch=12&p=c12-p08`, { waitUntil: 'domcontentloaded' });
     await page.waitForSelector('#text p.para.current', { timeout: 20000 });
     await page.evaluate(() => document.fonts.ready);
-    await page.waitForTimeout(500);
+    // The reflows after the fonts, and the connector's return bar, settled: the paragraph has stood still.
+    await page.waitForSelector('.prp-returnbar', { state: 'attached', timeout: 8000 }).catch(() => {});
+    await still(page, 10, '#c12-p08');
     const ch12 = PRINCE.chapters.find(c => c.n === 12);
     const at = await page.evaluate(() => ({ id: document.querySelector('#text p.current').id, top: document.getElementById('c12-p08').getBoundingClientRect().top, head: document.querySelector('#head').offsetHeight }));
     assert.equal(at.id, 'c12-p08');
@@ -586,7 +645,9 @@ test('page: AR Mode on its terms: a deep link lands under the head, the list is 
     await page.goto(`${BASE}/bibliotheca/neo/${hash}`, { waitUntil: 'domcontentloaded' });
     await page.waitForSelector('#text p.para.current', { timeout: 20000 });
     await page.evaluate(() => document.fonts.ready);
-    await page.waitForTimeout(500);
+    // The reflows after the fonts, and the connector's return bar, settled: the current paragraph has stood still.
+    await page.waitForSelector('.prp-returnbar', { state: 'attached', timeout: 8000 }).catch(() => {});
+    await still(page, 10, '#text p.para.current');
     return { ctx, page, errors };
   };
   try {
@@ -712,6 +773,7 @@ async function reading(browser, hash, { viewport = { width: 1366, height: 768 },
   const ctx = await browser.newContext({ viewport, ...context });
   const page = await ctx.newPage();
   const errors = watch(page);
+  await page.addInitScript(SENT_AWAY);
   await page.addInitScript(FAKE_SPEECH, speech);
   if (fixture) await withFixture(page);
   // With no proxy played, it answers as the real one does before it is set up (the local server has no Functions).
@@ -722,19 +784,27 @@ async function reading(browser, hash, { viewport = { width: 1366, height: 768 },
   // On its own the page gains the connector's return bar a moment after it loads, which moves the text down: wait
   // for it, so that nothing measured below moves under the test.
   await page.waitForSelector('.prp-returnbar', { state: 'attached', timeout: 8000 }).catch(() => {});
-  if (ar) { await page.keyboard.press('a'); await page.waitForSelector('#nar:not([hidden])'); }
+  // A turns the mode on, which pins the reader's paragraph until the page's next rendering has seen it (keepPlace): a
+  // test that scrolls by script next waits for that rendering, or the pane's reflow scrolls the page back to the pin.
+  if (ar) { await page.keyboard.press('a'); await page.waitForSelector('#nar:not([hidden])'); await drawn(page); }
   return { ctx, page, errors, said };
 }
 const spokenN = page => page.evaluate(() => window.__spoken.length);
 const narAt = page => page.evaluate(() => ({ pid: window.__narrator.passage?.id, k: window.__narrator.pos.k, playing: window.__narrator.playing }));
 // The unit being read, as the page marks it: the highlight's text, and its box against the reading region.
-const marked = page => page.evaluate(() => {
+const MARK = () => {
   // The box is the unit's: the piece being read of a long sentence (nc-say-part), else the sentence.
   const r = [...(CSS.highlights.get('nc-say') || [])][0], part = [...(CSS.highlights.get('nc-say-part') || [])][0], head = document.querySelector('#head').getBoundingClientRect().bottom;
   const pane = document.querySelector('#pane'), sheet = !pane.hidden && getComputedStyle(pane).position === 'fixed' && !document.querySelector('#layout').classList.contains('fill') ? pane.getBoundingClientRect().top : innerHeight;
   const box = (part || r)?.getBoundingClientRect();
   return { text: r?.toString() || '', top: box?.top, bottom: box?.bottom, region: [head, sheet], pid: window.__narrator.passage?.id, k: window.__narrator.pos.k };
-});
+};
+const marked = page => page.evaluate(MARK);
+// Waits (5 s at most) until the unit being read is marked inside the reading region, where keepInView brings it (a glide
+// of a quarter of a second or so, longer on a busy machine), and returns the mark as it was then; or, if it never is,
+// the mark as it is when the wait runs out, so that the assertion after it fails by name.
+const markInView = page => page.waitForFunction(`(() => { const m = (${MARK})(); return m.top >= m.region[0] - 1 && m.bottom <= m.region[1] + 1 && m; })()`, null, { timeout: 5000 })
+  .then(h => h.jsonValue(), () => marked(page));
 const unitOf = (chapterData, pid, k) => speakable(chapterData.paragraphs.find(p => p.id === pid)).units[k];
 
 test('page: AR Reader (Augmented Reading until 15 November 2026): the button and the kicker say so, the pane shows the nearest term before Play, the narrator reads and marks the unit, keeps it in view, and R pauses and resumes it', PAGE, async () => {
@@ -766,15 +836,20 @@ test('page: AR Reader (Augmented Reading until 15 November 2026): the button and
     // Past a screenful the page scrolls by itself, the unit stays in the reading region, and after the deep link the
     // current paragraph moves on with the voice.
     await page.waitForFunction(() => window.__narrator.passage?.id === 'c03-p07', null, { timeout: 30000 });
-    await page.waitForTimeout(400);
-    const m = await marked(page);
+    const m = await markInView(page);
     assert.ok(m.top >= m.region[0] - 1 && m.bottom <= m.region[1] + 1, `the unit is in the reading region: ${JSON.stringify(m)}`);
     await page.waitForFunction(() => document.querySelector('#text p.current')?.id === 'c03-p07' && /&p=c03-p07&/.test(location.hash), null, { timeout: 5000 });
-    // Scrolled away by hand, the page stays where the reader put it while the voice reads on.
+    // Scrolled away by hand, the page stays where the reader put it while the voice reads on. The wheel is turned
+    // while the page is at rest: one turned while it glides to the next unit (keepInView's smooth scroll) is lost, as
+    // the page then carries on following. (That is the page's behaviour mid-glide, noted, not what this step tests.)
     await page.mouse.move(300, 400);
+    const y0 = await still(page);
     await page.mouse.wheel(0, -1500);
-    await page.waitForTimeout(400);
-    const y = await page.evaluate(() => scrollY), n = await spokenN(page);
+    // The wheel's scroll is the browser's own animation: waited for until it has moved the page up and the page then
+    // stands still (a lost wheel fails by name below).
+    await page.waitForFunction(y0 => scrollY <= Math.max(0, y0 - 1000), y0, { timeout: 5000 }).catch(() => {});
+    const y = await still(page), n = await spokenN(page);
+    assert.ok(y <= Math.max(0, y0 - 1000), `the wheel scrolled the page up (${y0} then ${y})`);
     await page.waitForFunction(n => window.__spoken.length >= n + 3, n, { timeout: 10000 });
     assert.ok(Math.abs(await page.evaluate(() => scrollY) - y) <= 1, 'the page stayed put');
     // R pauses; R again reads the same unit from its start, and brings it back into view.
@@ -787,8 +862,7 @@ test('page: AR Reader (Augmented Reading until 15 November 2026): the button and
     await page.keyboard.press('r');
     await page.waitForFunction(n => window.__spoken.length > n, stopped);
     assert.equal((await page.evaluate(n => window.__spoken[n], stopped)).text, unitOf(CH3, at.pid, at.k).text, 'the same unit again');
-    await page.waitForTimeout(700);
-    const back = await marked(page);
+    const back = await markInView(page);
     assert.ok(back.top >= back.region[0] - 1 && back.bottom <= back.region[1] + 1, 'Play follows the voice again');
     await page.keyboard.press('r');
     assert.deepEqual(errors, []);
@@ -866,7 +940,9 @@ test('page: the divider between the text and the pane, with a real pointer: the 
     await page.goto(`${BASE}/bibliotheca/neo/#book=the-prince&ch=3&p=c03-p06&t=Q70972&pane=ency`, { waitUntil: 'domcontentloaded' });
     await page.waitForSelector('#pane:not([hidden])');
     await page.evaluate(() => document.fonts.ready);
-    await page.waitForTimeout(500);
+    // The reflows after the fonts, and the connector's return bar, settled: the reader's paragraph has stood still.
+    await page.waitForSelector('.prp-returnbar', { state: 'attached', timeout: 8000 }).catch(() => {});
+    await still(page, 10, '#text p.current');
     const bar = page.locator('#pane > .prp-split-bar');
     assert.equal(await bar.getAttribute('role'), 'separator');
     assert.equal(await bar.getAttribute('aria-valuenow'), '44');
@@ -1005,7 +1081,8 @@ test('page: the National Analysis row opens the term\'s country, or the book\'s 
     assert.equal(decodeURIComponent(await row.locator('a').getAttribute('data-shell-hash')), `#/rt/pestle?at=${BASE}/q/national.html#country=CHE`);
     await row.locator('[data-show]').click();
     const vm = await frameOf(page, '#vm-frame');
-    await vm.waitForFunction(() => location.hash === '#country=CHE' && /Switzerland/.test(document.body.innerText), null, { timeout: 20000 });
+    // (The frame can be read between two documents, when it has no body yet: that check waits on, it does not throw.)
+    await vm.waitForFunction(() => location.hash === '#country=CHE' && /Switzerland/.test(document.body?.innerText || ''), null, { timeout: 20000 });
     await page.waitForFunction(() => /&t=Q39&pane=vm&show=pestle:che$/.test(location.hash), null, { timeout: 5000 });
     // On War, no term: Spain, named most often, then Sweden and Portugal (Clausewitz's Poland is the Commonwealth, not
     // today's country, and his Switzerland of before 1848 has no entry and is left unmarked: the tagging of 18 November 2026).
@@ -1136,15 +1213,20 @@ test('page: the terms on screen cover no line of the text: AR Mode open on them,
       // AR Mode: one button, the pane on its first tab, the terms on screen.
       await page.click('#pane-toggle');
       await page.waitForSelector('#panel-terms:not([hidden])');
-      await page.waitForTimeout(300);
+      // The chips are drawn at the page's next update: measured once they are the terms in view.
+      await barShows(page);
       const both = await barCovers(page);
       assert.ok(both.open && both.first, `${at}: the terms are listed, and text is on screen: ${JSON.stringify(both)}`);
       const f = both.first, b = both.bar;
       assert.ok(!(f.l < b.r && f.r > b.l && f.t < b.b && f.b > b.t), `${at}: the first line on screen is clear of the terms: ${JSON.stringify(both)}`);
       if (viewport.width >= 1000) assert.deepEqual(both.over, [], `${at}: beside the text, over none of it`);
       // Scrolled on, the same (the head is stuck at the top of the window).
+      const y0 = await page.evaluate(() => scrollY);
       await page.mouse.wheel(0, 600);
-      await page.waitForTimeout(400);
+      // The wheel's scroll has moved the page and ended, and the chips are those of the new place.
+      await page.waitForFunction(y0 => scrollY > y0, y0, { timeout: 5000 });
+      await still(page);
+      await barShows(page);
       const on = await barCovers(page);
       assert.ok(on.first && !(on.first.l < on.bar.r && on.first.r > on.bar.l && on.first.t < on.bar.b && on.first.b > on.bar.t), `${at}, scrolled: ${JSON.stringify(on)}`);
       if (viewport.width >= 1000) assert.deepEqual(on.over, [], `${at}, scrolled`);
@@ -1318,8 +1400,7 @@ test('page: at 360 × 780 the pane is the sheet, the narrator\'s row fits, the s
     for (let i = 0; i < 4; i++) {
       // Each new unit, once the page has scrolled to it.
       await page.waitForFunction(n => window.__spoken.length > n, i, { timeout: 5000 });
-      await page.waitForTimeout(900);
-      const m = await marked(page);
+      const m = await markInView(page);
       assert.ok(m.bottom <= sheet.top + 1 && m.top >= m.region[0] - 1, `above the sheet: ${JSON.stringify(m)}`);
     }
     await page.click('#nar-play');
@@ -1334,9 +1415,24 @@ test('page: with reduced motion the text jumps to the sentence without gliding',
     const { page, errors } = await reading(browser, '#book=the-prince&ch=3&p=c03-p06', { context: { reducedMotion: 'reduce' }, speech: { ms: 3000 } });
     await page.evaluate(() => window.scrollTo(0, 0)); // away from the paragraph to be read
     await page.waitForTimeout(300);
-    await page.evaluate(() => { window.__ys = []; const tick = () => { window.__ys.push(Math.round(scrollY)); if (window.__ys.length < 40) requestAnimationFrame(tick); }; requestAnimationFrame(tick); });
+    // Still at the top: otherwise the jump below is not the one from far away that the test means to see.
+    assert.equal(await page.evaluate(() => scrollY), 0, 'the page is at the top before Play');
+    // Where the page stands at each frame, from before Play until it has moved and then stood still for 20 frames (or
+    // 600 frames have passed with no move): a click can take a second to arrive on a busy machine, so a fixed count of
+    // frames could end before the jump.
+    await page.evaluate(() => {
+      window.__ys = []; window.__ysDone = false;
+      let same = 0;
+      const tick = () => {
+        const ys = window.__ys, y = Math.round(scrollY);
+        same = ys.length && y === ys[ys.length - 1] ? same + 1 : 0;
+        ys.push(y);
+        if ((y !== ys[0] && same >= 20) || ys.length >= 600) window.__ysDone = true; else requestAnimationFrame(tick);
+      };
+      requestAnimationFrame(tick);
+    });
     await page.click('#nar-play');
-    await page.waitForFunction(() => window.__ys.length >= 40);
+    await page.waitForFunction(() => window.__ysDone, null, { timeout: 60000 });
     await page.click('#nar-play');
     const ys = [...new Set(await page.evaluate(() => window.__ys))];
     assert.equal(ys.length, 2, `one jump, no glide: ${ys}`);
@@ -1461,14 +1557,29 @@ test('page: when the proxy says the day\'s allowance is spent, this device\'s vo
     await page.unroute('**/api/voice/v1/say');
     const again = [];
     await page.route('**/api/voice/v1/say', route => { again.push(route.request().postDataJSON().text); return route.fulfill({ status: 200, body: Buffer.from(globalThis.PRPVoice.silentWav(0.05)), headers: { 'content-type': 'audio/wav', 'x-prp-voice-duration': '0.05' } }); });
-    const spoke = await spokenN(page);
+    // The device voice reads on until the page has the press, and a click can take a second to arrive on a busy machine
+    // (27 November 2026: two or three units more): its count, and the unit being read, are taken as the page answers
+    // the press. This listener comes after the page's own, which stops the device voice there and then.
+    await page.evaluate(() => document.querySelector('#nar-again').addEventListener('click', () => {
+      window.__atPress = { spoken: window.__spoken.length, speaking: speechSynthesis.speaking, pid: window.__narrator.passage?.id, k: window.__narrator.pos.k };
+    }, { once: true }));
     await page.click('#nar-again');
-    const at = await narAt(page);
+    const at = await page.evaluate(() => window.__atPress);
+    assert.ok(at, 'the page had the press');
+    assert.equal(at.speaking, false, 'the device voice is silenced at the press, the unit it was reading too');
     await page.waitForFunction(() => window.__narrator.voiceKind === 'stream');
-    await new Promise(r => setTimeout(r, 800));
+    // The online voice reads that unit through and asks for the next (or the next paragraph's first): it asks the proxy
+    // for its voices and then for each unit, answered by this test's routes, each allowed 5 s and 8 s by the voice layer
+    // before it hands over to the device. The device voice is watched until the online voice has asked for the next unit.
+    const on = await (await page.waitForFunction(a => { const n = window.__narrator; return (n.passage?.id !== a.pid || n.pos.k > a.k) && { backend: n.reader.backend }; }, at, { timeout: 20000 })).jsonValue();
+    assert.equal(on.backend, 'stream', 'read on with the online voice, not handed back to the device');
+    for (const t0 = Date.now(); again.length < 2; await new Promise(r => setTimeout(r, 50))) assert.ok(Date.now() - t0 < 20000, `the online voice asked for the unit after the press (${again.length} asked)`);
+    const end = await page.evaluate(() => ({ spoken: window.__spoken.length, speaking: speechSynthesis.speaking, backend: window.__narrator.reader.backend }));
     assert.ok(again.length >= 1, 'the online voice asked');
     assert.equal(again[0], unitOf(FX3, at.pid, at.k).text, 'from the unit being read');
-    assert.ok(await spokenN(page) <= spoke + 1, 'and the device voice stopped');
+    assert.equal(end.backend, 'stream', 'and still reads with it');
+    assert.equal(end.spoken, at.spoken, `and the device voice stopped at the press (${at.spoken} units, then ${end.spoken})`);
+    assert.equal(end.speaking, false, 'and is silent');
     await page.keyboard.press('r');
     // (The browser reports the proxy's 429 as a resource that failed to load: that is the answer the test played.)
     assert.deepEqual(errors.filter(e => !/status of 429/.test(e)), []);
@@ -1508,7 +1619,8 @@ test('page: with no voice on the device Play is off and says why, and no request
     assert.deepEqual(none.errors, []);
     await none.ctx.close();
     const late = await reading(browser, '#book=fixture-the-prince&ch=3', { fixture: true, speech: { late: 1000 } });
-    await late.page.waitForTimeout(2000);
+    // The voices come a second after the page starts (voiceschanged): waited for, 10 s at most on a busy machine.
+    await late.page.waitForFunction(() => !document.querySelector('#nar-play').disabled, null, { timeout: 10000 }).catch(() => {});
     assert.equal(await late.page.locator('#nar-play').isDisabled(), false, 'Play is on');
     await late.page.click('#nar-play');
     await late.page.waitForFunction(() => window.__spoken.length >= 1, null, { timeout: 5000 });
@@ -1897,8 +2009,7 @@ test('page: the Reader button sits left of AR Reader, named "Reader"; it shows t
       await page.waitForTimeout(200);
     }
     await page.waitForFunction(() => window.__narrator.passage?.id === 'c03-p07', null, { timeout: 30000 });
-    await page.waitForTimeout(400);
-    const m = await marked(page);
+    const m = await markInView(page);
     assert.ok(m.top >= m.region[0] - 1 && m.bottom <= m.region[1] + 1, `the unit is kept in view: ${JSON.stringify(m)}`);
     assert.equal(await page.locator('#pane').isHidden(), true, 'and the pane never opened');
     // R pauses and resumes, < > change the speed, as with the AR Reader.
@@ -2127,7 +2238,7 @@ test('page: in The Prince V a click on "Athens" opens the map on Classical Athen
     assert.ok(rec && !rec.facts?.dissolved && !rec.facts?.end, 'the Master Index still records no end for it');
     // With the point the Master Index stores (pt, from its full build) the map opens on it; without one it says so.
     if (Array.isArray(rec.pt)) await frame.waitForFunction(() => window.omniState?.frame === -508 && window.omniState.points?.includes('Q844930'), null, { timeout: 30000 });
-    else await frame.waitForFunction(() => window.omniState?.frame === -508 && /Classical Athens/.test(document.querySelector('#map-note').textContent), null, { timeout: 30000 });
+    else await frame.waitForFunction(() => window.omniState?.frame === -508 && /Classical Athens/.test(document.querySelector('#map-note')?.textContent || ''), null, { timeout: 30000 });
     const note = await frame.textContent('#map-note');
     if (Array.isArray(rec.pt)) {
       const box = (await frame.evaluate(() => window.omniState)).box;
@@ -2200,5 +2311,154 @@ test('page: Bibliotheca shown in another page\'s pane (a frame named prp-side) o
     await page.waitForTimeout(300);
     assert.equal(await f.locator('#nar').isHidden(), true, 'N does nothing there');
     assert.doesNotMatch(await f.evaluate(() => location.hash), /reader=1|ar=1/);
+  } finally { await browser.close(); }
+});
+
+// The Map tab draws a clicked term's view once the data for it has come (renderMap awaits clickView). A reader who
+// picks another tab meanwhile must keep that tab: the late view once wrote the Map tab's heading ("Omni-Map", the
+// entry's years) over the Master Index tab's (27 November 2026, on a loaded machine: "Ottoman Empire · 1299–1922" over
+// the Master Index tab). The test holds one of the view's files until the reader has moved to the Master Index tab.
+// A page of the fixture with the fetch count in place and one of a map view's files (omni/data/borders/index.json, the
+// smallest) held from its first request until the test lets it go.
+async function heldView(browser, hash) {
+  const ctx = await browser.newContext({ viewport: { width: 1120, height: 800 } });
+  const page = await ctx.newPage(), errors = watch(page);
+  await page.addInitScript(COUNT_FETCHES);
+  await withFixture(page);
+  let release, asked, first = true;
+  const gate = new Promise(r => { release = r; }), held = new Promise(r => { asked = r; });
+  await page.route('**/omni/data/borders/index.json', async route => {
+    if (!first) return route.continue();
+    first = false; asked(); await gate; return route.continue();
+  });
+  await page.goto(`${BASE}/bibliotheca/neo/${hash}`, { waitUntil: 'domcontentloaded' });
+  await page.waitForSelector('#text p.current', { timeout: 20000 });
+  await page.evaluate(() => document.fonts.ready);
+  return { ctx, page, errors, held, release };
+}
+// The pane as the reader sees it: its heading, the tab selected, the Map tab's card and frame, and the address's view.
+const paneNow = page => page.evaluate(() => ({
+  kicker: document.querySelector('#pane-kicker').textContent, title: document.querySelector('#pane-title').textContent,
+  tab: document.querySelector('[role=tab][aria-selected=true]')?.id || null, card: !document.querySelector('#map-card').hidden && !document.querySelector('#panel-map').hidden,
+  frame: document.querySelector('#map-frame').dataset.url || '', hash: location.hash,
+}));
+// The places a view centres on (its recipe's focus=), from a recipe or an address that carries one.
+const focusOf = s => decodeURIComponent((/(?:^|[#&?])focus=([^&]*)/.exec(s || '') || [])[1] || '').split(',').filter(Boolean);
+test('page: a term\'s map view that arrives after the reader has moved to the Master Index tab leaves that tab as it is', PAGE, async () => {
+  const browser = await launch({ args: ['--mute-audio'] });
+  try {
+    const { page, errors, held, release } = await heldView(browser, '#book=fixture-the-prince&ch=3');
+    await page.locator('#text a.term[data-qid="Q12560"]').first().click();
+    await page.waitForFunction(() => document.querySelector('#tab-map')?.getAttribute('aria-selected') === 'true');
+    await held; // the view is waiting for its data
+    await page.click('#tab-ency');
+    await page.waitForFunction(() => /&t=Q12560&pane=ency$/.test(location.hash));
+    const before = await page.evaluate(() => ({ kicker: document.querySelector('#pane-kicker').textContent, title: document.querySelector('#pane-title').textContent }));
+    assert.deepEqual(before, { kicker: 'Master Index', title: 'Ottoman Empire' });
+    // The data comes: every answer the page asked for has come and been read, and the late view has run.
+    release();
+    await fetchesDone(page);
+    const after = await page.evaluate(() => ({ kicker: document.querySelector('#pane-kicker').textContent, title: document.querySelector('#pane-title').textContent, hash: location.hash, ency: !document.querySelector('#panel-ency').hidden }));
+    assert.deepEqual({ kicker: after.kicker, title: after.title, ency: after.ency }, { ...before, ency: true }, 'the Master Index tab keeps its own heading');
+    // (The address writes map= only while the Map tab shows, so this holds with or without the mend: the heading tells.)
+    assert.match(after.hash, /&t=Q12560&pane=ency$/, 'and the address');
+    // The Map tab picked again draws the view.
+    await page.click('#tab-map');
+    await page.waitForFunction(() => /^Ottoman Empire · /.test(document.querySelector('#pane-title').textContent) && document.querySelector('#pane-kicker').textContent === 'Omni-Map', null, { timeout: 30000 });
+    assert.deepEqual(errors, []);
+  } finally { await browser.close(); }
+});
+
+// An address with the Map tab's own view (pane=map&map=…, here the Ottoman Empire's) opened cold: a reader who clicks
+// another term in the text before that view has been drawn gets the clicked term's view. The address's view once
+// stayed in force for that click: the Map tab was headed with the clicked term's name over the Ottoman map, and the
+// address paired the two (27 November 2026, a second reader's probe: "Kingdom of France · map of 1230–1990" with
+// focus=Q12560), whether the reader had gone to the Master Index tab meanwhile or stayed on the Map tab.
+test('page: a term clicked while an address\'s own map view is still loading draws the clicked term\'s view, not the address\'s', PAGE, async () => {
+  const browser = await launch({ args: ['--mute-audio'] });
+  try {
+    // The address a reader would share: the Turk's view, as a click on a fresh page writes it.
+    const ctx = await browser.newContext({ viewport: { width: 1120, height: 800 } });
+    const first = await ctx.newPage();
+    await withFixture(first);
+    await first.goto(`${BASE}/bibliotheca/neo/#book=fixture-the-prince&ch=3&p=c03-p07`, { waitUntil: 'domcontentloaded' });
+    await first.locator('#c03-p07 a.term[data-qid="Q12560"]').first().click();
+    await first.waitForFunction(() => /&pane=map&map=/.test(location.hash) && /focus%3DQ12560|focus=Q12560/.test(location.hash), null, { timeout: 30000 });
+    const shared = await first.evaluate(() => location.hash);
+    await ctx.close();
+    assert.ok(readMap(shared).map && focusOf(readMap(shared).map).includes('Q12560'), `the Turk's view: ${shared}`);
+    const rec = read(`lake/data/e/${70972 % 512}.json`).Q70972;
+    const want = `${rec.label} · ${yearsText(rec, { today: new Date().toISOString().slice(0, 10) })}`;
+    for (const away of [true, false]) {
+      const how = away ? 'from the Master Index tab' : 'on the Map tab';
+      const { page, errors, held, release } = await heldView(browser, shared);
+      await held; // the address's view is waiting for its data
+      if (away) {
+        await page.click('#tab-ency');
+        release();
+        await fetchesDone(page);
+      }
+      await page.locator('#text a.term[data-qid="Q70972"]').first().click();
+      if (!away) release();
+      await page.waitForFunction(() => document.querySelector('#tab-map')?.getAttribute('aria-selected') === 'true', null, { timeout: 10000 });
+      await fetchesDone(page);
+      const now = await paneNow(page);
+      assert.equal(now.title, want, `${how}: the clicked term's own heading`);
+      assert.ok(focusOf(now.frame).includes('Q70972') && !focusOf(now.frame).includes('Q12560'), `${how}: the frame shows the clicked term's view (${now.frame})`);
+      const map = readMap(now.hash).map;
+      assert.ok(focusOf(map).includes('Q70972') && !focusOf(map).includes('Q12560'), `${how}: and the address carries it (${map})`);
+      assert.equal(readHash(now.hash).t, 'Q70972');
+      assert.deepEqual(errors, []);
+      await page.context().close();
+    }
+  } finally { await browser.close(); }
+});
+
+// A series clicked in the text opens its Master Index entry (choice 7, tests/review-mi-types.test.mjs) once its view's
+// data has come; a reader who picks the Map tab meanwhile, or comes to it by an address, gets the series' card there,
+// as a reader who picks the Map tab later does (app.js, useTerm). Before 27 November 2026 the click's say outlived it:
+// the Map tab picked again before the data came sent the reader on to the Master Index tab.
+test('page: a series clicked in the text, then the Map tab chosen before its view has come, shows the series\' card on the Map tab', PAGE, async () => {
+  const browser = await launch({ args: ['--mute-audio'] });
+  try {
+    for (const way of ['picked again', 'picked once the data has come', 'by an address after the pane was shut']) {
+      const { page, errors, held, release } = await heldView(browser, '#book=fixture-the-prince&ch=3');
+      // No book tags a series yet: one tagged name, written the way lib/text.js writes a term (as the review test does).
+      await page.evaluate(() => {
+        const a = document.createElement('a');
+        a.className = 'term'; a.dataset.qid = 'Q165725'; a.dataset.jdpiEncy = 'Q165725'; a.id = 'test-series';
+        a.href = '../../encyclopedia/index.html#Q165725'; a.textContent = 'Balkan Wars';
+        document.querySelector('#text p.current').append(' ', a);
+      });
+      await page.locator('#test-series').click();
+      await page.waitForFunction(() => document.querySelector('#tab-map')?.getAttribute('aria-selected') === 'true');
+      await held; // the series' view is waiting for its data
+      if (way === 'picked again') {
+        await page.click('#tab-ency');
+        await page.click('#tab-map');
+        release();
+        await fetchesDone(page);
+      } else if (way === 'picked once the data has come') {
+        await page.click('#tab-ency');
+        release();
+        await fetchesDone(page);
+        await page.click('#tab-map');
+        await fetchesDone(page);
+      } else {
+        await page.click('#pane-close');
+        await page.waitForSelector('#pane', { state: 'hidden' });
+        release();
+        await fetchesDone(page);
+        await page.evaluate(() => { location.hash = `${location.hash.replace(/&pane=[a-z]+/, '')}&pane=map`; });
+        await page.waitForSelector('#pane:not([hidden])');
+        await fetchesDone(page);
+      }
+      const now = await paneNow(page);
+      assert.equal(now.tab, 'tab-map', `${way}: the Map tab stays the reader's (${JSON.stringify(now)})`);
+      assert.equal(now.card, true, `${way}: with the series' card`);
+      assert.equal(now.kicker, 'Omni-Map');
+      assert.deepEqual(errors, []);
+      await page.context().close();
+    }
   } finally { await browser.close(); }
 });

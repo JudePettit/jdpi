@@ -48,6 +48,22 @@ export async function settled(page, more) {
   if (more) await more(page);
 }
 
+/** Waits until the page has drawn `n` frames (two by default), so whatever it does at its next rendering in answer to
+    a change it was just given has run: a ResizeObserver, an IntersectionObserver's first report, the work they ask for
+    with requestAnimationFrame. A click or a key can be answered by a handler, and every wait for that answer can pass
+    on its first check, before the page has drawn once; on a busy machine the test's next step can then arrive first
+    (27 November 2026: Neo Book's pin, which AR Mode's opening sets and the page's next rendering marks as seen, held a
+    scripted scroll made before that rendering and scrolled the page back). Frame work the page asks for in the first
+    frame runs in the second, in the same frame as this wait's last callback, before the test's next command; work it
+    asks for later (after a fetch, a timer) is not covered, and needs a wait of its own. A page that does not draw
+    fails the wait by name after 10 s. */
+export const drawn = (page, n = 2) => page.evaluate(n => new Promise((resolve, reject) => {
+  const give = setTimeout(() => reject(new Error(`the page did not draw ${n} frames within 10 s`)), 10000);
+  let left = n;
+  const f = () => { if (--left > 0) requestAnimationFrame(f); else { clearTimeout(give); resolve(); } };
+  requestAnimationFrame(f);
+}), n);
+
 /** Opens `url` in a new document, every time. A goto from a page to the same page with another hash is a same-document
     navigation: the old document reads the new hash, and a page that writes its address back in its own form
     (history.replaceState: Omni writes its recipe) can rewrite it, without the parts it could not read, before a reload

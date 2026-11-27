@@ -72,10 +72,14 @@ test('page: conflict on territory, switched on by keyboard at 1968, is fetched o
   let hit = false, seen = '';
   for (let i = 0; i < 4 && !hit; i++) {
     await page.locator('#map').scrollIntoViewIfNeeded();
-    await page.waitForTimeout(600);
-    const mk = (await page.evaluate(() => window.omniState.lv.marks)).find(m => m.q === 'Q172640');
-    const box = await page.locator('#map canvas').first().boundingBox();
-    const xy = [box.x + mk.xy[0], box.y + mk.xy[1]];
+    // The mark and the canvas are read together, once both have stood still for ten frames (600 frames at most): read apart,
+    // or after a fixed wait, the map could move between them.
+    const xy = await page.evaluate(() => new Promise(resolve => {
+      const at = () => { const mk = window.omniState.lv.marks.find(m => m.q === 'Q172640'), b = document.querySelector('#map canvas').getBoundingClientRect(); return mk && [b.x + mk.xy[0], b.y + mk.xy[1]]; };
+      let was = JSON.stringify(at()), same = 0, frames = 0;
+      const f = () => { const now = JSON.stringify(at()); same = now === was ? same + 1 : 0; was = now; if (same >= 10 || ++frames > 600) resolve(at()); else requestAnimationFrame(f); };
+      requestAnimationFrame(f);
+    }));
     seen = await page.evaluate(([x, y]) => { const el = document.elementFromPoint(x, y); return `${el?.tagName}.${el?.className} pick=${document.getElementById('ly-pick')?.outerHTML.slice(0, 200)}`; }, xy);
     await page.mouse.click(...xy);
     hit = await picked();

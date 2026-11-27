@@ -11,7 +11,7 @@ import { CATEGORY_IDS, VISUAL_KINDS, flatScenes, shortCite } from '../kino/lib/f
 import { tokens, sentences, utterances, wordAt, spoken, speechRule, countSentences, speechWarnings } from '../kino/lib/text.js';
 import { shellHash, shellUrl, readKinoHash, kinoHash, filmRoute } from '../kino/lib/links.js';
 import '../design/prp-voice.js';
-import { pageTest, launch } from './tools/pages.mjs';
+import { pageTest, launch, drawn } from './tools/pages.mjs';
 import { readKinoView, kinoViewHash, linkPlace, SHELL_URL } from '../kino/lib/links.js';
 import { relatedPlaces, sceneEntities, tagTables, shardOf, CHIPS, PER_THING, MAP_COUNTRIES } from '../kino/lib/related.js';
 import { sentenceRuns } from '../kino/lib/text.js';
@@ -930,22 +930,41 @@ test('page: in a 480 px film column the sentence box keeps its height, and each 
     assert.ok(stage.w >= 476 && stage.w <= 482, `the film column is ${stage.w} px`);
     await page.evaluate(() => {
       const box = document.querySelector('#cap-text');
-      Object.assign(window, { __heights: new Set(), __outside: [], __lit: 0, __scrolled: 0 });
+      Object.assign(window, { __heights: new Set(), __outside: [], __lit: 0, __litI: new Set(), __scrolled: 0 });
       new MutationObserver(ms => {
         for (const m of ms) {
           if (!m.target.classList?.contains('on') || /\bon\b/.test(m.oldValue || '')) continue; // the moment a word is lit
           const b = box.getBoundingClientRect(), r = m.target.getBoundingClientRect();
-          window.__heights.add(Math.round(b.height)); window.__lit++; window.__scrolled = Math.max(window.__scrolled, box.scrollTop);
+          window.__heights.add(Math.round(b.height)); window.__lit++; window.__litI.add(+m.target.dataset.i); window.__scrolled = Math.max(window.__scrolled, box.scrollTop);
           if (r.top < b.top - 1 || r.bottom > b.bottom + 1) window.__outside.push(m.target.textContent);
         }
       }).observe(box, { subtree: true, attributes: true, attributeOldValue: true, attributeFilter: ['class'] });
     });
+    // In Captions only the caption clock (design/prp-voice.js, schedule()) lights, at each animation frame, the word whose
+    // time it is: a frame that comes late (a busy machine, or the Split view pane's page loading on the same thread)
+    // passes over the words whose time went by meanwhile, which no one saw unlit since nothing was drawn (27 November
+    // 2026: 54 words lit). The test holds the page's clock and moves it on itself, 160 ms at a time (each 16 ms frame in
+    // turn, the observer between them), so every word (the shortest here lasts 48 ms at speed 4) has its own frames
+    // whatever the machine, and every word must be lit.
+    await page.clock.install();
+    await page.clock.pauseAt(Date.now() + 1000);
+    // The clock is the test's: the page's own time moves by what the test runs, and by nothing else.
+    const t0 = await page.evaluate(() => performance.now());
+    await page.clock.runFor(160);
+    const t1 = await page.evaluate(() => performance.now());
+    assert.ok(Math.abs(t1 - t0 - 160) < 1, `the page's clock is held: 160 ms run moved it ${t1 - t0} ms`);
     const height = (await rect(page, '#cap-text')).h;
     await page.click('#play');
     const last = runs[1][runs[1].length - 1];
-    await page.waitForFunction(i => document.querySelector(`#cap-text .w[data-i="${i}"]`).classList.contains('on') || document.querySelector(`#cap-text .w[data-i="${i + 1}"]`)?.classList.contains('on'), last, { timeout: 60000 });
-    const seen = await page.evaluate(() => ({ heights: [...window.__heights], outside: window.__outside, lit: window.__lit, scrolled: window.__scrolled }));
-    assert.ok(seen.lit >= runs[0].length + runs[1].length - 4, `${seen.lit} words lit`);
+    const reached = i => document.querySelector(`#cap-text .w[data-i="${i}"]`).classList.contains('on') || !!document.querySelector(`#cap-text .w[data-i="${i + 1}"]`)?.classList.contains('on');
+    for (let t = 0; !(await page.evaluate(reached, last)); t += 160) {
+      assert.ok(t < 60000, 'the second sentence was read within a minute of the film\'s time');
+      await page.clock.runFor(160);
+    }
+    const seen = await page.evaluate(() => ({ heights: [...window.__heights], outside: window.__outside, lit: window.__lit, litI: [...window.__litI], scrolled: window.__scrolled }));
+    assert.ok(seen.lit >= runs[0].length + runs[1].length, `${seen.lit} words lit of ${runs[0].length + runs[1].length}`);
+    // Every word of the two sentences, each by its place (a word of the third sentence cannot stand in for one missed).
+    assert.deepEqual([...runs[0], ...runs[1]].filter(i => !seen.litI.includes(i)), [], 'every word of the two sentences was lit');
     assert.deepEqual(seen.heights, [Math.round(height)], 'the box never changes height');
     assert.deepEqual(seen.outside, [], 'every word is inside the box when it is lit');
     assert.ok(seen.scrolled > 0, 'the long sentence scrolled by lines');
@@ -1022,7 +1041,11 @@ test('page: full screen fits the 16:9 stage to the screen, the same in every sce
       assert.ok(said.h > 0 && said.y >= 0 && said.b <= h && said.x >= 0 && said.r <= w, `${at}: the note is on the screen`);
       // The shortest scene: the same box.
       await page.evaluate(() => { location.hash = '#doc=russian-revolutions-1917&s=assembly'; });
-      await page.waitForFunction(() => /s=assembly/.test(location.hash));
+      // The address is the test's own at once: measured once the player has gone to the scene (go() names it on the
+      // stage) and drawn it.
+      const scenes = flatScenes(ctx.docs.get('russian-revolutions-1917')), si = scenes.findIndex(s => s.id === 'assembly');
+      await page.waitForFunction(l => document.querySelector('#stage').getAttribute('aria-label') === l, `Scene ${si + 1}: ${scenes[si].title}`, { timeout: 10000 });
+      await drawn(page);
       const short = await rect(page, '#stage');
       assert.deepEqual([short.x, short.y, short.w, short.h].map(Math.round), [m.stage.x, m.stage.y, m.stage.width, m.stage.height].map(Math.round), `${at}: the same stage in every scene`);
       // Map labels never fall under their 11 px floor.
@@ -1041,10 +1064,12 @@ test('page: full screen fits the 16:9 stage to the screen, the same in every sce
 
 test('page: the controls stay one row: in a 900 px theatre with signs, in full screen at 1280 px with words, on a phone held sideways', PAGE, async () => {
   const browser = await launch();
+  // True when the controls shown lie in one row; else what lies below the first row, and the fonts' state, so that a
+  // failure says what wrapped (27 November 2026: once, at the first check, beside another test file; not seen in probes).
   const oneRow = page => page.locator('#controls > *').evaluateAll(els => {
-    const shown = els.filter(e => getComputedStyle(e).display !== 'none' && e.getBoundingClientRect().width > 0).map(e => e.getBoundingClientRect());
-    const mid = shown.map(r => r.top + r.height / 2);
-    return Math.max(...mid) - Math.min(...mid) < 10;
+    const shown = els.filter(e => getComputedStyle(e).display !== 'none' && e.getBoundingClientRect().width > 0);
+    const mid = shown.map(e => { const r = e.getBoundingClientRect(); return r.top + r.height / 2; }), top = Math.min(...mid);
+    return Math.max(...mid) - top < 10 || `${shown.filter((e, i) => mid[i] - top >= 10).map(e => e.id || e.className).join(', ')} below the row (fonts ${document.fonts.status}, controls ${Math.round(document.querySelector('#controls').getBoundingClientRect().width)} px)`;
   });
   const words = (page, id) => page.locator(`${id} .wide`).evaluate(e => getComputedStyle(e).display !== 'none');
   try {
@@ -1052,14 +1077,16 @@ test('page: the controls stay one row: in a 900 px theatre with signs, in full s
     await openFilm(page, 'wars', '#doc=ww2-europe&s=poland');
     const th = await rect(page, '#theatre');
     assert.ok(Math.abs(th.w - 900) <= 4, `the theatre is ${th.w} px`);
-    assert.ok(await oneRow(page), 'one row of controls');
+    let row = await oneRow(page);
+    assert.equal(row, true, `one row of controls: ${row}`);
     assert.equal(await words(page, '#split'), false, 'the new buttons show their signs');
     assert.equal(await words(page, '#related'), false);
     assert.equal(await page.locator('#split').getAttribute('aria-label'), 'Split view');
     await page.setViewportSize({ width: 1280, height: 800 });
     await page.click('#fullscreen');
     await page.waitForFunction(() => document.fullscreenElement?.id === 'theatre');
-    assert.ok(await oneRow(page), 'one row in full screen');
+    row = await oneRow(page);
+    assert.equal(row, true, `one row in full screen: ${row}`);
     assert.equal(await words(page, '#split'), true, 'with their words');
     assert.equal(await words(page, '#related'), true);
     await page.close();
@@ -1069,7 +1096,8 @@ test('page: the controls stay one row: in a 900 px theatre with signs, in full s
     await openFilm(phone, 'wars', '#doc=ww2-europe&s=poland');
     await phone.click('#fullscreen');
     await phone.waitForFunction(() => document.fullscreenElement?.id === 'theatre');
-    assert.ok(await oneRow(phone), 'one row of controls');
+    row = await oneRow(phone);
+    assert.equal(row, true, `one row of controls: ${row}`);
     const st = await rect(phone, '#stage');
     assert.ok(st.w >= 440, `the stage is ${st.w} px wide`);
     assert.ok(Math.abs(st.w - st.h * 16 / 9) <= 1.8);
@@ -1083,9 +1111,27 @@ test('page: full screen of both: the film and the page side by side, and F leave
     const page = await browser.newPage({ viewport: { width: 1920, height: 1080 } });
     await openFilm(page, 'wars', '#doc=ww2-europe&s=poland&split=1');
     await sideFrame(page, 'war-focus');
+    // What became of the press is recorded in the page (whether the button had it, and the browser's answer to the
+    // request), so that a press that does not bring full screen says why (27 November 2026: once in a run of this file,
+    // a 30 s wait for full screen with no word of the cause).
+    await page.evaluate(() => {
+      window.__fs = [];
+      document.addEventListener('click', e => { if (e.target.closest?.('#fullscreen')) window.__fs.push('the button had the press'); }, true);
+      const ask = Element.prototype.requestFullscreen;
+      Element.prototype.requestFullscreen = function (...a) {
+        window.__fs.push(`asked for ${this.id}`);
+        return ask.apply(this, a).then(v => { window.__fs.push('granted'); return v; }, e => { window.__fs.push(`refused: ${e}`); throw e; });
+      };
+    });
     await page.click('#fullscreen');
-    await page.waitForFunction(() => document.fullscreenElement?.id === 'theatre');
-    const stage = await rect(page, '#stage'), side = await rect(page, '#side');
+    const full = await page.waitForFunction(() => document.fullscreenElement?.id === 'theatre', null, { timeout: 30000 }).then(() => true, () => false);
+    assert.ok(full, `the theatre in full screen (${(await page.evaluate(() => window.__fs)).join('; ') || 'the page had no press'})`);
+    // Measured once the theatre fills the screen, both boxes in one reading.
+    await page.waitForFunction(() => Math.round(document.querySelector('#theatre').getBoundingClientRect().width) === innerWidth, null, { timeout: 10000 });
+    const { stage, side } = await page.evaluate(() => {
+      const r = s => { const b = document.querySelector(s).getBoundingClientRect(); return { x: b.x, y: b.y, w: b.width, h: b.height, r: b.right, b: b.bottom }; };
+      return { stage: r('#stage'), side: r('#side') };
+    });
     assert.equal(await page.evaluate(() => document.querySelector('#theatre').contains(document.querySelector('#side'))), true);
     assert.ok(stage.r <= side.x + 0.5, 'side by side, not overlapping');
     assert.ok(Math.abs(stage.w + side.w - 1920) <= 2, `together as wide as the screen (${stage.w} + ${side.w})`);
@@ -1888,7 +1934,11 @@ test('page: on a phone the Play button covers no words of any summary card, and 
     for (const [cat, doc, id] of scenes) {
       await page.goto(`${BASE}/kino/index.html?cat=${cat}#doc=${doc}&s=${id}`, { waitUntil: 'domcontentloaded' });
       await page.waitForSelector('.kn-layer.kn-v-summary .of', { timeout: 30000 });
-      await page.waitForTimeout(1500); // the card's lines rise into place
+      // The card's lines rise into place (kn-rise, 1.2 s after a delay of up to .3 s, kino.css): waited for to their end,
+      // not for 1.5 s from now, which leaves no room for a late first frame on a busy machine.
+      await page.waitForFunction(() => document.querySelector('.kn-layer.kn-v-summary').getAnimations({ subtree: true }).filter(a => a.animationName === 'kn-rise').every(a => a.playState === 'finished'), null, { timeout: 10000 });
+      // And the web fonts are in, which set the words' boxes.
+      await page.evaluate(() => document.fonts.ready);
       // The labels kino.js gives the button (setPlayUi): before the film starts, and after a pause.
       for (const label of ['Play', 'Resume']) {
         const r = await page.evaluate(label => {

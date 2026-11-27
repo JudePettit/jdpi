@@ -185,7 +185,7 @@ export function stateFrom(q, e) {
     November 2026): place Q → the country (P17) on the place's own item whose end time (P582) is the place's `since`.
     Western Sahara (Q6250) has no P571; its P17 Spanish Sahara (Q689837) runs from 1958 to 1976 (P580, P582), and
     Spanish Sahara's own end (P576) is 6 February 1976 (both read 26 November 2026), so in 1975 the page names it
-    "today’s Western Sahara". The build is to write that year as `since` where P571 gives none (build-history.mjs). */
+    "today’s Western Sahara". The build writes that year as `since` where P571 gives none (build-history.mjs step 5). */
 export const SINCE_FROM = {
   Q6250: 'Q689837', // Western Sahara ← Spanish Sahara: P17 Q689837, P582 1976
 };

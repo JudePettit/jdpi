@@ -29,11 +29,13 @@
 //    standing in; empty since review X1, 21 November 2026).
 // 5. Every place's Q-id asked of Wikidata (wbgetentities): its English label is the page's name for it, its ISO3
 //    (P298) must agree with Natural Earth's, and its inception (P571, the earliest) is kept as `since` when it falls
-//    after 1926, so the page can call a place named for a year before it "today’s …"; a place history-places.mjs
-//    NAMED_AS names carries its earlier states' names by year (`was`), and one STATE_FROM names the year its state
-//    existed from (`stateFrom`), each read from Wikidata (datedNames, below; --names-only rewrites only these). The year
-//    of a change keeps the earlier name VM holds; a state's first year is its own where VM holds no earlier state for it
-//    (names.js). The build stops where a state that is gone would be named before its inception with no earlier name.
+//    after 1926, or, where the item has none, the end (P582) of the country (P17) history-places.mjs SINCE_FROM names
+//    (Western Sahara: Spanish Sahara, to 1976), so the page can call a place named for a year before it "today’s …";
+//    a place history-places.mjs NAMED_AS names carries its earlier states' names by year (`was`), and one STATE_FROM
+//    names the year its state existed from (`stateFrom`), each read from Wikidata (datedNames, below; --names-only
+//    rewrites only these). The year of a change keeps the earlier name VM holds; a state's first year is its own where
+//    VM holds no earlier state for it (names.js). The build stops where a state that is gone would be named before its
+//    inception with no earlier name.
 // 6. Where the page draws each place each year (places.json): Cliopatria's rows of the year (2025 on 2024's rows, the
 //    last Cliopatria holds), each row's place by history-places.mjs; from 1946, a small state no row holds as Natural
 //    Earth's point (`points`); any other war place no row holds that year is listed as one VM cannot place
@@ -49,7 +51,7 @@ import { parseCsv } from './csv.mjs';
 import { COW_WIKI, UCDP_WIKI } from './history-wiki.mjs';
 import { FOUGHT_IN, CHECKED_THROUGH } from './history-fought.mjs';
 import { actors, interstateName } from './ucdp.mjs';
-import { rowQid, drawnRow, canonical, placeAt, CANONICAL, NAMED_AS, STATE_FROM, earlierNames, stateFrom, placeEntry, isEarlierState, goneUnnamed } from './history-places.mjs';
+import { rowQid, drawnRow, canonical, placeAt, CANONICAL, NAMED_AS, STATE_FROM, earlierNames, stateFrom, sinceFrom, placeEntry, isEarlierState, goneUnnamed } from './history-places.mjs';
 import { fetchWars, selectWars, THEN, FIRST as WD_FIRST, LAST as WD_LAST } from './wars-1926.mjs';
 import { placeResolver, governments, SPECIAL } from '../../omni/scripts/ucdp-places.mjs';
 import { entities, byTitles, sha256 } from '../../omni/scripts/history-common.mjs';
@@ -96,7 +98,7 @@ function stopIfGone(places, warList, own) {
   const bad = goneUnnamed(places, warList, own);
   if (bad.length) throw new Error(`A state that is gone, named before its inception with no earlier name (add a NAMED_AS row): ${bad.map(([q, y]) => `${q} ${places[q].n} ${y}`).join('; ')}`);
 }
-const PLACES_ABOUT ='VM’s own work. Each Cliopatria row’s place by year (battlefield/scripts/history-places.mjs); from 1946, each small state that no row holds in a year, as Natural Earth’s point (points: year → Q-id → point id); and, each year, the war places VM cannot place on a free border (unplaced). No place is drawn on a border of today. A place’s `since` is its inception on Wikidata, where after 1926; `stateFrom`, where that inception is a later change of regime, the year Wikidata shows the state of its name existed from; `was`, its earlier states’ names, each to its last year (and from its first, where that leaves a gap), from their own Wikidata items (history-places.mjs NAMED_AS). The page names a place by the year shown (battlefield/history/names.js).';
+const PLACES_ABOUT ='VM’s own work. Each Cliopatria row’s place by year (battlefield/scripts/history-places.mjs); from 1946, each small state that no row holds in a year, as Natural Earth’s point (points: year → Q-id → point id); and, each year, the war places VM cannot place on a free border (unplaced). No place is drawn on a border of today. A place’s `since` is its inception on Wikidata, where after 1926, or, where Wikidata gives none, the year it ends the country (P17) that held the place’s land (history-places.mjs SINCE_FROM: Western Sahara from 1976, the end of Spanish Sahara); `stateFrom`, where that inception is a later change of regime, the year Wikidata shows the state of its name existed from; `was`, its earlier states’ names, each to its last year (and from its first, where that leaves a gap), from their own Wikidata items (history-places.mjs NAMED_AS). The page names a place by the year shown (battlefield/history/names.js).';
 
 // ---- --names-only: the committed places.json with only its places' dated names (`was`, `stateFrom`) rewritten by the
 // functions step 5 uses, from Wikidata read now; nothing else in it, and nothing in wars.json, changes. For a change
@@ -251,7 +253,9 @@ for (const q of [...allPlaces].sort((a, b) => +a.slice(1) - +b.slice(1))) {
   // Kosovo has no ISO 3166 code: Natural Earth and Wikidata each use a user-assigned X code, so X codes are not compared.
   if (nat?.iso3 && iso.length && !iso.includes(nat.iso3) && !/^X/.test(nat.iso3)) throw new Error(`${q}: Wikidata's ISO3 ${iso.join(', ')} is not Natural Earth's ${nat.iso3}`);
   const since = (e.claims?.P571 || []).filter(c => c.rank !== 'deprecated').map(c => /^\+?(-?\d+)-/.exec(c.mainsnak?.datavalue?.value?.time || '')?.[1]).filter(Boolean).map(Number);
-  const sinceY = since.length && Math.min(...since) > FIRST ? Math.min(...since) : null;
+  // Where Wikidata gives no inception, the year it ends the country (P17) that held the place's land, for a place
+  // history-places.mjs SINCE_FROM names (Western Sahara: Spanish Sahara to 1976). The ternary gives null, never 0.
+  const sinceY = (since.length && Math.min(...since) > FIRST ? Math.min(...since) : null) ?? sinceFrom(q, e);
   places[q] = placeEntry({ n: e.labels?.en?.value || nat?.n || q, iso3: nat?.iso3 || iso[0], since: sinceY }, dated(q, sinceY));
 }
 stopIfGone(places, wars, q => got[q]);

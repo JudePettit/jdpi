@@ -4,7 +4,9 @@
    A place `p` is places.json's { n, since?, stateFrom?, was? }:
    · `was` [{ n, from?, to }]: the earlier states' names, oldest first, each to its last year (and from its first year
      where that leaves a gap after the name before it, or after 1926): the build's, from history-places.mjs NAMED_AS.
-   · `since`: Wikidata's earliest inception (P571) of the place's item, where after 1926.
+   · `since`: Wikidata's earliest inception (P571) of the place's item, where after 1926; where the item has none, the
+     year Wikidata ends the country (P17) that held the place's land (history-places.mjs SINCE_FROM: Western Sahara
+     from 1976, when Spanish Sahara ended), so 1975 is "today’s Western Sahara".
    · `stateFrom`: the year Wikidata shows the state of this name existed from, where its inception is a later change of
      regime (Kuwait: a sovereign state from 1961, its item's inception the liberation of 1991): history-places.mjs
      STATE_FROM.

@@ -301,7 +301,8 @@ const DATED = {
 const TODAY_RIGHT = ['Q233', 'Q252', 'Q262', 'Q423', 'Q574', 'Q668', 'Q685', 'Q691', 'Q836', 'Q929', 'Q974', 'Q986', 'Q1000', 'Q1019', 'Q1041', 'Q1045', 'Q1049'];
 // Every place the page names "today’s …" in a year a war touches it or it stands under the map (second review, 25
 // November 2026): the land then was a colony, crown colony, condominium, overseas province, trust territory or a
-// protectorate Wikidata gives no state of its own, and each is a state today (none has an end, P576, on Wikidata).
+// protectorate Wikidata gives no state of its own, and each but Western Sahara is a state today (none has an end, P576,
+// on Wikidata).
 // TODAY_RIGHT; Malaysia and Sri Lanka before their earlier states began (1941–45; British Ceylon, Q918153, crown colony,
 // in 1942); and places named only as a war's location: Kenya (Kenya Colony), Cyprus (British Cyprus, Q15240466, crown
 // colony), Cambodia (French Protectorate of Cambodia, Q3173090, protectorate only), Laos (history-places.mjs PASSED_OVER),
@@ -309,8 +310,13 @@ const TODAY_RIGHT = ['Q233', 'Q252', 'Q262', 'Q423', 'Q574', 'Q668', 'Q685', 'Q6
 // Cameroons) and Mauritania (French West Africa, Q210682); and Namibia, where South Africa: Namibia is placed from 25
 // November 2026 (battlefield-history-3): Namibia (Q1030) dates from 1990, and before then the territory was South-West
 // Africa (Q953068), a League of Nations mandate from 1920 that the UN General Assembly ended in 1966 (Resolution 2145)
-// and South Africa held until 1990. A state that is gone (South Yemen) is never "today’s".
-const TODAY_ALL = [...TODAY_RIGHT, 'Q833', 'Q854', 'Q114', 'Q229', 'Q424', 'Q819', 'Q916', 'Q1007', 'Q1009', 'Q1025', 'Q1029', 'Q1030'];
+// and South Africa held until 1990; and Western Sahara (Q6250) in 1975, from 27 November 2026, the one place on this
+// list that is not a state today (its P31, preferred, is disputed territory, Q15239622): its item has no inception, so
+// history-places.mjs SINCE_FROM dates it from the end of its country (P17) Spanish Sahara (Q689837, P582 1976; Spanish
+// Sahara's own end, P576, 6 February 1976; its P31 includes oversea province of Spain, Q41792036, Spain's counterpart
+// of the overseas province of Portugal, Q333542, that Angola and Mozambique were; read 27 November 2026). A state that
+// is gone (South Yemen) is never "today’s".
+const TODAY_ALL = [...TODAY_RIGHT, 'Q833', 'Q854', 'Q114', 'Q229', 'Q424', 'Q819', 'Q916', 'Q1007', 'Q1009', 'Q1025', 'Q1029', 'Q1030', 'Q6250'];
 const REVIEWED = ['Q115', 'Q148', 'Q233', 'Q252', 'Q262', 'Q423', 'Q574', 'Q668', 'Q685', 'Q691', 'Q796', 'Q817', 'Q822', 'Q833', 'Q836', 'Q842', 'Q854', 'Q929', 'Q948', 'Q974', 'Q986', 'Q1000', 'Q1019', 'Q1041', 'Q1045', 'Q1049', 'Q34754', 'Q267584'];
 test('Retrospective data: places are named by the state of the year: the tables’ exact shape, each earlier name and its last year', async () => {
   const { NAMED_AS, STATE_FROM, EARLIER_STATE, PASSED_OVER, isEarlierState, endOf, earlierNames } = await import('../battlefield/scripts/history-places.mjs');

@@ -9,7 +9,8 @@
 //                      1374628527; Austria annexed 12 March 1938, "Anschluss", revision 1387085266; all read 26 November).
 //   western-sahara     Western Sahara's `since` is 1976: Wikidata Q6250 has no inception (P571); its country (P17)
 //                      Spanish Sahara (Q689837) runs 1958–1976, and Spanish Sahara's end (P576) is 6 February 1976 (read
-//                      26 November 2026). history-places.mjs SINCE_FROM holds the rule; the build must still call it.
+//                      26 November 2026). history-places.mjs SINCE_FROM holds the rule; build-history.mjs calls it, and
+//                      the Retrospective Battlefield names it "today’s Western Sahara" in 1975 (27 November 2026).
 //   omni-territory     The Omni-Map's conflict-territory layer places every conflict the Retrospective Battlefield
 //                      places otherwise than UCDP's location where it does, by year where it moved (history-fought.mjs
 //                      FOUGHT_IN, every u… entry; Hyderabad's two alone keep UCDP's location), dates Western Sahara
@@ -81,10 +82,31 @@ test('western-sahara: its `since` is the end of its country (P17) Spanish Sahara
   assert.equal(placeName(ws, 1976), 'Western Sahara');
 });
 
-// A todo until the main session wires sinceFrom into build-history.mjs (not this part's file: line 254, `?? sinceFrom(q,
-// e)`) and rebuilds the Retrospective Battlefield in full (--names-only does not rewrite `since`); then a plain test.
-test('western-sahara: places.json carries it once build-history.mjs writes SINCE_FROM\'s year', { todo: 'build-history.mjs (not this part\'s file) must take sinceFrom where P571 gives none, then the Retrospective Battlefield is rebuilt in full' }, () => {
-  assert.equal(json('../battlefield/history/data/places.json').places.Q6250.since, 1976);
+// build-history.mjs takes sinceFrom where P571 gives none (27 November 2026), and the Retrospective Battlefield was
+// rebuilt in full with it (--names-only does not rewrite `since`).
+test('western-sahara: build-history.mjs writes SINCE_FROM\'s year as `since` where Wikidata gives no inception', () => {
+  const s = text('../battlefield/scripts/build-history.mjs');
+  assert.match(s, /import \{[^}]*\bsinceFrom\b[^}]*\} from '\.\/history-places\.mjs'/);
+  assert.match(s, /const sinceY = \(since\.length && Math\.min\(\.\.\.since\) > FIRST \? Math\.min\(\.\.\.since\) : null\) \?\? sinceFrom\(q, e\);/);
+  assert.match(s, /since` is its inception on Wikidata, where after 1926, or, where Wikidata gives none, the year it ends the country \(P17\) that held the place’s land \(history-places\.mjs SINCE_FROM: Western Sahara from 1976, the end of Spanish Sahara\)/);
+});
+
+test('western-sahara: places.json dates Western Sahara from 1976, so 1975 is "today’s Western Sahara"; the Method says why', async () => {
+  const { placeName } = await import('../battlefield/history/names.js');
+  const { SINCE_FROM } = await import('../battlefield/scripts/history-places.mjs');
+  const doc = json('../battlefield/history/data/places.json');
+  const ws = doc.places.Q6250;
+  assert.deepEqual(ws, { n: 'Western Sahara', iso3: 'ESH', since: 1976 });
+  assert.equal(placeName(ws, 1975), 'today’s Western Sahara');
+  assert.equal(placeName(ws, 1976), 'Western Sahara');
+  assert.match(doc.about, /or, where Wikidata gives none, the year it ends the country \(P17\) that held the place’s land \(history-places\.mjs SINCE_FROM: Western Sahara from 1976, the end of Spanish Sahara\)/);
+  assert.deepEqual(Object.keys(SINCE_FROM), ['Q6250'], 'the rule names Western Sahara alone');
+  // The wars that hold it: Morocco's (1975–89) and Mauritania's (1975–78), named under the map in those years.
+  const wars = json('../battlefield/history/data/wars.json').wars;
+  for (const id of ['u331', 'u428']) assert.ok(wars.find(w => w.id === id).loc.includes('Q6250'), id);
+  assert.ok(doc.unplaced[1975].includes('Q6250') && doc.unplaced[1976].includes('Q6250'));
+  const m = /<p><b>Method\.<\/b>([\s\S]*?)<\/p>/.exec(text('../battlefield/history/index.html'))?.[1] || '';
+  assert.match(m, /Western Sahara, whose Wikidata item gives no inception, is “today’s Western Sahara” to 1975, since Wikidata ends the country that held it, Spanish Sahara, in 1976\. From 1946/);
 });
 
 test('omni-territory: every conflict the Retrospective Battlefield places otherwise is placed as it places it, by year where it moved; the type is the last year\'s, by year where it changed', async () => {
@@ -261,6 +283,37 @@ test('page: War Focus\'s Method names the article\'s start, the several days and
     assert.match(t, /the atomic bombings of Hiroshima and Nagasaki: 6 and 9 August 1945/);
     assert.match(t, /Iran from 9 September 1943, Egypt from 24 February 1945/);
     assert.match(t, /Austria was in March 1938, is on neither side, only held \(Cliopatria draws it inside Germany/);
+    await page.close();
+  } finally { await browser.close(); }
+});
+
+test('page: the Retrospective Battlefield names Western Sahara "today’s" in 1975, while Spanish Sahara held it, and Western Sahara from 1976', pageTest, async () => {
+  const browser = await launch({ args: ['--mute-audio'] });
+  try {
+    const page = await browser.newPage({ viewport: { width: 1400, height: 900 } });
+    const errors = [];
+    page.on('pageerror', e => errors.push(e.message));
+    await page.goto(`${BASE}/battlefield/history/#y=1975&v=table`, { waitUntil: 'domcontentloaded', timeout: 60000 });
+    const go = async (h, done) => { await page.evaluate(h => { location.hash = h; }, h); await page.waitForFunction(done, null, { timeout: 15000 }); await page.waitForTimeout(200); };
+    const fought = id => page.locator(`#table-rows tr[data-id="${id}"] td.wrap`).textContent();
+    // The table of 1975: Morocco's and Mauritania's wars, fought in today's Western Sahara; and the line above the table.
+    await page.waitForFunction(() => /1975/.test(document.querySelector('#table-title')?.textContent || '') && !!document.querySelector('#table-rows tr[data-id="u331"]'), null, { timeout: 30000 });
+    assert.match(await fought('u331'), /today’s Western Sahara/);
+    assert.match(await fought('u428'), /today’s Western Sahara/);
+    assert.match(await page.locator('#table-unplaced').innerText(), /today’s Western Sahara/);
+    // Its own panel in 1975, and the list under the map.
+    await go('#y=1975&c=Q6250&v=map', () => document.querySelector('#year-big')?.textContent === '1975' && document.querySelector('#panel h2')?.textContent === 'Today’s Western Sahara');
+    assert.equal(await page.locator('#panel .border-note').innerText(), 'VM cannot place today’s Western Sahara on a free border for 1975, so it is not drawn.');
+    assert.match(await page.locator('#unplaced').innerText(), /today’s Western Sahara/);
+    // 1976, Spanish Sahara ended (6 February 1976): Western Sahara, not "today’s".
+    await go('#y=1976&c=Q6250&v=map', () => document.querySelector('#year-big')?.textContent === '1976' && document.querySelector('#panel h2')?.textContent === 'Western Sahara');
+    for (const el of ['#panel', '#unplaced']) assert.doesNotMatch(await page.locator(el).innerText(), /today’s Western Sahara/i, el);
+    assert.match(await page.locator('#unplaced').innerText(), /Western Sahara/);
+    await go('#y=1976&v=table', () => /1976/.test(document.querySelector('#table-title')?.textContent || '') && !!document.querySelector('#table-rows tr[data-id="u331"]'));
+    assert.match(await fought('u331'), /^(?!.*today’s).*Western Sahara/);
+    // The Method says why.
+    assert.match(await page.locator('.prp-sources').innerText(), /Western Sahara, whose Wikidata item gives no inception, is “today’s Western Sahara” to 1975/);
+    assert.deepEqual(errors, []);
     await page.close();
   } finally { await browser.close(); }
 });

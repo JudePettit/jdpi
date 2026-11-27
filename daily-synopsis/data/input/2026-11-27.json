@@ -1,0 +1,790 @@
+{
+ "format": "vm-daily-synopsis-input/1",
+ "day": "2026-11-27",
+ "id": "2026-11-27-aa2917701485",
+ "generated": "2026-11-27T02:56:10.759Z",
+ "window": {
+  "from": "2026-11-26T01:40:19.430Z",
+  "to": "2026-11-27T01:40:19.430Z"
+ },
+ "storeGenerated": "2026-11-27T01:40:19.430Z",
+ "rule": {
+  "minOutlets": 3,
+  "minSides": 2,
+  "cap": 10,
+  "fiveMinSides": 3,
+  "fiveNeedsLeftAndRight": true
+ },
+ "sides": [
+  {
+   "key": "far_left",
+   "label": "Far left"
+  },
+  {
+   "key": "left",
+   "label": "Left"
+  },
+  {
+   "key": "centre",
+   "label": "Centre"
+  },
+  {
+   "key": "right",
+   "label": "Right"
+  },
+  {
+   "key": "far_right",
+   "label": "Far right"
+  }
+ ],
+ "stories": [
+  {
+   "id": "s1",
+   "rank": 1,
+   "outlets": 7,
+   "sides": {
+    "far_left": 0,
+    "left": 2,
+    "centre": 5,
+    "right": 0,
+    "far_right": 0
+   },
+   "written5": false,
+   "lead": "s1-3",
+   "items": [
+    {
+     "id": "s1-1",
+     "side": "left",
+     "outlet": "The Independent",
+     "outletId": "independent",
+     "caution": true,
+     "access": "free",
+     "headline": "Gérard Depardieu ordered to stand trial for rape",
+     "url": "https://www.independent.co.uk/news/world/europe/gerard-depardieu-rape-trial-metoo-b3092287.html",
+     "published": "2026-11-26T16:01:25.000Z",
+     "summary": "It comes shortly after he abandoned his appeal of an earlier sexual assault conviction"
+    },
+    {
+     "id": "s1-2",
+     "side": "left",
+     "outlet": "The New York Times",
+     "outletId": "nyt",
+     "caution": false,
+     "access": "paid",
+     "headline": "Gérard Depardieu Is Ordered to Stand Trial Over Rape Accusation",
+     "url": "https://www.nytimes.com/2026/11/26/world/europe/france-depardieu-rape-trial.html",
+     "published": "2026-11-26T14:17:40.000Z",
+     "summary": "The actress Charlotte Arnould has accused the French movie star of raping her in 2018. He has denied any wrongdoing in the case."
+    },
+    {
+     "id": "s1-3",
+     "side": "centre",
+     "outlet": "Euronews",
+     "outletId": "euronews",
+     "caution": false,
+     "access": "free",
+     "headline": "Gérard Depardieu to stand trial over rape accusations by actress Charlotte Arnould",
+     "url": "https://www.euronews.com/2026/11/26/gerard-depardieu-to-stand-trial-over-rape-accusations-by-actress-charlotte-arnould",
+     "published": "2026-11-26T16:38:39.000Z",
+     "summary": "The 77-year-old actor is accused by actress Charlotte Arnould, then 22, of raping her twice in August 2018. The appeal court confirmed he will stand trial for one of the alleged rapes."
+    },
+    {
+     "id": "s1-4",
+     "side": "centre",
+     "outlet": "BBC News",
+     "outletId": "bbc",
+     "caution": false,
+     "access": "free",
+     "headline": "Gérard Depardieu to stand trial for alleged rape of actress in 2018, court rules",
+     "url": "https://www.bbc.co.uk/news/articles/cmlyd76kyx44o",
+     "published": "2026-11-26T14:44:26.000Z",
+     "summary": "A Paris appeals court rules Depardieu will go on trial for the alleged rape of Charlotte Arnould."
+    },
+    {
+     "id": "s1-5",
+     "side": "centre",
+     "outlet": "UPI",
+     "outletId": "upi",
+     "caution": false,
+     "access": "free",
+     "headline": "French judge rules Gerard Depardieu to stand trial for alleged rape",
+     "url": "https://www.upi.com/Top_News/World-News/2026/11/26/france-europe-film-rape-depardieu/7061795705455/",
+     "published": "2026-11-26T15:19:53.000Z",
+     "summary": "French film star Gerard Depardieu will face trial for allegedly raping an actor at his home in Paris in 2018, according to his attorney."
+    },
+    {
+     "id": "s1-6",
+     "side": "centre",
+     "outlet": "France 24",
+     "outletId": "france24",
+     "caution": false,
+     "access": "free",
+     "headline": "🔴 French actor Gérard Depardieu to face trial for alleged rape of actress Charlotte Arnould",
+     "url": "https://www.france24.com/en/france/20261126-french-actor-g%C3%A9rard-depardieu-to-face-trial-for-rape-his-lawyer-says",
+     "published": "2026-11-26T13:46:41.000Z",
+     "summary": ""
+    },
+    {
+     "id": "s1-7",
+     "side": "centre",
+     "outlet": "Deutsche Welle",
+     "outletId": "dw",
+     "caution": false,
+     "access": "free",
+     "headline": "Gerard Depardieu to stand trial in France for rape and sexual assault",
+     "url": "https://www.dw.com/en/gerard-depardieu-to-stand-trial-in-france-for-rape-and-sexual-assault/a-80069424?maca=en-rss-en-all-1573-rdf",
+     "published": "2026-11-26T20:41:00.000Z",
+     "summary": "The Paris Court of Appeal upheld the order for the 77-year-old French actor to stand trial on charges of raping and sexually assaulting an actress in 2018."
+    }
+   ]
+  },
+  {
+   "id": "s2",
+   "rank": 2,
+   "outlets": 6,
+   "sides": {
+    "far_left": 0,
+    "left": 0,
+    "centre": 4,
+    "right": 1,
+    "far_right": 1
+   },
+   "written5": false,
+   "lead": "s2-1",
+   "items": [
+    {
+     "id": "s2-1",
+     "side": "centre",
+     "outlet": "The Hill",
+     "outletId": "thehill",
+     "caution": false,
+     "access": "free",
+     "headline": "Musk pledges 2 SpaceX shares per American child",
+     "url": "https://thehill.com/policy/technology/6244857-elon-musk-pledges-spacex-shares-to-american-children/",
+     "published": "2026-11-26T20:01:29.000Z",
+     "summary": "SpaceX and its CEO Elon Musk announced Wednesday that they would each donate a share of the aerospace company’s stock to every American child with an active “Trump Account” — doubling a pledge the billionaire made last month. The company sa"
+    },
+    {
+     "id": "s2-2",
+     "side": "centre",
+     "outlet": "UPI",
+     "outletId": "upi",
+     "caution": false,
+     "access": "free",
+     "headline": "Musk doubles pledge to two SpaceX shares for every U.S. child",
+     "url": "https://www.upi.com/Top_News/US/2026/11/26/Elon-Musk-SpaceX-shares/9281795674997/",
+     "published": "2026-11-26T07:24:58.000Z",
+     "summary": "SpaceX founder and CEO Elon Musk said that every child in the United States would receive two shares in his company, doubling his previous commitment."
+    },
+    {
+     "id": "s2-3",
+     "side": "centre",
+     "outlet": "Euronews",
+     "outletId": "euronews",
+     "caution": false,
+     "access": "free",
+     "headline": "Musk says will give two SpaceX shares to 'every child in America'",
+     "url": "https://www.euronews.com/2026/11/26/musk-says-will-give-two-spacex-shares-to-every-child-in-america",
+     "published": "2026-11-26T10:59:56.000Z",
+     "summary": "Tech billionaire Elon Musk said on Wednesday he would give every child in the United States two shares in his SpaceX rocket company, doubling an offer he made last month."
+    },
+    {
+     "id": "s2-4",
+     "side": "centre",
+     "outlet": "CNBC",
+     "outletId": "cnbc",
+     "caution": false,
+     "access": "free",
+     "headline": "SpaceX, Musk pledge to donate a share each to active Trump Accounts",
+     "url": "https://www.cnbc.com/2026/11/25/spacex-musk-trump-account-stock.html",
+     "published": "2026-11-26T06:39:34.000Z",
+     "summary": "SpaceX said it will donate one share of the company's class A stock to every active Trump Account, and CEO Elon Musk would match it."
+    },
+    {
+     "id": "s2-5",
+     "side": "right",
+     "outlet": "Washington Examiner",
+     "outletId": "washingtonexaminer",
+     "caution": false,
+     "access": "paid",
+     "headline": "Elon Musk announces two SpaceX shares for every American child",
+     "url": "https://www.washingtonexaminer.com/news/business/4816338/elon-musk-two-spacex-shares-every-american-child/",
+     "published": "2026-11-26T23:27:52.000Z",
+     "summary": "SpaceX CEO Elon Musk announced the gifting of two SpaceX shares to every American child. The company on Wednesday said the shares will be distributed to Trump Accounts, tax-advantaged investment accounts for all children in the United State"
+    },
+    {
+     "id": "s2-6",
+     "side": "far_right",
+     "outlet": "ZeroHedge",
+     "outletId": "zerohedge",
+     "caution": true,
+     "access": "free",
+     "headline": "SpaceX, Musk Pledge To Donate Shares To Every Trump Account",
+     "url": "https://www.zerohedge.com/markets/spacex-musk-pledge-donate-shares-every-trump-account",
+     "published": "2026-11-26T12:20:00.000Z",
+     "summary": "SpaceX, Musk Pledge To Donate Shares To Every Trump Account Authored by Savannah Pointer via The Epoch Times, Elon Musk's SpaceX has pledged one share of its common stock to every active Trump Account in the United States. The company said"
+    }
+   ]
+  },
+  {
+   "id": "s3",
+   "rank": 3,
+   "outlets": 6,
+   "sides": {
+    "far_left": 1,
+    "left": 0,
+    "centre": 2,
+    "right": 0,
+    "far_right": 3
+   },
+   "written5": true,
+   "lead": "s3-1",
+   "items": [
+    {
+     "id": "s3-1",
+     "side": "far_left",
+     "outlet": "Truthout",
+     "outletId": "truthout",
+     "caution": false,
+     "access": "free",
+     "headline": "The FCC Approves SpaceX’s Plan for 1 Million Space Satellites",
+     "url": "https://truthout.org/articles/the-fcc-approves-spacexs-plan-for-1-million-space-satellites/",
+     "published": "2026-11-26T19:29:11.000Z",
+     "summary": "Environmental advocates warn that expanding satellites will impact “everyday lives as well as the future of our planet.”"
+    },
+    {
+     "id": "s3-2",
+     "side": "centre",
+     "outlet": "Euronews",
+     "outletId": "euronews",
+     "caution": false,
+     "access": "free",
+     "headline": "US says SpaceX can deploy 1 million satellites to build data centres in space",
+     "url": "https://www.euronews.com/2026/11/26/us-says-spacex-can-deploy-1-million-satellites-to-build-data-centres-in-space",
+     "published": "2026-11-26T10:30:42.000Z",
+     "summary": "The US Federal Communications Commission authorised Elon Musk's rocket company to create a data centre constellation to power AI on earth."
+    },
+    {
+     "id": "s3-3",
+     "side": "centre",
+     "outlet": "BBC News",
+     "outletId": "bbc",
+     "caution": false,
+     "access": "free",
+     "headline": "Musk's plan to send a million SpaceX data satellites into space approved",
+     "url": "https://www.bbc.co.uk/news/articles/cwp836l8n1jgo",
+     "published": "2026-11-26T09:27:44.000Z",
+     "summary": "The Starmind constellation aims to be the most cost and energy-efficient way to meet the growing demand for AI computing power."
+    },
+    {
+     "id": "s3-4",
+     "side": "far_right",
+     "outlet": "Breitbart",
+     "outletId": "breitbart",
+     "caution": true,
+     "access": "free",
+     "headline": "FCC Approves SpaceX Request for 1 Million Data Centers in Space",
+     "url": "https://www.breitbart.com/tech/2026/11/25/fcc-approves-spacex-request-1-million-data-centers-space/",
+     "published": "2026-11-26T03:49:57.000Z",
+     "summary": "The Federal Communications Commission (FCC) announced on Wednesday that it has approved a request from SpaceX to deploy one million orbital compute modules in space. The authorization, the first in U.S. history, provides approval for a cons"
+    },
+    {
+     "id": "s3-5",
+     "side": "far_right",
+     "outlet": "The Gateway Pundit",
+     "outletId": "gatewaypundit",
+     "caution": true,
+     "access": "free",
+     "headline": "‘A Great Asset to America and the World’: FCC Gives SpaceX Approval to Deploy a Million Data Centers in Space",
+     "url": "https://www.thegatewaypundit.com/2026/11/great-asset-america-world-fcc-gives-spacex-approval/",
+     "published": "2026-11-26T13:00:07.000Z",
+     "summary": "The Federal Communications Commission on Wednesday authorized Elon Musk's SpaceX to deploy orbital data centers, thus circumventing the controversy regarding their construction in various states. The post ‘A Great Asset to America and the W"
+    },
+    {
+     "id": "s3-6",
+     "side": "far_right",
+     "outlet": "American Greatness",
+     "outletId": "amgreatness",
+     "caution": true,
+     "access": "free",
+     "headline": "FCC Approves SpaceX Plan for One Million Data Centers in Orbit",
+     "url": "https://amgreatness.com/2026/11/26/fcc-approves-spacex-plan-for-one-million-data-centers-in-orbit/",
+     "published": "2026-11-26T08:21:38.000Z",
+     "summary": "Chairman Brendan Carr said the first-of-its-kind authorization will help America lead in super intelligence computing. Source"
+    }
+   ]
+  },
+  {
+   "id": "s4",
+   "rank": 4,
+   "outlets": 5,
+   "sides": {
+    "far_left": 0,
+    "left": 1,
+    "centre": 3,
+    "right": 0,
+    "far_right": 1
+   },
+   "written5": true,
+   "lead": "s4-2",
+   "items": [
+    {
+     "id": "s4-1",
+     "side": "left",
+     "outlet": "The New York Times",
+     "outletId": "nyt",
+     "caution": false,
+     "access": "paid",
+     "headline": "Two Italians Killed in Iranian Drone Attack on Kuwait, Officials Say",
+     "url": "https://www.nytimes.com/2026/11/26/world/middleeast/italians-killed-iran-drone-attack-kuwait.html",
+     "published": "2026-11-26T19:33:06.000Z",
+     "summary": "The deaths follow a series of strikes on Gulf Arab states that host U.S. military facilities in recent weeks as talks to end the war continue to stall."
+    },
+    {
+     "id": "s4-2",
+     "side": "centre",
+     "outlet": "Deutsche Welle",
+     "outletId": "dw",
+     "caution": false,
+     "access": "free",
+     "headline": "Iranian drone attack kills 2 Italians in Kuwait",
+     "url": "https://www.dw.com/en/iranian-drone-attack-kills-2-italians-in-kuwait/a-80064974?maca=en-rss-en-all-1573-rdf",
+     "published": "2026-11-26T15:11:00.000Z",
+     "summary": "The Italians were employed as technicians for the Italian branch of German arms manufacturer Rheinmetall. One Kuwaiti and one Pakistani national were also injured in the attack."
+    },
+    {
+     "id": "s4-3",
+     "side": "centre",
+     "outlet": "Deutsche Welle",
+     "outletId": "dw",
+     "caution": false,
+     "access": "free",
+     "headline": "Iranian drone kills 2 Italian workers in Kuwait, Meloni says",
+     "url": "https://www.dw.com/en/iranian-drone-kills-2-italian-workers-in-kuwait-meloni-says/a-80064974?maca=en-rss-en-all-1573-rdf",
+     "published": "2026-11-26T15:11:00.000Z",
+     "summary": "The Italians were employed as technicians for the Italian branch of German arms manufacturer Rheinmetall. One Kuwaiti and one Pakistani national were also injured in the attack. Iran has denied involvement."
+    },
+    {
+     "id": "s4-4",
+     "side": "centre",
+     "outlet": "Euronews",
+     "outletId": "euronews",
+     "caution": false,
+     "access": "free",
+     "headline": "Passenger flights diverted as Kuwait army intercepts Iranian drone attack",
+     "url": "https://www.euronews.com/2026/11/26/civilian-flights-diverted-as-kuwait-army-intercepts-iranian-drone-attack",
+     "published": "2026-11-26T13:19:28.000Z",
+     "summary": "Kuwait's military said four people were injured after \"a number of hostile\" Iranian drones were detected and intercepted in its airspace. Flights crossing Iraq toward the Gulf were given new headings ahead of Kuwait, shifting the internatio"
+    },
+    {
+     "id": "s4-5",
+     "side": "centre",
+     "outlet": "BBC News",
+     "outletId": "bbc",
+     "caution": false,
+     "access": "free",
+     "headline": "Italy says two citizens killed in Iranian strike in Kuwait",
+     "url": "https://www.bbc.co.uk/news/articles/c39w9y5dx4k5o",
+     "published": "2026-11-26T16:39:30.000Z",
+     "summary": "The pair were technicians for German company Rheinmetall, according to Italy's foreign ministry."
+    },
+    {
+     "id": "s4-6",
+     "side": "far_right",
+     "outlet": "ZeroHedge",
+     "outletId": "zerohedge",
+     "caution": true,
+     "access": "free",
+     "headline": "Iranian Drone Attack On Kuwait Kills Two Italian Engineers For Arms-Maker Rheinmetall ; Three Tankers On Fire In Hormuz",
+     "url": "https://www.zerohedge.com/geopolitical/kuwait-says-several-injured-iranian-drone-attack-three-tankers-fire-hormuz",
+     "published": "2026-11-26T14:00:00.000Z",
+     "summary": "Iranian Drone Attack On Kuwait Kills Two Italian Engineers For Arms-Maker Rheinmetall ; Three Tankers On Fire In Hormuz Kuwait said Thursday it was attacked by Iranian drones which breached its airspace during which four people were injured"
+    }
+   ]
+  },
+  {
+   "id": "s5",
+   "rank": 5,
+   "outlets": 5,
+   "sides": {
+    "far_left": 0,
+    "left": 0,
+    "centre": 3,
+    "right": 1,
+    "far_right": 1
+   },
+   "written5": false,
+   "lead": "s5-1",
+   "items": [
+    {
+     "id": "s5-1",
+     "side": "centre",
+     "outlet": "The Hill",
+     "outletId": "thehill",
+     "caution": false,
+     "access": "free",
+     "headline": "Judge blocks FCC from early renewal of ABC licenses",
+     "url": "https://thehill.com/regulation/court-battles/6244298-judge-blocks-fcc-from-early-renewal-of-abc-licenses/",
+     "published": "2026-11-26T02:01:56.000Z",
+     "summary": "A federal judge blocked the Federal Communications Commission (FCC) from its early renewal of ABC’s broadcast licenses. U.S. District Judge Loren AliKhan, a Biden-era appointee, granted a preliminary injunction Wednesday night that prohibit"
+    },
+    {
+     "id": "s5-2",
+     "side": "centre",
+     "outlet": "UPI",
+     "outletId": "upi",
+     "caution": false,
+     "access": "free",
+     "headline": "Judge blocks Trump's early license review of ABC stations",
+     "url": "https://www.upi.com/Top_News/US/2026/11/26/FCC-Alicenses-ruling/9901795679648/",
+     "published": "2026-11-26T09:08:59.000Z",
+     "summary": "A federal judge has blocked the Trump administration from conducting an early review of the broadcast licenses of eight ABC-owned television stations."
+    },
+    {
+     "id": "s5-3",
+     "side": "centre",
+     "outlet": "CNBC",
+     "outletId": "cnbc",
+     "caution": false,
+     "access": "free",
+     "headline": "Judge blocks FCC early-renewal process for Disney-owned ABC stations, for now",
+     "url": "https://www.cnbc.com/2026/11/26/fcc-disney-abc-stations-judge-block.html",
+     "published": "2026-11-26T04:00:15.000Z",
+     "summary": "A judge has blocked the FCC's early license renewal process for Disney-owned ABC stations in 'important victory for the First Amendment'"
+    },
+    {
+     "id": "s5-4",
+     "side": "right",
+     "outlet": "Reason",
+     "outletId": "reason",
+     "caution": false,
+     "access": "free",
+     "headline": "A Federal Judge Blocks the FCC's Review of ABC's Licenses, Saying It Likely Violates the First Amendment",
+     "url": "https://reason.com/2026/11/26/a-federal-judge-blocks-the-fccs-review-of-abcs-licenses-saying-it-likely-violates-the-first-amendment/",
+     "published": "2026-11-26T21:00:55.000Z",
+     "summary": "The FCC \"may not retaliate against or punish\" broadcasters \"for disfavored speech,\" U.S. District Judge Loren AliKhan says."
+    },
+    {
+     "id": "s5-5",
+     "side": "far_right",
+     "outlet": "The National Pulse",
+     "outletId": "nationalpulse",
+     "caution": true,
+     "access": "free",
+     "headline": "Biden Judge Blocks Trump FCC’s Early Review of ABC Licenses Amid DEI Investigation.",
+     "url": "https://thenationalpulse.com/2026/11/26/biden-judge-blocks-trump-fccs-early-review-of-abc-licenses-amid-dei-investigation/",
+     "published": "2026-11-26T22:30:35.000Z",
+     "summary": "A Biden-appointed judge has issued a preliminary injunction blocking the FCC from moving ahead with early license-renewal hearings for eight ABC stations, stalling a regulatory review tied to the broadcaster’s DEI hiring practices and alleg"
+    }
+   ]
+  },
+  {
+   "id": "s6",
+   "rank": 6,
+   "outlets": 4,
+   "sides": {
+    "far_left": 0,
+    "left": 1,
+    "centre": 2,
+    "right": 1,
+    "far_right": 0
+   },
+   "written5": true,
+   "lead": "s6-2",
+   "items": [
+    {
+     "id": "s6-1",
+     "side": "left",
+     "outlet": "The Independent",
+     "outletId": "independent",
+     "caution": true,
+     "access": "free",
+     "headline": "EPA expects Iowa lead detonation results soon",
+     "url": "https://www.independent.co.uk/news/world/americas/iowa-little-rock-america-b3092497.html",
+     "published": "2026-11-26T23:31:06.000Z",
+     "summary": "The U.S. Environmental Protection Agency says test results from samples taken after Wednesday's controlled detonation of lead azide in Iowa could come in Friday"
+    },
+    {
+     "id": "s6-2",
+     "side": "centre",
+     "outlet": "UPI",
+     "outletId": "upi",
+     "caution": false,
+     "access": "free",
+     "headline": "No airborne lead detected after detonation in Iowa: EPA chief",
+     "url": "https://www.upi.com/Top_News/US/2026/11/26/iowa-army-lead-detonation/7841795722702/",
+     "published": "2026-11-26T20:05:42.000Z",
+     "summary": "No airborne lead has been detected after the U.S. Army's detonation of unstable explosives in Iowa, U.S. Environmental Proection Agency Lee Zeldin,"
+    },
+    {
+     "id": "s6-3",
+     "side": "centre",
+     "outlet": "The Hill",
+     "outletId": "thehill",
+     "caution": false,
+     "access": "free",
+     "headline": "Zeldin: No airborne lead detected in Iowa a day after Army blast",
+     "url": "https://thehill.com/policy/energy-environment/6244772-lead-azide-airborne-epa-lee-zeldin/",
+     "published": "2026-11-26T18:21:06.000Z",
+     "summary": "The Environmental Protection Agency (EPA) said Thursday that its air monitors have detected no airborne lead following the Army’s controlled detonation of thousands of pounds of unstable explosives in southeastern Iowa, though the agency is"
+    },
+    {
+     "id": "s6-4",
+     "side": "right",
+     "outlet": "Washington Examiner",
+     "outletId": "washingtonexaminer",
+     "caution": false,
+     "access": "paid",
+     "headline": "EPA announces collection of over 1,000 post-detonation samples in Iowa, results expected Friday",
+     "url": "https://www.washingtonexaminer.com/policy/energy-and-environment/4816248/lee-zeldin-epa-collected-post-detonation-samples-iowa/",
+     "published": "2026-11-26T17:25:42.000Z",
+     "summary": "The Environmental Protection Agency has collected more than 1,000 environmental samples following Wednesday’s controlled detonation of five tons of destabilized lead azide in Middletown, Iowa, according to a public update from the agency. T"
+    }
+   ]
+  },
+  {
+   "id": "s7",
+   "rank": 7,
+   "outlets": 4,
+   "sides": {
+    "far_left": 0,
+    "left": 1,
+    "centre": 2,
+    "right": 0,
+    "far_right": 1
+   },
+   "written5": true,
+   "lead": "s7-2",
+   "items": [
+    {
+     "id": "s7-1",
+     "side": "left",
+     "outlet": "The Independent",
+     "outletId": "independent",
+     "caution": true,
+     "access": "free",
+     "headline": "Ukraine-Russia war latest: Trump tells Putin to end military aggression in Europe to ‘stop the bloodbath’",
+     "url": "https://www.independent.co.uk/news/world/europe/russia-ukraine-war-live-putin-drones-nuclear-weapons-casualties-b3091880.html",
+     "published": "2026-11-26T15:36:12.000Z",
+     "summary": "President Trump embraced Putin as a ‘friend’ at a trilateral summit in China, causing concern in Europe"
+    },
+    {
+     "id": "s7-2",
+     "side": "centre",
+     "outlet": "France 24",
+     "outletId": "france24",
+     "caution": false,
+     "access": "free",
+     "headline": "Trump urges Putin to end 'military aggression' in Europe",
+     "url": "https://www.france24.com/en/trump-urges-putin-to-end-military-aggression-in-europe",
+     "published": "2026-11-26T20:10:34.000Z",
+     "summary": "US President Donald Trump said Thursday he had asked Vladimir Putin to \"pull back all military aggression\" against Europe, in a shift in tone towards the leader Russian he called his friend just a week ago. Trump said he had made the reques"
+    },
+    {
+     "id": "s7-3",
+     "side": "centre",
+     "outlet": "Deutsche Welle",
+     "outletId": "dw",
+     "caution": false,
+     "access": "free",
+     "headline": "Trump says he urged Putin to 'pull back' military aggression in Europe",
+     "url": "https://www.dw.com/en/trump-says-he-urged-putin-to-pull-back-military-aggression-in-europe/a-80067722?maca=en-rss-en-all-1573-rdf",
+     "published": "2026-11-26T16:54:00.000Z",
+     "summary": "US President Donald Trump claimed that he talked with Vladimir Putin about ceasing Russia's military aggression in Europe and expressed his belief in the possibility of a deal between Russia and Ukraine."
+    },
+    {
+     "id": "s7-4",
+     "side": "far_right",
+     "outlet": "Breitbart",
+     "outletId": "breitbart",
+     "caution": true,
+     "access": "free",
+     "headline": "Trump Urged Vladimir Putin to End Military Aggression Against European Territories",
+     "url": "https://www.breitbart.com/politics/2026/11/26/trump-urged-vladimir-putin-to-end-military-aggression-against-european-territories/",
+     "published": "2026-11-26T18:53:58.000Z",
+     "summary": "President Donald Trump said Thursday that he told Russian President Vladimir Putin he would like to see an end to military aggression against European territories. The post Trump Urged Vladimir Putin to End Military Aggression Against Europ"
+    }
+   ]
+  },
+  {
+   "id": "s8",
+   "rank": 8,
+   "outlets": 4,
+   "sides": {
+    "far_left": 0,
+    "left": 0,
+    "centre": 2,
+    "right": 1,
+    "far_right": 1
+   },
+   "written5": false,
+   "lead": "s8-1",
+   "items": [
+    {
+     "id": "s8-1",
+     "side": "centre",
+     "outlet": "The Hill",
+     "outletId": "thehill",
+     "caution": false,
+     "access": "free",
+     "headline": "Trump, NATO chief urge Russia not to expand war in Ukraine",
+     "url": "https://thehill.com/policy/international/6244695-donald-trump-mark-rutte-meeting-russia-ukraine-war/",
+     "published": "2026-11-26T16:44:26.000Z",
+     "summary": "President Trump and NATO Secretary-General Mark Rutte urged Russia not to expand its war with Ukraine, as peace talks between the countries have made little headway in recent weeks and as the conflict nears five years. Trump and Rutte, foll"
+    },
+    {
+     "id": "s8-2",
+     "side": "centre",
+     "outlet": "UPI",
+     "outletId": "upi",
+     "caution": false,
+     "access": "free",
+     "headline": "Trump, NATO chief urge Putin not to expand war in Ukraine",
+     "url": "https://www.upi.com/Top_News/World-News/2026/11/26/nato-ukraine-russia/6331795718215/",
+     "published": "2026-11-26T18:47:11.000Z",
+     "summary": "U.S. President Donald Trump and NATO Secretary-General Mark Rutte urged Russian President Vladimir Putin not to expand the war in Ukraine."
+    },
+    {
+     "id": "s8-3",
+     "side": "right",
+     "outlet": "Fox News",
+     "outletId": "foxnews",
+     "caution": true,
+     "access": "free",
+     "headline": "Trump, NATO chief push Russia to avoid any actions that would 'expand the war' with Ukraine",
+     "url": "https://www.foxnews.com/politics/trump-nato-chief-push-russia-avoid-actions-expand-war-ukraine",
+     "published": "2026-11-26T13:16:51.000Z",
+     "summary": "President Donald Trump and NATO chief Mark Rutte, who met Wednesday night at Mar-a-Lago, urged Russia to avoid actions that might expand the Ukraine war."
+    },
+    {
+     "id": "s8-4",
+     "side": "far_right",
+     "outlet": "ZeroHedge",
+     "outletId": "zerohedge",
+     "caution": true,
+     "access": "free",
+     "headline": "Kremlin Fires Back After Trump And NATO Chief Warn Moscow Not To \"Expand The War\"",
+     "url": "https://www.zerohedge.com/geopolitical/kremlin-fires-back-after-trump-and-nato-chief-warn-moscow-not-expand-war",
+     "published": "2026-11-26T18:20:00.000Z",
+     "summary": "Kremlin Fires Back After Trump And NATO Chief Warn Moscow Not To \"Expand The War\" President Trump and NATO Secretary General Mark Rutte emerged from a Wednesday night meeting at Mar-a-Lago with a warning for Moscow: Russia must avoid \"any a"
+    }
+   ]
+  },
+  {
+   "id": "s9",
+   "rank": 9,
+   "outlets": 3,
+   "sides": {
+    "far_left": 0,
+    "left": 1,
+    "centre": 0,
+    "right": 1,
+    "far_right": 1
+   },
+   "written5": true,
+   "lead": "s9-3",
+   "items": [
+    {
+     "id": "s9-1",
+     "side": "left",
+     "outlet": "The Independent",
+     "outletId": "independent",
+     "caution": true,
+     "access": "free",
+     "headline": "‘Doesn’t feel like Thanksgiving’: Macy’s parade postponement dampens holiday spirits",
+     "url": "https://www.independent.co.uk/news/world/americas/thanksgiving-macy-parade-postponed-new-york-city-b3092083.html",
+     "published": "2026-11-26T12:28:40.000Z",
+     "summary": "New Yorkers, tourists and social media users alike shared disappointment at the news, with some conservatives quick to blame the decision on New York’s Democrat mayor"
+    },
+    {
+     "id": "s9-2",
+     "side": "left",
+     "outlet": "The Independent",
+     "outletId": "independent",
+     "caution": true,
+     "access": "free",
+     "headline": "Trump’s close MAGA confidant goes on ‘Muslim mayor’ tirade over Macy’s Thanksgiving parade",
+     "url": "https://www.independent.co.uk/news/world/americas/us-politics/thanksgiving-parade-mamdani-laura-loomer-b3092323.html",
+     "published": "2026-11-26T17:43:54.000Z",
+     "summary": "‘This is a safety concern. He doesn't control the weather, dumb***’ one X user responded"
+    },
+    {
+     "id": "s9-3",
+     "side": "right",
+     "outlet": "The Daily Caller",
+     "outletId": "dailycaller",
+     "caution": true,
+     "access": "free",
+     "headline": "Macy’s Thanksgiving Parade Postponed For First Time Ever",
+     "url": "https://dailycaller.com/2026/11/25/macys-thanksgiving-parade-postponed-noreaster-new-york-city",
+     "published": "2026-11-26T01:56:27.000Z",
+     "summary": ""
+    },
+    {
+     "id": "s9-4",
+     "side": "far_right",
+     "outlet": "Breitbart",
+     "outletId": "breitbart",
+     "caution": true,
+     "access": "free",
+     "headline": "Report -- NYC: Macy's Faces $1.7 Million Bill to Reinflate Parade Balloons amid High Helium Prices",
+     "url": "https://www.breitbart.com/science/2026/11/26/report-nyc-macys-faces-1-7-million-bill-reinflate-parade-balloons-amid-high-helium-prices/",
+     "published": "2026-11-26T19:33:13.000Z",
+     "summary": "Macy's may face a huge bill in order to get its massive parade balloons up and floating as the cost of helium has climbed. The post Report — NYC: Macy’s Faces $1.7 Million Bill to Reinflate Parade Balloons amid High Helium Prices appeared f"
+    }
+   ]
+  },
+  {
+   "id": "s10",
+   "rank": 10,
+   "outlets": 3,
+   "sides": {
+    "far_left": 0,
+    "left": 0,
+    "centre": 1,
+    "right": 1,
+    "far_right": 1
+   },
+   "written5": false,
+   "lead": "s10-2",
+   "items": [
+    {
+     "id": "s10-1",
+     "side": "centre",
+     "outlet": "RealClearPolitics",
+     "outletId": "realclear",
+     "caution": false,
+     "access": "free",
+     "headline": "Happy Thanksgiving!",
+     "url": "https://www.realclearpolitics.com/north-america/links/happy-thanksgiving-2026-11-26",
+     "published": "2026-11-26T14:39:08.000Z",
+     "summary": "Issues & Insights Ronald Reagan’s 1988 Thanksgiving Day Proclamation is worth reading today."
+    },
+    {
+     "id": "s10-2",
+     "side": "right",
+     "outlet": "Washington Free Beacon",
+     "outletId": "freebeacon",
+     "caution": true,
+     "access": "free",
+     "headline": "Happy Thanksgiving!",
+     "url": "https://freebeacon.com/america/happy-thanksgiving-14/",
+     "published": "2026-11-26T10:00:44.000Z",
+     "summary": "The Washington Free Beacon wishes its readers a happy Thanksgiving. The post Happy Thanksgiving! appeared first on ."
+    },
+    {
+     "id": "s10-3",
+     "side": "far_right",
+     "outlet": "One America News",
+     "outletId": "oann",
+     "caution": true,
+     "access": "unknown",
+     "headline": "Trump: ‘Happy Thanksgiving to all American patriots!’",
+     "url": "https://news.google.com/rss/articles/CBMihwFBVV95cUxPVUE3QzQ1RmhySnFFZTh1R25GbWR3YTdtME9vMWJ5MW1pazVkUDBIWDJQeUF5aG9aWnNBdHhtUFlxbXNfVzBqcnlwUHBFd3l1VXpQeXZVNnlBVkhEcTRhcHI2eDROeHFGY0dHQjUtWHNINDhNODZOa3o0QUx6WVNnRFItaHZKZkE?oc=5",
+     "published": "2026-11-26T20:37:25.000Z",
+     "summary": "Trump: ‘Happy Thanksgiving to all American patriots!’ One America News Network"
+    }
+   ]
+  }
+ ]
+}

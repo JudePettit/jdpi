@@ -4,7 +4,7 @@ import { esc, fmt, hhmm, dayLabel, duration, ago, explainError } from '../lib/ut
 import { compass } from '../lib/geo.js';
 import { findPasses, passTrack, makeLookAt, satrecFromOmm, orbitClass } from '../lib/passes.js';
 import { satMeta, SAT_GROUPS, LINKS } from '../lib/catalog.js';
-import { loadGp } from '../lib/sources.js';
+import { loadGp, gpPause } from '../lib/sources.js';
 import { skyPlot } from '../lib/charts.js';
 import { legend, emptyRow } from './ui.js';
 
@@ -16,7 +16,11 @@ export function create(ctx, panel) {
   const S = ctx.settings;
   const minEl = $('#sat-minel'), hours = $('#sat-hours'), simple = $('#sat-simple'), status = $('#sat-status'), tbody = $('#sat-table tbody');
   minEl.value = String(S.satMinEl); hours.value = String(S.satHours); simple.checked = S.satSimple !== false;
-  let sat = null, data = new Map(), sats = [], passes = [], selected = null, timer = null, alive = false, computedAt = 0, loadedAt = null;
+  let sat = null, data = new Map(), sats = [], passes = [], selected = null, timer = null, alive = false, computedAt = 0;
+  // Each group's elements and their time; the groups held only as the copies kept during a pause, and whether the last
+  // load met a pause, so that the tab loads them again once the pause is over, as a reload would.
+  const at = new Map(), pausedGroups = new Set();
+  let metPause = false, reloading = false;
 
   const groupsOn = () => new Set(S.satGroups?.length ? S.satGroups : ['weather', 'stations', 'amateur']);
   const renderChips = () => {
@@ -50,20 +54,30 @@ export function create(ctx, panel) {
       emptyRow(tbody, 6, `The orbit library (satellite.js) could not be loaded: ${esc(e.message)}.`);
       status.textContent = 'satellite.js failed to load'; return false;
     }
-    const want = SAT_GROUPS.filter(g => !data.has(g.id));
+    const want = SAT_GROUPS.filter(g => !data.has(g.id) || pausedGroups.has(g.id));
     const results = await Promise.allSettled(want.map(g => loadGp(g.celestrak)));
-    let err = null;
+    // During a pause after a failed download the reader returns a kept copy with a note saying when CelesTrak will be
+    // asked again (or, for a group with no copy, refuses with that note); it is given beside the elements' age.
+    let err = null, pausedNote = null;
     results.forEach((r, i) => {
-      if (r.status === 'fulfilled') { data.set(want[i].id, r.value.data); loadedAt = Math.min(loadedAt ?? r.value.at, r.value.at); }
-      else err = r.reason;
+      const id = want[i].id;
+      if (r.status === 'fulfilled') {
+        data.set(id, r.value.data); at.set(id, r.value.at);
+        if (r.value.paused) { pausedNote = r.value.note; pausedGroups.add(id); } else pausedGroups.delete(id);
+      } else {
+        err = r.reason;
+        if (r.reason?.paused) pausedNote = r.reason.message;
+      }
     });
+    metPause = !!pausedNote;
+    const loadedAt = Math.min(...[...data.keys()].map(id => at.get(id)));
     renderChips();
     if (!data.size) {
       ctx.setStatus('celestrak', 'bad', explainError(err));
       emptyRow(tbody, 6, `Orbital elements could not be downloaded from CelesTrak: ${esc(explainError(err))}.`);
       status.textContent = 'No orbital data'; return false;
     }
-    ctx.setStatus('celestrak', err ? 'warn' : 'ok', `${[...data.values()].reduce((n, a) => n + a.length, 0)} satellites in ${data.size} groups; elements ${ago(Date.now() - loadedAt)}.`);
+    ctx.setStatus('celestrak', err || pausedNote ? 'warn' : 'ok', `${[...data.values()].reduce((n, a) => n + a.length, 0)} satellites in ${data.size} groups; elements ${ago(Date.now() - loadedAt)}.${pausedNote ? ` ${pausedNote}.` : ''}`);
     return true;
   }
 
@@ -152,6 +166,12 @@ export function create(ctx, panel) {
   const loop = () => {
     clearTimeout(timer);
     if (!alive) return;
+    // Once the pause is over, load again what was held only because of it (the reader asks CelesTrak only for a copy
+    // that is out of date, and starts a new pause if CelesTrak fails again).
+    if (metPause && !reloading && !gpPause()) {
+      reloading = true;
+      load().then(ok => { if (ok) compute(); }).finally(() => { reloading = false; });
+    }
     if (Date.now() - computedAt > 5 * 60e3) compute(); else { drawSky(); renderGeo(); }
     timer = setTimeout(loop, 10000);
   };

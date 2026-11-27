@@ -1,6 +1,6 @@
 // SIGINT Dashboard · Overview: status tiles for every feed and connector, the public-feed checks, and the bridge setup.
-import { esc, ago, fetchJSON, explainError, PUBLIC_FEEDS } from '../lib/util.js';
-import { fetchAdsbPublic, loadGp, bridgeHealth, SWPC, wsprUrl } from '../lib/sources.js';
+import { esc, ago, hhmm, fetchJSON, explainError, PUBLIC_FEEDS } from '../lib/util.js';
+import { fetchAdsbPublic, loadGp, gpPause, bridgeHealth, SWPC, wsprUrl } from '../lib/sources.js';
 import { normaliseAircraft, normaliseScales } from '../lib/feeds.js';
 
 const TILES = [
@@ -64,7 +64,15 @@ export function create(ctx, panel) {
       }],
       ['celestrak', async () => {
         const r = await loadGp('weather');
-        return `${r.data.length} weather satellites${r.cached ? `, cached ${ago(Date.now() - r.at)}` : ', just downloaded'}.`;
+        const text = `${r.data.length} weather satellites${r.cached ? `, cached ${ago(Date.now() - r.at)}` : ', just downloaded'}.`;
+        // During a pause after a failed download the reader returns the kept copy with a note saying when CelesTrak
+        // will be asked again; give it beside the copy's age.
+        if (r.paused) return { state: 'warn', detail: `${text} ${r.note}.` };
+        // A copy young enough is given without asking CelesTrak, so without the note, even while a pause begun by the
+        // Satellites tab (or another tab) is running. This row is the Satellites tab's too, so it still says so, in the
+        // reader's words, from the pause the reader keeps (no request is made to learn it).
+        const p = r.cached && gpPause();
+        return p ? { state: 'warn', detail: `${text} ${p.why} at ${hhmm(new Date(p.at))}, so this page will not ask CelesTrak again before ${hhmm(new Date(p.until))}.` } : text;
       }],
       ['swpc', async () => {
         const s = normaliseScales(await fetchJSON(`${SWPC}/products/noaa-scales.json`, { timeout: 10000 }));
@@ -78,7 +86,7 @@ export function create(ctx, panel) {
     ];
     await Promise.all(jobs.map(async ([id, fn]) => {
       ctx.setStatus(id, 'checking', 'Checking…');
-      try { ctx.setStatus(id, 'ok', await fn()); }
+      try { const out = await fn(); if (typeof out === 'string') ctx.setStatus(id, 'ok', out); else ctx.setStatus(id, out.state, out.detail); }
       catch (e) {
         const why = e.budget ? e.message : explainError(e);
         const extra = id === 'adsb' ? ' adsb.lol sends no CORS headers: this works once the site’s Vitruvian Manager proxy is deployed, or with the Vitruvian Manager bridge turned on.' : '';

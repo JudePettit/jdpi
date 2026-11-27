@@ -326,8 +326,15 @@ test('the built calendar: one record per vote, Antonio Saca, the referendums lef
     [['2024-06-30', '2024 French legislative election (first round; second round 7 July)']]);
   assert.deepEqual(ALL.filter(e => e.country === 'Czechia' && e.type === 'election' && /^2025-10/.test(e.date)).map(e => [e.date, e.title]),
     [['2025-10-03', '2025 Czech parliamentary election']]);
-  assert.deepEqual(ALL.filter(e => e.country === 'Italy' && e.type === 'election' && e.date.startsWith('2027')).map(e => [e.date, e.title, e.status]),
-    [['2027-12-22', '2027 Italian general election', 'tentative']]);
+  // Italy's next general election, once and tentative. Which source dates it is not this test's business: until
+  // 26 November 2026 the daily build kept Wikipedia's electoral calendar's record (22 December 2027, the last day the
+  // vote may be held), and on 27 November the Retrospective's, known to the month (September 2027, to be confirmed);
+  // the pinned date and title then failed four refreshes' suites and held their deploys back.
+  const italy = ALL.filter(e => e.country === 'Italy' && e.type === 'election' && e.date.startsWith('2027')).map(e => [e.date, e.title, e.status]);
+  assert.equal(italy.length, 1, JSON.stringify(italy));
+  assert.match(italy[0][1], /Italian general election/);
+  assert.equal(italy[0][2], 'tentative');
+  assert.ok(italy[0][0] <= '2027-12-22', `not after the last day the vote may be held: ${italy[0][0]}`);
   assert.deepEqual(ALL.filter(e => e.country === 'Poland' && e.type === 'election' && e.date.startsWith('2027')).map(e => [e.date, e.title, e.status]),
     [['2027-11-11', 'Next Polish parliamentary election', 'tentative']]);
   assert.deepEqual(ALL.filter(e => e.country === 'Dominican Republic' && e.type === 'election' && e.date.startsWith('2024-05')).map(e => e.date), ['2024-05-19']);

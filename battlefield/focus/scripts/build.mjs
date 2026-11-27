@@ -41,7 +41,8 @@ import { execFileSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
 import { createRequire } from 'node:module';
 import { WARS, leftOutOf } from './wars.mjs';
-import { battleDates, fixDates, partsWithin, apportion, eventMonths, monthWeights, wdDate, decadeFits, stateBoxes, infoboxEnd, endAgainstArticle, casualtiesOf, byStart, pickCoord } from './rules.mjs';
+import { battleDates, fixDates, partsWithin, apportion, eventMonths, monthWeights, wdDate, decadeFits, stateBoxes, infoboxEnd, endAgainstArticle, casualtiesOf, byStart, pickCoord, addTime, battlesFromRows } from './rules.mjs';
+import { NAMES } from './names-kept.mjs';
 import { linkParts, ownDeaths, groupBattles, ownFigure } from '../figures.mjs';
 import { readArticle, battleFigures, wdStatements, keptFigures } from './infobox.mjs';
 import { candidateFiles } from '../../scripts/ucdp.mjs';
@@ -116,10 +117,12 @@ async function qidOf(title) {
   return Object.values(r.query.pages)[0]?.pageprops?.wikibase_item || null;
 }
 const BATTLE_TYPES = 'wd:Q178561 wd:Q188055 wd:Q645883 wd:Q1261499 wd:Q2001676 wd:Q3199915 wd:Q124757';
-const DATES = `OPTIONAL { ?b p:P585/psv:P585 [ wikibase:timeValue ?pt ; wikibase:timePrecision ?ptp ] }
-    OPTIONAL { ?b p:P580/psv:P580 [ wikibase:timeValue ?st ; wikibase:timePrecision ?stp ] }
-    OPTIONAL { ?b p:P582/psv:P582 [ wikibase:timeValue ?en ; wikibase:timePrecision ?enp ] }`;
-const addTime = (list, v, p) => { if (v && !list.some(x => x.v === v.value && x.p === p?.value)) list.push({ v: v.value, p: p?.value ?? 11 }); };
+// Every start, end and point in time but those Wikidata marks deprecated (Operation Oyster's end of 14 April 1969, the
+// invasion of Sicily's of 17 August 1944), as the Omni-Map's battles layer reads them (omni/scripts/build-battles.mjs
+// liveClaims); review of 27 November 2026.
+const DATES = `OPTIONAL { ?b p:P585 ?dPt . ?dPt psv:P585 [ wikibase:timeValue ?pt ; wikibase:timePrecision ?ptp ] ; wikibase:rank ?dPtR . FILTER(?dPtR != wikibase:DeprecatedRank) }
+    OPTIONAL { ?b p:P580 ?dSt . ?dSt psv:P580 [ wikibase:timeValue ?st ; wikibase:timePrecision ?stp ] ; wikibase:rank ?dStR . FILTER(?dStR != wikibase:DeprecatedRank) }
+    OPTIONAL { ?b p:P582 ?dEn . ?dEn psv:P582 [ wikibase:timeValue ?en ; wikibase:timePrecision ?enp ] ; wikibase:rank ?dEnR . FILTER(?dEnR != wikibase:DeprecatedRank) }`;
 // The items within a war: every item that is part of it (P361+), with the item it is part of and its dates, walked
 // down from the war by partsWithin (scripts/rules.mjs) so that no wider or later campaign brings in another war's battles.
 // And not from a wider operation that is also part of something outside the war down to a part of it fought outside
@@ -301,16 +304,11 @@ async function battlesOf(qid, span, theatre, warId) {
     OPTIONAL { ?article schema:about ?b ; schema:isPartOf <https://en.wikipedia.org/> }
     SERVICE wikibase:label { bd:serviceParam wikibase:language "en". } }`);
   const { has, deaths, cas, coords } = await deathsAndParts([...new Set(rows.map(r => r.b.value.split('/').pop()))].filter(q => within.has(q)));
-  const by = new Map();
-  for (const r of rows) {
-    const q = r.b.value.split('/').pop();
-    if (!within.has(q)) continue; // reached only through a campaign outside the war (partsWithin)
-    const b = by.get(q) || { q, n: r.bLabel?.value, desc: r.bDescription?.value || '', deaths: 0, cas: cas.get(q) || 0, t: { start: [], end: [], point: [] }, dvals: deaths.get(q) || [], coords: coords.get(q) || [] };
-    if (b.n === q) continue; // no English label
-    addTime(b.t.start, r.st, r.stp); addTime(b.t.end, r.en, r.enp); addTime(b.t.point, r.pt, r.ptp);
-    if (r.article) b.w = decodeURIComponent(r.article.value.split('/wiki/')[1]).replace(/_/g, ' ');
-    by.set(q, b);
-  }
+  // Each battle within the war, named by VM's name where names-kept.mjs NAMES keeps one (the Omni-Map's table too),
+  // else by Wikidata's English label (rules.mjs battlesFromRows).
+  const by = battlesFromRows(rows, within, { cas, deaths, coords, names: NAMES });
+  const relabelled = new Map(rows.map(r => [r.b.value.split('/').pop(), r.bLabel?.value]).filter(([q, l]) => NAMES[q] && by.has(q) && l !== NAMES[q]));
+  for (const [q, l] of relabelled) console.log(`  ${q}: named "${NAMES[q]}" (names-kept.mjs NAMES); Wikidata's English label today "${l}"`);
   // Every place it has (its best-ranked P625s): one picked the same whatever order Wikidata answers in (the first
   // row's, as until November 2026, moved between runs), and a whole's again once its parts are known (wholesAndParts).
   for (const b of by.values()) { const c = pickCoord(b.coords); if (c) { b.lat = c[0]; b.lon = c[1]; } }

@@ -37,7 +37,8 @@ import { support, supportText } from '../../lake/scripts/refs.mjs';
 import { updateLayer } from './build-borders.mjs';
 import { writeCatalogue } from './layer-catalogue.mjs';
 import { entities } from './history-common.mjs';
-import { battleDates, wdDate } from '../../battlefield/focus/scripts/rules.mjs';
+import { battleDates, finestOf } from '../../battlefield/focus/scripts/rules.mjs';
+import { NAMES } from '../../battlefield/focus/scripts/names-kept.mjs';
 import { formatValueDate } from '../../design/vm-dates.js';
 
 const ROOT = resolve(fileURLToPath(new URL('../..', import.meta.url)));
@@ -85,13 +86,9 @@ export function focusNames(dir = join(ROOT, 'battlefield/focus/data/wars')) {
   return out;
 }
 /** Names VM keeps where Wikidata's English label has lately been changed away from the name its English Wikipedia
-    article gives, with their sources; they come before War Focus's and Wikidata's. The killing of Yahya Sinwar
-    (Q130549291): Wikidata's English label was set to "Shahadat of Yahya Sinwar" on 24 November 2026 by a temporary
-    account; before that it read "killing of Yahya Sinwar", as its en-us label still does, and the item's English
-    Wikipedia article is "Killing of Yahya Sinwar" (its enwiki sitelink; all read 26 November 2026). */
-export const NAMES = {
-  Q130549291: 'killing of Yahya Sinwar',
-};
+    article gives, with their sources; they come before War Focus's and Wikidata's. One table for both pages, kept in
+    battlefield/focus/scripts/names-kept.mjs (War Focus's build reads it too), exported here as before. */
+export { NAMES };
 /** Step 1: the starts War Focus corrects (its DATE_FIXES, written into its war files as `sW`, Wikidata's start): { Q:
     { s, sW, sWp?, w } }, s the start War Focus shows (its English Wikipedia article's, w), sW Wikidata's, sWp the
     precision of Wikidata's ('m' a month, 'y' a year, absent a day). */
@@ -131,11 +128,10 @@ export const liveClaims = list => (list || []).filter(c => c && c.rank !== 'depr
 const timeOf = c => c?.mainsnak?.datavalue?.value;
 const asPoint = c => ({ v: String(timeOf(c)?.time || '').replace(/^\+/, ''), p: timeOf(c)?.precision ?? 11, c });
 /** A point in time that holds a finer one is the same date given twice, not two (Operation Martin, "1943" and "March
-    1943"): only the finer is kept, as battleDates (battlefield/focus/scripts/rules.mjs) keeps it. */
+    1943"): only the finer is kept, by War Focus's own rule (battlefield/focus/scripts/rules.mjs finestOf, which
+    battleDates reads its points by), not a copy of it. */
 export function finestPoints(claims) {
-  const pts = liveClaims(claims).map(asPoint), ok = x => !!wdDate(x.v, x.p); // wdDate reads an AD year, month or day
-  const holds = (x, y) => ok(x) && ok(y) && +y.p > +x.p && wdDate(x.v, x.p) <= wdDate(y.v, y.p) && wdDate(y.v, y.p, true) <= wdDate(x.v, x.p, true);
-  return pts.filter(x => !pts.some(y => y !== x && holds(x, y))).map(x => x.c);
+  return finestOf(liveClaims(claims).map(asPoint)).map(x => x.c);
 }
 const LISTED = ['', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine'];
 

@@ -165,8 +165,11 @@ export function citationOf(inner) {
     const who = named.last || named.last1 || named.author || named.author1 || named.authors || named.editor || named['editor-last'] || '';
     const year = (named.year || named.date || '').match(/\d{4}/)?.[0] || '';
     if (who) return `${who}${year ? ' ' + year : ''}${pg}`;
-    const by = named.publisher || named.work || named.website || named.newspaper || named.journal || named.agency || named.title || '';
-    return (by ? `${by}${year ? ' ' + year : ''}` : named.url ? hostOf(named.url) : '').slice(0, 90);
+    // {{cite archive}} names its holder and its item, not a publisher or a title (the Swatow Operation's "Japan Center for
+    // Historical Records", review of 27 November 2026).
+    const by = named.publisher || named.work || named.website || named.newspaper || named.journal || named.agency || named.title || named.institution || named.collection || named.item || '';
+    const url = named.url || named['item-url'];
+    return (by ? `${by}${year ? ' ' + year : ''}` : url ? hostOf(url) : '').slice(0, 90);
   }
   const url = /https?:\/\/[^\s\]|]+/.exec(s);
   const text = clean(s.replace(/\{\{[\s\S]*?\}\}/g, '')).replace(/^\W+|\W+$/g, '');
@@ -485,6 +488,8 @@ function readItems(text0, { field }) {
 }
 
 // ---------------------------------------------------------------------------------------------------------------- sides
+// Words for losses of no stated size, a unit's in place of its figure (readingFigures).
+const LOSS_WORDS = /^(?:unknown|unconfirmed|unclear|heavy|light|moderate|significant|severe|considerable|substantial|few|a few|several|hundreds|thousands|tens of thousands|dozens|many|some|numerous)\b/i;
 const WEAK = { fact: 0, estimate: 1, disputed: 2 };
 const weakest = list => list.reduce((a, b) => (WEAK[b] > WEAK[a] ? b : a), 'fact');
 const itemStatus = (it, line, reading) => (line.doubt || reading.byKind === 'claim' || line.byKind === 'claim' || line.lineKind === 'claim' ? 'disputed' : it.approx || it.range || it.atLeast || reading.byKind === 'estimate' || line.lineKind === 'estimate' || line.byKind === 'estimate' || reading.partial ? 'estimate' : 'fact');
@@ -690,7 +695,12 @@ function readingFigures(rd, side) {
   const wordsC = rd.words.some(w => !w.cats.has('k') || w.cats.has('all') || w.cats.size > 1);
   if (killedOnly && cAny) cAtLeast = true; // a group that gives only its killed: the casualties are at least the rest
   else if (!cAny) { cLow = 0; cHigh = 0; }
-  const deaths = dAny ? { low: dLow, high: dHigh, status: weakest(dSt), atLeast: dAtLeast || (wordsK && groups.size > 1) || rd.partial || undefined } : null;
+  // A unit of the side listed with words alone for its losses ("116th Infantry Regiment: unknown", "58th Infantry
+  // Regiment …: many killed in action" beside "65th Infantry Regiment: 42 killed"): the side's deaths are at least the
+  // figures given. Words of no kind count only where they speak of losses ("Heavy", "Unknown"), not of other things
+  // ("Most troops deserted", the Soviet invasion of Manchuria).
+  const wordsGroupK = rd.words.some(w => w.grouped && (w.cats.has('k') || (w.cats.has('all') && (PEOPLE.test(w.words) || LOSS_WORDS.test(w.words)))));
+  const deaths = dAny ? { low: dLow, high: dHigh, status: weakest(dSt), atLeast: dAtLeast || (wordsK && (groups.size > 1 || wordsGroupK)) || rd.partial || undefined } : null;
   const cas = cAny ? { low: cLow, high: cHigh, status: weakest(cSt), atLeast: cAtLeast || (wordsC && cAny) || rd.partial || undefined } : null;
   if (deaths && rd.partial) deaths.status = weakest([deaths.status, 'estimate']);
   if (cas && rd.partial) cas.status = weakest([cas.status, 'estimate']);
@@ -719,7 +729,11 @@ function finishSide(side, readings) {
       if (a.partial !== b.partial) continue;
       const ka = kindsOf(a), kb = kindsOf(b);
       if ([...ka].some(k => kb.has(k))) continue;
-      const by = [a.by, b.by].filter(Boolean).join('; ') || null;
+      // Whose figures they are: the names of the readings that give any. A reading of words alone ("58th Infantry
+      // Regiment according to a veteran's recollection: many killed in action") lends its words, not its name, to
+      // another's figure (the Western Hubei Operation's "65th Infantry Regiment: 42 killed", review of 27 November 2026).
+      const named = r => (r.lines.length || r.zero ? r.by : null);
+      const by = [named(a), named(b)].filter(Boolean).join('; ') || null;
       list[i] = { by, byKind: null, partial: a.partial, merged: true, lines: [...a.lines, ...b.lines], words: [...a.words, ...b.words], zero: a.zero || b.zero, refs: [...a.refs, ...b.refs] };
       list.splice(j, 1); changed = true;
     }

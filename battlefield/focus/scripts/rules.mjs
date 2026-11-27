@@ -23,6 +23,10 @@ const FIRST = { null: d => d, m: d => d.slice(0, 7) + '-01', y: d => d.slice(0, 
 
 // An item whose name says it lasted: a point in time given for it is when it began, not its whole span.
 const LASTING = /\b(campaigns?|offensives?|counteroffensives?|counter-offensives?|sieges?|occupations?|fronts?|insurgency|blockades?|war)\b/i;
+// A name's closing "in World War II", "during the Spanish Civil War": the war it was part of, which says nothing of how
+// long the item itself lasted. Read off a name with several points in time, so that the bombing of Kobe in World War II
+// (4 February and 5 June 1945) keeps both its raids (review of 27 November 2026).
+export const IN_WAR = name => String(name || '').replace(/\s+(?:in|during)\s+(?:the\s+)?(?:\S+\s+){0,4}war\b.*$/i, '');
 
 /**
  * A battle's dates from Wikidata's start (P580), end (P582) and point in time (P585), each [{ v, p }] (value and
@@ -35,7 +39,9 @@ const LASTING = /\b(campaigns?|offensives?|counteroffensives?|counter-offensives
  *   p, pe  the precision of the start ('m' month, 'y' year, null day) and, when it differs, of the end ('d' a day)
  *   pts    for a battle of several points in time, the days themselves (below); otherwise absent
  * Points in time alone run from the first to the last (one point: a one-day battle), unless its name says it lasted (a
- * campaign, an offensive, a siege, an occupation), when the first is its start. Several points are several days, not a
+ * campaign, an offensive, a siege, an occupation), when the first is its start; of several points, a closing "in World
+ * War II" is not read as such a name (IN_WAR: the bombing of Kobe in World War II, 4 February and 5 June 1945, Wikidata
+ * read 27 November 2026). Several points are several days, not a
  * span: the separate raids of the bombing of Yawata (June 1944, 20 August 1944, 8 August 1945) or of the Vatican (5
  * November 1943, 1 March 1944) were not under way in the months between. Their s and e are still the first and the
  * last, for sorting, and `pts` lists each, sorted and distinct, at its precision ('1944-08-20' a day, '1944-06' a
@@ -48,14 +54,13 @@ export function battleDates({ start = [], end = [], point = [], name = '', warEn
   const pick = (list, atEnd) => list.map(x => ({ d: wdDate(x.v, x.p, atEnd), p: PREC(x.p ?? 11) })).filter(x => x.d)
     .sort((a, b) => (a.d < b.d ? -1 : 1));
   const prec = x => +(x.p ?? 11);
-  const holds = (x, y) => prec(y) > prec(x) && wdDate(y.v, y.p) && wdDate(x.v, x.p) <= wdDate(y.v, y.p) && wdDate(y.v, y.p, true) <= wdDate(x.v, x.p, true);
-  const points = point.filter(x => wdDate(x.v, x.p) && !point.some(y => y !== x && holds(x, y)));
+  const points = finestOf(point).filter(x => wdDate(x.v, x.p));
   const st = pick(start)[0], pt = pick(points)[0], en = pick(end, true).at(-1), ptEnd = pick(points, true).at(-1);
   const first = st || pt;
   if (!first) return undatedOf([...start, ...point, ...end]);
   const out = { s: first.d, e: null, p: first.p, pe: null, u: null, eW: null };
   let last = en, several = false;
-  if (!last && !st && pt && !LASTING.test(name)) { last = ptEnd; several = true; }
+  if (!last && !st && pt && !LASTING.test(points.length > 1 ? IN_WAR(name) : name)) { last = ptEnd; several = true; }
   if (!last) { out.u = 'end'; return out; }
   if (last.d < out.s) return { ...out, u: 'order', eW: last.d };
   if (warEnd && FIRST[last.p](last.d) > warEnd) return { ...out, u: 'after', eW: last.d };
@@ -67,6 +72,47 @@ export function battleDates({ start = [], end = [], point = [], name = '', warEn
     if (days.length > 1) out.pts = days;
   }
   return out;
+}
+
+/** Whether point in time x holds a finer y (each { v, p }, a Wikidata time and its precision): y is to the month or
+ *  the day and falls within x, a year or a month, so the two are one date given twice (Operation Martin, "1943" and
+ *  "March 1943"). A value wdDate cannot read holds nothing and is held by nothing. */
+export const holdsFiner = (x, y) => {
+  const px = +(x.p ?? 11), py = +(y.p ?? 11), a = wdDate(x.v, x.p), b = wdDate(y.v, y.p);
+  return py > px && !!a && !!b && a <= b && wdDate(y.v, y.p, true) <= wdDate(x.v, x.p, true);
+};
+/** Points in time without those that hold a finer one (holdsFiner): the rule battleDates reads them by, and the
+ *  Omni-Map's battles layer too (omni/scripts/build-battles.mjs finestPoints), so both pages give a battle the same
+ *  dates. Each point keeps whatever else it carries (the Omni-Map's carry their Wikidata statement). */
+export const finestOf = points => points.filter(x => !points.some(y => y !== x && holdsFiner(x, y)));
+
+/** A Wikidata time from a SPARQL row ({ value } and its precision's { value }) added to a list of { v, p }, each value
+ *  and precision once (build.mjs reads a battle's every start, end and point in time so). */
+export const addTime = (list, v, p) => { if (v && !list.some(x => x.v === v.value && x.p === p?.value)) list.push({ v: v.value, p: p?.value ?? 11 }); };
+
+/**
+ * A war's battles from the rows of build.mjs battlesOf's query (?b ?bLabel ?bDescription ?pt ?ptp ?st ?stp ?en ?enp
+ * ?article, a row for each combination of an item's values): Map q → { q, n, desc, deaths, cas, t, dvals, coords, w },
+ * for each item `within` the war (partsWithin). Its name n is VM's where `names` keeps one (build.mjs passes
+ * names-kept.mjs NAMES, the Omni-Map's table too), else Wikidata's English label (the label service's), so a label
+ * lately changed away from the battle's English Wikipedia title does not reach the page (the killing of Yahya Sinwar);
+ * an item with neither (the label service gives its Q-id) is left out. t holds its every start, end and point in time
+ * (addTime), for battleDates; w its English Wikipedia title. `cas`, `deaths` and `coords` are the facts deathsAndParts
+ * asked of it apart (Maps by q). The table is passed in, not imported, so this file keeps no imports (the Battlefield's
+ * realtime build and its tests read it alone).
+ */
+export function battlesFromRows(rows, within, { cas = new Map(), deaths = new Map(), coords = new Map(), names = {} } = {}) {
+  const by = new Map();
+  for (const r of rows) {
+    const q = r.b.value.split('/').pop();
+    if (!within.has(q)) continue; // reached only through a campaign outside the war (partsWithin)
+    const b = by.get(q) || { q, n: names[q] || r.bLabel?.value, desc: r.bDescription?.value || '', deaths: 0, cas: cas.get(q) || 0, t: { start: [], end: [], point: [] }, dvals: deaths.get(q) || [], coords: coords.get(q) || [] };
+    if (b.n === q) continue; // no English label
+    addTime(b.t.start, r.st, r.stp); addTime(b.t.end, r.en, r.enp); addTime(b.t.point, r.pt, r.ptp);
+    if (r.article) b.w = decodeURIComponent(r.article.value.split('/wiki/')[1]).replace(/_/g, ' ');
+    by.set(q, b);
+  }
+  return by;
 }
 
 /** The months (yyyy-mm) of a battle's several points in time (battleDates' pts); a point dated only to its year is in

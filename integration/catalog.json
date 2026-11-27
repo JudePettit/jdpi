@@ -1,5 +1,5 @@
 {
-  "generated": "2026-11-27T21:36:46.614Z",
+  "generated": "2026-11-27T22:53:57.965Z",
   "name": "Vitruvian Manager data catalogue",
   "publisher": "JDP-Iq",
   "description": "Every public dataset in Vitruvian Manager (VM, by JDP-Iq), with its fields, size, licence and sources. Read-only; no keys. Files are static JSON on this site; the MCP server (/mcp) and the JSON API (/api/v1/) query them with row and size caps.",
@@ -386,13 +386,13 @@
       "sources": [
         "UCDP Candidate Events Dataset v26.01.26.09 (Hegre, H. et al. (2020). Introducing the UCDP Candidate Events Dataset. Research & Politics 7(3). Data: Uppsala Conflict Data Program, ucdp.uu.se.)"
       ],
-      "updated": "2026-11-26",
+      "updated": "2026-11-27",
       "refresh": "weekly",
       "page": "q/battlefield.html",
       "derivedFrom": [
         "battlefield/data/realtime.json"
       ],
-      "bytes": 47184
+      "bytes": 46990
     },
     {
       "id": "realtime-war-months",
@@ -455,7 +455,7 @@
       "sources": [
         "UCDP Candidate Events Dataset v26.01.26.09 (Hegre, H. et al. (2020). Introducing the UCDP Candidate Events Dataset. Research & Politics 7(3). Data: Uppsala Conflict Data Program, ucdp.uu.se.)"
       ],
-      "updated": "2026-11-26",
+      "updated": "2026-11-27",
       "refresh": "weekly",
       "page": "q/battlefield.html?view=archive",
       "derivedFrom": [
@@ -524,7 +524,7 @@
       "sources": [
         "UCDP Candidate Events Dataset v26.01.26.09 (Hegre, H. et al. (2020). Introducing the UCDP Candidate Events Dataset. Research & Politics 7(3). Data: Uppsala Conflict Data Program, ucdp.uu.se.)"
       ],
-      "updated": "2026-11-26",
+      "updated": "2026-11-27",
       "refresh": "weekly",
       "page": "q/battlefield.html",
       "derivedFrom": [

@@ -1,6 +1,6 @@
 # Vitruvian Manager datasets
 
-Generated 2026-11-26 from https://jdpi.pages.dev/integration/catalog.json. Read the live catalogue for current row counts.
+Generated 2026-11-27 from https://jdpi.pages.dev/integration/catalog.json. Read the live catalogue for current row counts.
 
 ## Realtime Geopolitics
 
@@ -94,7 +94,7 @@ National Analysis: key indicator time series. Yearly values since 1980 for every
 
 ### upcoming-political-events
 
-Realtime Calendar: recent and upcoming events. The Realtime Calendar's window: political events from six months ago to eighteen months ahead (2026-05-26 to 2028-05-26 at the last build): elections, referendums, summits, new leaders, coups, ceasefires, protests, court rulings and more.
+Realtime Calendar: recent and upcoming events. The Realtime Calendar's window: political events from six months ago to eighteen months ahead (2026-05-27 to 2028-05-27 at the last build): elections, referendums, summits, new leaders, coups, ceasefires, protests, court rulings and more.
 
 - Rows: 318 · refresh: daily · licence: Summaries from Wikipedia, CC BY-SA 4.0 (credit Wikipedia); facts from Wikidata (CC0) and UCDP/PRIO (CC BY 4.0); compilation © JDP-Iq. Leaders to 2015 after Archigos 4.1 (Goemans, Gleditsch and Chiozza), whose page states no licence: kept with its citation until VM’s owner decides.
 - File: https://jdpi.pages.dev/integration/data/upcoming-political-events.json (records at `records`)
@@ -106,7 +106,7 @@ Realtime Calendar: recent and upcoming events. The Realtime Calendar's window: p
 
 Political Briefing: stories. Every story from the Political Briefing's publishers over the last seven days, ten active publishers for each of five political positions (far left to far right). Join `s` to intelligence-briefing-sources for the outlet's name and position.
 
-- Rows: 6,412 · refresh: twice daily · licence: Headlines, standfirsts and links © their publishers, quoted for reference; selection and metadata © JDP-Iq.
+- Rows: 6,113 · refresh: twice daily · licence: Headlines, standfirsts and links © their publishers, quoted for reference; selection and metadata © JDP-Iq.
 - File: https://jdpi.pages.dev/briefing/data/latest.json (records at `items`)
 - Fields: `s` (string), `t` (string), `u` (string), `p` (date), `d` (string), `c` (string)
 
@@ -122,7 +122,7 @@ Political Briefing: publishers. The Political Briefing's publishers with their p
 
 Daily Synopsis: the day's major stories. Each day's major political stories, picked by stated rules with no AI model: those that at least three of the Political Briefing's publishers, from at least two of its five positions, ran in the 24 hours to its morning refresh, at most ten a day, with the number of outlets on each side and the first headline. `authorship` says whether that day's short digest was written by an AI model (Claude) and passed VM's checks (model) or the day holds the outlets' headlines alone (rules); no person checked either.
 
-- Rows: 60 · refresh: daily · licence: Headlines and links © their publishers, quoted for reference; selection and counts © JDP-Iq.
+- Rows: 70 · refresh: daily · licence: Headlines and links © their publishers, quoted for reference; selection and counts © JDP-Iq.
 - File: https://jdpi.pages.dev/integration/data/daily-synopsis-stories.json (records at `records`)
 - Fields: `day` (date), `rank` (number), `story` (string), `outlets` (number), `far_left` (number), `left` (number), `centre` (number), `right` (number), `far_right` (number), `lead_headline` (string), `lead_outlet` (string), `lead_url` (string), `authorship` (string), `written` (string), `five` (string)
 
@@ -130,7 +130,7 @@ Daily Synopsis: the day's major stories. Each day's major political stories, pic
 
 Economics Briefing: stories and papers. Every paper and story in the Economics Briefing over the last 7 days, classed by fields (macro, monetary, trade, labour, development, finance, public, energy) and by type (papers or news). Join `source` to econ-briefing-sources.
 
-- Rows: 502 · refresh: 6-hourly · licence: Titles, links and short summaries © their publishers, quoted for reference; classification and metadata © JDP-Iq.
+- Rows: 492 · refresh: 6-hourly · licence: Titles, links and short summaries © their publishers, quoted for reference; classification and metadata © JDP-Iq.
 - File: https://jdpi.pages.dev/econ/briefing/data/stories.json (records at `items`)
 - Fields: `id` (string), `title` (string), `url` (string), `source` (string), `kind` (string), `tier` (number), `fields` (array), `type` (string), `published` (date), `summary` (string), `section` (string), `doi` (string), `authors` (string), `also` (array), `undated` (boolean), `access` (string), `alt` (array)
 
@@ -146,7 +146,7 @@ Economics Briefing: sources. The journals, preprint servers, institutions and ne
 
 Scientific Briefing: stories and papers. Every paper and story in the Scientific Briefing over the last 7 days, classed by disciplines (physics, chemistry, biology, earth, space) and by type (papers or news). Join `source` to science-briefing-sources.
 
-- Rows: 1,196 · refresh: 6-hourly · licence: Titles, links and short summaries © their publishers, quoted for reference; classification and metadata © JDP-Iq.
+- Rows: 1,110 · refresh: 6-hourly · licence: Titles, links and short summaries © their publishers, quoted for reference; classification and metadata © JDP-Iq.
 - File: https://jdpi.pages.dev/science/briefing/data/stories.json (records at `items`)
 - Fields: `id` (string), `title` (string), `url` (string), `source` (string), `kind` (string), `tier` (number), `disciplines` (array), `type` (string), `published` (date), `summary` (string), `section` (string), `doi` (string), `also` (array), `undated` (boolean), `access` (string), `alt` (array)
 
@@ -162,7 +162,7 @@ Scientific Briefing: sources. The journals, preprint servers, institutions and n
 
 Digital Briefing: stories and papers. Every paper and story in the Digital Briefing over the last 7 days, classed by fields (ai, software, security, hardware, networks, quantum, privacy, policy) and by type (papers or news). Join `source` to digital-briefing-sources.
 
-- Rows: 1,118 · refresh: 6-hourly · licence: Titles, links and short summaries © their publishers, quoted for reference; classification and metadata © JDP-Iq.
+- Rows: 1,011 · refresh: 6-hourly · licence: Titles, links and short summaries © their publishers, quoted for reference; classification and metadata © JDP-Iq.
 - File: https://jdpi.pages.dev/digital/briefing/data/stories.json (records at `items`)
 - Fields: `id` (string), `title` (string), `url` (string), `source` (string), `kind` (string), `tier` (number), `fields` (array), `type` (string), `published` (date), `summary` (string), `section` (string), `doi` (string), `authors` (string), `also` (array), `access` (string), `accessMark` (string), `alt` (array)
 

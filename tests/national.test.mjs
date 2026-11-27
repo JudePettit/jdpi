@@ -492,14 +492,14 @@ test('page: the leaders\' source names the hand-built lists, San Marino\'s count
       assert.equal(smr.value, String(by.SMR.leadership.leaders100));
       assert.equal(smr.notes[0], 'Two hold the office together, for 6 months at a time; each person is counted', `${width}: ${smr.notes.join(' | ')}`);
       assert.ok(t.months === 6 && !/\bterms\b/.test(smr.notes[0]), `${width}: no count of terms`);
-      assert.match(smr.notes.at(-1), /^Political Retrospective: its own list of this state’s leaders, built by hand from at least two of Wikidata, Wikipedia’s lists of office holders and rulers\.org$/);
+      assert.match(smr.notes.at(-1), /^Political Retrospective: its own list of this state’s leaders, built by hand from Wikidata, Wikipedia’s lists and articles and the state’s official acts and records$/);
       for (const label of ['Average time in office', 'Longest-serving leader', 'Irregular seizures of power']) assert.match((await stat(label)).notes.at(-1), /^Political Retrospective: its own list/, `${width}: ${label}`);
       assert.match((await stat('Elections and referendums')).notes.at(-1), /^Political Retrospective \(Archigos and Wikidata\)/, 'the elections are not from the lists');
       const sources = await page.textContent('.prp-sources p');
       // Read from the data: on 17 November 2026, "the 11 states … (Andorra, Antigua and Barbuda, …, St. Lucia and St.
       // Vincent and the Grenadines)".
       const listed = Object.values(by).filter(c => c.leadership?.leaderLists).map(c => c.name).sort();
-      assert.ok(sources.includes(`for the leaders of the ${listed.length} states Archigos does not cover (${listed.slice(0, -1).join(', ')} and ${listed.at(-1)}), its own lists, built by hand from at least two of Wikidata, Wikipedia's lists of office holders and rulers.org;`), sources);
+      assert.ok(sources.includes(`for the leaders of the ${listed.length} states Archigos does not cover (${listed.slice(0, -1).join(', ')} and ${listed.at(-1)}), its own lists, built by hand from Wikidata, Wikipedia's lists and articles and each state's official acts and records;`), sources);
       stat = await open('DEU');
       const de = await stat('Leaders in the last 100 years');
       assert.deepEqual([de.value, de.notes.length], [String(by.DEU.leadership.leaders100), 1], `${width}: Germany's count, with its source only`);

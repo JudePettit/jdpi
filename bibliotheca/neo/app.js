@@ -508,6 +508,10 @@ function useTerm(qid, from = null) {
   // renderMap supersedes the one openPane starts, and must still know the click. A reader who picks the Map tab later
   // still gets the series' card.
   S.mapByClick = qid;
+  // A click on another term ends the address's own view (map=): the Map tab draws the clicked term's view, not the
+  // address's under the clicked term's name (27 November 2026: "Kingdom of France · map of 1230–1990" over the
+  // Ottoman Empire's view, when the address's view had not yet been drawn).
+  if (S.mapFromAddress && readRecipe(S.map || '')?.q !== qid) S.mapFromAddress = false;
   openPane(S.pane === 'map' || (inText && !S.ar) ? 'map' : 'ency');
   if (S.pane !== 'map') S.mapByClick = null;
   reveal(from);
@@ -871,7 +875,11 @@ async function renderMap() {
   if (S.mapKey !== key || !S.mapRes) {
     setPaneHead('Omni-Map', label, null);
     const v = await clickView(q, pid);
+    // A reader who has picked another tab (or shut the pane) while the view's data came keeps it: the view is drawn
+    // when the Map tab is picked again (27 November 2026: the Map tab's heading written over the Master Index tab's), and
+    // the click is decided here, so that a series picked on the Map tab later shows its card.
     if (seq !== S.mapSeq) return;
+    if (S.pane !== 'map') { if (S.mapByClick === q) S.mapByClick = null; return; }
     S.mapRes = v; S.mapKey = key;
     if (!v && own) { S.mapFromAddress = false; $('#map-empty').hidden = true; f.hidden = false; $('#map-card').hidden = true; showMapRecipe(S.map); return; }
     if (!v) { $('#map-empty').hidden = false; $('#map-empty').textContent = `The Master Index holds no record of ${label} yet, so VM cannot map it.`; f.hidden = true; $('#map-card').hidden = true; S.map = null; writeState(); return; }
@@ -1558,13 +1566,16 @@ function wire() {
   };
   $('#pane-tall').addEventListener('click', () => setTall(!$('#pane').classList.contains('tall')));
   const tabs = TABS;
-  for (const t of tabs) $(`#tab-${t}`).addEventListener('click', () => openPane(t));
+  // A tab the reader picks is the reader's own choice, not a term's click: a series' click still undecided (its view's
+  // data not yet come) no longer sends a reader who picks the Map tab to the Master Index tab (S.mapByClick).
+  const pick = t => { S.mapByClick = null; openPane(t); };
+  for (const t of tabs) $(`#tab-${t}`).addEventListener('click', () => pick(t));
   $('[role="tablist"]').addEventListener('keydown', e => {
     const k = { ArrowRight: 1, ArrowLeft: -1 }[e.key];
     if (!k) return;
     e.preventDefault(); e.stopPropagation();
     const next = tabs[(tabs.indexOf(S.pane) + k + tabs.length) % tabs.length];
-    openPane(next); $(`#tab-${next}`).focus();
+    pick(next); $(`#tab-${next}`).focus();
   });
   $('#era-pick').addEventListener('change', e => { S.eraOf = e.target.value === 'term' ? 'term' : 'book'; renderVm(); writeState(); });
   // The Map tab: an offer's view ("Its whole life", "This passage") in the frame; a click on a term redraws it.

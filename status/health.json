@@ -1,33 +1,28 @@
 {
-  "generated": "2026-11-26T19:12:57.583Z",
+  "generated": "2026-11-27T19:07:03.668Z",
   "ok": false,
-  "problems": 5,
+  "problems": 4,
   "failing": [
     {
       "name": "Scientific, Economics and Digital Briefings refresh",
       "what": "briefings-refresh.yml",
-      "detail": "last scheduled run failure on 2026-11-26 17:54 UTC: https://github.com/JudePettit/jdpi/actions/runs/45871585813"
+      "detail": "last scheduled run failure on 2026-11-27 17:40 UTC: https://github.com/JudePettit/jdpi/actions/runs/46043660072"
+    },
+    {
+      "name": "Political Briefing refresh",
+      "what": "briefing-refresh.yml",
+      "detail": "last scheduled run failure on 2026-11-27 16:31 UTC: https://github.com/JudePettit/jdpi/actions/runs/46034322284"
+    },
+    {
+      "name": "Calendars and Integration Hub refresh",
+      "what": "calendar-refresh.yml",
+      "detail": "last scheduled run failure on 2026-11-27 15:16 UTC: https://github.com/JudePettit/jdpi/actions/runs/46023481567"
     },
     {
       "name": "OSINT sanctions index refresh",
       "what": "sanctions-refresh.yml",
-      "detail": "last scheduled run failure on 2026-11-26 17:41 UTC: https://github.com/JudePettit/jdpi/actions/runs/45869851831"
-    },
-    {
-      "name": "Scientific Briefing on the site",
-      "what": "live science/briefing/data/stories.json",
-      "detail": "the site serves a copy 6 h older than the repository"
-    },
-    {
-      "name": "Economics Briefing on the site",
-      "what": "live econ/briefing/data/stories.json",
-      "detail": "the site serves a copy 6 h older than the repository"
-    },
-    {
-      "name": "Digital Briefing on the site",
-      "what": "live digital/briefing/data/stories.json",
-      "detail": "the site serves a copy 6 h older than the repository"
+      "detail": "last scheduled run failure on 2026-11-27 17:26 UTC: https://github.com/JudePettit/jdpi/actions/runs/46041797946"
     }
   ],
-  "run": "https://github.com/JudePettit/jdpi/actions/runs/45881924349"
+  "run": "https://github.com/JudePettit/jdpi/actions/runs/46054360536"
 }

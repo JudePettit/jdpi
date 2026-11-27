@@ -7,7 +7,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
-import { pageTest, launch } from './tools/pages.mjs';
+import { pageTest, launch, openFresh } from './tools/pages.mjs';
 import { readZip } from '../design/vm-bundle.js';
 
 const BASE = (process.env.JDPI_URL || '').replace(/\/$/, '');
@@ -171,9 +171,9 @@ test('page: addresses from before S5a open as before; an unknown layer is named 
   assert.deepEqual([...new Set(csv(b0['rows.csv']).map(r => r.layer))].sort(), ['borders']);
   assert.doesNotMatch(JSON.parse(b0['metadata.json']).datasets.map(d => d.id).join(), /countries|density/);
 
-  // An id VM does not hold is named, never drawn.
-  await page.goto(`${BASE}/omni/index.html#vr=1&t=1446..1514&at=1494&show=frame&step=y&base=plain&fill=wb:NO.SUCH.CODE&l=battles,shipwrecks`, { waitUntil: 'domcontentloaded' });
-  await page.reload({ waitUntil: 'domcontentloaded' });
+  // An id VM does not hold is named, never drawn. (In a new document: a hash-only goto and a reload could open the
+  // page's own rewrite of the address, without the ids it does not hold; tests/tools/pages.mjs, openFresh.)
+  await openFresh(page, `${BASE}/omni/index.html#vr=1&t=1446..1514&at=1494&show=frame&step=y&base=plain&fill=wb:NO.SUCH.CODE&l=battles,shipwrecks`);
   await ready(page, 1494);
   s = await settled(page, ['battles']);
   const body = await page.textContent('body');

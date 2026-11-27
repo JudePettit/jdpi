@@ -606,7 +606,12 @@ test('page: AR Mode on its terms: a deep link lands under the head, the list is 
     const france = w.page.locator('#c03-p13 a.term[data-qid="Q70972"]').first();
     await france.click();
     await w.page.waitForSelector('#pane:not([hidden])');
-    const box = await france.boundingBox(), head = await w.page.evaluate(() => document.querySelector('#head').getBoundingClientRect().bottom);
+    // The term and the head read in one go, of one layout: two reads could straddle the return bar's late arrival
+    // (design/prp-bar.js, in the page's flow), as National's Play and label did on 27 November 2026.
+    const { box, head } = await w.page.evaluate(() => {
+      const b = document.querySelector('#c03-p13 a.term[data-qid="Q70972"]').getBoundingClientRect();
+      return { box: { y: b.y, height: b.height }, head: document.querySelector('#head').getBoundingClientRect().bottom };
+    });
     assert.ok(box.y >= head && box.y + box.height <= 800, `the term clicked is in view: ${box.y} (head ${head})`);
     await w.page.waitForFunction(() => /&p=c03-p13&t=Q70972&pane=map/.test(location.hash)); // its map view (design S1)
     assert.equal(await w.page.getAttribute('#chips .nc-chip[data-term="Q70972"]', 'aria-pressed'), 'true', 'its chip on the terms tab is pressed');

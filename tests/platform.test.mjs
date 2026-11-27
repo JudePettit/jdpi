@@ -18,6 +18,12 @@ const INTRO = "Vitruvian Manager's modules allow you to learn, earn, create, and
 // Every module with a box on the Home page: all but Home, whose own page it is.
 const boxed = registry.suites.filter(s => s.id !== 'home');
 let browser, page;
+// PRP_IDLE_MAX=1 (a proof run, never set by npm test): every idle callback of the top window runs only at its own limit,
+// as on a main thread kept busy throughout, the latest the shell allows itself to read its files. A wait that holds then
+// does not lean on an idle moment coming early. (27 November 2026: run once so for the freshness and health-mark tests.)
+const idleAtLimit = p => (process.env.PRP_IDLE_MAX === '1' ? p.addInitScript(() => {
+  if (window.self === window.top) window.requestIdleCallback = (fn, o) => setTimeout(() => fn({ didTimeout: true, timeRemaining: () => 0 }), o?.timeout ?? 50);
+}) : null);
 
 before(async () => {
   if (pageTest.skip) return; // PRP_PAGES=0: only the registry check runs, with no browser
@@ -318,10 +324,20 @@ test('the Dashboard\'s health mark: quiet while the daily data check passes, nam
     p.on('pageerror', e => errors.push(e.message));
     let asked = 0;
     await p.route('**/status/health.json', r => { asked++; return body === 404 ? r.fulfill({ status: 404, body: 'not found' }) : r.fulfill({ json: body }); });
+    await idleAtLimit(p);
     await p.goto(`${BASE}/#/home/dashboard`, { waitUntil: 'networkidle' });
     await p.waitForSelector('#view #today');
     await p.waitForFunction(() => document.readyState === 'complete');
-    await p.waitForTimeout(400); // the mark fills at idle time, like the Today panel
+    // The mark fills at idle time (shell.js: loadHealth, from an idle callback with a limit of 1.5 s asked for as the
+    // Dashboard is drawn). An idle callback asked for now runs after it, so loadHealth has been called by then; the read
+    // it waits on (healthRead, shell.js's own top-level binding) is then awaited too, and loadHealth, waiting on it first,
+    // goes on to its end with no other wait. Until 27 November 2026 a blind 400 ms stood here, and a busy page could be
+    // read before the mark was filled; the quiet cases then passed without the file having been read at all.
+    await p.evaluate(async () => {
+      await new Promise(r => requestIdleCallback(r, { timeout: 1500 }));
+      if (healthRead?.json) await healthRead.json;
+      await new Promise(r => setTimeout(r, 0));
+    });
     const mark = await p.$eval('#view .head #health', el => ({ hidden: el.hidden, shown: !!el.offsetParent, cls: el.className, text: el.textContent.trim(), links: [...el.querySelectorAll('a')].map(a => [a.textContent, a.getAttribute('href'), a.target]) }));
     return { p, errors, asked, mark };
   };
@@ -342,8 +358,10 @@ test('the Dashboard\'s health mark: quiet while the daily data check passes, nam
   }
   // Passed (and recently): nothing to see. Nor when the file is missing or not yet written.
   for (const body of [{ generated: at(2), ok: true, problems: 0, failing: [], run: RUN }, 404, { nonsense: true }]) {
-    const { p, errors, mark } = await open(body);
+    const { p, errors, asked, mark } = await open(body);
     try {
+      // (Read, so the quiet mark is the file's answer; a 404 is not kept, so the freshness lines may ask again.)
+      assert.ok(body === 404 ? asked >= 1 : asked === 1, `the file was read (asked ${asked} times): ${JSON.stringify(body)}`);
       assert.deepEqual([mark.hidden, mark.shown, mark.text], [true, false, ''], JSON.stringify(body));
       assert.deepEqual(errors, []);
     } finally { await p.close(); }
@@ -351,15 +369,16 @@ test('the Dashboard\'s health mark: quiet while the daily data check passes, nam
   // The check has not run for more than three days: a warning that says since when, pass or fail.
   {
     const old = at(4 * 24);
-    const { p, mark } = await open({ generated: old, ok: true, problems: 0, failing: [], run: RUN });
+    const { p, asked, mark } = await open({ generated: old, ok: true, problems: 0, failing: [], run: RUN });
     try {
+      assert.equal(asked, 1, 'read once');
       assert.deepEqual([mark.hidden, mark.cls, mark.text], [false, 'prp-status warn dash-health', `The data check has not run since ${short(old)}. Details`]);
     } finally { await p.close(); }
   }
   // A run address that is not a GitHub Actions run is not linked.
   {
-    const { p, mark } = await open({ ...failing, run: 'javascript:alert(1)' });
-    try { assert.deepEqual([mark.hidden, mark.links], [false, []]); } finally { await p.close(); }
+    const { p, asked, mark } = await open({ ...failing, run: 'javascript:alert(1)' });
+    try { assert.equal(asked, 1, 'read once'); assert.deepEqual([mark.hidden, mark.links], [false, []]); } finally { await p.close(); }
   }
 });
 
@@ -464,6 +483,10 @@ test('each module\'s picture of Vitruvius shows in its box on the Home page and 
     assert.deepEqual(await p.$$eval('#view .mod img.suite-mark', imgs => imgs.map(i => [i.closest('.mod').dataset.suite, i.getAttribute('src'), i.alt, i.naturalWidth > 0])),
       registry.suites.filter(s => s.id !== 'home').map(s => [s.id, s.mark, '', true]));
     await p.goto(`${BASE}/#/hb`, { waitUntil: 'networkidle' });
+    // A goto that changes only the hash resolves at the in-document navigation, without waiting for networkidle, so the
+    // overview's picture may still be loading: the test waits until the browser is done with it (complete: loaded, or
+    // given up as broken), then asks whether it loaded. (27 November 2026: naturalWidth 0 on a busy machine.)
+    await p.waitForFunction(() => document.querySelector('#view .head img.suite-figure')?.complete, null, { timeout: 15000 });
     assert.deepEqual(await p.$eval('#view .head img.suite-figure', i => [i.getAttribute('src'), i.naturalWidth > 0]), ['design/vitruvius/module-hb-128.webp', true]);
     assert.equal(await p.textContent('#view h1'), 'Omni News');
     await p.goto(`${BASE}/#/rs`, { waitUntil: 'networkidle' });
@@ -896,8 +919,28 @@ const openShell = async (route, { width = 1440, height = 900, theme = 'light', m
   p.on('console', m => { if (m.type() === 'error' && !/Failed to load resource/.test(m.text())) errors.push(m.text()); });
   await p.route(ATLAS_MANIFEST, r => r.fulfill({ json: { lastUpdated: ATLAS_DAY, files: [] }, headers: { 'Access-Control-Allow-Origin': '*' } }));
   for (const [pattern, body] of Object.entries(routes)) await p.route(pattern, r => r.fulfill({ json: body }));
+  await idleAtLimit(p);
   await p.goto(`${BASE}/${route}`, { waitUntil: 'networkidle' });
-  // The lines' files are read at idle time after the first paint.
+  // The lines' files are read at idle time after the first paint (shell.js loadFreshness, from an idle callback with a
+  // limit of 1.5 s; on the Dashboard after the Today panel, whose sources may each take up to TODAY_FETCH_MS). Until then
+  // each line gives its rhythm alone ("Weekly"), with its title, so a wait for the titles passed at the first paint; and
+  // the network can fall quiet for networkidle's 500 ms before the files are asked for (27 November 2026: the phone's
+  // top bar read "Weekly" on a busy machine). The shell keeps what it has read in this session's storage and repaints
+  // every line in the same task, once every file and the daily check have answered, so the test waits for that entry to
+  // hold every light file there is, and the check. A file that cannot be read fails this wait plainly. The limit is the
+  // page's own worst case: the idle callback's 1.5 s, the Today panel's sources (each given up after TODAY_FETCH_MS,
+  // all at once), then the lines' files (the same), 1.5 s + 2 × 8 s today, with 2.5 s to spare on a busy runner. It is
+  // read from shell.js, so the figure follows TODAY_FETCH_MS if that changes. (The existsSync and the http filter remove
+  // nothing today: every light file is on this site and present. They keep the wait to files the shell can read.)
+  const { readsOf } = await import('../design/prp-freshness.js');
+  const light = readsOf(modules.map(x => x.m)).filter(f => !/^https?:/i.test(f) && existsSync(new URL('../' + f, import.meta.url)));
+  const limit = 1500 + 2 * await p.evaluate(() => TODAY_FETCH_MS) + 2500; // (shell.js's own: a top-level const of its classic script)
+  await p.waitForFunction(paths => {
+    try { const e = JSON.parse(sessionStorage.getItem('prp.fresh.v1') || 'null'); return !!e?.health && paths.every(f => e.reads?.[f]); } catch { return false; }
+  }, light, { timeout: limit }).catch(async e => {
+    const held = await p.evaluate(() => { try { return Object.keys(JSON.parse(sessionStorage.getItem('prp.fresh.v1') || 'null')?.reads || {}); } catch { return null; } }).catch(() => null);
+    throw new Error(`${route}: the shell had not read its lines' files within ${limit / 1000} s; it holds ${held ? held.length : 'none'} of the ${light.length} light files`, { cause: e });
+  });
   await p.waitForFunction(() => [...document.querySelectorAll('[data-fresh]')].every(el => el.title), null, { timeout: 15000 });
   return { ctx, p, errors };
 };

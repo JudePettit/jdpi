@@ -4,7 +4,7 @@
 //   npm run test:e2e -- tests/omni-review2-page.test.mjs            (serves the site locally and sets JDPI_URL)
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { pageTest, launch } from './tools/pages.mjs';
+import { pageTest, launch, openFresh } from './tools/pages.mjs';
 
 const BASE = (process.env.JDPI_URL || '').replace(/\/$/, '');
 const PAGE = BASE ? pageTest : { skip: 'set JDPI_URL to test the page (npm run test:e2e -- tests/omni-review2-page.test.mjs)' };
@@ -99,8 +99,9 @@ test('page X2: an address with a war filter that names no war opens, and says so
   const page = await open(t);
   const errors = watch(page);
   for (const w of ['wf-', 'wf--ukraine']) {
-    await page.goto(`${BASE}/omni/index.html#${HEAD}&t=2020..2026&at=2024&fill=borders&l=ucdp-events:w=${w}`, { waitUntil: 'domcontentloaded' });
-    await page.reload({ waitUntil: 'domcontentloaded' });
+    // (In a new document each time: a hash-only goto and a reload could open the page's own rewrite of the address,
+    // without what it cannot read; tests/tools/pages.mjs, openFresh. So below.)
+    await openFresh(page, `${BASE}/omni/index.html#${HEAD}&t=2020..2026&at=2024&fill=borders&l=ucdp-events:w=${w}`);
     await ready(page, 2024);
     assert.match(await page.textContent('#ly-ucdp-events-what'), new RegExp(`the war “${w}” \\(an id that names no war, so none of it is drawn\\)`));
   }
@@ -266,8 +267,7 @@ test('page 3rd X9: a fill= or base= the recipe cannot read is named, escaped, no
     [`vr=1&show=frame&step=y&base=plain&fill=invalid!&${tail}`, 'fill=invalid! is not a layer VM holds, so it is not drawn.'],
     [`vr=1&show=frame&step=y&base=unknown&fill=borders&${tail}`, 'base=unknown is not a base VM holds, so the plain base is drawn.'],
     [`vr=1&show=frame&step=y&base=plain&fill=%3Cimg%20src%3Dx%3E&${tail}`, 'fill=<img src=x> is not a layer VM holds, so it is not drawn.']]) {
-    await page.goto(`${BASE}/omni/index.html#${hash}`, { waitUntil: 'domcontentloaded' });
-    await page.reload({ waitUntil: 'domcontentloaded' });
+    await openFresh(page, `${BASE}/omni/index.html#${hash}`);
     await ready(page, 1609);
     const notes = await page.$$eval('#focus-body .om-notes li', ls => ls.map(l => l.textContent));
     assert.ok(notes.includes(said), `${hash}: ${JSON.stringify(notes)}`);
@@ -293,8 +293,7 @@ test('page live check: an l= the recipe cannot read is named, escaped, not dropp
     [`${head}&l=elections,coups,breakthroughs,calendar-events,a,b,c,d,e,f,g,h,i&all=%31&all=1`, 'l= has 13 entries and an address holds at most 3 layers (12 with all=1, “Show anyway”), so none of them is drawn.', []],
     [`${head}&l=elections,coups,breakthroughs,calendar-events&all&all=1`, 'l= has 4 entries and an address holds at most 3 layers (12 with all=1, “Show anyway”), so none of them is drawn.', []],
     [`${head}&l=elections,coups,breakthroughs,calendar-events&all=1`, null, ['elections', 'coups', 'breakthroughs', 'calendar-events']]]) {
-    await page.goto(`${BASE}/omni/index.html#${hash}`, { waitUntil: 'domcontentloaded' });
-    await page.reload({ waitUntil: 'domcontentloaded' });
+    await openFresh(page, `${BASE}/omni/index.html#${hash}`);
     await ready(page, 1968);
     const notes = await page.$$eval('#focus-body .om-notes li', ls => ls.map(l => l.textContent));
     if (said) assert.ok(notes.includes(said), `${hash}: ${JSON.stringify(notes)}`);

@@ -880,14 +880,29 @@ async function renderProfile() {
   if (profileShown === c.iso3) profileDone(c); else profileWait(c);
   const tok = ++profileTok;
   const [s, SI, GOV] = await Promise.all([series(c.iso3).catch(() => null), standins().catch(() => null), govAll()]);
-  // The years' figures could not load: rerender() says so and goes back, and so does the profile, to the country it shows.
+  // The years' figures could not load: rerender() says so and goes back, and draws the country asked for at the years it
+  // goes back to, or says its figures could not load (its catch, which then takes this render's place). Where no
+  // rerender() was waiting on these files (a retry from the Profile tab or a list, with nothing drawn to go back to), or
+  // this catch runs first, the profile goes back to the country it shows, or, with none shown, says this one's figures
+  // could not load, under its name, as the address names it. (Until 27 November 2026 a first open was left with the empty
+  // panel, "Choose a country", and the tab named none.)
   try { await ensureData(); } catch {
     if (tok !== profileTok) return;
-    if (profileShown && selected !== profileShown) { selected = profileShown; writeHash(); }
-    profileDone(byIso.get(profileShown)); return;
+    if (profileShown) {
+      if (selected !== profileShown) { selected = profileShown; writeHash(); }
+      profileDone(byIso.get(profileShown)); return;
+    }
+    if (!ready()) { profileNoData(c); return; }
+    // (The years shown are held after all: a later move, made with the Profile tab closed, replaced the years that
+    // failed with years already held. The country is drawn at them, below.)
   }
   if (tok !== profileTok) return;
   if (selected !== c.iso3) { profileDone(byIso.get(profileShown)); return; } // (the address has moved on: the tab names what is shown until its country is drawn)
+  // Years the map has not drawn: an address whose files failed once, then came in on this render's retry. The map is
+  // drawn at them first, so the map, its note and the profile agree; with the Profile tab open it draws the profile in
+  // turn, in this render's place. (Until 27 November 2026 the profile drew those years under a note saying they could
+  // not load, beside a map left undrawn.)
+  if (!mapAtView()) { rerender(); if (tok !== profileTok) return; }
   // The country's series could not load: the note says so, and the profile that was showing stays (only its button
   // follows the comparison); a first open draws what index.json and the years' files give, and "could not load" in
   // place of each figure that needed the series.
@@ -895,6 +910,48 @@ async function renderProfile() {
     seriesNote(c.name);
     if (profileShown === c.iso3) { const b = $('#addcmp'), on = compare.includes(c.iso3); if (b) { b.setAttribute('aria-pressed', String(on)); b.classList.toggle('primary', !on); b.textContent = on ? '✓ In comparison' : '+ Add to comparison'; } return; }
   } else seriesOk();
+  try { drawProfile(c, s, SI, GOV); } catch (e) { profileFail(c, tok); throw e; }
+  profileShown = c.iso3;
+  profileDone(c);
+  if (drawMsg && msg === drawMsg) note('');
+  drawMsg = '';
+  $('#addcmp').onclick = () => { toggleCompare(c.iso3, !compare.includes(c.iso3)); renderProfile(); };
+  fillMonthly(c);
+  try {
+    const [rows, acc] = await Promise.all([globalThis.GTTSDB ? globalThis.GTTSDB.latestTopStories(c.iso2) : [], PRPAccess.load('../design/prp-access.json')]);
+    // Free sources lead (design/prp-access.js): the first headline is from an outlet anyone can read wherever one of the
+    // country's outlets is free (the rest keep the tracker's order); a link to one that is not free carries a label.
+    const cls = r => (acc.size ? acc.classify({ host: r.outlet_domain, name: r.outlet, url: r.url }) : 'free');
+    $('#stories').innerHTML = rows.length ? PRPAccess.leadFree(rows, r => PRPAccess.isFree(cls(r))).slice(0, 8).map(r => `<div class="story"><a href="${esc(r.url)}" target="_blank" rel="noreferrer">${esc(r.title_en || r.title_original)}${PRPAccess.label(cls(r))}</a><small>${esc(r.outlet)} · front page of ${esc(dateOf(r.snapshot_date) || r.snapshot_date)}</small></div>`).join('') : '<div class="muted">No outlets tracked for this country yet.</div>';
+  } catch { $('#stories').innerHTML = '<div class="muted">Headlines unavailable.</div>'; }
+}
+// A profile that throws while it is drawn (a data file of a shape the code does not expect, or a fault in the code) is
+// not left dimmed, busy and inert for good, with the tab saying "loading…" and nothing on the page saying why. The note
+// says it could not be drawn; the panel goes back to the country it showed, or, where it showed this one (at other
+// years) or none, says so in place of the profile. The error is thrown on, so it still reaches the console.
+let drawMsg = '';
+function profileFail(c, tok) {
+  if (tok !== profileTok) return; // (a later render has taken over the panel)
+  drawMsg = `The profile of ${c.name}, ${whenText()}, could not be drawn.`;
+  note(drawMsg);
+  if (profileShown && profileShown !== c.iso3) {
+    if (selected !== profileShown) { selected = profileShown; writeHash(); }
+    profileDone(byIso.get(profileShown)); return;
+  }
+  $('#profile').innerHTML = `<div class="prp-panel"><div class="prp-empty">${esc(drawMsg)}</div></div>`;
+  profileShown = null;
+  profileDone(c);
+}
+// The years' figures could not load and no profile of another country is kept: the panel says so, under the country's
+// name, as the address names it, in seriesNote's words; a render still waiting gives way to it.
+function profileNoData(c) {
+  ++profileTok;
+  $('#profile').innerHTML = `<div class="prp-panel"><div class="prp-empty">The figures for ${esc(c.name)}, ${esc(whenText())}, could not load. Move the slider again to retry.</div></div>`;
+  profileShown = null;
+  profileDone(c);
+}
+// The profile itself, from index.json's record, the series, the stand-ins and the governance ranges.
+function drawProfile(c, s, SI, GOV) {
   const L = c.leadership, K = c.conflict, md = mode(), P = fr(c), Y = view.to;
   const govBy = new Map((GOV || []).filter(Boolean).map(x => [x.L.indicator, x]));
   const govLost = D.indicators.filter(i => isGov(i.code)).length - govBy.size;
@@ -974,17 +1031,6 @@ async function renderProfile() {
     <p class="panel-note" id="govnote">${govBy.size ? `<b>Governance rows</b> (political and legal): the figure is the World Bank’s estimate, about −2.5 to 2.5, as Country PESTLE scored it. The note under each<span class="gsl"> (and the small line beside it, with its range shaded)</span> gives the Bank’s 0 to 100 governance score, the scale the Bank gives its range on, and its own 90% range. ${esc(GOV_ENDS)} ${esc(GOV_CAVEAT)} Where two ranges overlap, the data cannot tell the two apart: Compare countries ranks every country with its range. Source: ${esc(GOV_SRC([...govBy.values()][0].L).replace(/GOV_WGI_\w\w\./g, 'GOV_WGI_xx.'))}.${govLost ? ` The ranges of ${count(govLost, 'indicator')} could not load, so ${plural(govLost, 'its row shows', 'their rows show')} the estimate alone.` : ''}` : 'The World Bank’s 0 to 100 governance scores and their 90% ranges could not load, so the governance rows show the estimate alone.'}</p>
     <div class="prp-panel-head"><b>Latest headlines</b><span class="hint">Global Headline Tracker · free sources lead, paywalls labelled</span></div><div id="stories" class="stories" aria-live="polite"><div class="muted">Loading…</div></div>
   </div>`;
-  profileShown = c.iso3;
-  profileDone(c);
-  $('#addcmp').onclick = () => { toggleCompare(c.iso3, !compare.includes(c.iso3)); renderProfile(); };
-  fillMonthly(c);
-  try {
-    const [rows, acc] = await Promise.all([globalThis.GTTSDB ? globalThis.GTTSDB.latestTopStories(c.iso2) : [], PRPAccess.load('../design/prp-access.json')]);
-    // Free sources lead (design/prp-access.js): the first headline is from an outlet anyone can read wherever one of the
-    // country's outlets is free (the rest keep the tracker's order); a link to one that is not free carries a label.
-    const cls = r => (acc.size ? acc.classify({ host: r.outlet_domain, name: r.outlet, url: r.url }) : 'free');
-    $('#stories').innerHTML = rows.length ? PRPAccess.leadFree(rows, r => PRPAccess.isFree(cls(r))).slice(0, 8).map(r => `<div class="story"><a href="${esc(r.url)}" target="_blank" rel="noreferrer">${esc(r.title_en || r.title_original)}${PRPAccess.label(cls(r))}</a><small>${esc(r.outlet)} · front page of ${esc(dateOf(r.snapshot_date) || r.snapshot_date)}</small></div>`).join('') : '<div class="muted">No outlets tracked for this country yet.</div>';
-  } catch { $('#stories').innerHTML = '<div class="muted">Headlines unavailable.</div>'; }
 }
 
 // Month by Month (monthly/data, design/prp-mark.js): the country's latest marks, fighting and volatility apart, each with
@@ -1451,6 +1497,8 @@ function setView(p) {
   for (const m of METRICS.filter(x => x.timeless)) { const o = $(`#metric option[value="${m.id}"]`); if (o) o.textContent = isLatest(view.to) && !per() ? m.label : `${m.label} (not by year)`; }
 }
 let drawTok = 0, lastDrawn = null;
+// The map shows the years and the measure now chosen (it has drawn them, not only been asked to).
+const mapAtView = () => !!lastDrawn && lastDrawn.from === view.from && lastDrawn.to === view.to && lastDrawn.metric === $('#metric').value;
 // While the years' files load, the map says so (dimmed, aria-busy, "loading…" in its title), so the read-out and the
 // map never disagree unannounced.
 function busy(on) {
@@ -1474,6 +1522,12 @@ async function rerender() {
       else $('#yrlabel').textContent = whenText();
       note(`The figures for ${want} could not load. Move the slider again to retry.`);
       writeHash();
+      // The profile follows. A country asked for and not shown (an address with country=, a move of the address to
+      // another country, a click while these files loaded) is drawn at the years gone back to, which are held, so
+      // nothing is asked for again; with nothing drawn to go back to, its panel says its figures could not load. Either
+      // takes the place of a render still waiting on these files. (Until 27 November 2026 an address moved to France at
+      // years that failed kept Germany's profile, tab and all, under an address naming France.)
+      if (selected && selected !== profileShown) { if (ready()) renderProfile(); else profileNoData(byIso.get(selected)); }
       return;
     }
     if (tok !== drawTok) return; // (a later move has taken over: it clears the busy state when it draws)

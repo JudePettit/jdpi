@@ -34,6 +34,48 @@ const ROUND = /\b(?:round|run-?off|phase)\b/i;
 const DATE_GONE = /\b(?:postpon|delay|moved|date has gone|no (?:polling )?date (?:has|had) (?:yet )?been set)/i;
 /** The title of a Wikipedia article from its address, with spaces ("1990 Romanian general election"), or null. */
 export const pageTitle = s => { const m = /en\.wikipedia\.org\/wiki\/([^#]+)/.exec(s || ''); if (!m) return null; try { return decodeURIComponent(m[1]).replace(/_/g, ' '); } catch { return null; } };
+const REFERENDUM = /referend|plebiscite/i;
+/**
+ * The article a Wikipedia address opens, and the section in it, as "Title" or "Title#Section", or null. `redirects`
+ * (title → the title it leads to) is followed hop by hop, as the Wikipedia API lists each hop of a double redirect;
+ * `sections` (title → the section its redirect leads to) gives the section where the address names none. The first
+ * letter of a title is not case-sensitive on Wikipedia, so "next Bahraini general election" and "Next Bahraini general
+ * election" are one article (second readers, 27 November 2026). A '#' in the address may be written as it is or as %23
+ * (the electoral calendars' links are built with encodeURIComponent).
+ */
+export function articleOf(address, redirects = new Map(), sections = new Map()) {
+  const m = /en\.wikipedia\.org\/wiki\/(.+)$/.exec(address || '');
+  if (!m) return null;
+  let text;
+  try { text = decodeURIComponent(m[1]).replace(/_/g, ' '); } catch { return null; }
+  const cap = s => s.charAt(0).toUpperCase() + s.slice(1);
+  const at = text.indexOf('#');
+  let title = (at < 0 ? text : text.slice(0, at)).trim();
+  const own = at < 0 ? '' : text.slice(at + 1).trim();
+  let hop = '';
+  for (const seen = new Set(); title && !seen.has(cap(title)); ) {
+    seen.add(cap(title));
+    const to = redirects.get(title) ?? redirects.get(cap(title));
+    if (!to) break;
+    hop = sections.get(title) ?? sections.get(cap(title)) ?? hop;
+    title = String(to).trim();
+  }
+  if (!title) return null;
+  const section = own || hop;
+  return section ? `${cap(title)}#${section}` : cap(title);
+}
+/**
+ * The titles build-events.mjs sends to the Wikipedia API to learn which are redirects: the articles of the elections,
+ * referendums and summits, and the articles the electoral calendars list as undated (`undated`, addresses), since an
+ * undated link that is itself a redirect matches a record only once its target is known (27 November 2026). Each title
+ * as the address spells it, without the section (sameArticle looks redirects up by that spelling); "2026 in Ruritania"
+ * pages are left out.
+ */
+export function titlesToResolve(events, undated = []) {
+  const sources = events.filter(e => /^(?:election|referendum|summit)$/.test(e.type) && /en\.wikipedia\.org\/wiki\//.test(e.source || '')).map(e => e.source);
+  const title = s => { try { return decodeURIComponent(String(s).split('/wiki/')[1] || '').replace(/_/g, ' ').split('#')[0].trim(); } catch { return null; } };
+  return [...new Set([...sources, ...undated].map(title).filter(t => t && !/^\d{4} in /.test(t)))];
+}
 /** The cached lead of an event's Wikipedia article (title → lead, as calendar/scripts/summary-cache.json keys it). */
 export function leadOf(e, leads = {}) {
   const t = /en\.wikipedia\.org\/wiki\/([^#]+)/.exec(e?.source || '')?.[1];
@@ -118,6 +160,23 @@ export function atlasLater(dir) {
  * way to a dated one of the same type and country in that month, and an Atlas record to any other record of its type
  * and country on its day (or in its month).
  *
+ * The undated rule matches by article, through `redirects` on both sides (27 November 2026): the record goes when the
+ * article its address leads to is one the calendars list as undated, or one an undated link leads to. That day
+ * Wikipedia's 2027 electoral calendar moved Italy from December to "Unknown date", linking "2027 Italian general
+ * election", while the Retrospective's record links "Next Italian general election", a redirect to it; matched by
+ * address, Wikidata's 30 September 2027 stayed, as a vote expected in September that no source gives. A past vote's
+ * record is never dropped by this rule, and the record is noted in `dropped`. After that day's second readers:
+ *  - The match is by article and section (articleOf): one article often holds several referendums, so a record whose
+ *    redirect leads to "2027 Ruritanian referendums#June" does not give way to an undated "#November", nor a record of
+ *    one section to an undated link to the whole article. `sections` (title → the section its redirect leads to) comes
+ *    from the Wikipedia API with `redirects`.
+ *  - Redirects are followed hop by hop on both sides, and a title's first letter is read in capitals, as Wikipedia reads it.
+ *  - Matched through a redirect, the article's title must agree with the record's type: a referendum's names a
+ *    referendum or a plebiscite, an election's names an election or no referendum. The undated links carry no country.
+ *  - The calendars' days are matched by article in the same way: a placeholder whose vote the calendar dates under the
+ *    article its redirect leads to keeps only the calendar's day, even in the next year (a deadline on 31 December, a
+ *    vote in January), where the month-only rule, which asks for the same year, would have left two records.
+ *
  * Since 26 November 2026 (follow-up of the corrections of that day) the sources' records of one vote are also matched
  * when their days differ, if what they elect agrees (ballotKind):
  *  - An Atlas record dated up to 14 days after another source's record of the vote is that vote: its last day (the
@@ -151,18 +210,33 @@ export function atlasLater(dir) {
  *    article ("2025 Liechtenstein general election": the Retrospective's 2 February and the calendar's 9 February; the
  *    lead says "held in Liechtenstein on 9 February 2025").
  */
-export function mergeBallots(events, { today, undated = new Set(), calendarsFrom = Infinity, later = [], dropped = [], leads = {}, redirects = new Map() }) {
-  const art = e => { const t = pageTitle(e.source); return t ? redirects.get(t) || t : e.source; };
+export function mergeBallots(events, { today, undated = new Set(), calendarsFrom = Infinity, later = [], dropped = [], leads = {}, redirects = new Map(), sections = new Map() }) {
+  // The article and section a record's address opens (articleOf: through every hop of `redirects`, with the section a
+  // redirect leads to from `sections`, the first letter in capitals).
+  const art = e => articleOf(e.source, redirects, sections) || e.source;
   const isBallot = e => e.type === 'election' || e.type === 'referendum';
   const nowCalled = c => String(c).split(' / ').at(-1); // "Soviet Union / Russia" is Russia
   const placeholder = d => d.endsWith('-01') || new Date(Date.UTC(+d.slice(0, 4), +d.slice(5, 7), 0)).getUTCDate() === +d.slice(8);
+  // What an article's title says it holds agrees with the record's type: a referendum's article names a referendum or a
+  // plebiscite, an election's names none, unless it names an election too ("… general election and referendum").
+  const kindAgrees = (e, title) => e.type === 'referendum' ? REFERENDUM.test(title) : !REFERENDUM.test(title) || /\belection/i.test(title);
+  // The calendars' days for each article and section, matched by article as the undated rule below is (second readers,
+  // 27 November 2026): a record under a redirect, or under another spelling of the address, finds them too. Where the
+  // addresses differ, the types must agree.
   const calendarDays = new Map();
-  for (const e of events) if (e.via === 'list' && isBallot(e) && e.precision !== 'month') (calendarDays.get(e.source) || calendarDays.set(e.source, new Set()).get(e.source)).add(e.date);
+  for (const e of events) if (e.via === 'list' && isBallot(e) && e.precision !== 'month') (calendarDays.get(art(e)) || calendarDays.set(art(e), []).get(art(e))).push(e);
+  // The articles the calendars list as undated, read as art() reads a record's address, so that a record and a calendar
+  // link that open one article and section match whichever of the two is the redirect (27 November 2026).
+  const undatedArticles = new Set([...undated].map(u => articleOf(u, redirects, sections) || u));
   let out = events.filter(e => {
     if (e.via !== 'retro' || !isBallot(e) || !placeholder(e.date)) return true;
-    if (calendarDays.has(e.source) && +e.date.slice(0, 4) >= calendarsFrom) return calendarDays.get(e.source).has(e.date);
+    const cal = (calendarDays.get(art(e)) || []).filter(x => x.source === e.source || x.type === e.type);
+    if (cal.length && +e.date.slice(0, 4) >= calendarsFrom) return cal.some(x => x.date === e.date);
     if (e.date <= today) return true;
-    if (undated.has(e.source)) return false;
+    if (undated.has(e.source) || (undatedArticles.has(art(e)) && kindAgrees(e, art(e)))) {
+      dropped.push({ ...e, why: 'the electoral calendars list the vote as not yet dated' });
+      return false;
+    }
     return Object.assign(e, { date: e.date.slice(0, 8) + '01', status: 'tentative', precision: 'month', title: toBeConfirmed(e.title) });
   });
   const key = (e, month) => `${e.type}|${nowCalled(e.country)}|${month ? e.date.slice(0, 7) : e.date}`;

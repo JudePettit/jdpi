@@ -33,7 +33,7 @@ import { leaderText } from '../../lake/scripts/resolve.mjs';
 import { countryInText, countryOfLink, isKnownCountry, normaliseCountry } from './countries.mjs';
 import { currentEvents } from './current-events.mjs';
 import { listEvents, resolveTitles } from './wiki-lists.mjs';
-import { atlasElections, atlasLater, mergeBallots, resolveExpected, markDeadlines, sameArticle } from './outlook.mjs';
+import { atlasElections, atlasLater, mergeBallots, resolveExpected, markDeadlines, sameArticle, titlesToResolve } from './outlook.mjs';
 import { PARTY_CONTEST, belowState, NOT_HELD, offYear, PLACED, ownTerritory } from './ballot-scope.mjs';
 import { lostEvents, refuseIfLost } from './guard.mjs';
 import { writeHeads } from '../../integration/scripts/heads.mjs';
@@ -366,18 +366,23 @@ try {
 const ballotsDropped = [];
 const LEADS = new URL('./summary-cache.json', import.meta.url);
 const leads = existsSync(LEADS) ? JSON.parse(readFileSync(LEADS, 'utf8')) : {};
-let redirects = new Map();
+let redirects = new Map(), sections = new Map();
 try {
-  const linked = [...new Set(events.filter(e => /^(?:election|referendum|summit)$/.test(e.type) && /en\.wikipedia\.org\/wiki\//.test(e.source || ''))
-    .map(e => { try { return articleTitle(e.source).split('#')[0]; } catch { return null; } }).filter(t => t && !/^\d{4} in /.test(t)))];
+  // The calendars' undated links are resolved too: mergeBallots matches them to the Retrospective's records by article,
+  // and a link that is itself a redirect matches only once its target is known (27 November 2026; titlesToResolve).
+  const linked = titlesToResolve(events, undated);
   const resolved = await resolveTitles(linked);
-  redirects = new Map([...resolved].filter(([, r]) => r.to && !/^(?:List of|Elections in|\d{4} in) /.test(r.to)).map(([t, r]) => [t, r.to]));
+  const followed = [...resolved].filter(([, r]) => r.to && !/^(?:List of|Elections in|\d{4} in) /.test(r.to));
+  redirects = new Map(followed.map(([t, r]) => [t, r.to]));
+  // The section a redirect leads to ("June 2027 Ruritanian referendum" → "2027 Ruritanian referendums#June"): one
+  // article can hold several votes, and the undated rule tells them apart by it.
+  sections = new Map(followed.filter(([, r]) => r.fragment).map(([t, r]) => [t, r.fragment]));
   const before = events.length, kept = sameArticle(events, redirects, ballotsDropped);
   events.length = 0;
   events.push(...kept);
   console.log(`Wikipedia redirects: ${redirects.size} of ${linked.length} titles lead to another article; ${before - kept.length} records under them give way`);
 } catch (err) { skipped('Wikipedia redirects', err); }
-const merged = mergeBallots(events, { today: TODAY, undated, calendarsFrom, later: atlasDir ? atlasLater(atlasDir) : [], dropped: ballotsDropped, leads, redirects });
+const merged = mergeBallots(events, { today: TODAY, undated, calendarsFrom, later: atlasDir ? atlasLater(atlasDir) : [], dropped: ballotsDropped, leads, redirects, sections });
 for (const d of ballotsDropped) console.log(`Ballots: ${d.date} ${d.country}, ${d.title}: left out, ${d.why}`);
 leftOut.datesGone = ballotsDropped.filter(d => /puts the vote in/.test(d.why)).map(d => `${d.date} ${d.country}: ${d.title}`);
 const deadlines = markDeadlines(merged, leads, TODAY);

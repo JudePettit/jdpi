@@ -1851,20 +1851,33 @@ test('page (AC-5): the Pacific war draws no dot for a later state and its battle
   assert.ok(sea >= 24, `a dot's target over the sea is a finger's width at 1024 wide (${sea} px)`);
   // At its mark's centre the pointer finds a battle (Tarawa's lies under Makin's, two days and a few miles apart), never a
   // dot, and a click opens that battle's record.
-  // (Wikidata's labels and points as committed when War Focus's index was stamped on 27 November 2026.)
-  for (const name of AS_BUILT ? ['Battle of Tarawa', 'Battle of Kwajalein'] : []) {
-    const at = await page.evaluate(n => {
-      const c = d3.selectAll('#map circle.battle').filter(b => b.n === n).node(); if (!c) return null;
-      const r = c.getBoundingClientRect(), x = r.x + r.width / 2, y = r.y + r.height / 2, top = document.elementFromPoint(x, y);
-      return { x, y, battle: top?.matches('circle.battle') ? d3.select(top).datum().n : null, dot: !!(top?.closest('g.dot') || top?.classList.contains('dot-sea')) };
-    }, name);
-    assert.ok(at, `${name} is marked`);
-    assert.ok(at.battle && !at.dot, `a battle's mark is what the pointer finds at ${name}'s`);
-    await page.mouse.click(at.x, at.y);
-    await page.waitForFunction(n => !document.querySelector('#modal').hidden && document.querySelector('#modal-title').textContent === n, at.battle, { timeout: 10000 });
-    await page.click('#modal-close');
-    await page.waitForFunction(() => document.querySelector('#modal').hidden, null, { timeout: 10000 });
-  }
+  // (Wikidata's labels and points as committed when War Focus's index was stamped on 27 November 2026: Tarawa Q250309 and
+  // Kwajalein Q1789376.) Refresh pins 2 (28 November 2026): after a later build the battles are picked from the file by
+  // the rule, not by name: those drawn by February 1944 (a point, a start by then) in the waters of the Gilbert Islands
+  // (Kiribati), the Marshall Islands, Nauru and Kosrae (latitude 3° S to 15° N, longitude 160° to 180° E), the two latest
+  // first; a build with none says so. (The box holds Kiribati's Gilbert Islands and Banaba, not its Line and Phoenix
+  // Islands east of 180°, and holds Kosrae, of the Federated States of Micronesia: Wikidata P625, read 28 November 2026.)
+  const ww2 = await dataFile('battlefield/focus/data/wars/ww2.json');
+  const inLaterStates = b => b.lat != null && b.s && b.s.slice(0, 7) <= '1944-02' && b.lat >= -3 && b.lat <= 15 && b.lon >= 160 && b.lon <= 180;
+  const named = ['Q250309', 'Q1789376'].map(q => ww2.battles.find(b => b.q === q));
+  const picked = AS_BUILT ? named : ww2.battles.filter(inLaterStates).sort((a, b) => b.s.localeCompare(a.s)).slice(0, 2);
+  if (AS_BUILT) assert.deepEqual(named.map(b => [b?.n, inLaterStates(b || {})]), [['Battle of Tarawa', true], ['Battle of Kwajalein', true]]);
+  await t.test('the battles in the waters of later states are what the pointer finds, and take their clicks', async st => {
+    if (!picked.length) { st.skip('War Focus\'s Second World War file draws no battle by February 1944 in the waters of the Gilbert Islands, the Marshall Islands, Nauru or Kosrae: nothing to click'); return; }
+    for (const { q, n: name } of picked) {
+      const at = await page.evaluate(id => {
+        const c = d3.selectAll('#map circle.battle').filter(b => b.q === id).node(); if (!c) return null;
+        const r = c.getBoundingClientRect(), x = r.x + r.width / 2, y = r.y + r.height / 2, top = document.elementFromPoint(x, y);
+        return { x, y, battle: top?.matches('circle.battle') ? d3.select(top).datum().n : null, dot: !!(top?.closest('g.dot') || top?.classList.contains('dot-sea')) };
+      }, q);
+      assert.ok(at, `${name} is marked`);
+      assert.ok(at.battle && !at.dot, `a battle's mark is what the pointer finds at ${name}'s`);
+      await page.mouse.click(at.x, at.y);
+      await page.waitForFunction(n => !document.querySelector('#modal').hidden && document.querySelector('#modal-title').textContent === n, at.battle, { timeout: 10000 });
+      await page.click('#modal-close');
+      await page.waitForFunction(() => document.querySelector('#modal').hidden, null, { timeout: 10000 });
+    }
+  });
   // Tonga: its first day is "1970" in the Retrospective's table, so it is drawn from January 1971, never in 1970.
   assert.equal(FOCUS_DOTS.TON.from, '1970');
   await page.evaluate(() => { location.hash = '#war=cambodian-civil-war&m=1970-04'; });

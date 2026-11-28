@@ -643,8 +643,16 @@ test('data: the current leader of the countries Jude named is the most powerful 
 
 // Every name the page tags with data-qid gets a link to its Master Index entry (design/jdpi-entities.js), so the build
 // lists in peopleInIndex only the heads' and leader's IDs that lake/data/index.json has; the rest stay untagged.
-test('data: the people tagged for the Master Index are the heads and leader it has an entry for', () => {
+// Refresh pins 2 (28 November 2026): the entries are the lake's as National Analysis's build read them (build.mjs reads
+// lake/data/index.json), and the lake is rebuilt on the 3rd of each month, National Analysis on the 5th; so the entries
+// are compared while National Analysis was built no earlier than the lake (index.generated against the lake's
+// manifest.generated), and after a lake build alone the check says so (the rule itself: the fixture test of
+// peopleInIndex above). The heads-and-leader rule is the build's own and holds whatever the day.
+test('data: the people tagged for the Master Index are the heads and leader it has an entry for', async t => {
+  const { readAfter } = await import('./tools/as-built.mjs');
   const n = read('national/data/index.json'), lake = new Set(read('lake/data/index.json').rows.map(r => r[0]));
+  const lakeBuilt = read('lake/data/manifest.json').generated, compared = readAfter(n.generated, lakeBuilt);
+  if (!compared) t.diagnostic(`National Analysis (${n.generated}) was built before the lake (${lakeBuilt}): its tags are not compared with the lake's entries until its next build`);
   let tagged = 0;
   for (const c of n.countries) {
     const own = [c.headOfStateQid, c.headOfGovernmentQid, c.leader?.qid].filter(Boolean);
@@ -652,7 +660,7 @@ test('data: the people tagged for the Master Index are the heads and leader it h
     assert.ok(Array.isArray(c.peopleInIndex) && c.peopleInIndex.length && new Set(c.peopleInIndex).size === c.peopleInIndex.length, `${c.iso3}: ${JSON.stringify(c.peopleInIndex)}`);
     for (const q of c.peopleInIndex) {
       assert.ok(own.includes(q), `${c.iso3}: ${q} is not one of its heads or its leader`);
-      assert.ok(lake.has(q), `${c.iso3}: ${q} has no Master Index entry, so its link would open "No entry"`);
+      if (compared) assert.ok(lake.has(q), `${c.iso3}: ${q} has no Master Index entry, so its link would open "No entry"`);
       tagged++;
     }
   }

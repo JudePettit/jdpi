@@ -12,6 +12,7 @@ import { cardLayer, cardOf } from '../design/vm-click.js';
 import { UNITS, unitOf, BARRED } from '../omni/scripts/build-wb.mjs';
 import { electionRows, coupRow, labelYear, ahead } from '../omni/scripts/build-political.mjs';
 import { rowOf } from '../omni/scripts/build-calendar-layer.mjs';
+import { builtOn } from './tools/as-built.mjs';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const json = p => JSON.parse(readFileSync(join(ROOT, p), 'utf8'));
@@ -75,11 +76,27 @@ test('V5: an election’s card opens the Omni-Map with the elections layer; a co
   assert.deepEqual(cardLayer({ type: 'election', label: '2026 Bulgarian presidential election' }), { l: 'elections' });
   assert.deepEqual(cardLayer({ type: 'event', label: '1973 Chilean coup d’état' }), { l: 'coups' });
   assert.equal(cardLayer({ type: 'person', label: 'Ada Lovelace' }), null);
+  // An election's record, in the lake's shape (Q110159977 as the lake held it on 26 November 2026): its card's map offer
+  // opens the elections layer.
+  const fixture = { q: 'Q110159977', label: '2026 Bulgarian presidential election', type: 'election', facts: { date: '2026-10-25' }, rel: { Country: [['Q219', 'Bulgaria']] } };
+  assert.match(cardOf(fixture, { today: '2026-11-20' }).offers.find(o => o.id === 'life').at, /[#&]l=elections(&|$)/);
+  // Refresh pins 2 (28 November 2026): the lake is rebuilt from Wikidata each month (lake-refresh.yml, which does not run
+  // this file), so the built entry is Q110159977 while the lake is the build of 26 November 2026, and after a later build
+  // the first dated election the lake holds, in its shard order.
   const q = 'Q110159977', shard = json(`lake/data/e/${+q.slice(1) % 512}.json`);
-  const rec = shard[q] || Object.values(shard).find(r => r.q === q);
-  assert.ok(rec, `the lake holds ${q}`);
+  const lakeBuilt = json('lake/data/manifest.json').generated;
+  let rec = shard[q] || Object.values(shard).find(r => r.q === q);
+  if (builtOn(lakeBuilt, '2026-11-26')) assert.ok(rec?.type === 'election', `the lake of 26 November 2026 holds ${q}, an election`);
+  else if (rec?.type !== 'election' || !rec.facts?.date) {
+    rec = null;
+    for (let i = 0; i < 512 && !rec; i++) {
+      const p = `lake/data/e/${i}.json`;
+      if (existsSync(join(ROOT, p))) rec = Object.values(json(p)).find(r => r?.type === 'election' && r.facts?.date) || null;
+    }
+  }
+  assert.ok(rec, 'the lake holds a dated election');
   const life = cardOf(rec, { today: '2026-11-20' }).offers.find(o => o.id === 'life');
-  assert.match(life.at, /[#&]l=elections(&|$)/);
+  assert.match(life?.at || '', /[#&]l=elections(&|$)/, `${rec.label} (${rec.q})`);
 });
 
 test('V8: UCDP cells keep each month’s counts, in words, the latest last', () => {

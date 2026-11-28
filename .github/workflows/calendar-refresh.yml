@@ -75,6 +75,17 @@ jobs:
         run: |
           git checkout -- integration llms.txt
           git clean -fdq -- integration
+      # The deploy that follows runs package.json's whole "test" list on what this refresh commits. Its unit and data
+      # tests run here first, on the same files and with the deploy's settings, so that a test elsewhere in the list that
+      # the new data breaks stops this refresh (nothing is committed, the site keeps the last good data and goes on
+      # publishing, and this run goes red, where the freshness check shows it) instead of every deploy after it.
+      # Four files of the list (documentary, headlines, learning, platform) load playwright-core when they are read.
+      - run: npm ci --ignore-scripts
+      - name: Test the whole unit list on what this refresh would commit
+        env:
+          PRP_PAGES: '0'
+          PRP_CPU_LIMIT_MS: '80'
+        run: node tests/tools/run.mjs unit
       - uses: ./.github/actions/commit-data
         with:
           paths: >-

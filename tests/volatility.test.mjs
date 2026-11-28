@@ -650,24 +650,32 @@ test('page: a country not scored says plainly why, the method names the shrinkag
 // countries (its news that day was mostly of peace talks), and the page did not say that a country at war can read so.
 // A country in which UCDP records fighting, as part of a war of 1,000 battle deaths or more, says so beside a conflict
 // component that is not high; a country with none says nothing of it.
-test('page: a country at war whose conflict component is not high says plainly that it is at war', pageTest, async () => {
+// Refresh pins 2 (28 November 2026): the conflict components are GDELT's of the latest day, read again every night
+// (volatility-refresh), and this test runs only in the deploy; a day on which every country at war reads 70 or more
+// leaves no country to check the note on, so that part says so (a skip) instead of stopping the site. The country at
+// peace is checked every day.
+test('page: a country at war whose conflict component is not high says plainly that it is at war', pageTest, async t => {
   const v = read('index.json'), brief = JSON.parse(readFileSync(new URL('../national/data/brief.json', import.meta.url), 'utf8'));
   const wars = new Map(brief.countries.map(c => [c.iso3, (c.wars || []).filter(w => w.deaths >= 1000 && !w.id.startsWith('other-') && !/worldwide/i.test(w.name))]));
   const day = v.latest, conflict = iso => v.countries[iso]?.days.find(r => r[0] === day)?.[2]?.[0];
   // A country at war with a conflict component under 70 on the latest day (Ukraine on 14 November), and one at peace.
   const war = ['UKR', ...Object.keys(v.countries)].find(iso => wars.get(iso)?.length && conflict(iso) != null && conflict(iso) < 70);
   const peace = ['DNK', ...Object.keys(v.countries)].find(iso => wars.has(iso) && !wars.get(iso).length && conflict(iso) != null);
-  assert.ok(war && peace, `a country at war (${war}) and one at peace (${peace}) on ${day}`);
+  assert.ok(peace, `a country at peace (${peace}) on ${day}`);
+  assert.ok([...wars.values()].some(w => w.length), 'National Analysis\'s brief names countries at war');
   const browser = await launch();
   try {
     const page = await browser.newPage({ viewport: { width: 1400, height: 900 } });
     const errors = [];
     page.on('pageerror', e => errors.push(e.message));
-    await page.goto(`${BASE}/q/volatility#country=${war}&day=${day}`, { waitUntil: 'domcontentloaded', timeout: 30000 });
-    await page.waitForSelector('#profile .stat', { timeout: 20000 });
-    const note = await page.locator('#pf-war').innerText();
-    assert.match(note, new RegExp(`^Conflict & security reads ${Math.round(conflict(war))}, but it measures the share of .+ news coverage that reports fighting, not the fighting itself\\. UCDP records fighting in`));
-    for (const w of wars.get(war)) assert.ok(note.includes(w.name) && note.includes(w.deaths.toLocaleString('en-GB')), w.name);
+    await t.test('a country at war whose conflict component is under 70 says it is at war', async st => {
+      if (!war) { st.skip(`no country at war reads a conflict component under 70 on ${day}: no note to check`); return; }
+      await page.goto(`${BASE}/q/volatility#country=${war}&day=${day}`, { waitUntil: 'domcontentloaded', timeout: 30000 });
+      await page.waitForSelector('#profile .stat', { timeout: 20000 });
+      const note = await page.locator('#pf-war').innerText();
+      assert.match(note, new RegExp(`^Conflict & security reads ${Math.round(conflict(war))}, but it measures the share of .+ news coverage that reports fighting, not the fighting itself\\. UCDP records fighting in`));
+      for (const w of wars.get(war)) assert.ok(note.includes(w.name) && note.includes(w.deaths.toLocaleString('en-GB')), w.name);
+    });
     await page.goto(`${BASE}/q/volatility#country=${peace}&day=${day}`, { waitUntil: 'domcontentloaded', timeout: 30000 });
     await page.waitForFunction(name => document.querySelector('#profile h2')?.textContent === name, v.countries[peace].name, { timeout: 20000 });
     assert.equal(await page.locator('#pf-war').count(), 0, peace);

@@ -10,7 +10,7 @@
 //   government  forms of government whose Wikidata statement has ended are left out (Mexico's "empire"), in a fixed order
 //   rebuild     the data rebuilt by build.mjs. These follow their sources (wars.json, realtime.json, Wikidata as read by
 //               the build), so a routine refresh with new data passes them; the few figures read on 26 November 2026 are
-//               checked only on a build of that week (THIS_REBUILD) and skipped with a message after it.
+//               checked only on a build of those days (THIS_REBUILD) and skipped with a message after it.
 // FOLLOW_NATIONAL_DATA (a copy of national/data) and FOLLOW_NATIONAL_BUILD (a copy of build.mjs) point the tests at an
 // older copy, to show they fail on it.
 import { test } from 'node:test';
@@ -26,8 +26,10 @@ const BUILD = process.env.FOLLOW_NATIONAL_BUILD || join(ROOT, 'national/scripts/
 const json = p => JSON.parse(readFileSync(p, 'utf8'));
 const index = () => json(join(DATA, 'index.json'));
 const country = iso3 => index().countries.find(c => c.iso3 === iso3);
-// The rebuild of 26 November 2026: the figures read that day are checked only on a build of that week.
-const THIS_REBUILD = /^2026-11-2[6-9]/;
+// The rebuild of 26 November 2026: the figures read that day are checked only on a build of those days (refresh pins 2,
+// 28 November 2026: the window was the 26th to the 29th, but a build run by hand on the 28th or 29th reads Wikidata
+// again; the data holds the read of 27 November 2026, 12:17 UTC, with the same values).
+const THIS_REBUILD = /^2026-11-2[67]/;
 const laterBuild = () => { const at = index().sources?.wikidataRead || ''; return THIS_REBUILD.test(at) ? false : `a later build (${at}): the figures read on 26 November 2026 may have moved with their sources`; };
 
 // ---- carry
@@ -222,9 +224,10 @@ test('government: forms of government whose Wikidata statement has ended are lef
   assert.match(src, /OPTIONAL \{ \?c wdt:P122 \?gv\. \?c p:P122 \?gst\. \?gst ps:P122 \?gv\. FILTER NOT EXISTS \{ \?gst pq:P582 \?gend \}/, 'the statement, not ended');
   assert.match(src, /government: \[\.\.\.\(w\.gov \|\| \[\]\)\]\.sort\(\(a, b\) => a\.localeCompare\(b, 'en'\)\)\.slice\(0, 4\)/, 'sorted before four are kept');
   // On the rebuilt data: Mexico's "empire" (Q48349, its statements end in 1823 and 1867) is gone.
-  const mex = country('MEX').government;
-  assert.ok(!mex.includes('empire'), mex.join(', '));
   for (const c of index().countries) assert.deepEqual(c.government, [...c.government].sort((a, b) => a.localeCompare(b, 'en')), c.iso3);
+  // Mexico's statements as Wikidata gave them on 26 November 2026: held only for that build (refresh pins 2), since the
+  // rule is the query's (the source checks above) and Wikidata's statements may change.
+  if (!laterBuild()) { const mex = country('MEX').government; assert.ok(!mex.includes('empire'), mex.join(', ')); }
 });
 
 // ---- rebuild
@@ -256,13 +259,16 @@ test('rebuild: the wars fought on a country\'s territory follow the Retrospectiv
 test('rebuild: Serbia\'s head of state comes from Wikidata, with no correction, and is not "Vacant"', { skip: false }, t => {
   // Wikidata's item for Aleksandar Čupić (Q142195374) was typed as something other than a human by vandalism on
   // 24 November 2026, undone on 26 November at 12:27 UTC; the correction made while it stood is removed.
+  // The correction table is VM's own and is checked whatever the day; Serbia's head is Wikidata's, so after a later
+  // build (refresh pins 2) the rest says so by a skip: every head named without a Wikidata ID is then still held to the
+  // table by national.test.mjs ("a head named without a Wikidata ID is one leader-corrections.json supplied").
   assert.ok(!json(join(ROOT, 'national/scripts/leader-corrections.json')).corrections.some(k => k.iso3 === 'SRB'), 'no SRB correction');
+  const later = laterBuild();
+  if (later) { t.skip(later); return; }
   const c = country('SRB');
   assert.ok(c.headOfState && /^Q[1-9]\d*$/.test(c.headOfStateQid || ''), `a head with a Wikidata ID: ${c.headOfState} ${c.headOfStateQid}`);
   assert.ok(!(c.vacant || []).includes('headOfState'));
   if (c.leader.office === 'headOfState') assert.equal(c.leader.source, 'wikidata');
-  const later = laterBuild();
-  if (later) { t.diagnostic(later); return; }
   // As Wikidata gave it on 26 November 2026: P39 President of Serbia (Q889830) from 19 November 2026.
   assert.deepEqual([c.headOfState, c.headOfStateQid, c.leader.name, c.leader.since, c.leader.source], ['Aleksandar Čupić', 'Q142195374', 'Aleksandar Čupić', '2026-11-19', 'wikidata']);
 });

@@ -42,7 +42,22 @@ test('page: Investor Impersonator, part of Wealth Automation\'s Auto Trader, wit
   assert.doesNotMatch(html, /Money Management|Tally Stick/);
 });
 
+// Refresh pins 2 (28 November 2026): the weekly traders-refresh reads the House Clerk's filings and SEC EDGAR again, and
+// this page test runs only in the deploy after it, so a member who stops filing or a quarter's new holdings would stop
+// the site. The member and the holdings are taken from the committed files the page shows: Nancy Pelosi while she has
+// trades owned by her spouse (41 of her 41 in the file of 24 November 2026), else the member with the most such trades
+// among those whose trades the table lists in full (400); Warren Buffett is VM's own list's, and his filer's name and
+// largest holding are his latest 13F's, as traders/data/investors.json holds them (BERKSHIRE HATHAWAY INC, and APPLE INC
+// first by value, for the quarter to 30 September 2026, filed on 16 November 2026).
 test('Congress trades filter by member and ticker; investors show 13F holdings', pageTest, async () => {
+  const c = read('traders/data/congress.json'), inv = read('traders/data/investors.json');
+  const spouse = new Map();
+  for (const t of c.trades) if (t.owner === 'SP') spouse.set(t.member, (spouse.get(t.member) || 0) + 1);
+  const full = c.members.filter(m => spouse.get(m.id) && m.trades <= 400).sort((a, b) => spouse.get(b.id) - spouse.get(a.id) || a.name.localeCompare(b.name));
+  const member = full.find(m => m.id === 'pelosi-ca11') || full[0];
+  assert.ok(member, 'a member with trades owned by a spouse, listed in full');
+  const buffett = inv.investors.find(i => i.person === 'Warren Buffett');
+  assert.ok(buffett?.positions?.length, 'Warren Buffett, on VM\'s list of investors, with his holdings');
   const browser = await launch();
   const page = await browser.newPage({ viewport: { width: 1400, height: 900 } });
   const errors = [];
@@ -50,20 +65,22 @@ test('Congress trades filter by member and ticker; investors show 13F holdings',
   await page.goto(`${BASE}/fe/traders?tab=congress`, { waitUntil: 'domcontentloaded', timeout: 30000 });
   await page.waitForSelector('#trades tr td', { timeout: 20000 });
   const rows = await page.locator('#trades tr').count();
-  await page.fill('#member-search', 'Pelosi');
-  await page.locator('.member', { hasText: 'Pelosi' }).click();
+  await page.fill('#member-search', member.name);
+  await page.locator(`.member[data-id="${member.id}"]`).click();
   await page.selectOption('#f-days', '9999');
-  const title = await page.locator('#trades-title').innerText();
-  const pelosi = await page.locator('#trades').innerText();
+  // The title's own words, without the Master Index's ◈ (design/jdpi-entities.js adds it after the member's name once it
+  // has read the keys, at a time of its own).
+  const title = await page.locator('#trades-title').evaluate(el => [...el.childNodes].filter(n => !n.classList?.contains('jdpi-ency')).map(n => n.textContent).join('').trim());
+  const theirs = await page.locator('#trades').innerText();
   await page.click('.tabs button[data-tab=investors]');
   await page.locator('.card', { hasText: 'Warren Buffett' }).click();
   const detail = await page.locator('#investor-detail').innerText();
   await browser.close();
   assert.ok(rows > 50, `rows: ${rows}`);
-  assert.match(title, /Pelosi/);
-  assert.match(pelosi, /Spouse/);
-  assert.match(detail, /BERKSHIRE|Berkshire/);
-  assert.match(detail, /APPLE|Apple|AMERICAN EXPRESS|American Express/);
+  assert.equal(title, `Trades by ${member.name}`);
+  assert.match(theirs, /Spouse/, `${member.name}: ${spouse.get(member.id)} trades owned by a spouse`);
+  assert.ok(detail.includes(buffett.registeredName), `the filer's name, ${buffett.registeredName}`);
+  assert.ok(detail.includes(buffett.positions[0].name), `the largest holding, ${buffett.positions[0].name}`);
   assert.deepEqual(errors, []);
 });
 

@@ -1,7 +1,7 @@
 name: Refresh Invention Timeline
 # Monthly: re-read the facts behind the curated breakthroughs from Wikidata (people, life dates, institutions, places)
-# and rebuild science/progress/data/events.json. --refresh refetches cached items older than 25 days; the cache is
-# committed so that each run asks Wikidata only for what is due.
+# and rebuild science/progress/data/events.json, then the Omni-Map's breakthroughs layer made from it. --refresh
+# refetches cached items older than 25 days; the cache is committed so that each run asks Wikidata only for what is due.
 on:
   schedule:
     # On the 2nd, a day before the Master Index refresh (3rd, 03:31), which reads this output and also leans on Wikidata.
@@ -22,14 +22,41 @@ jobs:
         with:
           node-version: 24
       - run: node science/scripts/build-progress.mjs --refresh
+      # The Omni-Map's breakthroughs layer is made from events.json and names the build it was made from (its `of`), so it
+      # is rebuilt here from the new file and committed with it; otherwise the map would show the timeline of the month
+      # before. The same script puts the layer's entry in the layer catalogue (omni/data/layers.json, which lists the
+      # file's sha256 and bytes, and layers.head.json) and the timeline's version and date in its source entry
+      # (integration/sources.json, vm-invention). No fetch: it reads events.json and the three files it updates (the
+      # terms it records are those of sources.json's wikidata entry).
+      - name: Rebuild the Omni-Map's breakthroughs layer
+        run: node omni/scripts/build-breakthroughs.mjs
+      # The layer's tests: its rows against the new events, its sha256 and bytes in the catalogue, the catalogue's and the
+      # source entry's shape, and (follow-refresh-jobs) that the layer is the one made from events.json as it stands.
+      # PRP_CPU_LIMIT_MS as in the deploy (pages-deploy.yml): omni-data's frame test allows a runner 80 ms.
       - name: Test the new data
         env:
           PRP_PAGES: '0'
-        run: node --test tests/science-progress.test.mjs tests/kino.test.mjs
+          PRP_CPU_LIMIT_MS: '80'
+        run: >-
+          node --test tests/science-progress.test.mjs tests/kino.test.mjs tests/follow-invention-timeline.test.mjs
+          tests/omni-history.test.mjs tests/omni-layers.test.mjs tests/omni-data.test.mjs tests/follow-refresh-jobs.test.mjs
+      # The deploy that follows runs package.json's whole "test" list on what this refresh commits. Its unit and data
+      # tests run here first, on the same files and with the deploy's settings, so that a test elsewhere in the list that
+      # the new data breaks stops this refresh (nothing is committed, the site keeps the last good data and goes on
+      # publishing, and this run goes red, where the freshness check shows it) instead of every deploy after it.
+      # Four files of the list (documentary, headlines, learning, platform) load playwright-core when they are read.
+      - run: npm ci --ignore-scripts
+      - name: Test the whole unit list on what this refresh would commit
+        env:
+          PRP_PAGES: '0'
+          PRP_CPU_LIMIT_MS: '80'
+        run: node tests/tools/run.mjs unit
       - uses: ./.github/actions/commit-data
         with:
-          paths: science/progress/data science/scripts/progress-cache.json
-          message: 'Invention Timeline: monthly Wikidata refresh'
+          paths: >-
+            science/progress/data science/scripts/progress-cache.json
+            omni/data/layers/breakthroughs omni/data/layers.json omni/data/layers.head.json integration/sources.json
+          message: 'Invention Timeline: monthly Wikidata refresh, and the Omni-Map layer made from it'
   # Tests the whole suite on main as this refresh left it, and deploys that commit only if it passed (pages-deploy.yml).
   deploy:
     needs: refresh

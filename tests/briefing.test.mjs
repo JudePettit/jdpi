@@ -6,6 +6,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { pageTest, launch } from './tools/pages.mjs';
+import { builtOn } from './tools/as-built.mjs';
 import { POSITIONS, PER_POSITION, MIN_WORKING_SHARE, MIN_ACTIVE, SOURCES } from '../briefing/scripts/sources.mjs';
 import { parseFeed, canonicalUrl, titleKey } from '../briefing/scripts/rss.mjs';
 import { categorize } from '../briefing/scripts/categorize.mjs';
@@ -1074,18 +1075,28 @@ test('page: the Publishers tab gives each publisher\'s row on Wikipedia\'s list 
       return tr ? { text: tr.cells[3].textContent, links: [...tr.cells[3].querySelectorAll('a')].map(x => x.getAttribute('href')), caution: !!tr.cells[0].querySelector('.caution') } : null;
     }, n);
     const name = id => SOURCES.find(s => s.id === id).name;
+    // The words each row shows, from the committed list (refresh pins 2, 28 November 2026): the weekly rsp-refresh reads
+    // Wikipedia's list again, and its own test step holds which rows each publisher joins (RSP_EXPECTED) but not the
+    // rows' statuses, which Wikipedia's editors change; the page shows the committed file's. As read on 23 November 2026
+    // (rsp.json): The Guardian "Generally reliable", The Guardian blogs "No consensus", Breitbart News "Deprecated",
+    // blacklisted. The rule: the row's name, its status in the list's own words, and "Blacklisted" where the list says so.
+    const byK = new Map(RSPD.rows.map(r => [r.k, r]));
+    const shown = k => { const r = byK.get(k); return `${r.name}: ${[RSPD.words[r.st] || RSPD.words.d, r.b ? RSPD.words.b : ''].filter(Boolean).join(' · ')}`; };
+    const reEsc = s => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
     const guardian = await cell(name('guardian'));
     assert.equal(guardian.links.length, 2, 'a split shows each of its rows');
-    assert.match(guardian.text, /^The Guardian: Generally reliable.*The Guardian blogs: /);
+    assert.deepEqual(RSPD.outlets.guardian.rows.map(k => byK.get(k).name), ['The Guardian', 'The Guardian blogs']);
+    assert.match(guardian.text, new RegExp(`^${reEsc(shown(RSPD.outlets.guardian.rows[0]))}.*${reEsc(shown(RSPD.outlets.guardian.rows[1]))}`));
     assert.equal((await cell(name('commondreams'))).text, 'Not on Wikipedia’s list');
     assert.match((await cell(name('jacobin'))).text, /^No flag: /);
-    const breitbart = await cell(name('breitbart'));
+    const breitbart = await cell(name('breitbart')), bRow = RSPD.outlets.breitbart.rows[0];
     assert.ok(breitbart.caution, 'the ⚠ stays');
-    assert.equal(breitbart.text, 'Breitbart News: Deprecated · Blacklisted');
+    assert.equal(breitbart.text, shown(bRow));
+    if (builtOn(RSPD.read, '2026-11-23')) assert.equal(breitbart.text, 'Breitbart News: Deprecated · Blacklisted', 'as Wikipedia\'s list read on 23 November 2026');
     assert.equal(breitbart.links[0], `${RSP_URL}#Breitbart_News`);
     // A story's line: ⚠, then the Wikipedia flag, short.
     const story = await page.evaluate(() => storyHtml({ ...D.items[0], s: 'breitbart' }, false));
-    assert.match(story, /⚠<\/span><a class="rsp" [^>]+><span class="rsp-k">Wikipedia<\/span> Deprecated · Blacklisted<\/a> · /);
+    assert.match(story, new RegExp(`⚠</span><a class="rsp" [^>]+><span class="rsp-k">Wikipedia</span> ${reEsc(shown(bRow).replace(/^[^:]+: /, ''))}</a> · `));
     assert.match(await page.evaluate(() => storyHtml({ ...D.items[0], s: 'guardian' }, false)), /varies by subject: see the list<\/a> · /);
     const credit = await page.innerHTML('#rspcredit');
     assert.ok(credit.includes('by Wikipedia contributors') && credit.includes('>CC BY-SA 4.0</a>') && credit.includes(`oldid=${RSPD.revisions[0].revid}`), credit);

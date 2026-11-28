@@ -447,8 +447,11 @@ test('recount: --only gives the full build’s total whatever the 300-place cap,
 // and shelf; the Master Index page). Each test below holds the builder's rule now, as a unit case. Where the data can
 // only be brought in line by a full build (every record made again: the disambiguation pages left out, dates by rank,
 // `n` on every short record, the summaries checked), its data check binds from the manifest's `fullBuild` stamp, which
-// only a full build by the corrected builder writes (the lake refresh of 3 December 2026); LAKE_RULES=all runs those
-// checks on any data, as a check of a scratch full build. The rest bind on the data as committed.
+// only a full build by the corrected builder writes (the gate has been open since the full build of 21 November 2026,
+// manifest.fullBuild 2026-11-21T06:19:25Z); LAKE_RULES=all runs those checks on any data, as a check of a scratch full
+// build. The rest bind on the data as committed. (Some of these checks name Wikidata's values; this file runs in
+// lake-refresh.yml's own test step and in warfocus-refresh.yml's lake step, which puts lake/data back when it fails, so
+// a Wikidata edit they catch stops that refresh, not the site.)
 const resolveFns = resolveRules;
 const lakeManifest = read('lake/data/manifest.json');
 const FULL = Boolean(lakeManifest.fullBuild) || process.env.LAKE_RULES === 'all';
@@ -1215,7 +1218,9 @@ test('committed lake: War Focus’s atomic bombings read as War Focus counts the
   // lake refresh is a full build, so it cannot.)
   const { readAfter } = await import('./tools/as-built.mjs');
   const lakeBuilt = read('lake/data/manifest.json').generated, focusBuilt = read('battlefield/focus/data/index.json').generated;
-  if (!readAfter(lakeBuilt, focusBuilt)) { t.diagnostic(`the lake (${lakeBuilt}) was built before War Focus (${focusBuilt}): not compared`); return; }
+  // Skipped, not passed, while the two builds differ (refresh pins 2, 28 November 2026): the rule itself is proved
+  // whatever the day by the adapter fixture below.
+  if (!readAfter(lakeBuilt, focusBuilt)) { t.skip(`the lake (${lakeBuilt}) was built before War Focus (${focusBuilt}): not compared; the fixture test after this one proves the rule`); return; }
   const all = lakeRecords(), at = (q, war) => all.get(q).mentions.find(m => m.m === 'war-focus' && m.u.includes(`#war=${war}`))?.c;
   // The lines expected, from War Focus's data by its own rule (figures.mjs), not written in (the second reader, WF2-08
   // and F4: an edit on Wikidata would otherwise stop the refresh), with a late count's year on its share alone (WF2-01).
@@ -1229,6 +1234,33 @@ test('committed lake: War Focus’s atomic bombings read as War Focus counts the
     assert.equal(at('Q709352', 'ww2'), `Part of World War II; ${figureLine(japan)}`);
     assert.match(at('Q709352', 'ww2'), /; [\d,]+ of them counted in \d{4} \(a late count/);
   }
+});
+// The same rule whatever the day (refresh pins 2, 28 November 2026): the adapter run on War Focus files made here, so the
+// comparison above, which holds only while the lake was built after War Focus, is not the rule's only proof. The three
+// records are War Focus's as its build of 27 November 2026 holds them (battlefield/focus/data/wars/ww2.json, from
+// Wikidata: Q488's parts P527, Q703203's and Q4382340's deaths P1120 with their point in time, 31 August 2013).
+test('War Focus adapter: an event listed with its parts gives the figure War Focus shows over them, each death once (fixture)', async () => {
+  const { battlefield } = await import('../lake/scripts/adapters.mjs');
+  const dir = mkdtempSync(join(tmpdir(), 'mi-wf-'));
+  try {
+    const put = (p, o) => { mkdirSync(join(dir, p, '..'), { recursive: true }); writeFileSync(join(dir, p), JSON.stringify(o)); };
+    const battles = [
+      { q: 'Q488', n: 'atomic bombings of Hiroshima and Nagasaki', lat: 34.395, lon: 132.455, s: '1945-08-06', e: '1945-08-09', p: null, deaths: null, cas: null,
+        dv: [286818, 162083], w: 'Atomic bombings of Hiroshima and Nagasaki', up: 'Q590545', parts: ['Q703203', 'Q4382340'], fs: 'unread' },
+      { q: 'Q703203', n: 'atomic bombing of Hiroshima', lat: 34.391, lon: 132.458, s: '1945-08-06', e: '1945-08-06', p: null, deaths: 286818, cas: null, dAt: '2013-08-31', w: 'Atomic bombing of Hiroshima', up: 'Q488' },
+      { q: 'Q4382340', n: 'atomic bombing of Nagasaki', lat: 32.774, lon: 129.863, s: '1945-08-09', e: '1945-08-09', p: null, deaths: 162083, cas: null, dAt: '2013-08-31', w: 'Atomic bombing of Nagasaki', up: 'Q488' },
+    ];
+    put('battlefield/history/data/wars.json', { wars: [] });
+    put('battlefield/focus/data/index.json', { generated: '2026-11-27T21:03:01.158Z', wars: [{ id: 'ww2', qid: 'Q362', name: 'World War II', start: '1939-09-01', end: '1945-09-02', battles: 3, totalDeaths: null }] });
+    put('battlefield/focus/data/wars/ww2.json', { battles });
+    put('battlefield/data/realtime.json', { wars: [], year: 2026 });
+    const out = battlefield({ jdpiDir: dir }), line = q => out.find(m => m.key.qid === q && m.module === 'war-focus')?.context;
+    const g = groupBattles(battles).byQ;
+    for (const q of ['Q488', 'Q703203', 'Q4382340']) assert.equal(line(q), `Part of World War II; ${figureLine(g.get(q))}`, q);
+    // The event's figure is its parts' sum, never a part's figure as its own, and its late count's year is given.
+    assert.match(line('Q488'), /^Part of World War II; 448,901 deaths, the sum of its parts' recorded figures, counted in 2013 \(a late count/);
+    assert.equal(line('Q362'), 'Month by month, 1939–1945: 3 battles and operations', 'a war no free source gives deaths for gives its battles alone');
+  } finally { rmSync(dir, { recursive: true, force: true }); }
 });
 
 // The free-data rule (Jude, MP-11, 17 November 2026; built 20 November): the Correlates of War's terms bar commercial use

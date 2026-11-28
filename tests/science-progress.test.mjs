@@ -239,6 +239,26 @@ test('progress-4 and progress-5: places set by hand where Wikidata’s facts wou
     // Wikipedia "Atomic clock" (revision 1386411903): the first practical caesium clock "was built at the National
     // Physical Laboratory in the United Kingdom in 1955 by Louis Essen". Not the University of London.
     'atomic-clock': 'Q1967606',
+    // Wikipedia "Nicolas Léonard Sadi Carnot" (revision 1379960021, read 28 November 2026): in Paris he attended
+    // lectures at the Sorbonne and the Collège de France, and his Reflections were "published at his own expense in
+    // June 1824". Not the Lycée Charlemagne, where he prepared for the École polytechnique as a boy, nor the École
+    // polytechnique (1812-1814), whose Wikidata place is its campus at Palaiseau.
+    'carnot-cycle': 'Q90',
+    // Wikipedia "Zabdiel Boylston" (revision 1356032392, read 28 November 2026): "During a smallpox outbreak in 1721 in
+    // Boston, Boylston inoculated" his son and two enslaved men. Not Harvard University, in Cambridge, Massachusetts,
+    // 5 km from Boston (an undated place of study), where the education rule placed it.
+    'variolation-boston': 'Q100',
+    // Wikipedia "Old Naval Observatory" (revision 1372951816, read 28 November 2026): it "is where the United States
+    // Naval Observatory was located from 1844 to 1893", and "It was with this telescope that the Moons of Mars were
+    // discovered by Asaph Hall in 1877". The seed's fallback names the observatory as a body, whose Wikidata item stands
+    // at its site of today.
+    'moons-of-mars': 'Q1570896',
+    // Wikipedia "Andrew Fire" (revision 1381483627, read 28 November 2026): from 1986 to 2003 he was on the staff of the
+    // "Carnegie Institution of Washington’s Department of Embryology in Baltimore", where the work on double-stranded
+    // RNA was done. Wikidata's Q30294630 is that department, in Baltimore (revision 2474470841). Not the Carnegie
+    // Institution's item, whose coordinates are its headquarters in Washington, D.C., 59 km away, where the seed's
+    // institution had placed it (tests/follow-placing.test.mjs), nor Johns Hopkins University, his adjunct post.
+    'rna-interference': 'Q30294630',
   };
   for (const [id, q] of Object.entries(AT)) {
     assert.equal(ev(id).place.q, q, `${id}: ${ev(id).place.n}`);

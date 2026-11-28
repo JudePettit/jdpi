@@ -85,11 +85,11 @@ test('the build reports a held pn, keeps it held until the seed is mended, and r
   assert.doesNotMatch(guard, /pnHeld/, 'a held pn does not stop the write');
 });
 
-// VM's own values, pinned outright: a pn beside a hand-set QID names that same place (francium, stethoscope, stm). A
+// VM's own values, pinned outright: a pn beside a hand-set QID names that same place (francium, rna-interference, stethoscope, stm). A
 // seed that moves its at and leaves the pn fails here, before any build, and the build refuses it too (pnVerdict).
 test('seed: a pn beside a hand-set QID is that QID', () => {
   const both = SEED.filter(s => s.pn && parseRef(s.at).qid);
-  assert.deepEqual(both.map(s => s.id).sort(), ['francium', 'stethoscope', 'stm']);
+  assert.deepEqual(both.map(s => s.id).sort(), ['francium', 'rna-interference', 'stethoscope', 'stm']);
   for (const s of both) assert.equal(parseRef(s.pn).qid, parseRef(s.at).qid, s.id);
 });
 

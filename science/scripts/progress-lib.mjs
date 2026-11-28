@@ -25,11 +25,13 @@ export const BASIS = {
   institution: 'Discoverer’s main institution (Wikidata)',
   education: 'Where the discoverer studied (Wikidata)',
   birthplace: 'Discoverer’s birthplace (Wikidata)',
-  fallback: 'Place set by hand (Wikidata gives no location for the discoverers near it)',
+  fallback: 'Place set by hand (Wikidata gives the discoverers no dated institution near it, nor a more exact place)',
 };
-/** How far (km) a discoverer's institution or work place may lie from the seed's hand-set place; for the weaker
- *  proxies (where they studied, where they were born) it must be the same town. */
-export const ANCHOR_KM = 100, ANCHOR_KM_WEAK = 20;
+/** How far (km) a discoverer's institution or work place may lie from the seed's hand-set place; a weaker clue (an
+ *  undated work place, where they studied, where they were born) must lie within 10 km of the seed's town, and only
+ *  where the seed names a town (choosePlace): Coventry is 18 km from Rugby and Leiden 15 km from The Hague, and both are
+ *  other towns. */
+export const ANCHOR_KM = 100, ANCHOR_KM_WEAK = 10;
 
 /** "Q935 Isaac Newton" → { qid: 'Q935', name: 'Isaac Newton' }; "Isaac Newton" → { qid: null, name }. */
 export function parseRef(s) {
@@ -120,7 +122,11 @@ export const covers = (st, year, life, open) => { const r = span(st, life, open)
  *  takes a place's founding year (place().founded) as the earliest of these over its P571 statements. */
 export const firstYear = ({ y, pr = 9 }) => (pr >= 9 ? y : pr === 8 ? Math.floor(y / 10) * 10 : pr === 7 ? Math.floor((y - 1) / 100) * 100 + 1 : pr === 6 ? Math.floor((y - 1) / 1000) * 1000 + 1 : null);
 
-const ACADEMIC = /universit|college|institut|laborator|observator|academ|école|ecole|school|hospital|polytechn|research|society|station|museum|centre|center|faculty|abbey|monastery|librar|bell labs|cern|nasa|agency|company|corporation/i;
+// "organization" as a whole word, and "non-profit": Wikidata describes the Carnegie Institution for Science (Q1043963),
+// labelled "Carnegie Science" as read on 28 November 2026, as a "non-profit organization in the USA", and the Bureau des
+// Longitudes as an "organization" (whole words, so that "organisms" or "organizational" in a theory's description do not
+// count).
+const ACADEMIC = /universit|college|institut|laborator|observator|academ|école|ecole|school|hospital|polytechn|research|society|station|museum|centre|center|faculty|abbey|monastery|librar|bell labs|cern|nasa|agency|company|corporation|\borgani[sz]ations?\b|\bnon-?profit\b/i;
 /** Does a Wikidata description or label read like an institution rather than a town or a house? */
 export const looksInstitutional = (label, desc) => ACADEMIC.test(`${label || ''} ${desc || ''}`);
 
@@ -138,6 +144,18 @@ export const looksInstitutional = (label, desc) => ACADEMIC.test(`${label || ''}
  * maxKm from it is skipped (Wikidata often lists later, earlier or honorary posts without dates). Every person-based
  * rule also skips a place founded (its earliest P571) after the year, and the undated rules (main institution, work
  * location, education) drop a statement whose own start or end rules the year out.
+ * The weak clues (an undated work location, where they studied, their birthplace) give way to the seed's fallback
+ * place unless they agree with it: the clue is that very place, or the seed names a town rather than an institution and
+ * the clue lies within ANCHOR_KM_WEAK of it, in the town or beside it. So a seed that names the body where the thing
+ * was done (the Berlin Observatory, the Vienna General Hospital) keeps the event there against a city, a school or a
+ * birthplace nearby; a seed's town (Geesthacht, Rugby, Pavia) keeps it against another town within reach (Hamburg,
+ * Coventry, Milan); and a clue within 10 km of the seed's town (Merchiston Tower in Edinburgh, Jiankang where Nanjing
+ * stands) still places it, as more exact. Within 10 km is not always within the town (Harvard, in Cambridge, for
+ * Boston; the University of Manchester for Salford): where it matters the seed sets the place by hand.
+ * A main institution (undated) gives way in the same way to a seed place that is itself an institution, unless it is
+ * that place: Nüsslein-Volhard's Tübingen (from 1981) to the European Molecular Biology Laboratory for 1980, Vine's
+ * East Anglia to Cambridge for 1963. Against a seed town it still comes first, within maxKm. A dated clue (an
+ * institution or work location at the time) and an institution the discoverers shared still come before any seed place.
  */
 export function choosePlace(event, people, place, weight = () => 0, maxKm = ANCHOR_KM) {
   const y = event.year;
@@ -183,42 +201,56 @@ export function choosePlace(event, people, place, weight = () => 0, maxKm = ANCH
     const w = (p.work || []).filter(st => covers(st, y, life(p)) && fits(st.q)).sort((a, b) => width(a, p) - width(b, p));
     if (w.length) return out(w[0].q, 'work-location', at(w[0].q), p.qid);
   }
+  // The undated clues (3 to 5) agree with the seed's fallback place, or give way to it (see the header): a main
+  // institution gives way to a seed place that is itself an institution, unless it is that place; the weak clues (4 and
+  // 5) give way to any seed place, unless they are that place or lie within ANCHOR_KM_WEAK of a seed town.
+  const agreesMain = q => !anchor?.inst || q === event.fb;
+  const agrees = q => !anchor || q === event.fb || (!anchor.inst && distanceKm([at(q).lat, at(q).lon], [anchor.lat, anchor.lon]) <= weak);
   // 3. Main institution: preferred rank, then the one nearest in time, then the most shared, academic ones first.
   const near = (st, p) => { const r = span(st, life(p)); return r ? Math.max(0, r[0] - y, y - r[1]) : 500; };
   for (const p of people) {
     for (const k of ['employer', 'affiliation']) {
-      const c = (p[k] || []).filter(st => !datedOut(st) && fits(st.q)).sort((a, b) => !!b.preferred - !!a.preferred || near(a, p) - near(b, p)
+      const c = (p[k] || []).filter(st => !datedOut(st) && fits(st.q) && agreesMain(st.q)).sort((a, b) => !!b.preferred - !!a.preferred || near(a, p) - near(b, p)
         || !!at(b.q).inst - !!at(a.q).inst || weight(b.q) - weight(a.q));
       if (c.length) return out(c[0].q, 'institution', at(c[0].q), p.qid);
     }
   }
   // 4. Work location (only if there is one obvious candidate, or the preferred one).
   for (const p of people) {
-    const w = (p.work || []).filter(st => !datedOut(st) && fits(st.q));
+    const w = (p.work || []).filter(st => !datedOut(st) && fits(st.q) && agrees(st.q));
     const pick = w.find(st => st.preferred) || (w.length === 1 ? w[0] : w.sort((a, b) => near(a, p) - near(b, p))[0]);
     if (pick) return out(pick.q, 'work-location', at(pick.q), p.qid);
   }
   // 5. Education (the latest: usually the most advanced), then birthplace.
   for (const p of people) {
-    const ed = (p.educated || []).filter(st => !(st.s != null && st.s > y) && fits(st.q, weak) && at(st.q).inst).sort((a, b) => (span(b, life(p))?.[1] ?? -1e9) - (span(a, life(p))?.[1] ?? -1e9));
+    const ed = (p.educated || []).filter(st => !(st.s != null && st.s > y) && fits(st.q, weak) && at(st.q).inst && agrees(st.q)).sort((a, b) => (span(b, life(p))?.[1] ?? -1e9) - (span(a, life(p))?.[1] ?? -1e9));
     if (ed.length) return out(ed[0].q, 'education', at(ed[0].q), p.qid);
   }
-  for (const p of people) for (const q of p.birthplace || []) { if (fits(q, weak)) return out(q, 'birthplace', at(q), p.qid); }
+  for (const p of people) for (const q of p.birthplace || []) { if (fits(q, weak) && agrees(q)) return out(q, 'birthplace', at(q), p.qid); }
   if (anchor) return out(event.fb, 'fallback', anchor);
   return null;
 }
 
-/** Institutions linked to an event: those its people belonged to around the event year (and the placing institution).
+/** Institutions linked to an event: first the institution it is placed at (the one a rule through the people chose,
+ *  or the place set by hand or found on Wikidata when that is an institution, not a birthplace or the item's own site),
+ *  then those its people belonged to in the event year by Wikidata's dates.
  *  A place founded after the year is left out, as choosePlace leaves it out: Goethe University Frankfurt (1914) for
- *  Salvarsan in 1909, the University of Palermo (1806) for Ceres in 1801. */
+ *  Salvarsan in 1909, the University of Palermo (1806) for Ceres in 1801. So is a statement whose own dates begin
+ *  after the year or end before it: covers() allows a year either side, for the placing rules, but the card lists
+ *  where the people were in the year itself, not Le Verrier's University of Paris (from 1847) for Neptune in 1846,
+ *  nor ETH Zurich (to 1914) for general relativity in 1915. A school with only its start date is taken to run
+ *  EDUCATION_YEARS, as choosePlace takes it: not St Albans School (from 1952) for Hawking radiation in 1974.
+ *  The placing institution is listed even where the people's statements at it fall a year either side (covers()) or,
+ *  for the education rule, before the year: it is where the card says the thing was done. */
 export function eventInstitutions(event, people, place, chosen) {
   const y = event.year, out = [];
   const add = q => { if (q && !out.includes(q)) out.push(q); };
-  if (chosen && ['shared-institution', 'institution-at-time', 'institution', 'education'].includes(chosen.basis)) add(chosen.qid);
-  if (chosen && chosen.basis === 'curated' && place(chosen.qid)?.inst) add(chosen.qid);
+  const inYear = st => !((st.s != null && st.s > y) || (st.e != null && st.e < y));
+  if (chosen && (['shared-institution', 'institution-at-time', 'institution', 'education'].includes(chosen.basis)
+    || (!['birthplace', 'site'].includes(chosen.basis) && place(chosen.qid)?.inst && !(place(chosen.qid).founded > y)))) add(chosen.qid);
   for (const p of people) {
     for (const k of ['employer', 'affiliation', 'educated']) {
-      for (const st of p[k] || []) if (covers(st, y, { born: p.born, died: p.died }) && place(st.q)?.inst !== false && !(place(st.q)?.founded > y)) add(st.q);
+      for (const st of p[k] || []) if (covers(st, y, { born: p.born, died: p.died }, k === 'educated' ? EDUCATION_YEARS : undefined) && inYear(st) && place(st.q)?.inst !== false && !(place(st.q)?.founded > y)) add(st.q);
     }
   }
   return out.slice(0, 8);

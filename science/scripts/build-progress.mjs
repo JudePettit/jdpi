@@ -14,24 +14,29 @@
 // 4. Place each event on the map (choosePlace in progress-lib.mjs: location of discovery, the discoverer's institution
 //    at the time, their main institution, birthplace, the seed's fallback) and record the rule as positionBasis.
 //    The seed's hand-set place anchors the person-based rules: an institution or birthplace more than ANCHOR_KM from
-//    it is skipped, since Wikidata often lists later or honorary posts without dates. Every person-based rule also
+//    it is skipped, since Wikidata often lists later or honorary posts without dates, and a weak clue (an undated work
+//    place, a school, a birthplace) gives way to it unless it is that place or lies within 10 km of the town it names;
+//    an institution the seed names keeps the event against them all and against an undated main institution
+//    elsewhere. Every person-based rule also
 //    skips a place founded (earliest P571) after the year, and the undated rules drop a statement whose own start or
-//    end rules the year out; the card's list of institutions leaves out a place founded after the year too. Locations
+//    end rules the year out; the card's list of institutions (eventInstitutions) leaves out a place founded after the
+//    year too, and a person. A life date the seed's LIFE sets by hand replaces Wikidata's (lifeYear). Locations
 //    of discovery that are whole countries are not used; discovery sites far from the hand-set place are logged for
 //    review. A seed pn ("Q<id> name") names the place as it was called in the year, shown when the event is placed at
 //    that QID (pnVerdict below). An event a source edit has moved elsewhere is written where the facts now place it
-//    and reported ("pnHeld", kept in the cache's pnHeld until the facts lead back or the seed is mended); a pn that
+//    and reported ("pnHeld", kept in the cache's pnHeld until the facts lead back or the seed is mended, and listed in
+//    events.json's pnHeld, so that a green refresh commits it where it is seen); a pn that
 //    none of the event's facts lead to and no build has used or held (a typo or a stale override), a pn beside a
 //    hand-set QID (at) of another place, or a move to another item under the pn's place's name of today, stops the
 //    write until the seed is mended ("pnUnused"; --allow-drop writes anyway).
-// 5. Write events.json: events, plus people and institution lookups; but not if a seed event found no place, people or
+// 5. Write events.json: events, plus people and institution lookups and the pns held (pnHeld); but not if a seed event found no place, people or
 //    institutions fell below 90% of the last build's, or the file would pass 1.5 MB (--allow-drop writes the first two).
 // Answers are cached in progress-cache.json (compact, per item, with the date fetched). --refresh refetches anything
 // older than 25 days (the monthly workflow uses it); --offline builds from the cache alone.
 import { readFileSync, writeFileSync, mkdirSync, existsSync } from 'node:fs';
 import { join, resolve, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { SEED } from './progress-seed.mjs';
+import { SEED, LIFE } from './progress-seed.mjs';
 import { DISCIPLINES, BASIS, ANCHOR_KM, parseRef, nameMatches, normName, firstYear, choosePlace, eventInstitutions, looksInstitutional, seedProblems, distanceKm } from './progress-lib.mjs';
 import { lostCounts, refuseIfLost } from '../../calendar/scripts/guard.mjs';
 import { writeHeads } from '../../integration/scripts/heads.mjs';
@@ -191,6 +196,11 @@ const label = q => items[q]?.l || cache.labels[q]?.l || items[q]?.w || null;
 const namesOf = q => [items[q]?.l, items[q]?.w, ...(items[q]?.a || [])];
 /** A year from a time property, if it is given at least to the precision asked for (9 = year, 7 = century). */
 const yearOf = (q, p, minPrecision = 0) => { const s = pick(claims(q, p).filter(x => x.y != null && (x.pr ?? 9) >= minPrecision)); return s ? s.y : null; };
+/** A person's year of birth (P569) or death (P570): the one the seed's LIFE sets by hand where Wikidata's own statement
+ *  is wrong (van 't Hoff's death, given as 1901 on 28 November 2026; progress-seed.mjs names the source), otherwise
+ *  Wikidata's. The report ("life") lists each one used and says when Wikidata has come to agree, so that it can go. */
+const LIFE_KEY = { P569: 'born', P570: 'died' };
+const lifeYear = (q, p, minPrecision = 0) => LIFE[q]?.[LIFE_KEY[p]] ?? yearOf(q, p, minPrecision);
 /** Coordinates of an item: its own (P625), or those of its headquarters, location or administrative area. */
 function coordOf(q, hop = 0) {
   if (!items[q] || items[q].missing) return null;
@@ -269,7 +279,7 @@ function why(r, q) {
   if (r.kind === 'person') {
     // A QID written into the seed is the curator's choice (it may be a group, such as the Banū Mūsā brothers).
     if (!has(q, 'P31', HUMAN) && q !== r.qid) return `${q} (“${it.l}”) is not a person`;
-    const b = yearOf(q, 'P569', 9), d = yearOf(q, 'P570', 9), y0 = Math.min(...r.years), y1 = Math.max(...r.years);
+    const b = lifeYear(q, 'P569', 9), d = lifeYear(q, 'P570', 9), y0 = Math.min(...r.years), y1 = Math.max(...r.years);
     if (b != null && b > y0 + (r.loose ? 25 : -10)) return `${q} (“${it.l}”) was born in ${b}, too late for ${y0}`;
     if (d != null && d < y1 - (r.loose ? 150 : 30)) return `${q} (“${it.l}”) died in ${d}, long before ${y1}`;
   }
@@ -315,7 +325,7 @@ saveCache();
 
 // ---------------------------------------------------------------- 4. place every event
 const sts = (q, p) => claims(q, p).filter(s => s.q).map(({ q: v, s, e, preferred }) => ({ q: v, s, e, preferred }));
-const personModel = q => ({ qid: q, born: yearOf(q, 'P569'), died: yearOf(q, 'P570'), employer: sts(q, 'P108'), affiliation: sts(q, 'P1416'),
+const personModel = q => ({ qid: q, born: lifeYear(q, 'P569'), died: lifeYear(q, 'P570'), employer: sts(q, 'P108'), affiliation: sts(q, 'P1416'),
   educated: sts(q, 'P69'), work: sts(q, 'P937'), birthplace: claims(q, 'P19').map(s => s.q).filter(Boolean) });
 const shared = new Map();
 for (const q of peopleQ) for (const v of uniq([...sts(q, 'P108'), ...sts(q, 'P1416')].map(s => s.q))) shared.set(v, (shared.get(v) || 0) + 1);
@@ -360,6 +370,15 @@ const lastPlace = new Map((lastBuild.events || []).map(x => [x.id, x.place?.q ||
 // The pns held by the last build that wrote (event id → the pn's QID, in the cache, which the refresh commits with the
 // data), and those held by this one, which replace them once it writes.
 const lastHeld = cache.pnHeld || {}, pnHeld = {};
+const heldWhy = {}; // why each pn was held this build, for events.json's pnHeld
+// The pns this build holds, as events.json records them (its pnHeld, an empty list when none), so that a held pn is
+// seen in the data a green refresh commits, not only in the run's log: one entry per event, sorted by id, with the
+// seed's pn, where the event is placed instead, and why the pn is kept. It reads nothing but its arguments
+// (tests/follow-placing.test.mjs runs it on a fixture): held, event id → the pn's QID; why, event id → pnVerdict's
+// reason; seed, event id → its seed entry; placed, event id → its place { q, n }.
+function heldEntries(held, why, seed, placed) {
+  return Object.keys(held).sort().map(id => ({ id, pn: seed.get(id).pn, placed: placed.get(id), why: why[id] }));
+}
 
 // A location of discovery that is a whole country or continent says too little to place a dot.
 const COARSE = ['Q6256', 'Q3624078', 'Q7275', 'Q5107', 'Q9430'];
@@ -387,7 +406,9 @@ for (const e of SEED) {
   }
   if (anchor && ['discovery', 'site'].includes(chosen.basis) && km(ev.fb) > 25)
     report.review.push(`${e.id}: ${chosen.basis} “${chosen.name}” is ${Math.round(distanceKm([chosen.lat, chosen.lon], [anchor.lat, anchor.lon]))} km from the seed’s place “${e.fb}”`);
-  const inst = eventInstitutions(ev, models, place, chosen).filter(q => label(q));
+  // A person is not an institution, though Wikidata gives some as an employer (Robert Boyle for Hooke, the Grand Duke
+  // Ferdinando II for Torricelli): the card's list leaves them out.
+  const inst = eventInstitutions(ev, models, place, chosen).filter(q => label(q) && !has(q, 'P31', HUMAN));
   if (item) {
     const wy = ['P575', 'P585', 'P577', 'P571'].map(p => yearOf(item, p, 9)).find(y => y != null);
     if (wy != null && Math.abs(wy - e.y) > (e.y > 1500 ? 3 : 60)) report.years.push(`${e.id}: seed ${e.y}, Wikidata ${wy} (${label(item)})`);
@@ -407,6 +428,7 @@ for (const e of SEED) {
     if (v.name) chosen.name = v.name;
     else if (v.held) { report.pnHeld.push(`${e.id}: pn “${e.pn}” held: ${v.held}`); pnHeld[e.id] = pn.qid; }
     else report.pnUnused.push(`${e.id}: ${v.refuse}`);
+    if (v.held) heldWhy[e.id] = v.held;
   }
   const wiki = item ? items[item].w : (e.w && cache.titles[e.w]?.q && !cache.titles[e.w]?.dab ? e.w : null);
   events.push({
@@ -446,9 +468,14 @@ for (const q of [...usedPeople].sort((a, b) => +a.slice(1) - +b.slice(1))) {
   // approx: Wikidata gives the birth or death only to the decade or century.
   const approx = ['P569', 'P570'].some(p => { const s = pick(claims(q, p).filter(x => x.y != null)); return s && (s.pr ?? 9) < 9; });
   people[q] = { name: displayName(q), ...(it.w ? { wiki: it.w } : {}), ...(it.d ? { desc: it.d } : {}),
-    ...(yearOf(q, 'P569') != null ? { born: yearOf(q, 'P569') } : {}), ...(yearOf(q, 'P570') != null ? { died: yearOf(q, 'P570') } : {}), ...(approx ? { approx: 1 } : {}),
+    ...(lifeYear(q, 'P569') != null ? { born: lifeYear(q, 'P569') } : {}), ...(lifeYear(q, 'P570') != null ? { died: lifeYear(q, 'P570') } : {}), ...(approx ? { approx: 1 } : {}),
     country: labelsOf(q, 'P27', 2), occupation: labelsOf(q, 'P106', 4), field: labelsOf(q, 'P101', 4), inst };
 }
+// The life dates set by hand (LIFE), each against what Wikidata now says.
+report.life = Object.entries(LIFE).flatMap(([q, fix]) => ['born', 'died'].filter(k => fix[k] != null).map(k => {
+  const wd = yearOf(q, k === 'born' ? 'P569' : 'P570');
+  return `${q} ${label(q) || ''}: ${k} ${fix[k]} set by hand, Wikidata ${wd ?? 'none'}${wd === fix[k] ? ' (the same: the entry in LIFE is not needed while Wikidata stays so)' : ''}${people[q] ? '' : ' (not on the page)'}`;
+}));
 const institutions = {};
 for (const q of [...usedInst].sort((a, b) => +a.slice(1) - +b.slice(1))) {
   const it = items[q] || {}, ll = coordOf(q);
@@ -461,6 +488,7 @@ const out = {
   source: 'Wikidata (CC0), via wbgetentities; selection, titles and notes by Vitruvian Manager',
   disciplines: DISCIPLINES, basis: BASIS,
   counts: { events: events.length, people: Object.keys(people).length, institutions: Object.keys(institutions).length, positionBasis: basisCount },
+  pnHeld: heldEntries(pnHeld, heldWhy, seedById, new Map(events.map(x => [x.id, x.place]))),
   events, people, institutions,
 };
 const text = JSON.stringify(out);
@@ -489,3 +517,5 @@ writeHeads(OUT_FILE); // events.head.json in step with it (integration/scripts/h
 cache.pnHeld = pnHeld; // only a build that writes records what it held
 saveCache();
 console.log(`\nWrote ${OUT_FILE}.`);
+// Last, so that it ends the run's log: a held pn does not stop the write, and is recorded in events.json's pnHeld.
+console.log(out.pnHeld.length ? `pnHeld (${out.pnHeld.length}), recorded in events.json: ${out.pnHeld.map(h => `${h.id} (pn ${parseRef(h.pn).qid}, placed at ${h.placed.q})`).join('; ')}` : 'pnHeld: none');

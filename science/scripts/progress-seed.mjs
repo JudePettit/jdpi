@@ -11,7 +11,8 @@
 //   q   Wikidata item of the discovery/invention  w   its English Wikipedia title (used to resolve and check q)
 //   p   people: "Q<id> English Wikipedia title"; the first is the principal discoverer
 //   at  curated place, overriding the automatic rules (only where Wikidata's facts would mislead)
-//   fb  fallback place, used only when no rule finds a location
+//   fb  fallback place, used when no rule finds a location; it also anchors the rules through the people
+//       (choosePlace in progress-lib.mjs): an undated clue gives way to it unless it agrees with it
 //   pn  "Q<id> name": the place's name in the event's year, shown when the event is placed at that item (Wikidata's
 //       label is today's name: University College Cork was Queen's College Cork until 1908)
 // A name without a QID is resolved through English Wikipedia at build time (and logged); a QID whose label does not
@@ -171,7 +172,7 @@ export const SEED = [
   { id: "newcomen-engine", y: 1712, d: "tech", t: "Newcomen’s atmospheric engine", w: "Newcomen atmospheric engine", p: ["Thomas Newcomen"], fb: "Dudley", n: "The first practical steam engine, pumping water from a coal mine near Dudley Castle." },
   { id: "fahrenheit", y: 1714, d: "phys", t: "Fahrenheit’s mercury thermometer", w: "Mercury-in-glass thermometer", p: ["Daniel Gabriel Fahrenheit"], at: "Gdańsk", pn: "Q1792 Danzig", fb: "Amsterdam", n: "Reliable mercury thermometers and, ten years later, the temperature scale that carries his name." },
   { id: "variolation-london", y: 1721, d: "med", t: "Montagu brings smallpox inoculation to Britain", w: "Variolation", p: ["Lady Mary Wortley Montagu"], fb: "London", n: "Having seen the Ottoman practice in Constantinople, she has her daughter inoculated during a London epidemic." },
-  { id: "variolation-boston", y: 1721, d: "med", t: "Onesimus’s inoculation saves lives in Boston", p: ["Onesimus (Bostonian)", "Zabdiel Boylston", "Cotton Mather"], fb: "Boston", n: "West African knowledge shared by Onesimus leads Boylston to inoculate during an epidemic, with far fewer deaths among those treated." },
+  { id: "variolation-boston", y: 1721, d: "med", t: "Onesimus’s inoculation saves lives in Boston", p: ["Onesimus (Bostonian)", "Zabdiel Boylston", "Cotton Mather"], at: "Boston", fb: "Boston", n: "West African knowledge shared by Onesimus leads Boylston to inoculate during an epidemic, with far fewer deaths among those treated." },
   { id: "aberration-of-light", y: 1728, d: "astro phys", t: "Bradley discovers the aberration of starlight", w: "Aberration (astronomy)", p: ["James Bradley"], fb: "Kew", n: "Stars shift through the year because of the Earth’s motion: direct proof that the Earth orbits the Sun." },
   { id: "electrical-conduction", y: 1729, d: "phys", t: "Gray shows electricity can be conducted", p: ["Stephen Gray (scientist)"], fb: "London", n: "Charge travels hundreds of feet along a thread hung on silk, separating conductors from insulators." },
   { id: "systema-naturae", y: 1735, d: "bio", t: "Linnaeus’s System of Nature", w: "Systema Naturae", p: ["Carl Linnaeus"], fb: "Leiden", n: "A nested classification of nature into kingdoms, classes, orders, genera and species." },
@@ -241,7 +242,7 @@ export const SEED = [
   { id: "difference-engine", y: 1822, d: "tech math", t: "Babbage’s Difference Engine", w: "Difference engine", p: ["Charles Babbage"], at: "London", fb: "London", n: "A design for a machine to compute and print mathematical tables automatically." },
   { id: "fourier-series", y: 1822, d: "math phys", t: "Fourier’s analytic theory of heat", w: "Fourier series", p: ["Joseph Fourier"], fb: "Paris", n: "Any periodic signal can be written as a sum of sines and cosines, a tool now used across science." },
   { id: "plesiosaur", y: 1823, d: "earth bio", t: "Mary Anning’s plesiosaur", w: "Plesiosaurus", p: ["Mary Anning"], fb: "Lyme Regis", n: "The first complete skeleton of a long-necked sea reptile, one of the finds that revealed a lost world." },
-  { id: "carnot-cycle", y: 1824, d: "phys", t: "Carnot’s theory of heat engines", w: "Reflections on the Motive Power of Fire", p: ["Nicolas Léonard Sadi Carnot"], fb: "Paris", n: "An engine’s best efficiency depends only on the temperatures it works between: the root of the second law." },
+  { id: "carnot-cycle", y: 1824, d: "phys", t: "Carnot’s theory of heat engines", w: "Reflections on the Motive Power of Fire", p: ["Nicolas Léonard Sadi Carnot"], at: "Paris", fb: "Paris", n: "An engine’s best efficiency depends only on the temperatures it works between: the root of the second law." },
   { id: "greenhouse-effect", y: 1824, d: "earth", t: "Fourier describes the greenhouse effect", w: "Greenhouse effect", p: ["Joseph Fourier"], fb: "Paris", n: "The atmosphere lets sunlight in but slows the escape of heat, keeping the Earth warmer than it would otherwise be." },
   { id: "first-photograph", y: 1826, d: "tech chem", t: "Niépce takes the first photograph", w: "View from the Window at Le Gras", p: ["Nicéphore Niépce"], fb: "Saint-Loup-de-Varennes", n: "Bitumen hardened by light over a long exposure records the view from his window." },
   { id: "ohms-law", y: 1827, d: "phys", t: "Ohm’s law", w: "Ohm's law", p: ["Georg Ohm"], fb: "Cologne", n: "The current through a conductor is proportional to the voltage across it." },
@@ -309,7 +310,7 @@ export const SEED = [
   { id: "anthrax", y: 1876, d: "med bio", t: "Koch proves a bacterium causes anthrax", w: "Koch's postulates", p: ["Robert Koch"], at: "Wolsztyn", n: "Growing anthrax bacilli outside the body and following their life cycle ties one microbe to one disease." },
   { id: "gibbs-thermodynamics", y: 1876, d: "chem phys", t: "Gibbs’s chemical thermodynamics", w: "Gibbs free energy", p: ["Josiah Willard Gibbs"], fb: "Yale University", n: "Free energy and the phase rule explain when reactions run and how phases coexist." },
   { id: "phonograph", y: 1877, d: "tech", t: "Edison’s phonograph", w: "Phonograph", p: ["Thomas Edison"], at: "Menlo Park, New Jersey", fb: "Menlo Park, New Jersey", n: "Sound recorded as grooves on tinfoil and played back." },
-  { id: "moons-of-mars", y: 1877, d: "astro", t: "Hall discovers the moons of Mars", w: "Moons of Mars", p: ["Asaph Hall"], fb: "United States Naval Observatory", n: "Phobos and Deimos are found with the great refractor in Washington." },
+  { id: "moons-of-mars", y: 1877, d: "astro", t: "Hall discovers the moons of Mars", w: "Moons of Mars", p: ["Asaph Hall"], at: "Q1570896 Old Naval Observatory", fb: "United States Naval Observatory", n: "Phobos and Deimos are found with the great refractor in Washington." },
   { id: "light-bulb", y: 1879, d: "tech", t: "The practical light bulb", w: "Incandescent light bulb", p: ["Thomas Edison", "Joseph Swan"], fb: "Menlo Park, New Jersey", n: "Carbon filaments in a good vacuum glow for hundreds of hours, bringing electric light into homes." },
   { id: "malaria-parasite", y: 1880, d: "med", t: "Laveran sees the malaria parasite", w: "Plasmodium", p: ["Charles Louis Alphonse Laveran"], at: "Constantine, Algeria", n: "A single-celled parasite in a patient’s blood: the first protozoan shown to cause disease." },
   { id: "phagocytes", y: 1882, d: "bio med", t: "Mechnikov discovers phagocytes", w: "Phagocytosis", p: ["Élie Metchnikoff"], at: "Messina", n: "Mobile cells in starfish larvae swarm round and engulf a thorn: the cellular immune response." },
@@ -564,7 +565,7 @@ export const SEED = [
   { id: "dark-energy", y: 1998, d: "astro", t: "The universe’s expansion is speeding up", w: "Accelerating expansion of the universe", p: ["Saul Perlmutter", "Brian Schmidt", "Adam Riess"], fb: "Lawrence Berkeley National Laboratory", n: "Distant supernovae are fainter than expected, pointing to a mysterious dark energy." },
   { id: "neutrino-oscillation", y: 1998, d: "phys", t: "Neutrinos have mass", w: "Neutrino oscillation", p: ["Takaaki Kajita", "Arthur B. McDonald"], at: "Super-Kamiokande", n: "Neutrinos change type as they travel, which requires them to have mass." },
   { id: "embryonic-stem-cells", y: 1998, d: "bio med", t: "Human embryonic stem cells", w: "Embryonic stem cell", p: ["James Thomson (cell biologist)"], fb: "University of Wisconsin–Madison", n: "Cells able to become any tissue are grown in the laboratory." },
-  { id: "rna-interference", y: 1998, d: "bio", t: "RNA interference", w: "RNA interference", p: ["Andrew Fire", "Craig Mello"], fb: "Carnegie Institution for Science", n: "Double-stranded RNA silences matching genes, a new layer of gene control." },
+  { id: "rna-interference", y: 1998, d: "bio", t: "RNA interference", w: "RNA interference", p: ["Andrew Fire", "Craig Mello"], at: "Q30294630 Department of Embryology", pn: "Q30294630 Carnegie Institution of Washington’s Department of Embryology", fb: "Carnegie Institution for Science", n: "Double-stranded RNA silences matching genes, a new layer of gene control." },
   // ---- 2000 onwards
   { id: "ribosome", y: 2000, d: "chem bio", t: "The structure of the ribosome", w: "Ribosome", p: ["Ada Yonath", "Venki Ramakrishnan", "Thomas A. Steitz"], fb: "Weizmann Institute of Science", n: "Atomic maps of the cell’s protein factory, after decades of work." },
   { id: "hubble-constant", y: 2001, d: "astro", t: "The Hubble constant pinned down", w: "Hubble's law", p: ["Wendy Freedman"], fb: "Carnegie Observatories", n: "The Hubble Space Telescope Key Project measures the universe’s expansion rate to about ten per cent." },
@@ -599,3 +600,14 @@ export const SEED = [
   { id: "geometric-langlands", y: 2024, d: "math", t: "The geometric Langlands conjecture proved", w: "Geometric Langlands correspondence", p: ["Dennis Gaitsgory"], fb: "Bonn", n: "A team of nine mathematicians completes a proof of some 800 pages connecting geometry and number theory." },
   { id: "rubin-observatory", y: 2025, d: "astro tech", t: "The Vera C. Rubin Observatory’s first light", w: "Vera C. Rubin Observatory", p: [], fb: "Vera C. Rubin Observatory", n: "The largest digital camera ever built begins a ten-year survey of the southern sky." },
 ];
+
+// Life dates set by hand, by the person's Wikidata QID, only where Wikidata's own statement is wrong; each names its
+// source. The build uses them in place of Wikidata's P569 (born) or P570 (died), and its report says when Wikidata has
+// come to agree, so that the entry can go.
+export const LIFE = {
+  // Jacobus Henricus van 't Hoff (tetrahedral-carbon): Wikidata's P570 read "+1901-03-01" on 28 November 2026 (item
+  // modified 27 November 2026), while its own description reads "Dutch physical and organic chemist (1852-1911)".
+  // Wikipedia "Jacobus Henricus van 't Hoff" (revision 1384273170, read 28 November 2026): "Van 't Hoff died at the age
+  // of 58, on 1 March 1911, at Steglitz, near Berlin".
+  Q102822: { died: 1911 },
+};

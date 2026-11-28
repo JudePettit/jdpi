@@ -40,7 +40,12 @@ jobs:
         run: >-
           node --test tests/science-progress.test.mjs tests/kino.test.mjs tests/follow-invention-timeline.test.mjs
           tests/omni-history.test.mjs tests/omni-layers.test.mjs tests/omni-data.test.mjs tests/follow-refresh-jobs.test.mjs
-          tests/follow-neptune.test.mjs
+          tests/follow-neptune.test.mjs tests/follow-placing.test.mjs
+      # A seed place name that a source edit has left unused does not stop the refresh: the build writes on and records it
+      # in events.json (pnHeld). It is printed in the run's summary here, so that a green run still shows it.
+      - name: Show any seed place name held this month
+        run: |
+          node -e "const h = require('./science/progress/data/events.json').pnHeld || []; console.log(h.length ? 'Seed place names held this month (a source edit left them unused): ' + JSON.stringify(h) : 'No seed place name is held this month.')" >> "$GITHUB_STEP_SUMMARY"
       # The deploy that follows runs package.json's whole "test" list on what this refresh commits. Its unit and data
       # tests run here first, on the same files and with the deploy's settings, so that a test elsewhere in the list that
       # the new data breaks stops this refresh (nothing is committed, the site keeps the last good data and goes on

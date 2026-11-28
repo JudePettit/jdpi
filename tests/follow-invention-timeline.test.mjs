@@ -27,14 +27,17 @@ const bare = s => (s || '').replace(/\s*\([^)]*\)\s*$/, '').trim();
 // (people, life dates, institutions and their labels, places), and the Omni-Map layer made from it, and the deploy that
 // follows runs this file. Today's names of institutions (Wikidata's labels and descriptions), and which events are
 // placed at them, are pinned only while the cache's reads of what gave them are those of 28 October 2026 that these
-// pins were checked against (AS_BUILT): the seven events' places, items and people (science/scripts/progress-cache.json,
+// pins were checked against (AS_BUILT): the six events' places, items and people (science/scripts/progress-cache.json,
 // each item's `t`), whatever day the file was built from them (the builds of 26 and of 28 November 2026 both were).
+// rotation-curves was a seventh until 28 November 2026: the seed now sets it by hand at the Carnegie Institution's
+// Department of Terrestrial Magnetism (Q30258396, read that day), a facility the card does not list as an institution,
+// so its place chip alone carries the name of the time (tests/science-progress.test.mjs pins it).
 // Where it is false the pins say so (t.diagnostic) and the rest is still tested. The names of the time (the seed's pn)
 // and the titles and notes are VM's own and are pinned outright where the seed itself places the event, and wherever
 // else the event is placed at the pn's item (where an event is placed through its people follows Wikidata's facts);
 // the rest is tested against the file as it stands.
 const { builtOn } = await import('./tools/as-built.mjs');
-const PINNED = ['boolean-algebra', 'stethoscope', 'weather-fronts', 'general-relativity', 'artemisinin', 'rotation-curves', 'stm'];
+const PINNED = ['boolean-algebra', 'stethoscope', 'weather-fronts', 'general-relativity', 'artemisinin', 'stm'];
 const reads = JSON.parse(read('science/scripts/progress-cache.json')).items;
 const AS_BUILT = PINNED.every(id => { const e = ev(id); return !!e && [e.place.q, e.q, ...e.people].filter(Boolean).every(q => builtOn(reads[q]?.t, '2026-10-28')); });
 const NOT_AS_BUILT = 'the pins of Wikidata’s names are not checked: the cache’s reads of these events’ places, items and people are not those of 28 October 2026';

@@ -27,6 +27,9 @@
 //  - looksInstitutional did not count the Carnegie Institution for Science (Q1043963), which Wikidata labels "Carnegie
 //    Science" and describes as a "non-profit organization in the USA" (read 28 November 2026), as an institution, so
 //    Vera Rubin's card for the rotation curves (1970) lost it; "organization" (a whole word) and "non-profit" now count.
+//    (Later the same day the seed set that event by hand at the Institution's Department of Terrestrial Magnetism,
+//    Q30258396, as it had set RNA interference at the Department of Embryology: its place chip names the Institution
+//    and the card lists no institution. tests/science-progress.test.mjs pins it.)
 //  - Neptune's card (1846) listed the University of Paris, from Le Verrier's post there from 1847 (P108, Q209842):
 //    covers() allows a year either side, which the placing rules need for loose dates, and eventInstitutions used it
 //    for the card too. Besides the institution it is placed at, the card now lists only what a statement's own dates
@@ -214,8 +217,10 @@ test('BASIS and the page: the fallback and the method say what the rule does', (
   assert.ok(page.includes('their main institution, unless the place set by hand for the breakthrough is another institution;'), 'Method: the main institution');
   assert.ok(page.includes('then a work location without dates, where they studied or their birthplace, but only if it is the place set by hand for the breakthrough or lies within 10 km of the town that place names; and finally that place set by hand, which may be approximate.'), 'Method: the weak clues');
   assert.equal(ANCHOR_KM_WEAK, 10, 'the page’s 10 km is the rule’s');
-  assert.ok(page.includes('a card lists the institution it is placed at and those its discoverers belonged to in that year, by Wikidata’s dates.'), 'Method: the card’s institutions');
-});
+  // "where Wikidata describes that place as one": a facility set by hand (the Carnegie Institution's two departments,
+  // for rna-interference and rotation-curves, as Wikidata described them on 28 November 2026) is not listed as the
+  // place's institution, and its place chip carries the Institution's name.
+  assert.ok(page.includes('a card lists the institution it is placed at (where Wikidata describes that place as one) and those its discoverers belonged to in that year, by Wikidata’s dates.'), 'Method: the card’s institutions');});
 
 test('build: a person is not listed among a card’s institutions', () => {
   assert.match(src, /eventInstitutions\(ev, models, place, chosen\)\.filter\(q => label\(q\) && !has\(q, 'P31', HUMAN\)\)/);

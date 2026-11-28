@@ -193,7 +193,6 @@ test('progress-4 and progress-5: places set by hand where Wikidata’s facts wou
     'rocket-equation': 'Q2837',      // Kaluga, not Borovsk
     'optical-fibre': 'Q852729',      // Harlow, not Imperial College
     'pulsars': 'Q2402680',           // Mullard Radio Astronomy Observatory, not her college
-    'rotation-curves': 'Q1043963',   // the Carnegie Institution, not Georgetown
     'ct-scanner': 'Q678138',         // Hayes, not Cambridge
     'artemisinin': 'Q1073814',       // the Academy of Traditional Chinese Medicine, not Peking University
     'stm': 'Q1474431',               // IBM's Zurich laboratory, not ETH Zurich
@@ -259,6 +258,14 @@ test('progress-4 and progress-5: places set by hand where Wikidata’s facts wou
     // Institution's item, whose coordinates are its headquarters in Washington, D.C., 59 km away, where the seed's
     // institution had placed it (tests/follow-placing.test.mjs), nor Johns Hopkins University, his adjunct post.
     'rna-interference': 'Q30294630',
+    // Wikipedia "Vera Rubin" (revision 1386458857, read 28 November 2026): "She joined the Carnegie Institution of
+    // Washington (later called Carnegie Institution of Science) in 1965 as a staff member in the Department of
+    // Terrestrial Magnetism", where "she met her long-time collaborator, instrument-maker Kent Ford". Wikidata's
+    // Q30258396 is that department, a "facility in Washington D.C." founded in 1904, part of (P749) the Carnegie
+    // Institution (revision 2540660448). Not the Carnegie Institution's own item, whose coordinates are its headquarters
+    // about 6 km away, where the seed had set it by name until 28 November 2026, nor Georgetown University (her
+    // undated employer on Wikidata).
+    'rotation-curves': 'Q30258396',
   };
   for (const [id, q] of Object.entries(AT)) {
     assert.equal(ev(id).place.q, q, `${id}: ${ev(id).place.n}`);
@@ -335,7 +342,7 @@ test('progress-8: institutions and places under the names they had in the year',
   assert.equal(ev('fahrenheit').place.n, 'Danzig');                                 // the name his Wikipedia article uses
   assert.equal(ev('stethoscope').place.n, 'Necker Hospital');                       // merged with the Enfants Malades in 1920
   assert.equal(ev('artemisinin').place.n, 'Academy of Traditional Chinese Medicine'); // renamed in 1985 and 2005
-  assert.equal(ev('rotation-curves').place.n, 'Carnegie Institution of Washington');  // Carnegie Institution for Science from 2007
+  assert.equal(ev('rotation-curves').place.n, 'Carnegie Institution of Washington’s Department of Terrestrial Magnetism'); // the Institution was renamed in 2007
   assert.equal(ev('stm').place.n, 'IBM Zurich Research Laboratory');                 // later IBM Research – Zurich
   assert.equal(ev('francium').place.n, 'Radium Institute');                          // the Institut Curie from 1970
   assert.deepEqual(pnNames(data, SEED), [], 'every pn shown where its event is placed at its item');

@@ -1,6 +1,6 @@
 {
   "format": "vm-layers/1",
-  "generated": "2026-11-28T06:48:32Z",
+  "generated": "2026-11-28T16:02:05Z",
   "layers": [
     {
       "id": "borders",
@@ -591,13 +591,13 @@
       "method": "VM’s own text. The 570 breakthroughs of VM’s Invention Timeline (science/progress), 3000 BC to 2025: which events are in it is VM’s choice, and every title and note is VM’s own text; the facts behind each (its Wikidata item) are Wikidata’s (CC0). A year the timeline marks as approximate is written “c.”. Each point is placed by the Invention Timeline’s rule for it, which the point’s card names (the place of discovery, the site, or the discoverer’s institution, work place, school or birthplace, each from Wikidata); 214 are placed by hand by VM, where Wikidata gives no place or would mislead, and say so. A discipline can be chosen alone (the filter in the layer’s address: l=breakthroughs:d=astro).",
       "open": true,
       "pinnable": true,
-      "built": "2026-11-28T06:48:32Z",
+      "built": "2026-11-28T16:02:05Z",
       "files": [
         {
           "file": "omni/data/layers/breakthroughs/events.json",
-          "bytes": 326215,
-          "gzip": 67514,
-          "sha256": "9fc7180fae150da1a772e0bc9894714323b17d496afc907312fc3cbff793ae78"
+          "bytes": 326256,
+          "gzip": 67539,
+          "sha256": "59b4484c9622996106d07d1767101284bded858bde01507cf792f1cede57bd50"
         }
       ]
     },

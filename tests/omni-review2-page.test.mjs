@@ -5,6 +5,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { pageTest, launch, openFresh } from './tools/pages.mjs';
+import { builtOn } from './tools/as-built.mjs';
 
 const BASE = (process.env.JDPI_URL || '').replace(/\/$/, '');
 const PAGE = BASE ? pageTest : { skip: 'set JDPI_URL to test the page (npm run test:e2e -- tests/omni-review2-page.test.mjs)' };
@@ -188,17 +189,50 @@ test('page X6: a click on a battle’s point opens the pick panel, with its War 
   assert.deepEqual(errors, []);
 });
 
+// The subject of the two tests below that read a Q-id's record from the lake: a Q-id VM's crosswalk cannot outline
+// (omni/data/borders/qids.json), whose point (pt) the Master Index holds in its shard lake/data/e/<n>.json, n its number
+// mod 512 (omni/app.js, shardOf). The shard is rebuilt from Wikidata each month (lake-refresh.yml, on the 3rd); the
+// crosswalk is rebuilt with the borders, by hand (omni/scripts/build-borders.mjs). So the subject is picked from them as
+// the site under test serves them, by that rule (refresh pins 2, 28 November 2026): Genoa (Q1449), as written, while
+// it qualifies, else the first Q-id of Genoa's shard that does. Genoa's point is pinned to the lake's build of
+// 26 November 2026, which held 8.934° E, 44.407° N. All three files must load as JSON (a site that has lost one fails
+// here: Pages answers a missing path with 200 and its HTML page); a shard that loads and holds no such Q-id leaves
+// these tests nothing to show, and they say so.
+const GENOA = 'Q1449', shardOf = q => +q.slice(1) % 512;
+async function lakeSubject() {
+  const get = async p => {
+    const r = await fetch(`${BASE}/${p}`);
+    assert.ok(r.ok, `${p}: HTTP ${r.status}`);
+    const body = await r.text();
+    try { return JSON.parse(body); } catch { assert.fail(`${p} did not load as JSON (${r.headers.get('content-type') || 'no content type'}): ${body.slice(0, 60)}`); }
+  };
+  const [shard, crosswalk, manifest] = await Promise.all([get(`lake/data/e/${shardOf(GENOA)}.json`), get('omni/data/borders/qids.json'), get('lake/data/manifest.json')]);
+  assert.ok(shard && typeof shard === 'object' && !Array.isArray(shard), `lake/data/e/${shardOf(GENOA)}.json is not a shard of records`);
+  assert.ok(crosswalk?.entries && typeof crosswalk.entries === 'object', 'omni/data/borders/qids.json holds no entries');
+  assert.ok(typeof manifest?.generated === 'string', 'lake/data/manifest.json names no build (generated)');
+  const point = q => { const pt = shard?.[q]?.pt; return Array.isArray(pt) && pt.length === 2 && pt.every(Number.isFinite) ? pt : null; };
+  const fits = q => !!point(q) && !crosswalk?.entries?.[q]?.length;
+  const q = fits(GENOA) ? GENOA : Object.keys(shard || {}).filter(x => /^Q\d+$/.test(x) && fits(x)).sort((a, b) => a.slice(1) - b.slice(1))[0];
+  if (!q) return { why: `lake/data/e/${shardOf(GENOA)}.json holds no Q-id with a point that VM's crosswalk cannot outline: nothing to focus` };
+  if (q === GENOA && builtOn(manifest?.generated, '2026-11-26')) assert.deepEqual(point(q).map(v => Math.round(v * 1e3) / 1e3), [8.934, 44.407], 'Genoa’s point as the lake of 26 November 2026 held it');
+  return { q, pt: point(q), shard: shardOf(q), label: shard[q].label || q };
+}
+
 test('page X7: prp:focus with a Q-id the view has not read loads its point from the lake and fits it', PAGE, async t => {
+  const subject = await lakeSubject();
+  if (subject.why) { t.skip(subject.why); return; }
   const page = await open(t);
   const errors = watch(page);
   await page.goto(`${BASE}/omni/index.html#${HEAD}&t=1980..2000&at=1990&fill=borders`, { waitUntil: 'domcontentloaded' });
   await ready(page, 1990);
   await page.waitForFunction(() => typeof window.omniFocus === 'function', null, { timeout: 30000 });
-  // Q1449, Genoa: no border in VM's crosswalk; its point is in lake/data/e/425.json.
-  await page.evaluate(() => window.dispatchEvent(new CustomEvent('prp:focus', { detail: { qids: ['Q1449'] } })));
+  // Genoa or the Q-id picked in its stead: no border in VM's crosswalk; its point is in its lake shard.
+  await page.evaluate(q => window.dispatchEvent(new CustomEvent('prp:focus', { detail: { qids: [q] } })), subject.q);
   await page.waitForFunction(() => window.omniFocus().focused, null, { timeout: 20000 });
   const [w, s, e, n] = (await page.evaluate(() => window.omniFocus())).focused;
-  assert.ok(w <= 8.94 && e >= 8.93 && s <= 44.41 && n >= 44.40, `the box holds Genoa's point: ${[w, s, e, n]}`);
+  const [x, y] = subject.pt;
+  assert.ok(w <= x && x <= e && s <= y && y <= n, `the box holds ${subject.label}'s point ${subject.pt}: ${[w, s, e, n]}`);
+  assert.ok(e - w < 5 && n - s < 5, `${subject.label}'s point, not a wider view: ${[w, s, e, n]}`);
   assert.deepEqual(errors, []);
 });
 
@@ -206,22 +240,25 @@ test('page X7: prp:focus with a Q-id the view has not read loads its point from 
 // Each test below failed on f9e1004 and passes once mended; the Node-level findings are in omni-review2-data.test.mjs.
 
 test('page 3rd X1: an older recipe whose subject is read late never replaces the newer view', PAGE, async t => {
+  const subject = await lakeSubject();
+  if (subject.why) { t.skip(subject.why); return; }
   const page = await open(t);
   const errors = watch(page);
-  // Q1449, Genoa: its Master Index record is in lake/data/e/425.json, held until the newer recipe has drawn.
-  const late = await hold(page, '**/lake/data/e/425.json');
-  await page.goto(`${BASE}/omni/index.html#${HEAD}&t=1980..2010&at=1990&fill=borders&q=Q1449`, { waitUntil: 'domcontentloaded' });
+  // Genoa or the Q-id picked in its stead (lakeSubject): its Master Index record is in its shard, held until the newer
+  // recipe has drawn.
+  const late = await hold(page, `**/lake/data/e/${subject.shard}.json`);
+  await page.goto(`${BASE}/omni/index.html#${HEAD}&t=1980..2010&at=1990&fill=borders&q=${subject.q}`, { waitUntil: 'domcontentloaded' });
   await late.asked;
   await page.evaluate(h => { location.hash = h; }, `${HEAD}&t=1980..2010&at=2000&fill=borders`);
   await ready(page, 2000);
-  const done = page.waitForResponse(r => /\/lake\/data\/e\/425\.json$/.test(r.url()), { timeout: 30000 });
+  const done = page.waitForResponse(r => new RegExp(`/lake/data/e/${subject.shard}\\.json$`).test(r.url()), { timeout: 30000 });
   late.release();
   await done;
   await page.waitForTimeout(2000);
   const s = await fresh(page);
   assert.equal(s.frame, 2000, 'the newer recipe’s year stands');
   assert.match(s.recipe, /at=2000/);
-  assert.doesNotMatch(s.recipe, /q=Q1449/);
+  assert.doesNotMatch(s.recipe, new RegExp(`q=${subject.q}(&|$)`));
   assert.deepEqual(errors, []);
 });
 

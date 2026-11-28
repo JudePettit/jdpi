@@ -40,6 +40,7 @@ jobs:
         run: >-
           node --test tests/science-progress.test.mjs tests/kino.test.mjs tests/follow-invention-timeline.test.mjs
           tests/omni-history.test.mjs tests/omni-layers.test.mjs tests/omni-data.test.mjs tests/follow-refresh-jobs.test.mjs
+          tests/follow-neptune.test.mjs
       # The deploy that follows runs package.json's whole "test" list on what this refresh commits. Its unit and data
       # tests run here first, on the same files and with the deploy's settings, so that a test elsewhere in the list that
       # the new data breaks stops this refresh (nothing is committed, the site keeps the last good data and goes on

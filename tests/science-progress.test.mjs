@@ -10,6 +10,7 @@ import { SEED } from '../science/scripts/progress-seed.mjs';
 import { DISCIPLINE_IDS, BASIS, parseRef, nameMatches, yearOf, yearLabel, parsePoint, span, covers, EDUCATION_YEARS, distanceKm, firstYear, choosePlace, eventInstitutions, seedProblems } from '../science/scripts/progress-lib.mjs';
 import { progress, ADAPTERS } from '../lake/scripts/adapters.mjs';
 import { pageTest, launch } from './tools/pages.mjs';
+import { builtOn } from './tools/as-built.mjs';
 
 const ROOT = fileURLToPath(new URL('..', import.meta.url));
 const FILE = join(ROOT, 'science/progress/data/events.json');
@@ -216,6 +217,28 @@ test('progress-4 and progress-5: places set by hand where Wikidata’s facts wou
     // Wikipedia "Streptomycin": first isolated on 19 October 1943 by Schatz in Waksman's laboratory at Rutgers
     // University. Not Temple University (Schatz's undated Wikidata employer, a later post).
     'streptomycin': 'Q499451',
+    // Wikipedia "Discovery of Neptune" (revision 1387592462, read 28 November 2026): the planet was confirmed "at the
+    // Berlin Observatory", by Galle; Wikidata's item for the discovery (Q1356165) gives its location (P276) as the Berlin
+    // Observatory (Q698950). Not the university Galle had studied at, nor Berlin as one of his undated work places
+    // (added to Wikidata on 13 November 2026), where the rules through the people placed it.
+    'neptune': 'Q698950',
+    // Where the seed's fallback place already named the body the work was done at, but the education rule placed the
+    // event at a school nearby (the second readers of 28 November 2026; each article read once that day):
+    // Wikipedia "Ignaz Semmelweis" (revision 1383434529): in 1847 he proposed hand washing "at Vienna General Hospital's
+    // First Obstetrical Clinic". Not the University of Vienna.
+    'handwashing': 'Q180080',
+    // Wikipedia "Pluto" (revision 1387738753): the observatory's director gave the search to Tombaugh, who had just
+    // arrived at the observatory (Lowell Observatory, Flagstaff), and he found the moving object in February 1930. Not
+    // Northern Arizona University, under a name the college did not then bear.
+    'pluto': 'Q466895',
+    // Wikipedia "Francium" (revision 1385825504): discovered on 7 January 1939 "by Marguerite Perey of the Curie
+    // Institute in Paris"; Wikipedia "Curie Institute (Paris)" (revision 1383501461): the Institut du Radium, founded
+    // in 1909, merged with the Fondation Curie in 1970 to become the Institut Curie, so the seed's pn names it the Radium
+    // Institute for 1939. Not the University of Paris.
+    'francium': 'Q2451973',
+    // Wikipedia "Atomic clock" (revision 1386411903): the first practical caesium clock "was built at the National
+    // Physical Laboratory in the United Kingdom in 1955 by Louis Essen". Not the University of London.
+    'atomic-clock': 'Q1967606',
   };
   for (const [id, q] of Object.entries(AT)) {
     assert.equal(ev(id).place.q, q, `${id}: ${ev(id).place.n}`);
@@ -244,21 +267,67 @@ test('progress-7: the Chinese breakthroughs of 850, 1040 and 1637 are in China, 
   assert.equal(ev('vitruvius').place.n, 'Rome');
 });
 
-test('progress-8: institutions and places under the names they had in the year', () => {
-  assert.equal(ev('boolean-algebra').place.n, 'Queen\'s College Cork');            // University College Cork from 1908
-  assert.equal(ev('weather-fronts').place.n, 'Geophysical Institute, Bergen');      // the University of Bergen from 1946
+// The Friedrich Wilhelm University from 1828 until its closure in 1945; reopened in 1946 as the University of Berlin;
+// Humboldt University from 1949 (Wikipedia "Humboldt University of Berlin", revision 1388386551, read 28 November
+// 2026); written as the page already names Q20266330, its 1828 Wikidata item. Which events Wikidata's facts place at
+// Q152087 changes with its edits (Neptune left it in the rehearsal of 28 November 2026, when Galle's work places had
+// been added), so the rule is tested, not a count: on a fixture, and on the built data whatever it holds. Problems,
+// one line each: an event there from 1828 to 1945 not under that name, one from 1949 not under the lookup's (today's)
+// name, and one before 1828 or from 1946 to 1948, for which VM has set no name of the time.
+const FWU = 'Frederick William University Berlin';
+const berlinNames = d => d.events.filter(e => e.place.q === 'Q152087').flatMap(e => {
+  const want = e.y < 1828 || (e.y >= 1946 && e.y < 1949) ? null : e.y < 1946 ? FWU : d.institutions.Q152087?.name;
+  return want && e.place.n === want ? [] : [`${e.y} ${e.id}: “${e.place.n}”, not ${want ? `“${want}”` : 'a name VM has set'}`];
+});
+// Every seed pn is the name its event is shown under whenever the build places the event at the pn's item.
+const pnNames = (d, seed) => seed.filter(s => s.pn).flatMap(s => {
+  const { qid, name } = parseRef(s.pn), e = d.events.find(x => x.id === s.id);
+  return e && e.place.q === qid && e.place.n !== name ? [`${s.id}: at ${qid} as “${e.place.n}”, not its pn “${name}”`] : [];
+});
+test('progress-8: the names of the time, by rule (a fixture)', () => {
+  const fixture = { institutions: { Q152087: { name: 'Humboldt-Universität zu Berlin' } }, events: [
+    { id: 'a', y: 1846, place: { q: 'Q152087', n: FWU } },
+    { id: 'b', y: 1882, place: { q: 'Q152087', n: 'Humboldt-Universität zu Berlin' } }, // today's name for the year
+    { id: 'c', y: 2016, place: { q: 'Q152087', n: FWU } },                               // the old name after 1949
+    { id: 'd', y: 2016, place: { q: 'Q152087', n: 'Humboldt-Universität zu Berlin' } },
+    { id: 'e', y: 1815, place: { q: 'Q152087', n: FWU } },                               // before the name was given
+    { id: 'f', y: 1846, place: { q: 'Q64', n: 'Berlin' } },                              // elsewhere: not this rule's
+    { id: 'g', y: 1945, place: { q: 'Q152087', n: FWU } },                               // the year of its closure
+    { id: 'h', y: 1947, place: { q: 'Q152087', n: FWU } }] };                            // the University of Berlin then
+  assert.deepEqual(berlinNames(fixture), ['1882 b: “Humboldt-Universität zu Berlin”, not “Frederick William University Berlin”',
+    '2016 c: “Frederick William University Berlin”, not “Humboldt-Universität zu Berlin”', '1815 e: “Frederick William University Berlin”, not a name VM has set',
+    '1947 h: “Frederick William University Berlin”, not a name VM has set']);
+  const seed = [{ id: 'a', pn: `Q152087 ${FWU}` }, { id: 'b', pn: `Q152087 ${FWU}` }, { id: 'f', pn: `Q152087 ${FWU}` }];
+  assert.deepEqual(pnNames(fixture, seed), [`b: at Q152087 as “Humboldt-Universität zu Berlin”, not its pn “${FWU}”`]);
+});
+
+test('progress-8: institutions and places under the names they had in the year', async t => {
+  // Placed through their people, so where Wikidata's facts lead each month: under the name of the year whenever they are
+  // at the pn's item (pnNames, below), as they were in the build of 26 November 2026.
+  for (const [id, then] of [['boolean-algebra', 'Queen\'s College Cork'],   // University College Cork from 1908
+    ['weather-fronts', 'Geophysical Institute, Bergen']]) {                 // the University of Bergen from 1946
+    const pn = parseRef(SEED.find(s => s.id === id).pn);
+    assert.equal(pn.name, then, `${id}: the seed's name of the time`);
+    if (ev(id).place.q === pn.qid) assert.equal(ev(id).place.n, then, id);
+  }
+  // Placed by the seed itself (a place set by hand, or the fallback of an event with no people), so pinned outright.
   assert.equal(ev('reusable-rocket').place.n, 'Cape Canaveral Air Force Station');  // Space Force Station from December 2020
   assert.equal(ev('fahrenheit').place.n, 'Danzig');                                 // the name his Wikipedia article uses
   assert.equal(ev('stethoscope').place.n, 'Necker Hospital');                       // merged with the Enfants Malades in 1920
   assert.equal(ev('artemisinin').place.n, 'Academy of Traditional Chinese Medicine'); // renamed in 1985 and 2005
   assert.equal(ev('rotation-curves').place.n, 'Carnegie Institution of Washington');  // Carnegie Institution for Science from 2007
   assert.equal(ev('stm').place.n, 'IBM Zurich Research Laboratory');                 // later IBM Research – Zurich
-  // The Friedrich Wilhelm University from 1828 until 1945, Humboldt University only from 1949 (Wikipedia "Humboldt
-  // University of Berlin"); written as the page already names Q20266330, its 1828 Wikidata item.
-  const hu = data.events.filter(e => e.place.q === 'Q152087' && e.y < 1949);
-  assert.ok(hu.length >= 5, hu.map(e => e.id).join(', '));
-  for (const e of hu) assert.equal(e.place.n, 'Frederick William University Berlin', e.id);
-  assert.equal(data.institutions.Q20266330?.name, 'Frederick William University Berlin');
+  assert.equal(ev('francium').place.n, 'Radium Institute');                          // the Institut Curie from 1970
+  assert.deepEqual(pnNames(data, SEED), [], 'every pn shown where its event is placed at its item');
+  await t.test('Q152087 under its name of the year, on the built data', st => {
+    const there = data.events.filter(e => e.place.q === 'Q152087');
+    if (!there.length) { st.skip('Wikidata\'s facts place no event at Q152087 in this build: nothing to check (the fixture proves the rule)'); return; }
+    assert.deepEqual(berlinNames(data), []);
+  });
+  // The seed's name agrees with the lookup's name for Q20266330, Wikidata's label: held to the reads that gave it
+  // (its cache date; "Frederick William University Berlin" as read on 28 October and on 28 November 2026).
+  const read20266330 = cache.items.Q20266330?.t;
+  if (builtOn(read20266330, '2026-10-28') || builtOn(read20266330, '2026-11-28')) assert.equal(data.institutions.Q20266330?.name, FWU);
   assert.notEqual(ev('michelson-morley').place.q, 'Q1047060');                     // not Case Western Reserve (1967)
   assert.notEqual(ev('pulsars').place.q, 'Q1195404');                              // not Murray Edwards College (New Hall until 2008)
 });

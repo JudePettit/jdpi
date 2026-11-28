@@ -18,8 +18,12 @@
 //    skips a place founded (earliest P571) after the year, and the undated rules drop a statement whose own start or
 //    end rules the year out; the card's list of institutions leaves out a place founded after the year too. Locations
 //    of discovery that are whole countries are not used; discovery sites far from the hand-set place are logged for
-//    review. A seed pn ("Q<id> name") names the place as it was called in the year; if the event is no longer placed
-//    at that QID, nothing is written until the seed is mended (--allow-drop writes anyway).
+//    review. A seed pn ("Q<id> name") names the place as it was called in the year, shown when the event is placed at
+//    that QID (pnVerdict below). An event a source edit has moved elsewhere is written where the facts now place it
+//    and reported ("pnHeld", kept in the cache's pnHeld until the facts lead back or the seed is mended); a pn that
+//    none of the event's facts lead to and no build has used or held (a typo or a stale override), a pn beside a
+//    hand-set QID (at) of another place, or a move to another item under the pn's place's name of today, stops the
+//    write until the seed is mended ("pnUnused"; --allow-drop writes anyway).
 // 5. Write events.json: events, plus people and institution lookups; but not if a seed event found no place, people or
 //    institutions fell below 90% of the last build's, or the file would pass 1.5 MB (--allow-drop writes the first two).
 // Answers are cached in progress-cache.json (compact, per item, with the date fetched). --refresh refetches anything
@@ -63,7 +67,9 @@ const items = cache.items;
 function saveCache() {
   // One entry per line, keys sorted: monthly refreshes give small, readable diffs.
   const part = o => `{\n${Object.keys(o).sort().map(k => `${JSON.stringify(k)}:${JSON.stringify(o[k])}`).join(',\n')}\n}`;
-  writeFileSync(CACHE_FILE, `{"version":1,\n"titles":${part(cache.titles)},\n"items":${part(cache.items)},\n"labels":${part(cache.labels)},\n"search":${part(cache.search)}}\n`);
+  // pnHeld (pnVerdict below) is written only while a pn is held, so that a month with none leaves the file as it was.
+  const held = cache.pnHeld && Object.keys(cache.pnHeld).length ? `,\n"pnHeld":${part(cache.pnHeld)}` : '';
+  writeFileSync(CACHE_FILE, `{"version":1,\n"titles":${part(cache.titles)},\n"items":${part(cache.items)},\n"labels":${part(cache.labels)},\n"search":${part(cache.search)}${held}}\n`);
 }
 
 // ---------------------------------------------------------------- HTTP (polite: one request at a time, paced, maxlag)
@@ -315,11 +321,52 @@ const shared = new Map();
 for (const q of peopleQ) for (const v of uniq([...sts(q, 'P108'), ...sts(q, 'P1416')].map(s => s.q))) shared.set(v, (shared.get(v) || 0) + 1);
 const weight = q => shared.get(q) || 0;
 
+// The seed's pn names the place as it was called in the event's year (Queen's College Cork until 1908), for the place
+// it gives by QID only, so that a move to another place cannot carry the old name with it. What to do with it:
+//   { name }    the event is placed at the pn's item: it is shown under the name of the time.
+//   { held }    the event is placed elsewhere this month, but the pn's item is one the event's own facts still name
+//               (its seed places, its item's location, its people's institutions, work places or birthplaces), or the
+//               one the last build placed it at, or one an earlier build held (the cache's pnHeld, kept while the seed
+//               is unchanged): a source edit moved it. It is written where the facts now place it, under that place's
+//               name, as every event without a pn is, and the report says so ("pnHeld"); the pn stays for the month the
+//               facts lead back. An edited source does not stop the refresh, in its first month or any later one, since
+//               an unused pn is never shown and writing publishes nothing false (Neptune, 28 November 2026: Galle's
+//               work places, imported from the GND on 13 November, put the event in Berlin rather than at the
+//               university he had studied at, and the refresh of 2 December would have stopped). A pn held only by the
+//               record is stale, and the report says to mend the seed.
+//   { refuse }  a mistake in the seed, mended there before anything is written ("pnUnused"): the seed sets the place
+//               by hand to another QID (at) than its pn's, so contradicts itself; no fact of the event names the pn's
+//               item and no build has placed it there or held it (a typo, or an override left behind when the seed's
+//               own place changed); or the event now sits at another item under the very name the pn's item has today
+//               (the same body under a new item), which would bring back today's name for the year.
+// It reads nothing but its arguments (tests/follow-neptune.test.mjs runs it on fixtures): pn { qid, name }; chosen
+// { qid, name }; atQ, the QID the seed's own at gives (null for a name or none); reach, the QIDs the event's facts
+// name; lastQ, where the last build placed it; heldQ, the pn an earlier build held for it; labelOf(q); norm(s).
+function pnVerdict(pn, chosen, { atQ = null, reach, lastQ, heldQ = null, labelOf, norm }) {
+  if (pn.qid === chosen.qid) return { name: pn.name };
+  if (atQ && atQ !== pn.qid)
+    return { refuse: `pn “${pn.qid} ${pn.name}” beside the seed’s hand-set place ${atQ}: the seed contradicts itself` };
+  const today = labelOf(pn.qid);
+  if (today && norm(labelOf(chosen.qid) || chosen.name) === norm(today))
+    return { refuse: `placed at ${chosen.qid} “${chosen.name}”, which bears the name ${pn.qid} has today: written, it would show today’s name for the year` };
+  const why = reach.includes(pn.qid) ? 'still among the places they name' : lastQ === pn.qid ? 'where the last build placed it'
+    : heldQ === pn.qid ? 'held since an earlier build, though none of the event’s facts name it now' : null;
+  if (why) return { held: `placed at ${chosen.qid} “${chosen.name}” this month, by Wikidata’s facts as they now stand; ${pn.qid} is ${why}, so the pn is kept for when it is placed there again${why.startsWith('held') ?' (stale: mend the seed unless the facts will lead back)' : ''}` };
+  return { refuse: `pn “${pn.qid} ${pn.name}” not used, since the event is placed at ${chosen.qid} “${chosen.name}”; none of its facts name ${pn.qid}, and no build has placed it there or held it` };
+}
+// The last build: where each event was placed (pnVerdict), and its counts (the guard below).
+const lastBuild = existsSync(OUT_FILE) ? JSON.parse(readFileSync(OUT_FILE, 'utf8')) : {};
+const lastPlace = new Map((lastBuild.events || []).map(x => [x.id, x.place?.q || null]));
+// The pns held by the last build that wrote (event id → the pn's QID, in the cache, which the refresh commits with the
+// data), and those held by this one, which replace them once it writes.
+const lastHeld = cache.pnHeld || {}, pnHeld = {};
+
 // A location of discovery that is a whole country or continent says too little to place a dot.
 const COARSE = ['Q6256', 'Q3624078', 'Q7275', 'Q5107', 'Q9430'];
 const coarse = q => COARSE.some(v => has(q, 'P31', v));
 const events = [], usedPeople = new Set(), usedInst = new Set(), basisCount = {};
 report.review = [];
+report.pnHeld = [];
 report.pnUnused = [];
 for (const e of SEED) {
   const item = refOf('item', itemRaw(e))?.q || null;
@@ -349,11 +396,18 @@ for (const e of SEED) {
   people.forEach(q => usedPeople.add(q));
   inst.forEach(q => usedInst.add(q));
   if (['shared-institution', 'institution-at-time', 'institution', 'education'].includes(chosen.basis) || (chosen.basis !== 'birthplace' && place(chosen.qid)?.inst)) usedInst.add(chosen.qid);
-  // The seed's pn names the place as it was called in the event's year (Queen's College Cork until 1908), for the place
-  // it gives by QID only, so a later move to another place cannot carry the old name with it.
+  // The seed's pn (pnVerdict above): the places the event's facts name are its seed places, its item's location of
+  // discovery and location, and its people's institutions, work places and birthplaces.
   const pn = e.pn ? parseRef(e.pn) : null;
-  if (pn && pn.qid === chosen.qid) chosen.name = pn.name;
-  else if (pn) report.pnUnused.push(`${e.id}: pn “${e.pn}” not used, since the event is placed at ${chosen.qid} “${chosen.name}”`);
+  if (pn) {
+    const reach = uniq([ev.at, ev.fb, ...(item ? ['P189', 'P276'].flatMap(p => claims(item, p).map(s => s.q)) : []),
+      ...people.flatMap(q => PLACE_PROPS.flatMap(p => claims(q, p).map(s => s.q)))]);
+    const v = pnVerdict(pn, chosen, { atQ: e.at ? parseRef(e.at).qid || null : null, reach, lastQ: lastPlace.get(e.id) || null,
+      heldQ: lastHeld[e.id] || null, labelOf: label, norm: normName });
+    if (v.name) chosen.name = v.name;
+    else if (v.held) { report.pnHeld.push(`${e.id}: pn “${e.pn}” held: ${v.held}`); pnHeld[e.id] = pn.qid; }
+    else report.pnUnused.push(`${e.id}: ${v.refuse}`);
+  }
   const wiki = item ? items[item].w : (e.w && cache.titles[e.w]?.q && !cache.titles[e.w]?.dab ? e.w : null);
   events.push({
     id: e.id, y: e.y, ...(e.ca ? { ca: 1 } : {}), d: e.d.split(/\s+/), t: e.t, n: e.n,
@@ -420,15 +474,18 @@ for (const [k, list] of Object.entries(report)) if (list.length) console.log(`\n
 // validating, not a month's edits, which move a handful); and the file stays under 1.5 MB, since the page loads it whole.
 // --allow-drop (calendar/scripts/guard.mjs) writes the first two anyway, for a deliberate change to the seed.
 if (text.length > 1.5 * 1024 * 1024) { console.error(`Not written: events.json would be ${(text.length / 1048576).toFixed(2)} MB, over 1.5 MB.`); process.exit(1); }
-const last = (existsSync(OUT_FILE) && JSON.parse(readFileSync(OUT_FILE, 'utf8')).counts) || {};
+const last = lastBuild.counts || {};
 refuseIfLost([
   ...(events.length < SEED.length ? [`${SEED.length - events.length} of ${SEED.length} seed events not placed (see "dropped")`] : []),
-  // A pn the build could not use would silently bring back today's name for the year (see "pnUnused"): mend the seed.
+  // A pn no fact of its event leads to and no build has used or held, or one beside a hand-set QID of another place, is
+  // a mistake in the seed, and a move to the pn's place under a new item would bring back today's name for the year
+  // (see "pnUnused"): mend the seed. A pn held by a source edit ("pnHeld") is not.
   ...(report.pnUnused.length ? [`${report.pnUnused.length} seed pn names not used (see "pnUnused")`] : []),
   ...lostCounts({ people: last.people || 0, institutions: last.institutions || 0 }, out.counts, { keep: 0.9 }),
 ]);
 mkdirSync(dirname(OUT_FILE), { recursive: true });
 writeFileSync(OUT_FILE, text);
 writeHeads(OUT_FILE); // events.head.json in step with it (integration/scripts/heads.mjs)
+cache.pnHeld = pnHeld; // only a build that writes records what it held
 saveCache();
 console.log(`\nWrote ${OUT_FILE}.`);

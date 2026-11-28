@@ -24,22 +24,34 @@ const text = s => s.replace(/<[^>]+>/g, '').replace(/\s+/g, ' ');
 const bare = s => (s || '').replace(/\s*\([^)]*\)\s*$/, '').trim();
 
 // progress-refresh.yml rebuilds science/progress/data/events.json on the 2nd of each month from what Wikidata then says
-// (people, life dates, institutions and their labels, places), and the deploy that follows runs this file. Today's
-// names of institutions (Wikidata's labels and descriptions) are pinned only while the file is the build of
-// 26 November 2026 that these pins were checked against (AS_BUILT, its `generated`); the names of the time (the seed's
-// pn) and the titles and notes are VM's own and are pinned outright; the rest is tested against the file as it stands.
+// (people, life dates, institutions and their labels, places), and the Omni-Map layer made from it, and the deploy that
+// follows runs this file. Today's names of institutions (Wikidata's labels and descriptions), and which events are
+// placed at them, are pinned only while the cache's reads of what gave them are those of 28 October 2026 that these
+// pins were checked against (AS_BUILT): the seven events' places, items and people (science/scripts/progress-cache.json,
+// each item's `t`), whatever day the file was built from them (the builds of 26 and of 28 November 2026 both were).
+// Where it is false the pins say so (t.diagnostic) and the rest is still tested. The names of the time (the seed's pn)
+// and the titles and notes are VM's own and are pinned outright where the seed itself places the event, and wherever
+// else the event is placed at the pn's item (where an event is placed through its people follows Wikidata's facts);
+// the rest is tested against the file as it stands.
 const { builtOn } = await import('./tools/as-built.mjs');
-const AS_BUILT = builtOn(data.generated, '2026-11-26');
+const PINNED = ['boolean-algebra', 'stethoscope', 'weather-fronts', 'general-relativity', 'artemisinin', 'rotation-curves', 'stm'];
+const reads = JSON.parse(read('science/scripts/progress-cache.json')).items;
+const AS_BUILT = PINNED.every(id => { const e = ev(id); return !!e && [e.place.q, e.q, ...e.people].filter(Boolean).every(q => builtOn(reads[q]?.t, '2026-10-28')); });
+const NOT_AS_BUILT = 'the pins of Wikidata’s names are not checked: the cache’s reads of these events’ places, items and people are not those of 28 October 2026';
+// Is the event placed at its seed pn's item in this build?
+const atPn = id => { const s = SEED.find(x => x.id === id); return !!s?.pn && ev(id)?.place.q === parseRef(s.pn).qid; };
 
 // The events placed at an institution under its name of the time: the place chip reads e.place.n, and the lookup
 // (data.institutions) holds one name per item, today's (Wikidata's label).
 const renamed = data.events.filter(e => e.inst.includes(e.place.q) && data.institutions[e.place.q] && data.institutions[e.place.q].name !== e.place.n);
 
-test('progress-8 (precondition): events placed at an institution under its name of the time, which the lookup names as today', () => {
+test('progress-8 (precondition): events placed at an institution under its name of the time, which the lookup names as today', t => {
   const ids = renamed.map(e => e.id);
-  if (AS_BUILT) for (const id of ['boolean-algebra', 'stethoscope', 'weather-fronts', 'general-relativity', 'artemisinin', 'rotation-curves', 'stm']) assert.ok(ids.includes(id), id);
+  if (AS_BUILT) for (const id of PINNED) assert.ok(ids.includes(id), id);
   if (AS_BUILT) assert.equal(data.institutions.Q1574185.name, 'University College Cork');
-  assert.equal(ev('boolean-algebra').place.n, 'Queen\'s College Cork');
+  else t.diagnostic(NOT_AS_BUILT);
+  assert.equal(ev('stethoscope').place.n, 'Necker Hospital'); // set by hand in the seed (at), so always there
+  if (atPn('boolean-algebra')) assert.equal(ev('boolean-algebra').place.n, 'Queen\'s College Cork');
 });
 
 test('progress-8: the card’s Institutions list names the place’s institution as the place chip does', () => {
@@ -78,12 +90,15 @@ test('Sources: how names are shown, true to the build', () => {
 
 test('Omni: the breakthroughs layer is in step with the Invention Timeline’s events', () => {
   const layer = JSON.parse(read('omni/data/layers/breakthroughs/events.json'));
-  // The layer is built by hand (omni/scripts/build-breakthroughs.mjs) from the events file it names (`of`); the monthly
-  // refresh rebuilds the events file and not the layer, so the two are compared row for row only while the layer is
-  // the one built from the file as it stands. Whatever the day, every row is an event of the timeline under VM's own
-  // title and note (the seed's).
-  if (layer.of === data.generated) assert.deepEqual(layer.rows, breakthroughRows(data));
-  else assert.ok(Date.parse(layer.of) < Date.parse(data.generated), `the layer (${layer.of}) is of an earlier events file than ${data.generated}`);
+  // The layer is made by omni/scripts/build-breakthroughs.mjs from the events file it names (`of`). The monthly refresh
+  // (progress-refresh.yml) rebuilds the events file and then the layer, and commits both together; a hand rebuild of the
+  // events is committed with the layer rebuilt after it, in the same way. So the layer is always the one made from the
+  // file as it stands, row for row (tests/follow-refresh-jobs.test.mjs holds the same of the job). This fails on purpose
+  // after a hand rebuild of events.json until build-breakthroughs.mjs has been run: that is the state that must not be
+  // committed, and both gates this file runs in (the job's test step and the deploy) come after both builds.
+  assert.equal(layer.of, data.generated, `the layer is of the events file ${layer.of}, not of ${data.generated} as it stands: run node omni/scripts/build-breakthroughs.mjs`);
+  assert.deepEqual(layer.rows, breakthroughRows(data));
+  // Every row is an event of the timeline under VM's own title and note (the seed's).
   const events = new Map(data.events.map(e => [e.id, e]));
   for (const r of layer.rows) {
     const e = events.get(r.id);
@@ -94,7 +109,7 @@ test('Omni: the breakthroughs layer is in step with the Invention Timeline’s e
   assert.equal(row('telescope').label, 'Lipperhey seeks a patent for the telescope');
   assert.equal(row('tcp-ip').label, 'Cerf and Kahn design a protocol to join networks');
   assert.deepEqual([row('ice-age').sortYear, row('ice-age').placeName], [1837, 'Neuchâtel']);
-  assert.equal(row('boolean-algebra').placeName, 'Queen\'s College Cork');
+  if (atPn('boolean-algebra')) assert.equal(row('boolean-algebra').placeName, 'Queen\'s College Cork');
   assert.equal(row('stethoscope').placeName, 'Necker Hospital');
   assert.ok(!layer.rows.some(r => /People's Republic of China/.test(r.placeName || '') && r.sortYear < 1949));
   // The layer's catalogue entry counts what the file holds.
@@ -121,13 +136,17 @@ test('page: the card’s Institutions list names the place’s institution as it
   // The place's institution: its name of the time, with today's name below it ("now …"), and never today's description,
   // which is false for the year (UCC as a constituent university of the NUI, formed in 1908; the University of Bergen,
   // established in 1946, as the Geophysical Institute's parent in 1919). The name of the time is the seed's (VM's);
-  // today's name and description are Wikidata's, from the file as it stands, and as the build of 26 November gave them
-  // while the file is that build (AS_BUILT).
+  // today's name and description are Wikidata's, from the file as it stands, and as the reads of 28 October gave them
+  // while the cache holds those reads (AS_BUILT).
+  if (!AS_BUILT) t.diagnostic(NOT_AS_BUILT);
   for (const [y, id, then, nowAsBuilt, descAsBuilt] of [[1854, 'boolean-algebra', 'Queen\'s College Cork', 'now University College Cork', /National University of Ireland/],
     [1919, 'weather-fronts', 'Geophysical Institute, Bergen', 'now University of Bergen, Geophysical Institute', /department at the University of Bergen \(UiB\)/],
     [1816, 'stethoscope', 'Necker Hospital', 'now Necker–Enfants Malades Hospital', /teaching hospital in Paris/],
     [1915, 'general-relativity', 'Frederick William University Berlin', 'now Humboldt-Universität zu Berlin', /public research university in Berlin/],
     [1972, 'artemisinin', 'Academy of Traditional Chinese Medicine', 'now China Academy of Chinese Medical Sciences', /education organization in Beijing/]]) {
+    // Three of these are placed through their people: a month whose Wikidata places one elsewhere leaves it unchecked
+    // here (the others still are; science-progress's pnNames holds the rule on the data).
+    if (!atPn(id)) { t.diagnostic(`${id}: placed at ${ev(id).place.q} “${ev(id).place.n}” in this build, not at its pn's item: not checked`); continue; }
     const inst = data.institutions[ev(id).place.q];
     assert.equal(ev(id).place.n, then, `${id}: the seed's name of the time`);
     if (!inst || inst.name === then) continue; // Wikidata now names it as it was named then: nothing to set beside it

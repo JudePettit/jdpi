@@ -1,5 +1,5 @@
 {
-  "generated": "2026-11-28T16:08:36.770Z",
+  "generated": "2026-11-28T16:59:31.161Z",
   "name": "Vitruvian Manager data catalogue",
   "publisher": "JDP-Iq",
   "description": "Every public dataset in Vitruvian Manager (VM, by JDP-Iq), with its fields, size, licence and sources. Read-only; no keys. Files are static JSON on this site; the MCP server (/mcp) and the JSON API (/api/v1/) query them with row and size caps.",
@@ -1414,7 +1414,7 @@
           "description": "The same item at the other outlets that carried it, each { source, url, title, access }"
         }
       ],
-      "rows": 473,
+      "rows": 475,
       "licence": "Titles, links and short summaries © their publishers, quoted for reference; classification and metadata © JDP-Iq.",
       "sources": [
         "RSS and Atom feeds of the journals, working-paper series, central banks, think tanks and economics desks listed in econ-briefing-sources"
@@ -1422,7 +1422,7 @@
       "updated": "2026-11-28",
       "refresh": "6-hourly",
       "page": "econ/briefing/index.html",
-      "bytes": 276286
+      "bytes": 277180
     },
     {
       "id": "econ-briefing-sources",
@@ -1558,7 +1558,7 @@
       "updated": "2026-11-28",
       "refresh": "6-hourly",
       "page": "econ/briefing/index.html",
-      "bytes": 276286
+      "bytes": 277180
     },
     {
       "id": "science-briefing-stories",
@@ -1651,7 +1651,7 @@
           "description": "The same item at the other outlets that carried it, each { source, url, title, access }"
         }
       ],
-      "rows": 1056,
+      "rows": 1065,
       "licence": "Titles, links and short summaries © their publishers, quoted for reference; classification and metadata © JDP-Iq.",
       "sources": [
         "RSS and Atom feeds of the journals and science desks listed in science-briefing-sources (Springer Nature, AAAS, Cell Press, PNAS, APS, Wiley, IOP, AAS, PLOS, NASA, ESA and others)"
@@ -1659,7 +1659,7 @@
       "updated": "2026-11-28",
       "refresh": "6-hourly",
       "page": "science/briefing/index.html",
-      "bytes": 618277
+      "bytes": 624445
     },
     {
       "id": "science-briefing-sources",
@@ -1785,7 +1785,7 @@
       "updated": "2026-11-28",
       "refresh": "6-hourly",
       "page": "science/briefing/index.html",
-      "bytes": 618277
+      "bytes": 624445
     },
     {
       "id": "digital-briefing-stories",
@@ -1883,7 +1883,7 @@
           "description": "The same item at the other outlets that carried it, each { source, url, title, access }"
         }
       ],
-      "rows": 983,
+      "rows": 975,
       "licence": "Titles, links and short summaries © their publishers, quoted for reference; classification and metadata © JDP-Iq.",
       "sources": [
         "RSS and Atom feeds of the journals, preprint servers, labs and technology desks listed in digital-briefing-sources"
@@ -1891,7 +1891,7 @@
       "updated": "2026-11-28",
       "refresh": "6-hourly",
       "page": "digital/briefing/index.html",
-      "bytes": 588076
+      "bytes": 582696
     },
     {
       "id": "digital-briefing-sources",
@@ -2037,7 +2037,7 @@
       "updated": "2026-11-28",
       "refresh": "6-hourly",
       "page": "digital/briefing/index.html",
-      "bytes": 588076
+      "bytes": 582696
     },
     {
       "id": "political-calendar",

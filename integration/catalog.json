@@ -1,5 +1,5 @@
 {
-  "generated": "2026-11-28T01:12:37.210Z",
+  "generated": "2026-11-28T02:59:58.009Z",
   "name": "Vitruvian Manager data catalogue",
   "publisher": "JDP-Iq",
   "description": "Every public dataset in Vitruvian Manager (VM, by JDP-Iq), with its fields, size, licence and sources. Read-only; no keys. Files are static JSON on this site; the MCP server (/mcp) and the JSON API (/api/v1/) query them with row and size caps.",
@@ -1131,16 +1131,16 @@
           "description": "Soft-news class when the story is not hard news: s sport, e entertainment, l lifestyle; absent for news"
         }
       ],
-      "rows": 5991,
+      "rows": 5814,
       "licence": "Headlines, standfirsts and links © their publishers, quoted for reference; selection and metadata © JDP-Iq.",
       "sources": [
         "RSS and Atom feeds of the publishers listed in intelligence-briefing-sources",
         "Political positions: AllSides Media Bias Ratings, otherwise Media Bias/Fact Check, adjusted to five steps"
       ],
-      "updated": "2026-11-27",
+      "updated": "2026-11-28",
       "refresh": "twice daily",
       "page": "q/briefing.html",
-      "bytes": 2613890
+      "bytes": 2536340
     },
     {
       "id": "intelligence-briefing-sources",
@@ -1205,10 +1205,10 @@
         "Media Bias/Fact Check",
         "The publishers' own feeds"
       ],
-      "updated": "2026-11-27",
+      "updated": "2026-11-28",
       "refresh": "twice daily",
       "page": "q/briefing.html",
-      "bytes": 2613890
+      "bytes": 2536340
     },
     {
       "id": "daily-synopsis-stories",
@@ -1296,17 +1296,18 @@
           "description": "The story's written 5 Sided Analysis: published, refused, missing or not-eligible"
         }
       ],
-      "rows": 70,
+      "rows": 80,
       "licence": "Headlines and links © their publishers, quoted for reference; selection and counts © JDP-Iq.",
       "sources": [
         "The Political Briefing's publishers' RSS and Atom feeds (intelligence-briefing-stories)",
         "Political positions: AllSides Media Bias Ratings, otherwise Media Bias/Fact Check, adjusted to five steps"
       ],
-      "updated": "2026-11-27",
+      "updated": "2026-11-28",
       "refresh": "daily",
       "page": "daily-synopsis/index.html",
       "derivedFrom": [
         "daily-synopsis/data/index.json",
+        "daily-synopsis/data/days/2026-11-28.json",
         "daily-synopsis/data/days/2026-11-27.json",
         "daily-synopsis/data/days/2026-11-26.json",
         "daily-synopsis/data/days/2026-11-25.json",
@@ -1315,7 +1316,7 @@
         "daily-synopsis/data/days/2026-11-22.json",
         "daily-synopsis/data/days/2026-11-21.json"
       ],
-      "bytes": 28761
+      "bytes": 32996
     },
     {
       "id": "econ-briefing-stories",
@@ -1418,10 +1419,10 @@
       "sources": [
         "RSS and Atom feeds of the journals, working-paper series, central banks, think tanks and economics desks listed in econ-briefing-sources"
       ],
-      "updated": "2026-11-27",
+      "updated": "2026-11-28",
       "refresh": "6-hourly",
       "page": "econ/briefing/index.html",
-      "bytes": 285748
+      "bytes": 285817
     },
     {
       "id": "econ-briefing-sources",
@@ -1554,10 +1555,10 @@
       "sources": [
         "RSS and Atom feeds of the journals, working-paper series, central banks, think tanks and economics desks listed in econ-briefing-sources"
       ],
-      "updated": "2026-11-27",
+      "updated": "2026-11-28",
       "refresh": "6-hourly",
       "page": "econ/briefing/index.html",
-      "bytes": 285748
+      "bytes": 285817
     },
     {
       "id": "science-briefing-stories",
@@ -1650,15 +1651,15 @@
           "description": "The same item at the other outlets that carried it, each { source, url, title, access }"
         }
       ],
-      "rows": 1074,
+      "rows": 1059,
       "licence": "Titles, links and short summaries © their publishers, quoted for reference; classification and metadata © JDP-Iq.",
       "sources": [
         "RSS and Atom feeds of the journals and science desks listed in science-briefing-sources (Springer Nature, AAAS, Cell Press, PNAS, APS, Wiley, IOP, AAS, PLOS, NASA, ESA and others)"
       ],
-      "updated": "2026-11-27",
+      "updated": "2026-11-28",
       "refresh": "6-hourly",
       "page": "science/briefing/index.html",
-      "bytes": 628579
+      "bytes": 619794
     },
     {
       "id": "science-briefing-sources",
@@ -1781,10 +1782,10 @@
       "sources": [
         "RSS and Atom feeds of the journals and science desks listed in science-briefing-sources (Springer Nature, AAAS, Cell Press, PNAS, APS, Wiley, IOP, AAS, PLOS, NASA, ESA and others)"
       ],
-      "updated": "2026-11-27",
+      "updated": "2026-11-28",
       "refresh": "6-hourly",
       "page": "science/briefing/index.html",
-      "bytes": 628579
+      "bytes": 619794
     },
     {
       "id": "digital-briefing-stories",
@@ -1882,15 +1883,15 @@
           "description": "The same item at the other outlets that carried it, each { source, url, title, access }"
         }
       ],
-      "rows": 986,
+      "rows": 984,
       "licence": "Titles, links and short summaries © their publishers, quoted for reference; classification and metadata © JDP-Iq.",
       "sources": [
         "RSS and Atom feeds of the journals, preprint servers, labs and technology desks listed in digital-briefing-sources"
       ],
-      "updated": "2026-11-27",
+      "updated": "2026-11-28",
       "refresh": "6-hourly",
       "page": "digital/briefing/index.html",
-      "bytes": 590184
+      "bytes": 589471
     },
     {
       "id": "digital-briefing-sources",
@@ -2033,10 +2034,10 @@
       "sources": [
         "RSS and Atom feeds of the journals, preprint servers, labs and technology desks listed in digital-briefing-sources"
       ],
-      "updated": "2026-11-27",
+      "updated": "2026-11-28",
       "refresh": "6-hourly",
       "page": "digital/briefing/index.html",
-      "bytes": 590184
+      "bytes": 589471
     },
     {
       "id": "political-calendar",

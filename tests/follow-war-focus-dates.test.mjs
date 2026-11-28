@@ -22,6 +22,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync, readdirSync } from 'node:fs';
 import { pageTest, launch } from './tools/pages.mjs';
+import { readAfter, sameDay } from './tools/as-built.mjs';
 
 const BASE = (process.env.JDPI_URL || 'https://jdpi.pages.dev').replace(/\/$/, '');
 const text = rel => readFileSync(new URL(rel, import.meta.url), 'utf8');
@@ -65,16 +66,24 @@ test('war-focus-dates: the Markale massacres, the Al-Shati airstrike and the bom
   assert.ok(several >= 1, 'War Focus holds a battle of several dates');
 });
 
-test('war-focus-dates: every battle both pages hold has the same separate dates on War Focus as on the Omni-Map', () => {
+test('war-focus-dates: every battle both pages hold has the same separate dates on War Focus as on the Omni-Map', t => {
   const layer = json('../omni/data/layers/battles.json');
   const rows = layer.rows.filter(r => /^wf-/.test(r.war || ''));
   const by = new Map(rows.map(r => [r.q, r]));
   const from = r => r.dates?.map(d => String(d.from));
-  // Only while the two pages were built from Wikidata within two days of each other: War Focus is rebuilt on the 2nd of
-  // each month (warfocus-refresh.yml) and the Omni-Map's battles layer by hand, so a Wikidata edit between the two
-  // builds is no fault of either page, and must not hold back the refresh's deploy.
-  const wfBuilt = Date.parse(json('../battlefield/focus/data/index.json').generated), omBuilt = Date.parse(layer.built);
-  if (Math.abs(wfBuilt - omBuilt) > 2 * 864e5) return;
+  // A comparison of two builds (refresh pins 2, 28 November 2026), as tests/follow-war-pages.test.mjs makes it. The
+  // layer takes each battle's war from War Focus's files (build-battles.mjs focusBattles), but its days are its own read
+  // of Wikidata's P585 (finestPoints), as War Focus's pts are War Focus's: two independent reads. So they are compared
+  // only while the layer was built after War Focus's last build and on the same day (readAfter and sameDay). Within two
+  // days was not enough: War Focus rebuilt a day after the layer (an --only build, or the refresh of the 2nd of a month
+  // run again), with a Wikidata edit between the two, would fail here although neither page is at fault. War Focus is
+  // rebuilt on the 2nd of each month (warfocus-refresh.yml) and the layer by hand. Whatever the day, the rule both pages
+  // read their days by is proved on a fixture below ("the same Wikidata points give the same days on both pages").
+  const FOCUS_BUILT = json('../battlefield/focus/data/index.json').generated;
+  if (!(readAfter(layer.built, FOCUS_BUILT) && sameDay(layer.built, FOCUS_BUILT))) {
+    t.skip(`the Omni-Map's battles layer (built ${layer.built}) is not War Focus's build of that day (${FOCUS_BUILT}): not compared`);
+    return;
+  }
   // The battles named in this part: Markale, Al-Shati, the Ardenne Abbey massacre and the atomic bombings of Hiroshima
   // and Nagasaki (Wikidata, read 27 November 2026).
   for (const [id, q] of [['bosnian-war', 'Q1482369'], ['gaza-war', 'Q122998566'], ['ww2', 'Q22947455'], ['ww2', 'Q488']]) {
@@ -90,6 +99,41 @@ test('war-focus-dates: every battle both pages hold has the same separate dates 
   // The War Focus battles the layer holds by another war's file (a battle two wars list keeps the first) agree too.
   for (const id of WARS) for (const b of war(id).battles) if (b.pts && by.has(b.q)) assert.deepEqual(by.get(b.q).dates?.map(d => String(d.from)), b.pts, `${id} ${b.q}`);
   assert.ok(n >= 7, `${n} battles of several dates on both pages`);
+});
+
+// The rule the comparison above rests on, whatever day either page was built: given the same Wikidata points in time,
+// War Focus's build (battlesFromRows, battleDates: its query leaves out a deprecated date) and the Omni-Map's
+// (battleRow, finestPoints over every statement but a deprecated one) give a battle the same separate days. Fixture
+// points in Wikidata's shapes (Q1482369's two P585, read 27 November 2026; Operation Martin's year and month), not the
+// committed files, so no live value is pinned.
+test('war-focus-dates: the same Wikidata points give the same days on both pages (fixture)', async () => {
+  const { battlesFromRows, battleDates } = await import('../battlefield/focus/scripts/rules.mjs');
+  const { battleRow } = await import('../omni/scripts/build-battles.mjs');
+  const wd = q => ({ type: 'uri', value: `http://www.wikidata.org/entity/${q}` }), lit = value => ({ type: 'literal', value });
+  const claim = (t, precision, rank = 'normal') => ({ rank, mainsnak: { snaktype: 'value', datavalue: { value: { time: t, precision, calendarmodel: 'http://www.wikidata.org/entity/Q1985727' } } } });
+  const at = { rank: 'normal', mainsnak: { snaktype: 'value', datavalue: { value: { latitude: 43.86, longitude: 18.43, precision: 0.01 } } } };
+  const cases = [
+    // The items' own P585 statements and ranks (Wikidata, read 28 November 2026), but for the deprecated third Markale
+    // point, 1994-03-01, which is added for the test and is not Wikidata's.
+    // Two days, the second of another year, and a deprecated third that neither page reads.
+    { q: 'Q1482369', name: 'Markale massacres', points: [['1994-02-05', 11, 'preferred'], ['1995-08-28', 11, 'normal'], ['1994-03-01', 11, 'deprecated']] },
+    // A year that holds a finer month is one date, the month: no separate days on either page.
+    { q: 'Q19384597', name: 'Operation Martin', points: [['1943-00-00', 9, 'normal'], ['1943-03-00', 10, 'normal']] },
+    // A month and two days: three dates, each at its own precision.
+    { q: 'Q4940734', name: 'Bombing of Yawata', points: [['1944-06-00', 10, 'normal'], ['1944-08-20', 11, 'normal'], ['1945-08-08', 11, 'normal']] },
+  ];
+  for (const c of cases) {
+    const live = c.points.filter(([, , rank]) => rank !== 'deprecated');
+    const rows = live.map(([d, p]) => ({ b: wd(c.q), bLabel: lit(c.name), pt: lit(`${d}T00:00:00Z`), ptp: lit(String(p)) }));
+    const t = battlesFromRows(rows, new Set([c.q])).get(c.q).t;
+    const focus = battleDates({ ...t, name: c.name }).pts ?? null;
+    const e = { id: c.q, labels: { en: { value: c.name } }, claims: { P585: c.points.map(([d, p, rank]) => claim(`+${d}T00:00:00Z`, p, rank)), P625: [at] } };
+    const omni = battleRow(e, q => q)?.dates?.map(d => String(d.from)) ?? null;
+    assert.deepEqual(omni, focus, `${c.name}: the Omni-Map ${omni}, War Focus ${focus}`);
+  }
+  // And the days themselves, as both pages show them.
+  const days = c => battleDates({ ...battlesFromRows(c.points.filter(x => x[2] !== 'deprecated').map(([d, p]) => ({ b: wd(c.q), bLabel: lit(c.name), pt: lit(`${d}T00:00:00Z`), ptp: lit(String(p)) })), new Set([c.q])).get(c.q).t, name: c.name }).pts ?? null;
+  assert.deepEqual(cases.map(days), [['1994-02-05', '1995-08-28'], null, ['1944-06', '1944-08-20', '1945-08-08']]);
 });
 
 test('war-focus-dates: one rule for both pages, imported, not copied', async () => {

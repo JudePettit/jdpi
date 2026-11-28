@@ -28,6 +28,7 @@ import { resolve, windowFor, frameFor, yearsNote, yearsText, ownYears } from '..
 import { formatSpan } from '../design/vm-dates.js';
 import { yearText, readYear, ticksFor, playSteps, playStep, playSpan, nextStop, keepFiles } from '../omni/lib/time.js';
 import { pageTest, launch, launchOptions, openFresh } from './tools/pages.mjs';
+import { builtOn } from './tools/as-built.mjs';
 import '../design/prp-focus.js';
 import '../design/prp-map.js';
 
@@ -1220,9 +1221,11 @@ test('page: the heading gives the clicked entry\'s own years, a slow borders fil
     // R1: Ludovico Sforza's own years (the Master Index's), with the window named as the map's, never as his dates.
     await page.goto(`${BASE}/omni/index.html#${RECIPE}`, { waitUntil: 'domcontentloaded' });
     await ready(page, 1494);
+    // (His label and years are the lake's, which lake-refresh rebuilds from Wikidata each month: read from the record, as
+    // the page reads them. The map's 1446–1514 is the address's own window, RECIPE's t=, VM's.)
     const rec = read(`lake/data/e/${236853 % 512}.json`).Q236853;
-    const own = yearsText(rec, { today: new Date().toISOString().slice(0, 10) });
-    assert.equal(await page.textContent('#view-subject'), `${rec.label} (${own}): map of 1446–1514`);
+    const own = rec ? yearsText(rec, { today: new Date().toISOString().slice(0, 10) }) : null;
+    assert.equal(await page.textContent('#view-subject'), rec ? `${rec.label}${own ? ` (${own})` : ''}: map of 1446–1514` : 'The Omni-Map, 1446–1514');
     // R6: the one reason that applies (the start of the book's era is the reader's to say).
     assert.match(await page.textContent('#frame-why'), /^Opens on 1494, as VM's click chose it: the passage's own year, or the start of the book's era, as the reader's card beside the map says\./);
     // R3: while the file for the slider's new year loads, the note says so and the map's year stays where it is drawn.
@@ -1264,7 +1267,7 @@ test('page: the heading gives the clicked entry\'s own years, a slow borders fil
   } finally { await browser.close(); }
 });
 
-test('page: a click\'s view opens on the clicked place\'s own outline; where VM holds none, it says so and shows the world (MP-10)', PAGE, async () => {
+test('page: a click\'s view opens on the clicked place\'s own outline; where VM holds none, it says so and shows the world (MP-10)', PAGE, async t => {
   const browser = await launch({ args: ['--mute-audio'] });
   try {
     const page = await browser.newPage({ viewport: { width: 1440, height: 900 } });
@@ -1281,27 +1284,40 @@ test('page: a click\'s view opens on the clicked place\'s own outline; where VM 
     assert.ok(st.focus.includes('Q148540') && st.focus.includes('Q70972'), 'both outlined and in focus');
     assert.ok(st.box[0] <= fl[0] && st.box[1] <= fl[1] && st.box[2] >= fl[2] && st.box[3] >= fl[3], `the box ${st.box} holds Florence ${fl}`);
     assert.ok(st.box[2] - st.box[0] < fr[2] - fr[0], 'and is Florence\'s, not France\'s too');
-    // Classical Athens, which Cliopatria does not outline under its name and the Master Index gives no point: said, and the world.
-    await page.goto(`${BASE}/omni/index.html#vr=1&t=-513..-503&at=-508&show=frame&step=y&base=plain&fill=borders&l=battles&focus=Q844930,Q148540&q=Q844930`, { waitUntil: 'domcontentloaded' });
-    await page.reload({ waitUntil: 'domcontentloaded' });
-    await ready(page, -508);
-    // The Master Index stores each entry's point (pt) from its full build: with one, the map opens on it; without, it
-    // says so and shows the world.
+    // Classical Athens, which Cliopatria does not outline under its name: the map opens on the Master Index's point for it,
+    // and where the Master Index holds none, that is said, and the world shown.
+    // Refresh pins 2 (28 November 2026): its label, its dates (founded -0508, no end) and its point are the lake's, which
+    // lake-refresh rebuilds from Wikidata each month, so the expected text is worked out from the record the page reads,
+    // by the page's own rule (yearsText); the literal words are held to the lake's build of 26 November 2026. The frame's
+    // 508 BC is the address's own year, VM's.
     const rec = read(`lake/data/e/${844930 % 512}.json`).Q844930;
-    if (Array.isArray(rec?.pt)) await page.waitForFunction(() => window.omniState.points?.includes('Q844930'), null, { timeout: 15000 });
-    else await page.waitForFunction(() => /Classical Athens/.test(document.querySelector('#map-note').textContent), null, { timeout: 15000 });
-    st = await page.evaluate(() => window.omniState);
-    const note = await page.textContent('#map-note');
-    if (Array.isArray(rec?.pt)) {
-      assert.ok(st.box && st.box[0] <= rec.pt[0] && rec.pt[0] <= st.box[2] && st.box[1] <= rec.pt[1] && rec.pt[1] <= st.box[3], `centred on its recorded point ${rec.pt} (${st.box})`);
-      assert.ok(st.box[2] - st.box[0] < 20, 'Classical Athens\'s point, not a box over Florence as well');
-      assert.match(await page.textContent('#focus-body'), /Classical Athens Q844930[^]*?: shown as a point/);
-    } else {
-      assert.equal(st.box, null, 'the world, not another place\'s box');
-      assert.match(note, /^VM holds no outline of Classical Athens for 508 BC/);
-      assert.match(note, /the Master Index holds no point for it, so the map shows the whole world/);
-    }
-    assert.match(await page.textContent('#focus-body'), /Classical Athens[\s\S]*its own dates in the Master Index: from 508 BC, end not recorded/);
+    await t.test('Classical Athens, clicked: its point, or said to have none and the world', async st2 => {
+      if (!rec) { st2.skip('the Master Index no longer holds Q844930 (Classical Athens): nothing to click'); return; }
+      await page.goto(`${BASE}/omni/index.html#vr=1&t=-513..-503&at=-508&show=frame&step=y&base=plain&fill=borders&l=battles&focus=Q844930,Q148540&q=Q844930`, { waitUntil: 'domcontentloaded' });
+      await page.reload({ waitUntil: 'domcontentloaded' });
+      await ready(page, -508);
+      const name = rec.label, re = s => String(s).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      const ownText = yearsText(rec, { today: new Date().toISOString().slice(0, 10) });
+      if (builtOn(read('lake/data/manifest.json').generated, '2026-11-26')) assert.deepEqual([name, ownText, Array.isArray(rec.pt)], ['Classical Athens', 'from 508 BC, end not recorded', true], 'Q844930 as the lake held it on 26 November 2026 (with a point, 37.97° N, 23.72° E)');
+      // The Master Index stores each entry's point (pt) from its full build: with one, the map opens on it; without, it
+      // says so and shows the world.
+      if (Array.isArray(rec.pt)) await page.waitForFunction(() => window.omniState.points?.includes('Q844930'), null, { timeout: 15000 });
+      else await page.waitForFunction(n => document.querySelector('#map-note').textContent.includes(n), name, { timeout: 15000 });
+      const s = await page.evaluate(() => window.omniState);
+      const note = await page.textContent('#map-note');
+      if (Array.isArray(rec.pt)) {
+        assert.ok(s.box && s.box[0] <= rec.pt[0] && rec.pt[0] <= s.box[2] && s.box[1] <= rec.pt[1] && rec.pt[1] <= s.box[3], `centred on its recorded point ${rec.pt} (${s.box})`);
+        assert.ok(s.box[2] - s.box[0] < 20, `${name}'s point, not a box over Florence as well`);
+        assert.match(await page.textContent('#focus-body'), new RegExp(`${re(name)} Q844930[^]*?: shown as a point`));
+      } else {
+        assert.equal(s.box, null, 'the world, not another place\'s box');
+        assert.match(note, new RegExp(`^VM holds no outline of ${re(name)} for 508 BC`));
+        assert.match(note, /the Master Index holds no point for it, so the map shows the whole world/);
+      }
+      const body = await page.textContent('#focus-body');
+      if (ownText) assert.match(body, new RegExp(`${re(name)}[\\s\\S]*its own dates in the Master Index: ${re(ownText)}`));
+      else assert.doesNotMatch(body, /its own dates in the Master Index/, 'a record with no dates is given none');
+    });
     assert.deepEqual(errors, []);
   } finally { await browser.close(); }
 });

@@ -7,6 +7,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync, readdirSync } from 'node:fs';
 import * as L from '../osint/lib.js';
+import { builtOn } from './tools/as-built.mjs';
 import * as X from '../osint/exif.js';
 import { renderMarkdown, inline, wrapText, flowSvg, stackSvg, lanesSvg, parseFigure, slugify, defaultLink } from '../osint/md.js';
 
@@ -513,12 +514,32 @@ test('sanctions index: the built file holds no individual and none of the droppe
   assert.ok(!/[\w.+-]+@[\w-]+\.[\w.]+/.test(JSON.stringify(idx.records)), 'no email address');
   const find = (q, ref) => { const r = L.sanctionsSearch(idx, q).results.find(x => x.rec.ref === ref); assert.ok(r, `${q} → ${ref}`); return r.rec; };
   // A known company on both lists, a known ship (by name and by IMO number), and the EU's own IMO-bearing enterprise.
-  assert.equal(find('Korea Mining Development Trading Corporation', 'EU.4187.20').list, 'eu');
-  assert.equal(find('Korea Mining Development Trading Corporation', 'DPR0157').listed, '2009-04-24');
-  const ship = find('Petrel 8', 'DPR0075');
-  assert.deepEqual([ship.type, ship.imo, ship.flag, ship.listed], ['Ship', '9562233', 'Comoros', '2017-10-03']);
-  assert.equal(find('IMO 9562233', 'DPR0075').name, 'Petrel 8');
-  assert.equal(find('EU.4198.83', 'EU.4198.83').imo, '5342883');
+  // Refresh pins 2 (28 November 2026): the daily sanctions-refresh reads both lists again and runs this file before it
+  // commits, so a ship reflagged or a record delisted would stop it every day until the test was mended. The records
+  // are therefore picked from the built index by their shape (the named ones first, while they are there) and found by
+  // the search whatever the day; their values as the lists gave them are held only for the build of 27 November 2026.
+  const byRef = new Map(idx.records.map(r => [r.ref, r]));
+  const ukByName = new Map(idx.records.filter(r => r.list === 'uk').map(r => [r.name.toLowerCase(), r]));
+  const ukShip = [byRef.get('DPR0075'), ...idx.records].find(r => r?.list === 'uk' && r.type === 'Ship' && r.imo && r.name);
+  const euImo = [byRef.get('EU.4198.83'), ...idx.records].find(r => r?.list === 'eu' && r.imo);
+  const euBoth = [byRef.get('EU.4187.20'), ...idx.records].find(r => r?.list === 'eu' && r.type !== 'Ship' && ukByName.has(r.name.toLowerCase()));
+  assert.ok(ukShip && euImo && euBoth, 'a UK ship with an IMO number, an EU record with one, and a company on both lists');
+  const ukBoth = ukByName.get(euBoth.name.toLowerCase());
+  assert.equal(find(euBoth.name, euBoth.ref).list, 'eu');
+  assert.equal(find(euBoth.name, ukBoth.ref).list, 'uk');
+  assert.equal(find(ukShip.name, ukShip.ref).type, 'Ship');
+  // (A record may hold several IMO numbers, joined by ", " as build-sanctions.mjs writes them: the search takes one.)
+  for (const n of ukShip.imo.split(/,\s*/)) assert.equal(find(`IMO ${n}`, ukShip.ref).name, ukShip.name);
+  assert.equal(find(euImo.ref, euImo.ref).imo, euImo.imo);
+  if (builtOn(idx.built, '2026-11-27')) {
+    // As the EU's and the UK's lists gave them, read on 27 November 2026 (lists.eu and lists.uk, read).
+    assert.equal(find('Korea Mining Development Trading Corporation', 'EU.4187.20').list, 'eu');
+    assert.equal(find('Korea Mining Development Trading Corporation', 'DPR0157').listed, '2009-04-24');
+    const ship = find('Petrel 8', 'DPR0075');
+    assert.deepEqual([ship.type, ship.imo, ship.flag, ship.listed], ['Ship', '9562233', 'Comoros', '2017-10-03']);
+    assert.equal(find('IMO 9562233', 'DPR0075').name, 'Petrel 8');
+    assert.equal(find('EU.4198.83', 'EU.4198.83').imo, '5342883');
+  }
   // No aircraft: neither the EU's file nor the UK's types one (only the US list does, and it is left out).
   assert.ok(!idx.records.some(r => r.reg || r.type === 'Aircraft'));
 });

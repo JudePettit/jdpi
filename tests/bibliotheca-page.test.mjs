@@ -15,6 +15,7 @@ import { frameMove } from '../bibliotheca/neo/lib/frame.js';
 import { shellHash } from '../kino/lib/links.js';
 import { pageTest, launch, drawn } from './tools/pages.mjs';
 import { yearsText } from '../design/vm-click.js';
+import { builtOn } from './tools/as-built.mjs';
 
 const ROOT = fileURLToPath(new URL('..', import.meta.url));
 const file = p => readFileSync(join(ROOT, p), 'utf8');
@@ -164,13 +165,51 @@ test('era: the twentieth century opens every screen, War Focus at each war\'s fi
 // with Switzerland (Q39) chosen in the Manifesto. It now opens the country the row is about: the term's, when the term
 // is one of today's countries or a place in one (the Master Index's Country relation: Ferrara is in Italy); else those
 // the book names most, three at most; and where there is none, the row is left out.
-test('era: the National Analysis row opens the country it is about, or is left out', async () => {
+// Refresh pins 2 (28 November 2026): the rule is tested on a fixture whatever the day. The book's terms and the
+// entries' Country relations are the lake's and the books' tags, which lake-refresh rebuilds from Wikidata each month
+// (lake-refresh.yml tags every book again against the new lake), and this file is in the deploy's list only, so the
+// built books and entries are held to the lake's build of 26 November 2026 (lake/data/manifest.json, generated), and
+// after a later build checked by shape.
+test('era: the National Analysis row opens the country it is about, or is left out (fixture)', async () => {
+  const { todayCountries } = await import('../bibliotheca/neo/lib/era.js');
+  const byQid = new Map([['Q39', 'CHE'], ['Q38', 'ITA'], ['Q29', 'ESP'], ['Q34', 'SWE'], ['Q45', 'PRT'], ['Q31', 'BEL']]);
+  const term = (qid, label) => ({ qid, label });
+  const rows = cs => cs.map(c => [c.iso3, c.name, c.from, c.n]);
+  // A term that is a country: that country, by the entry's label.
+  assert.deepEqual(rows(todayCountries({ qid: 'Q39', entity: { label: 'Switzerland' }, terms: [term('Q29', 'Spain')], byQid })), [['CHE', 'Switzerland', 'term', 0]]);
+  // A place in one, by the entry's Country relation (Ferrara is in Italy; the Papal States, no country today, is not listed).
+  assert.deepEqual(todayCountries({ qid: 'Q13362', entity: { label: 'Ferrara', rel: { Country: [['Q38', 'Italy'], ['Q170174', 'Papal States']] } }, terms: [], byQid }).map(c => c.iso3), ['ITA']);
+  // No term, or one in no country of today: the book's, most named first, the first named first on a tie, three at most.
+  const book = [term('Q34', 'Sweden'), term('Q29', 'Spain'), term('Q99', 'California'), term('Q29', 'Spain'), term('Q31', 'Belgium'), term('Q34', 'Sweden'), term('Q29', 'Spain'), term('Q45', 'Portugal'), term('Q99', 'California'), term('Q99', 'California'), term('Q99', 'California')];
+  assert.deepEqual(rows(todayCountries({ terms: book, byQid })), [['ESP', 'Spain', 'book', 3], ['SWE', 'Sweden', 'book', 2], ['BEL', 'Belgium', 'book', 1]]);
+  assert.deepEqual(todayCountries({ qid: 'Q70972', entity: { label: 'Kingdom of France', rel: { Country: [['Q70972', 'Kingdom of France']] } }, terms: book.slice(0, 2), byQid }).map(c => [c.iso3, c.from]), [['SWE', 'book'], ['ESP', 'book']]);
+  // None at all: no row.
+  assert.deepEqual(todayCountries({ qid: 'Q70972', entity: { label: 'Kingdom of France' }, terms: [term('Q99', 'California')], byQid }), []);
+  const pestle = cs => eraRows([1847, 1848], { countries: cs, today: TODAY }).filter(r => r.module === 'pestle').map(r => [r.id, r.at, r.today, r.place]);
+  assert.deepEqual(pestle(todayCountries({ qid: 'Q39', entity: { label: 'Switzerland' }, byQid })), [['pestle:che', 'q/national.html#country=CHE', true, 'Switzerland today, not then']]);
+  assert.match(pestle(todayCountries({ terms: book, byQid }))[0][3], /^Spain today, named 3 times in this book$/);
+  assert.deepEqual(pestle([]), []);
+});
+
+test('era: the National Analysis row opens the country it is about, or is left out', async t => {
   const { todayCountries } = await import('../bibliotheca/neo/lib/era.js');
   const brief = read('national/data/brief.json'), byQid = new Map(brief.countries.filter(c => c.qid).map(c => [c.qid, c.iso3]));
   const lake = q => read(`lake/data/e/${+q.slice(1) % 512}.json`)[q];
   const termsOf = slug => read(`bibliotheca/data/books/${slug}.json`).chapters.flatMap(c => c.paragraphs.flatMap(p => p.terms || []));
   const manifesto = termsOf('communist-manifesto'), prince = termsOf('the-prince'), onWar = termsOf('on-war');
   const pestle = cs => eraRows([1847, 1848], { countries: cs, today: TODAY }).filter(r => r.module === 'pestle').map(r => [r.id, r.at, r.today, r.place]);
+  // The built books by shape, whatever the day: three countries at most, each one National Analysis lists, the book's
+  // own most named first.
+  const iso = new Set(byQid.values());
+  for (const terms of [manifesto, prince, onWar]) {
+    const cs = todayCountries({ terms, byQid });
+    assert.ok(cs.length <= 3 && cs.every(c => iso.has(c.iso3) && c.from === 'book'), JSON.stringify(cs));
+    assert.ok(cs.every((c, i) => i === 0 || cs[i - 1].n >= c.n), 'the most named first');
+  }
+  if (!builtOn(read('lake/data/manifest.json').generated, '2026-11-26')) {
+    t.skip('the lake and the books were rebuilt after 26 November 2026 (lake-refresh tags every book again from Wikidata): the named terms below are as that build held them, and the rule is tested on the fixture above');
+    return;
+  }
   // A term that is a country: that country.
   const swiss = todayCountries({ qid: 'Q39', entity: lake('Q39'), terms: manifesto, byQid });
   assert.deepEqual(swiss.map(c => [c.iso3, c.name, c.from]), [['CHE', 'Switzerland', 'term']]);

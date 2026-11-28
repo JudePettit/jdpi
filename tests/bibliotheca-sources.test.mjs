@@ -11,6 +11,7 @@ import {
   TAGS, KINDS, CONFIDENCE, BASES, FLAGS, RETROSPECTIVE_YEARS, WORDING, LINKS_PATH,
   check, checkFile, derive, scriptBasis, plain, isShown, basisText, flagText, readerTexts, linksOn, linksFrom, kindOfType, yearsFrom,
 } from '../bibliotheca/lib/sources.js';
+import { builtOn, readAfter } from './tools/as-built.mjs';
 
 const read = p => JSON.parse(readFileSync(new URL('../' + p, import.meta.url), 'utf8'));
 const ID = /\b(?:ACT|PART|WIT|OWN|BORNAFTER|FROMOTHERS|OUTSIDE|RETROSPECTIVE|CONTEMPORARY|UNKNOWN|FORERUNNER|POLEMIC|AS-TOLD-TO|DISPUTED)\b|\bQ\d+\b|\bP\d+\b/;
@@ -396,16 +397,28 @@ test('the dates a link holds are the shelf’s where they come from the shelf', 
   }
 });
 
-test('a subject the file says has an entry has one, of a kind that fits; a link waits for one otherwise', () => {
-  for (const l of FILE.links) {
-    const e = lake(l.subject.q);
-    if (l.entry) {
-      assert.ok(e, `${l.subject.label} (${l.subject.q}) has no entry`);
-      assert.equal(kindOfType(e.type), l.subject.kind, `${l.subject.label}: the entry is a ${e.type}`);
-    }
+// Refresh pins 2 (28 November 2026): the file is VM's, judged on one day; the lake is rebuilt from Wikidata each month
+// (lake-refresh.yml, which does not run this file), and an entry dropped or retyped there (its type is from Wikidata's
+// classes) would fail the deploy, not the refresh. So the file is held to the lake while the lake is the one it was
+// checked against (built on 26 November 2026) or the file was judged after the lake was built; whatever the day, its
+// shape. (The pages ask the lake, not the file's entry flag, so a stale flag misleads no reader.)
+test('a subject the file says has an entry has one, of a kind that fits; a link waits for one otherwise', t => {
+  for (const l of FILE.links.filter(l => l.entry)) {
+    assert.match(l.subject.q, /^Q\d+$/, `${l.subject.label}: a Q-id`);
+    assert.ok(KINDS.includes(l.subject.kind), `${l.subject.label}: a kind the rule knows (${l.subject.kind})`);
   }
   // a later entry needs no change to the file: the pages ask the lake, so a link marked false may gain one
   assert.ok(FILE.links.some(l => !l.entry), 'some links wait for their entry');
+  const lakeBuilt = read('lake/data/manifest.json').generated;
+  if (!builtOn(lakeBuilt, '2026-11-26') && !readAfter(FILE.judged, lakeBuilt)) {
+    t.skip(`the lake was rebuilt from Wikidata at ${lakeBuilt}, after the file was judged (${FILE.judged}) and after the lake of 26 November 2026 it was checked against: its entries are not compared with the file`);
+    return;
+  }
+  for (const l of FILE.links.filter(l => l.entry)) {
+    const e = lake(l.subject.q);
+    assert.ok(e, `${l.subject.label} (${l.subject.q}) has no entry`);
+    assert.equal(kindOfType(e.type), l.subject.kind, `${l.subject.label}: the entry is a ${e.type}`);
+  }
 });
 
 test('linksOn and linksFrom find a subject’s books and a book’s subjects, sets included', () => {

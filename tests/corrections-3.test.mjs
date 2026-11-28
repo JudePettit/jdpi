@@ -195,7 +195,7 @@ test('front-pages-12: a war\'s name in the menu carries its years once', () => {
   for (const [id, n] of names) assert.equal((n.match(/\(\d{4}/g) || []).length, 1, `${id}: ${n}`);
 });
 
-test('page: the Allies of October 1939 leave out Egypt and Iran, the Axis Austria; several days listed, not a span; Iwo Jima from 19 Feb 1945; the menu names each war\'s years once', pageTest, async () => {
+test('page: the Allies of October 1939 leave out Egypt and Iran, the Axis Austria; several days listed, not a span; Iwo Jima from 19 Feb 1945; the menu names each war\'s years once', pageTest, async t => {
   const browser = await launch({ args: ['--mute-audio'] });
   const page = await browser.newPage({ viewport: { width: 1400, height: 900 } });
   const errors = [];
@@ -243,19 +243,28 @@ test('page: the Allies of October 1939 leave out Egypt and Iran, the Axis Austri
       assert.equal((await row('Bombing of Yawata')).dates, 'June 1944, 20 Aug 1944 and 8 Aug 1945');
       assert.equal((await row('Operation Martin')).dates, 'March 1943');
     }
-    // The Vatican is not under way in a month between its raids (December 1943, as the file held it on 27 November);
-    // it is in the month of its first raid (November 1943). The months are the file's, whatever the day.
-    const vat = ww2.battles.find(b => b.q === 'Q2909620');
+    // A battle of several days is not under way in a month between them (the Vatican in December 1943, as the file held
+    // it on 27 November); it is in the month of its first (November 1943). The months are the file's, whatever the day.
+    // Refresh pins 2 (28 November 2026): the battle is picked by that rule from the file, the Vatican first, so a later
+    // build whose Vatican leaves no month between its raids checks another battle (Yawata, Kobe, Innoshima held one on
+    // 27 November), and one with no such battle says so (a skip) instead of passing on nothing.
     const next = m => { const [y, mo] = m.split('-').map(Number); return mo === 12 ? `${y + 1}-01` : `${y}-${String(mo + 1).padStart(2, '0')}`; };
-    const first = vat?.pts?.[0]?.length >= 7 ? vat.pts[0].slice(0, 7) : null, between = first && next(first);
-    const months = first && vat.pts.length > 1 && between < vat.pts[1].slice(0, 7) && !vat.pts.some(d => d.startsWith(between)) ? [[between, ''], [first, 'sel']] : [];
-    if (AS_BUILT) assert.deepEqual(months, [['1943-12', ''], ['1943-11', 'sel']]);
-    for (const [m, cls] of months) {
-      await page.goto(`${BASE}/battlefield/focus/#war=ww2&m=${m}&v=battles`, { waitUntil: 'domcontentloaded' });
-      await page.reload({ waitUntil: 'domcontentloaded' });
-      await page.waitForFunction(([x, n]) => document.querySelector('#month')?.dataset.value === x && [...document.querySelectorAll('#battles-rows button.rowbtn')].some(b => b.textContent === n), [m, vat.n], { timeout: 30000 });
-      assert.equal((await row(vat.n)).cls, cls, m);
-    }
+    const gapOf = b => {
+      const first = b?.s && b.pts?.length > 1 && named(b.n) && b.pts[0].length >= 7 ? b.pts[0].slice(0, 7) : null, between = first && next(first);
+      return first && between < b.pts[1].slice(0, 7) && !b.pts.some(d => d.startsWith(between)) ? [[between, ''], [first, 'sel']] : null;
+    };
+    const vat = ww2.battles.find(b => b.q === 'Q2909620');
+    const pick = gapOf(vat) ? vat : ww2.battles.find(gapOf);
+    if (AS_BUILT) assert.deepEqual([pick?.q, gapOf(pick)], ['Q2909620', [['1943-12', ''], ['1943-11', 'sel']]]);
+    await t.test('a battle of several days is not under way in a month between them, and is in the month of its first', async st => {
+      if (!pick) { st.skip('no battle of War Focus\'s Second World War file has several days with a month between its first two: nothing to check'); return; }
+      for (const [m, cls] of gapOf(pick)) {
+        await page.goto(`${BASE}/battlefield/focus/#war=ww2&m=${m}&v=battles`, { waitUntil: 'domcontentloaded' });
+        await page.reload({ waitUntil: 'domcontentloaded' });
+        await page.waitForFunction(([x, n]) => document.querySelector('#month')?.dataset.value === x && [...document.querySelectorAll('#battles-rows button.rowbtn')].some(b => b.textContent === n), [m, pick.n], { timeout: 30000 });
+        assert.equal((await row(pick.n)).cls, cls, `${pick.n}, ${m}`);
+      }
+    });
     assert.deepEqual(errors, []);
   } finally { await browser.close(); }
 });

@@ -1,8 +1,16 @@
 {
  "format": "vm-daily-synopsis-index/1",
- "generated": "2026-11-27T02:56:10.759Z",
- "latest": "2026-11-27",
+ "generated": "2026-11-28T02:47:23.154Z",
+ "latest": "2026-11-28",
  "days": [
+  {
+   "day": "2026-11-28",
+   "authorship": "rules",
+   "written": "missing",
+   "stories": 10,
+   "fiveWritten": 0,
+   "corrections": 0
+  },
   {
    "day": "2026-11-27",
    "authorship": "rules",

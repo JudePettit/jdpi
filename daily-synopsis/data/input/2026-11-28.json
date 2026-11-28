@@ -1,0 +1,670 @@
+{
+ "format": "vm-daily-synopsis-input/1",
+ "day": "2026-11-28",
+ "id": "2026-11-28-53f79189fb66",
+ "generated": "2026-11-28T02:47:23.154Z",
+ "window": {
+  "from": "2026-11-27T01:22:31.362Z",
+  "to": "2026-11-28T01:22:31.362Z"
+ },
+ "storeGenerated": "2026-11-28T01:22:31.362Z",
+ "rule": {
+  "minOutlets": 3,
+  "minSides": 2,
+  "cap": 10,
+  "fiveMinSides": 3,
+  "fiveNeedsLeftAndRight": true
+ },
+ "sides": [
+  {
+   "key": "far_left",
+   "label": "Far left"
+  },
+  {
+   "key": "left",
+   "label": "Left"
+  },
+  {
+   "key": "centre",
+   "label": "Centre"
+  },
+  {
+   "key": "right",
+   "label": "Right"
+  },
+  {
+   "key": "far_right",
+   "label": "Far right"
+  }
+ ],
+ "stories": [
+  {
+   "id": "s1",
+   "rank": 1,
+   "outlets": 5,
+   "sides": {
+    "far_left": 0,
+    "left": 1,
+    "centre": 3,
+    "right": 1,
+    "far_right": 0
+   },
+   "written5": true,
+   "lead": "s1-2",
+   "items": [
+    {
+     "id": "s1-1",
+     "side": "left",
+     "outlet": "The New York Times",
+     "outletId": "nyt",
+     "caution": false,
+     "access": "paid",
+     "headline": "Quebec Can Keep Its Ban on Religious Symbols, Canada’s Top Court Rules",
+     "url": "https://www.nytimes.com/2026/11/27/world/canada/canada-supreme-court-quebec-religion-bill-21.html",
+     "published": "2026-11-27T21:17:11.000Z",
+     "summary": "In a landmark decision, the Supreme Court backed the province’s use of a constitutional override while leaving the door open to future legal scrutiny."
+    },
+    {
+     "id": "s1-2",
+     "side": "centre",
+     "outlet": "BBC News",
+     "outletId": "bbc",
+     "caution": false,
+     "access": "free",
+     "headline": "Canada's top court largely upholds Quebec ban on religious symbols for public servants",
+     "url": "https://www.bbc.co.uk/news/articles/cq3dgpy9lem3o",
+     "published": "2026-11-27T15:38:13.000Z",
+     "summary": "The law faced legal challenges from a range of groups, including female Muslim, Sikh and Catholic teachers, who argued it violated their funadamental rights."
+    },
+    {
+     "id": "s1-3",
+     "side": "centre",
+     "outlet": "UPI",
+     "outletId": "upi",
+     "caution": false,
+     "access": "free",
+     "headline": "Canadian Supreme Court upholds Quebec law banning religious symbols",
+     "url": "https://www.upi.com/Top_News/World-News/2026/11/27/canada-quebec-religious-symbol/2021795810027/",
+     "published": "2026-11-27T20:42:52.000Z",
+     "summary": "Canada's Supreme Court upheld most of Quebec's law that bars public employees from wearing religious symbols while at work."
+    },
+    {
+     "id": "s1-4",
+     "side": "centre",
+     "outlet": "Deutsche Welle",
+     "outletId": "dw",
+     "caution": false,
+     "access": "free",
+     "headline": "Canada: Supreme Court largely upholds Quebec secularism bill",
+     "url": "https://www.dw.com/en/canada-supreme-court-largely-upholds-quebec-secularism-bill/a-80082571?maca=en-rss-en-all-1573-rdf",
+     "published": "2026-11-27T20:43:00.000Z",
+     "summary": "Quebec's government passed Bill 21 to ban religious symbols for public servants, arguing it was necessary to protect its secularist society. Critics argue the bill weakens legal protections for fundamental rights."
+    },
+    {
+     "id": "s1-5",
+     "side": "right",
+     "outlet": "Washington Examiner",
+     "outletId": "washingtonexaminer",
+     "caution": false,
+     "access": "paid",
+     "headline": "Canadian Supreme Court largely upholds Quebec’s ban on religious symbols for public sector workers",
+     "url": "https://www.washingtonexaminer.com/news/world/4816704/canada-supreme-court-upholds-quebec-ban-religious-symbols-public-workers/",
+     "published": "2026-11-27T22:49:45.000Z",
+     "summary": "The Supreme Court of Canada upheld most of Quebec’s law barring public employees in certain positions of authority from wearing religious symbols at work, delivering a major victory on Friday for the province’s secularism policy. The 2019 l"
+    }
+   ]
+  },
+  {
+   "id": "s2",
+   "rank": 2,
+   "outlets": 5,
+   "sides": {
+    "far_left": 0,
+    "left": 0,
+    "centre": 0,
+    "right": 2,
+    "far_right": 3
+   },
+   "written5": false,
+   "lead": "s2-3",
+   "items": [
+    {
+     "id": "s2-1",
+     "side": "right",
+     "outlet": "Fox News",
+     "outletId": "foxnews",
+     "caution": true,
+     "access": "free",
+     "headline": "New California law could keep teens in booster seats until age 16 unless they pass test",
+     "url": "https://www.foxnews.com/politics/california-law-keep-teens-booster-seats-age-16-unless-pass-test",
+     "published": "2026-11-27T21:50:25.000Z",
+     "summary": "Assemblymember Lori Wilson's seat belt fit test bill requires minors to pass five criteria before riding without a booster seat or in the front seat."
+    },
+    {
+     "id": "s2-2",
+     "side": "right",
+     "outlet": "The Daily Caller",
+     "outletId": "dailycaller",
+     "caution": true,
+     "access": "free",
+     "headline": "New California Law Could Force Teenagers Into Booster Seats When Riding In A Car",
+     "url": "https://dailycaller.com/2026/11/27/new-california-law-force-teenagers-into-booster-seats-gavin-newsome-500-dollar-fine",
+     "published": "2026-11-27T16:07:33.000Z",
+     "summary": "‘Properly restrained’"
+    },
+    {
+     "id": "s2-3",
+     "side": "far_right",
+     "outlet": "The Gateway Pundit",
+     "outletId": "gatewaypundit",
+     "caution": true,
+     "access": "free",
+     "headline": "New California Law Requires Kids to Sit in Booster Seats Until Age 16… Unless They Pass a Five-Step Test",
+     "url": "https://www.thegatewaypundit.com/2026/11/new-california-law-requires-kids-sit-booster-seats/",
+     "published": "2026-11-27T23:20:06.000Z",
+     "summary": "Meanwhile in the Democrat hellhole of California... The post New California Law Requires Kids to Sit in Booster Seats Until Age 16… Unless They Pass a Five-Step Test appeared first on The Gateway Pundit."
+    },
+    {
+     "id": "s2-4",
+     "side": "far_right",
+     "outlet": "One America News",
+     "outletId": "oann",
+     "caution": true,
+     "access": "unknown",
+     "headline": "Calif.: New booster seat law will require a ‘5-Step Fit Test’ for kids ages 8-15 starting in 2027",
+     "url": "https://news.google.com/rss/articles/CBMiwgFBVV95cUxPRS1fVF9YNVhEV2FIejYtM3FwTUZYT09ES1N5V2hCWUN0d0pRVGszX3dxMUFXOVVBaVB1QUNUMTg0cWhtQXNSWjNzVE5STGFZOER6RmFYeDNfM2tmeHdBM0F2X0JWZWV6cDVyMVF4emhUWGtzZzc2ZF9iYWhPRWQtY0RPRzk4OWF1ajJFbDF2UDJsY3RsYWtaaUtPdDl2SXpxTC1aSC1uRlpOeHNPZlZJdDlRTGgwV1Q0eFpZS0hiRmpVdw?oc=5",
+     "published": "2026-11-28T00:04:10.000Z",
+     "summary": "Calif.: New booster seat law will require a ‘5-Step Fit Test’ for kids ages 8-15 starting in 2027 One America News Network"
+    },
+    {
+     "id": "s2-5",
+     "side": "far_right",
+     "outlet": "TheBlaze",
+     "outletId": "blaze",
+     "caution": true,
+     "access": "unknown",
+     "headline": "Buckle up, 'nanny state': California to require booster seats for some kids as old as 15",
+     "url": "https://www.theblaze.com/news/buckle-up-nanny-state-ca",
+     "published": "2026-11-27T14:57:49.000Z",
+     "summary": "It's dawning on Californians that they may soon have to strap their teenage children into booster seats to comply with state law. Starting on Jan. 1, 2027, parents and legal guardians will be barred from transporting kids ages 8 to 15 witho"
+    }
+   ]
+  },
+  {
+   "id": "s3",
+   "rank": 3,
+   "outlets": 5,
+   "sides": {
+    "far_left": 1,
+    "left": 0,
+    "centre": 4,
+    "right": 0,
+    "far_right": 0
+   },
+   "written5": false,
+   "lead": "s3-2",
+   "items": [
+    {
+     "id": "s3-1",
+     "side": "far_left",
+     "outlet": "Morning Star",
+     "outletId": "morningstar",
+     "caution": false,
+     "access": "metered",
+     "headline": "Iranian foreign minister denies involvement in Kuwait strike that killed two Italians",
+     "url": "https://morningstaronline.co.uk/article/iran-had-no-involvement-kuwait-drone-attack-insists-countrys-fm",
+     "published": "2026-11-27T10:29:50.000Z",
+     "summary": "IRANIAN Foreign Minister Seyed Abbas Araghchi has denied Iranian involvement in a drone attack that killed two Italians in Kuwait on Thursday. In remarks during separate phone calls with Kuwait’s Foreign Minister Sheikh Jarrah Jaber Al-Ahma"
+    },
+    {
+     "id": "s3-2",
+     "side": "centre",
+     "outlet": "France 24",
+     "outletId": "france24",
+     "caution": false,
+     "access": "free",
+     "headline": "Kuwait: Two Italians killed in drone attack",
+     "url": "https://www.france24.com/en/video/20261127-kuwait-two-italians-killed-in-drone-attack",
+     "published": "2026-11-27T11:45:48.000Z",
+     "summary": "A drone attack in Kuwait killed two Italian technicians working on an air defence system on Thursday, marking the first fatal strike in the Gulf state for months."
+    },
+    {
+     "id": "s3-3",
+     "side": "centre",
+     "outlet": "UPI",
+     "outletId": "upi",
+     "caution": false,
+     "access": "free",
+     "headline": "2 Italians killed in Kuwait drone strike; Iran denies responsibility",
+     "url": "https://www.upi.com/Top_News/World-News/2026/11/26/italy-Italians-killed-Kuwait-drone-strike-Iran/1511795749242/",
+     "published": "2026-11-27T03:48:00.000Z",
+     "summary": "Two Italians were killed Thursday in a drone strike in Kuwait, officials from both countries confirmed, blaming Iran for the attack."
+    },
+    {
+     "id": "s3-4",
+     "side": "centre",
+     "outlet": "Euronews",
+     "outletId": "euronews",
+     "caution": false,
+     "access": "free",
+     "headline": "Iran denies responsibility for Kuwait drone strike that killed two Italians",
+     "url": "https://www.euronews.com/2026/11/27/iran-denies-responsibility-for-kuwait-drone-strike-that-killed-two-italians",
+     "published": "2026-11-27T10:20:33.000Z",
+     "summary": "Iran's Foreign Minister Abbas Araghchi called the accusations baseless and the incident \"suspicious\" and offered to cooperate on a joint investigation. Kuwait called it \"a heinous Iranian aggression\". Saudi Arabia, Bahrain, Qatar and the UA"
+    },
+    {
+     "id": "s3-5",
+     "side": "centre",
+     "outlet": "CNBC",
+     "outletId": "cnbc",
+     "caution": false,
+     "access": "free",
+     "headline": "Two Italians killed in Kuwait drone attack; Trump says Iran war ends ‘whenever I want it’",
+     "url": "https://www.cnbc.com/2026/11/27/us-iran-war-trump-hormuz-italian-killed-trump.html",
+     "published": "2026-11-27T03:30:23.000Z",
+     "summary": "Iran's foreign minister Abbas Araghchi said \"The incident is suspicious and looks like a precooked recipe for war.\""
+    }
+   ]
+  },
+  {
+   "id": "s4",
+   "rank": 4,
+   "outlets": 4,
+   "sides": {
+    "far_left": 0,
+    "left": 0,
+    "centre": 1,
+    "right": 1,
+    "far_right": 2
+   },
+   "written5": false,
+   "lead": "s4-3",
+   "items": [
+    {
+     "id": "s4-1",
+     "side": "centre",
+     "outlet": "The Hill",
+     "outletId": "thehill",
+     "caution": false,
+     "access": "free",
+     "headline": "Hackers break into US Air Force cloud computing platform: Report",
+     "url": "https://thehill.com/policy/defense/6245197-air-force-cloud-one-hack/",
+     "published": "2026-11-27T13:54:01.000Z",
+     "summary": "Hackers breached the Air Force’s main cloud computing platform in recent weeks, risking sensitive data, according to a new report from Reuters, the latest in a string of cyber incidents and outages at government agencies. Reuters reported F"
+    },
+    {
+     "id": "s4-2",
+     "side": "right",
+     "outlet": "Washington Examiner",
+     "outletId": "washingtonexaminer",
+     "caution": false,
+     "access": "paid",
+     "headline": "Hackers breached the Air Force’s cloud platform: Report",
+     "url": "https://www.washingtonexaminer.com/policy/defense/4816440/hackers-breach-air-force-cloud-platform/",
+     "published": "2026-11-27T14:39:10.000Z",
+     "summary": "Hackers have reportedly breached the Air Force’s flagship cloud computing platform, putting sensitive personal and logistics data at risk, according to Reuters. The breach was discovered over the past month, and it caused disruption across"
+    },
+    {
+     "id": "s4-3",
+     "side": "far_right",
+     "outlet": "Breitbart",
+     "outletId": "breitbart",
+     "caution": true,
+     "access": "free",
+     "headline": "Report: Hackers Breach Air Force's 'Cloud One' Computing Platform",
+     "url": "https://www.breitbart.com/tech/2026/11/27/report-hackers-breach-air-forces-cloud-one-computing-platform/",
+     "published": "2026-11-27T13:33:13.000Z",
+     "summary": "Hackers have reportedly broken into Cloud One, the US Air Force's primary cloud computing platform, potentially exposing sensitive tactical, personnel and logistics data, according to Reuters. The post Report: Hackers Breach Air Force’s ‘Cl"
+    },
+    {
+     "id": "s4-4",
+     "side": "far_right",
+     "outlet": "One America News",
+     "outletId": "oann",
+     "caution": true,
+     "access": "unknown",
+     "headline": "Report: U.S. Air Force’s primary cloud platform suffers cyberattack",
+     "url": "https://news.google.com/rss/articles/CBMimwFBVV95cUxPR1lVZlJWOE9lRTdEaVVNRDFXaU05LVpoVC1MbkR6RVFyX2NPM3FIaXFYQ25CblAydVNuNzF0M21xS1Y2VlpwcWRNbkdOQ1pDZGYxb0YyWnFiaXVmNk5HcFpqUE10cjNfT3lfRUlkejJiajVoZUQtWFRPZEFrRmEyaEc2VDFTc2xDZGNodUdpb3Q4QWVBazlrWUxkTQ?oc=5",
+     "published": "2026-11-27T23:39:00.000Z",
+     "summary": "Report: U.S. Air Force’s primary cloud platform suffers cyberattack One America News Network"
+    }
+   ]
+  },
+  {
+   "id": "s5",
+   "rank": 5,
+   "outlets": 4,
+   "sides": {
+    "far_left": 0,
+    "left": 0,
+    "centre": 2,
+    "right": 1,
+    "far_right": 1
+   },
+   "written5": false,
+   "lead": "s5-1",
+   "items": [
+    {
+     "id": "s5-1",
+     "side": "centre",
+     "outlet": "UPI",
+     "outletId": "upi",
+     "caution": false,
+     "access": "free",
+     "headline": "Nebraska Sen. Deb Fischer's office says husband died by suicide",
+     "url": "https://www.upi.com/Top_News/US/2026/11/27/nebraska-senate/1371795816166/",
+     "published": "2026-11-27T23:02:53.000Z",
+     "summary": "The husband of U.S. Sen. Deb Fischer (R-Neb.) died by suicide, her office said Friday."
+    },
+    {
+     "id": "s5-2",
+     "side": "centre",
+     "outlet": "The Hill",
+     "outletId": "thehill",
+     "caution": false,
+     "access": "free",
+     "headline": "Sen. Deb Fischer’s office says her husband died by suicide",
+     "url": "https://thehill.com/homenews/senate/6245545-deb-fischer-nebraska/",
+     "published": "2026-11-27T19:39:16.000Z",
+     "summary": "A spokesperson for Sen. Deb Fischer (R-Neb.) said Friday her husband, Bruce Fischer, whose death was announced earlier in the week, had died by suicide. “There has been a sad update in the death of Senator Fischer’s husband, Bruce,” the spo"
+    },
+    {
+     "id": "s5-3",
+     "side": "right",
+     "outlet": "The Daily Caller",
+     "outletId": "dailycaller",
+     "caution": true,
+     "access": "free",
+     "headline": "GOP Senator Deb Fischer’s Late Husband Died By Suicide",
+     "url": "https://dailycaller.com/2026/11/27/deb-fischer-husband-bruce-died-suicide",
+     "published": "2026-11-27T18:44:34.000Z",
+     "summary": "‘It was learned that Bruce chose to end his life’"
+    },
+    {
+     "id": "s5-4",
+     "side": "far_right",
+     "outlet": "Breitbart",
+     "outletId": "breitbart",
+     "caution": true,
+     "access": "free",
+     "headline": "Republican Senator Deb Fischer's Husband, Bruce, Dies by Suicide: 'a Sad Update'",
+     "url": "https://www.breitbart.com/health/2026/11/27/republican-senator-deb-fischers-husband-bruce-dies-by-suicide-a-sad-update/",
+     "published": "2026-11-27T19:16:14.000Z",
+     "summary": "Sen. Deb Fischer's (R-NE) office on Friday updated information about her husband's recent death, stating he took his own life. The post Republican Senator Deb Fischer’s Husband, Bruce, Dies by Suicide: ‘a Sad Update’ appeared first on Breit"
+    }
+   ]
+  },
+  {
+   "id": "s6",
+   "rank": 6,
+   "outlets": 3,
+   "sides": {
+    "far_left": 0,
+    "left": 1,
+    "centre": 1,
+    "right": 1,
+    "far_right": 0
+   },
+   "written5": true,
+   "lead": "s6-2",
+   "items": [
+    {
+     "id": "s6-1",
+     "side": "left",
+     "outlet": "The Independent",
+     "outletId": "independent",
+     "caution": true,
+     "access": "free",
+     "headline": "US military disables another ship in Gulf of Oman after attempt to breach Iranian ports blockade",
+     "url": "https://www.independent.co.uk/news/world/americas/usa-military-gulf-of-oman-ship-iran-blockade-b3093017.html",
+     "published": "2026-11-27T19:54:54.000Z",
+     "summary": "US military says it disabled another ship in the Gulf of Oman"
+    },
+    {
+     "id": "s6-2",
+     "side": "centre",
+     "outlet": "Deutsche Welle",
+     "outletId": "dw",
+     "caution": false,
+     "access": "free",
+     "headline": "US disables ship in Gulf of Oman under Iran blockade",
+     "url": "https://www.dw.com/en/us-disables-ship-in-gulf-of-oman-under-iran-blockade/a-80082950?maca=en-rss-en-all-1573-rdf",
+     "published": "2026-11-27T23:17:00.000Z",
+     "summary": "The United States said it was continuing \"to strictly enforce the blockade\" of Iran's ports. Meanwhile, Kuwait summoned Iran's ambassador over a strike that killed two Italian technicians."
+    },
+    {
+     "id": "s6-3",
+     "side": "right",
+     "outlet": "Washington Examiner",
+     "outletId": "washingtonexaminer",
+     "caution": false,
+     "access": "paid",
+     "headline": "US strikes commercial ship in Gulf of Oman for attempting to run naval blockade after leaving Iran",
+     "url": "https://www.washingtonexaminer.com/news/world/4816605/us-strikes-commercial-ship-gulf-of-oman/",
+     "published": "2026-11-27T20:18:41.000Z",
+     "summary": "The U.S. military struck and disabled a commercial vessel on Thursday in the Gulf of Oman, which connects to the Strait of Hormuz, for attempting to run a U.S. naval blockade after leaving an Iranian port, according to U.S. Central Command."
+    }
+   ]
+  },
+  {
+   "id": "s7",
+   "rank": 7,
+   "outlets": 3,
+   "sides": {
+    "far_left": 0,
+    "left": 0,
+    "centre": 1,
+    "right": 1,
+    "far_right": 1
+   },
+   "written5": false,
+   "lead": "s7-2",
+   "items": [
+    {
+     "id": "s7-1",
+     "side": "centre",
+     "outlet": "The Hill",
+     "outletId": "thehill",
+     "caution": false,
+     "access": "free",
+     "headline": "Trump: Iran war will be over ‘sort of whenever I want it to be’",
+     "url": "https://thehill.com/homenews/administration/6245034-trump-says-iran-war-ends-whenever/",
+     "published": "2026-11-27T01:41:40.000Z",
+     "summary": "President Trump said the Iran war will be over “sort of whenever I want it to be” as the conflict stretches into its ninth month and pushback against it grows. The president called soldiers at Mar-a-Lago on Thursday alongside first lady Mel"
+    },
+    {
+     "id": "s7-2",
+     "side": "right",
+     "outlet": "The American Conservative",
+     "outletId": "amconmag",
+     "caution": false,
+     "access": "free",
+     "headline": "Iran War Day 273: Trump Says Victory Will Come ‘Whenever I Want It’",
+     "url": "https://www.theamericanconservative.com/iran-war-day-273-trump-says-victory-will-come-whenever-i-want-it/",
+     "published": "2026-11-27T15:30:00.000Z",
+     "summary": "State of the Union: Iran claimed another tanker was struck in the Strait of Hormuz. The post Iran War Day 273: Trump Says Victory Will Come ‘Whenever I Want It’ appeared first on The American Conservative."
+    },
+    {
+     "id": "s7-3",
+     "side": "far_right",
+     "outlet": "ZeroHedge",
+     "outletId": "zerohedge",
+     "caution": true,
+     "access": "free",
+     "headline": "Watch: Trump Tells Troops Victory Over Iran Comes \"Whenever I Want It To Be\"",
+     "url": "https://www.zerohedge.com/geopolitical/watch-trump-tells-troops-victory-over-iran-comes-whenever-i-want-it-be",
+     "published": "2026-11-27T14:30:00.000Z",
+     "summary": "Watch: Trump Tells Troops Victory Over Iran Comes \"Whenever I Want It To Be\" President Trump used his Thanksgiving calls to deployed troops on Thursday to tell an Army air defense battalion in the Middle East that victory over Iran is close"
+    }
+   ]
+  },
+  {
+   "id": "s8",
+   "rank": 8,
+   "outlets": 3,
+   "sides": {
+    "far_left": 0,
+    "left": 0,
+    "centre": 1,
+    "right": 0,
+    "far_right": 2
+   },
+   "written5": false,
+   "lead": "s8-2",
+   "items": [
+    {
+     "id": "s8-1",
+     "side": "centre",
+     "outlet": "UPI",
+     "outletId": "upi",
+     "caution": false,
+     "access": "free",
+     "headline": "Sheinbaum criticizes DEA hotline to report corrupt Mexican officials",
+     "url": "https://www.upi.com/Top_News/World-News/2026/11/27/latam-mexico-Sheinbaum-criticizes-DEA-hotline-report-corrupt-officials/7961795736131/",
+     "published": "2026-11-27T06:02:02.000Z",
+     "summary": "Mexican President Claudia Sheinbaum on Thursday criticized a move by U.S. officials to set up a hotline for reporting Mexican government corruption."
+    },
+    {
+     "id": "s8-2",
+     "side": "far_right",
+     "outlet": "Breitbart",
+     "outletId": "breitbart",
+     "caution": true,
+     "access": "free",
+     "headline": "Mexican Journalist Announces Use of DEA’s Tip Line in Mexico",
+     "url": "https://www.breitbart.com/border/2026/11/27/mexican-journalist-announces-use-of-deas-tip-line-in-mexico/",
+     "published": "2026-11-27T19:50:29.000Z",
+     "summary": "Less than an hour after the U.S. Drug Enforcement Administration announced a secure tip line to expose drug cartels and the corrupt Mexican government officials who enable them, a journalist from that country announced that he had called in"
+    },
+    {
+     "id": "s8-3",
+     "side": "far_right",
+     "outlet": "The Gateway Pundit",
+     "outletId": "gatewaypundit",
+     "caution": true,
+     "access": "free",
+     "headline": "Sheinbaum Calls DEA Tip Line for Reporting Narco Officials “Interference” as Cartels Control Territory in Most Mexican States",
+     "url": "https://www.thegatewaypundit.com/2026/11/sheinbaum-calls-dea-tip-line-reporting-narco-officials/",
+     "published": "2026-11-27T20:40:43.000Z",
+     "summary": "Mexican President Claudia Sheinbaum said Friday, Nov. The post Sheinbaum Calls DEA Tip Line for Reporting Narco Officials “Interference” as Cartels Control Territory in Most Mexican States appeared first on The Gateway Pundit."
+    },
+    {
+     "id": "s8-4",
+     "side": "far_right",
+     "outlet": "Breitbart",
+     "outletId": "breitbart",
+     "caution": true,
+     "access": "free",
+     "headline": "Mexican President Tells DEA to Butt Out After It Opened Secure Tip Line in Mexico",
+     "url": "https://www.breitbart.com/border/2026/11/27/mexican-president-tells-dea-to-butt-out-after-opening-secure-tip-line-in-mexico/",
+     "published": "2026-11-27T19:38:37.000Z",
+     "summary": "Mexican President Claudia Sheinbaum criticized the U.S. Drug Enforcement Administration for establishing and promoting a series of secure tip lines in Mexico, calling it foreign interference and telling them to butt out. The post Mexican Pr"
+    }
+   ]
+  },
+  {
+   "id": "s9",
+   "rank": 9,
+   "outlets": 3,
+   "sides": {
+    "far_left": 0,
+    "left": 1,
+    "centre": 0,
+    "right": 2,
+    "far_right": 0
+   },
+   "written5": false,
+   "lead": "s9-2",
+   "items": [
+    {
+     "id": "s9-1",
+     "side": "left",
+     "outlet": "The Independent",
+     "outletId": "independent",
+     "caution": true,
+     "access": "free",
+     "headline": "Joe Biden memoir sales lag behind Barack Obama and Bill Clinton books",
+     "url": "https://www.independent.co.uk/news/world/americas/joe-biden-memoir-sales-obama-clinton-b3092987.html",
+     "published": "2026-11-27T18:16:56.000Z",
+     "summary": "Biden’s memoir, Promise Me America, was released last week"
+    },
+    {
+     "id": "s9-2",
+     "side": "right",
+     "outlet": "Fox News",
+     "outletId": "foxnews",
+     "caution": true,
+     "access": "free",
+     "headline": "Biden book sales lag way behind Obama, Clinton memoirs in first week",
+     "url": "https://www.foxnews.com/politics/biden-book-sales-lag-way-behind-obama-clinton-memoirs-first-week",
+     "published": "2026-11-27T19:38:23.000Z",
+     "summary": "President Joe Biden's memoir, \"Promise Me, America,\" sold 21,000 copies in its first week, per Circana, far behind presidents Barack Obama and Bill Clinton's totals."
+    },
+    {
+     "id": "s9-3",
+     "side": "right",
+     "outlet": "Washington Examiner",
+     "outletId": "washingtonexaminer",
+     "caution": false,
+     "access": "paid",
+     "headline": "Biden’s first-week book sales lag behind Obama’s and Clinton’s",
+     "url": "https://www.washingtonexaminer.com/news/white-house/4816641/biden-book-sales-trail-obama-clinton/",
+     "published": "2026-11-27T21:16:41.000Z",
+     "summary": "New data show first-week sales of former President Joe Biden’s memoir, Promise Me, America, trailed those of former Presidents Barack Obama and Bill Clinton. According to Circana, Biden’s memoir sold roughly 21,000 copies in its first week,"
+    }
+   ]
+  },
+  {
+   "id": "s10",
+   "rank": 10,
+   "outlets": 3,
+   "sides": {
+    "far_left": 0,
+    "left": 0,
+    "centre": 1,
+    "right": 0,
+    "far_right": 2
+   },
+   "written5": false,
+   "lead": "s10-2",
+   "items": [
+    {
+     "id": "s10-1",
+     "side": "centre",
+     "outlet": "CNBC",
+     "outletId": "cnbc",
+     "caution": false,
+     "access": "free",
+     "headline": "SpaceX shares jump 4% amid tech rally and after Musk says he will expand on Trump Account share donations",
+     "url": "https://www.cnbc.com/2026/11/27/spacex-shares-musk-donations.html",
+     "published": "2026-11-27T10:20:39.000Z",
+     "summary": "SpaceX shares jumped in premarket trading after Elon Musk said on X that he would donate shares to American children every year."
+    },
+    {
+     "id": "s10-2",
+     "side": "far_right",
+     "outlet": "One America News",
+     "outletId": "oann",
+     "caution": true,
+     "access": "unknown",
+     "headline": "Musk personally donates additional SpaceX shares to every U.S. child through Trump Accounts",
+     "url": "https://news.google.com/rss/articles/CBMivgFBVV95cUxQWTNMbTdIN3FtakxhOElXSXJVa3ZhOTAtRHpNQ1VCY2hubUZ1QUVxd0hOcU9NaEFRZEdoeGdiTnJoSXhOb25UZlgyeGdncERPcjhhTTdPaElsM3EzRVVRTHFKTzJoQkFUcklJQUczel8ybllMM0VxUmJibWIwcHRTVlRYT3otT0VKLWY2ZngxemY0cmJpdVBzNS12UEpWZjVMVVZoZGtYeklra25GMmhxdlptNjlhb1BwLThDcmF3?oc=5",
+     "published": "2026-11-27T16:09:54.000Z",
+     "summary": "Musk personally donates additional SpaceX shares to every U.S. child through Trump Accounts One America News Network"
+    },
+    {
+     "id": "s10-3",
+     "side": "far_right",
+     "outlet": "American Greatness",
+     "outletId": "amgreatness",
+     "caution": true,
+     "access": "free",
+     "headline": "Musk and SpaceX to Give Each Child in a Trump Account One Share of Company Stock",
+     "url": "https://amgreatness.com/2026/11/27/musk-and-spacex-to-give-each-child-in-a-trump-account-one-share-of-company-stock/",
+     "published": "2026-11-27T08:45:29.000Z",
+     "summary": "The pledge adds to a fast-growing program created under President Trump's 2025 tax law, which the White House says now covers nearly 70 million accounts. Source"
+    }
+   ]
+  }
+ ]
+}

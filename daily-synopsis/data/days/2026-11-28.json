@@ -1,0 +1,1020 @@
+{
+ "format": "vm-daily-synopsis-day/1",
+ "day": "2026-11-28",
+ "input": "2026-11-28-53f79189fb66",
+ "generated": "2026-11-28T02:47:23.154Z",
+ "updated": "2026-11-28T02:47:23.154Z",
+ "window": {
+  "from": "2026-11-27T01:22:31.362Z",
+  "to": "2026-11-28T01:22:31.362Z"
+ },
+ "storeGenerated": "2026-11-28T01:22:31.362Z",
+ "authorship": "rules",
+ "model": null,
+ "label": {
+  "text": "This digest was assembled by rules, with no AI model: Vitruvian Manager’s code picked the stories and grouped the outlets’ own headlines beneath them, and no person checked it. The linked reports are the sources.",
+  "five": "The 5 Sided Analysis under each story lays out the outlets’ own headlines by side, far left to far right, by rules alone.",
+  "notProof": "A side with no headline here was not found among Vitruvian Manager’s outlets, which is not proof that the side did not report it.",
+  "meta": "Assembled by rules, with no AI model; no person checked it"
+ },
+ "rule": {
+  "minOutlets": 3,
+  "minSides": 2,
+  "cap": 10,
+  "fiveMinSides": 3,
+  "fiveNeedsLeftAndRight": true
+ },
+ "sides": [
+  {
+   "key": "far_left",
+   "label": "Far left"
+  },
+  {
+   "key": "left",
+   "label": "Left"
+  },
+  {
+   "key": "centre",
+   "label": "Centre"
+  },
+  {
+   "key": "right",
+   "label": "Right"
+  },
+  {
+   "key": "far_right",
+   "label": "Far right"
+  }
+ ],
+ "written": {
+  "status": "missing",
+  "note": "The written digest is not available for this day.",
+  "attempts": []
+ },
+ "lead": null,
+ "stories": [
+  {
+   "id": "s1",
+   "rank": 1,
+   "outlets": 5,
+   "lead": "s1-2",
+   "headlines": [
+    {
+     "id": "s1-1",
+     "side": "left",
+     "outlet": "The New York Times",
+     "outletId": "nyt",
+     "caution": false,
+     "access": "paid",
+     "headline": "Quebec Can Keep Its Ban on Religious Symbols, Canada’s Top Court Rules",
+     "url": "https://www.nytimes.com/2026/11/27/world/canada/canada-supreme-court-quebec-religion-bill-21.html",
+     "published": "2026-11-27T21:17:11.000Z"
+    },
+    {
+     "id": "s1-2",
+     "side": "centre",
+     "outlet": "BBC News",
+     "outletId": "bbc",
+     "caution": false,
+     "access": "free",
+     "headline": "Canada's top court largely upholds Quebec ban on religious symbols for public servants",
+     "url": "https://www.bbc.co.uk/news/articles/cq3dgpy9lem3o",
+     "published": "2026-11-27T15:38:13.000Z"
+    },
+    {
+     "id": "s1-3",
+     "side": "centre",
+     "outlet": "UPI",
+     "outletId": "upi",
+     "caution": false,
+     "access": "free",
+     "headline": "Canadian Supreme Court upholds Quebec law banning religious symbols",
+     "url": "https://www.upi.com/Top_News/World-News/2026/11/27/canada-quebec-religious-symbol/2021795810027/",
+     "published": "2026-11-27T20:42:52.000Z"
+    },
+    {
+     "id": "s1-4",
+     "side": "centre",
+     "outlet": "Deutsche Welle",
+     "outletId": "dw",
+     "caution": false,
+     "access": "free",
+     "headline": "Canada: Supreme Court largely upholds Quebec secularism bill",
+     "url": "https://www.dw.com/en/canada-supreme-court-largely-upholds-quebec-secularism-bill/a-80082571?maca=en-rss-en-all-1573-rdf",
+     "published": "2026-11-27T20:43:00.000Z"
+    },
+    {
+     "id": "s1-5",
+     "side": "right",
+     "outlet": "Washington Examiner",
+     "outletId": "washingtonexaminer",
+     "caution": false,
+     "access": "paid",
+     "headline": "Canadian Supreme Court largely upholds Quebec’s ban on religious symbols for public sector workers",
+     "url": "https://www.washingtonexaminer.com/news/world/4816704/canada-supreme-court-upholds-quebec-ban-religious-symbols-public-workers/",
+     "published": "2026-11-27T22:49:45.000Z"
+    }
+   ],
+   "sentences": null,
+   "five": {
+    "sides": [
+     {
+      "key": "far_left",
+      "label": "Far left",
+      "outlets": 0,
+      "headlines": []
+     },
+     {
+      "key": "left",
+      "label": "Left",
+      "outlets": 1,
+      "headlines": [
+       "s1-1"
+      ]
+     },
+     {
+      "key": "centre",
+      "label": "Centre",
+      "outlets": 3,
+      "headlines": [
+       "s1-2",
+       "s1-3",
+       "s1-4"
+      ]
+     },
+     {
+      "key": "right",
+      "label": "Right",
+      "outlets": 1,
+      "headlines": [
+       "s1-5"
+      ]
+     },
+     {
+      "key": "far_right",
+      "label": "Far right",
+      "outlets": 0,
+      "headlines": []
+     }
+    ],
+    "eligible": true,
+    "written": null,
+    "status": "missing",
+    "note": "The written comparison is not available for this story."
+   }
+  },
+  {
+   "id": "s2",
+   "rank": 2,
+   "outlets": 5,
+   "lead": "s2-3",
+   "headlines": [
+    {
+     "id": "s2-1",
+     "side": "right",
+     "outlet": "Fox News",
+     "outletId": "foxnews",
+     "caution": true,
+     "access": "free",
+     "headline": "New California law could keep teens in booster seats until age 16 unless they pass test",
+     "url": "https://www.foxnews.com/politics/california-law-keep-teens-booster-seats-age-16-unless-pass-test",
+     "published": "2026-11-27T21:50:25.000Z"
+    },
+    {
+     "id": "s2-2",
+     "side": "right",
+     "outlet": "The Daily Caller",
+     "outletId": "dailycaller",
+     "caution": true,
+     "access": "free",
+     "headline": "New California Law Could Force Teenagers Into Booster Seats When Riding In A Car",
+     "url": "https://dailycaller.com/2026/11/27/new-california-law-force-teenagers-into-booster-seats-gavin-newsome-500-dollar-fine",
+     "published": "2026-11-27T16:07:33.000Z"
+    },
+    {
+     "id": "s2-3",
+     "side": "far_right",
+     "outlet": "The Gateway Pundit",
+     "outletId": "gatewaypundit",
+     "caution": true,
+     "access": "free",
+     "headline": "New California Law Requires Kids to Sit in Booster Seats Until Age 16… Unless They Pass a Five-Step Test",
+     "url": "https://www.thegatewaypundit.com/2026/11/new-california-law-requires-kids-sit-booster-seats/",
+     "published": "2026-11-27T23:20:06.000Z"
+    },
+    {
+     "id": "s2-4",
+     "side": "far_right",
+     "outlet": "One America News",
+     "outletId": "oann",
+     "caution": true,
+     "access": "unknown",
+     "headline": "Calif.: New booster seat law will require a ‘5-Step Fit Test’ for kids ages 8-15 starting in 2027",
+     "url": "https://news.google.com/rss/articles/CBMiwgFBVV95cUxPRS1fVF9YNVhEV2FIejYtM3FwTUZYT09ES1N5V2hCWUN0d0pRVGszX3dxMUFXOVVBaVB1QUNUMTg0cWhtQXNSWjNzVE5STGFZOER6RmFYeDNfM2tmeHdBM0F2X0JWZWV6cDVyMVF4emhUWGtzZzc2ZF9iYWhPRWQtY0RPRzk4OWF1ajJFbDF2UDJsY3RsYWtaaUtPdDl2SXpxTC1aSC1uRlpOeHNPZlZJdDlRTGgwV1Q0eFpZS0hiRmpVdw?oc=5",
+     "published": "2026-11-28T00:04:10.000Z"
+    },
+    {
+     "id": "s2-5",
+     "side": "far_right",
+     "outlet": "TheBlaze",
+     "outletId": "blaze",
+     "caution": true,
+     "access": "unknown",
+     "headline": "Buckle up, 'nanny state': California to require booster seats for some kids as old as 15",
+     "url": "https://www.theblaze.com/news/buckle-up-nanny-state-ca",
+     "published": "2026-11-27T14:57:49.000Z"
+    }
+   ],
+   "sentences": null,
+   "five": {
+    "sides": [
+     {
+      "key": "far_left",
+      "label": "Far left",
+      "outlets": 0,
+      "headlines": []
+     },
+     {
+      "key": "left",
+      "label": "Left",
+      "outlets": 0,
+      "headlines": []
+     },
+     {
+      "key": "centre",
+      "label": "Centre",
+      "outlets": 0,
+      "headlines": []
+     },
+     {
+      "key": "right",
+      "label": "Right",
+      "outlets": 2,
+      "headlines": [
+       "s2-1",
+       "s2-2"
+      ]
+     },
+     {
+      "key": "far_right",
+      "label": "Far right",
+      "outlets": 3,
+      "headlines": [
+       "s2-3",
+       "s2-4",
+       "s2-5"
+      ]
+     }
+    ],
+    "eligible": false,
+    "written": null,
+    "status": "not-eligible",
+    "note": "No written comparison for this story: one is written only when at least three of the five sides carried it, one left of centre and one right of centre."
+   }
+  },
+  {
+   "id": "s3",
+   "rank": 3,
+   "outlets": 5,
+   "lead": "s3-2",
+   "headlines": [
+    {
+     "id": "s3-1",
+     "side": "far_left",
+     "outlet": "Morning Star",
+     "outletId": "morningstar",
+     "caution": false,
+     "access": "metered",
+     "headline": "Iranian foreign minister denies involvement in Kuwait strike that killed two Italians",
+     "url": "https://morningstaronline.co.uk/article/iran-had-no-involvement-kuwait-drone-attack-insists-countrys-fm",
+     "published": "2026-11-27T10:29:50.000Z"
+    },
+    {
+     "id": "s3-2",
+     "side": "centre",
+     "outlet": "France 24",
+     "outletId": "france24",
+     "caution": false,
+     "access": "free",
+     "headline": "Kuwait: Two Italians killed in drone attack",
+     "url": "https://www.france24.com/en/video/20261127-kuwait-two-italians-killed-in-drone-attack",
+     "published": "2026-11-27T11:45:48.000Z"
+    },
+    {
+     "id": "s3-3",
+     "side": "centre",
+     "outlet": "UPI",
+     "outletId": "upi",
+     "caution": false,
+     "access": "free",
+     "headline": "2 Italians killed in Kuwait drone strike; Iran denies responsibility",
+     "url": "https://www.upi.com/Top_News/World-News/2026/11/26/italy-Italians-killed-Kuwait-drone-strike-Iran/1511795749242/",
+     "published": "2026-11-27T03:48:00.000Z"
+    },
+    {
+     "id": "s3-4",
+     "side": "centre",
+     "outlet": "Euronews",
+     "outletId": "euronews",
+     "caution": false,
+     "access": "free",
+     "headline": "Iran denies responsibility for Kuwait drone strike that killed two Italians",
+     "url": "https://www.euronews.com/2026/11/27/iran-denies-responsibility-for-kuwait-drone-strike-that-killed-two-italians",
+     "published": "2026-11-27T10:20:33.000Z"
+    },
+    {
+     "id": "s3-5",
+     "side": "centre",
+     "outlet": "CNBC",
+     "outletId": "cnbc",
+     "caution": false,
+     "access": "free",
+     "headline": "Two Italians killed in Kuwait drone attack; Trump says Iran war ends ‘whenever I want it’",
+     "url": "https://www.cnbc.com/2026/11/27/us-iran-war-trump-hormuz-italian-killed-trump.html",
+     "published": "2026-11-27T03:30:23.000Z"
+    }
+   ],
+   "sentences": null,
+   "five": {
+    "sides": [
+     {
+      "key": "far_left",
+      "label": "Far left",
+      "outlets": 1,
+      "headlines": [
+       "s3-1"
+      ]
+     },
+     {
+      "key": "left",
+      "label": "Left",
+      "outlets": 0,
+      "headlines": []
+     },
+     {
+      "key": "centre",
+      "label": "Centre",
+      "outlets": 4,
+      "headlines": [
+       "s3-2",
+       "s3-3",
+       "s3-4",
+       "s3-5"
+      ]
+     },
+     {
+      "key": "right",
+      "label": "Right",
+      "outlets": 0,
+      "headlines": []
+     },
+     {
+      "key": "far_right",
+      "label": "Far right",
+      "outlets": 0,
+      "headlines": []
+     }
+    ],
+    "eligible": false,
+    "written": null,
+    "status": "not-eligible",
+    "note": "No written comparison for this story: one is written only when at least three of the five sides carried it, one left of centre and one right of centre."
+   }
+  },
+  {
+   "id": "s4",
+   "rank": 4,
+   "outlets": 4,
+   "lead": "s4-3",
+   "headlines": [
+    {
+     "id": "s4-1",
+     "side": "centre",
+     "outlet": "The Hill",
+     "outletId": "thehill",
+     "caution": false,
+     "access": "free",
+     "headline": "Hackers break into US Air Force cloud computing platform: Report",
+     "url": "https://thehill.com/policy/defense/6245197-air-force-cloud-one-hack/",
+     "published": "2026-11-27T13:54:01.000Z"
+    },
+    {
+     "id": "s4-2",
+     "side": "right",
+     "outlet": "Washington Examiner",
+     "outletId": "washingtonexaminer",
+     "caution": false,
+     "access": "paid",
+     "headline": "Hackers breached the Air Force’s cloud platform: Report",
+     "url": "https://www.washingtonexaminer.com/policy/defense/4816440/hackers-breach-air-force-cloud-platform/",
+     "published": "2026-11-27T14:39:10.000Z"
+    },
+    {
+     "id": "s4-3",
+     "side": "far_right",
+     "outlet": "Breitbart",
+     "outletId": "breitbart",
+     "caution": true,
+     "access": "free",
+     "headline": "Report: Hackers Breach Air Force's 'Cloud One' Computing Platform",
+     "url": "https://www.breitbart.com/tech/2026/11/27/report-hackers-breach-air-forces-cloud-one-computing-platform/",
+     "published": "2026-11-27T13:33:13.000Z"
+    },
+    {
+     "id": "s4-4",
+     "side": "far_right",
+     "outlet": "One America News",
+     "outletId": "oann",
+     "caution": true,
+     "access": "unknown",
+     "headline": "Report: U.S. Air Force’s primary cloud platform suffers cyberattack",
+     "url": "https://news.google.com/rss/articles/CBMimwFBVV95cUxPR1lVZlJWOE9lRTdEaVVNRDFXaU05LVpoVC1MbkR6RVFyX2NPM3FIaXFYQ25CblAydVNuNzF0M21xS1Y2VlpwcWRNbkdOQ1pDZGYxb0YyWnFiaXVmNk5HcFpqUE10cjNfT3lfRUlkejJiajVoZUQtWFRPZEFrRmEyaEc2VDFTc2xDZGNodUdpb3Q4QWVBazlrWUxkTQ?oc=5",
+     "published": "2026-11-27T23:39:00.000Z"
+    }
+   ],
+   "sentences": null,
+   "five": {
+    "sides": [
+     {
+      "key": "far_left",
+      "label": "Far left",
+      "outlets": 0,
+      "headlines": []
+     },
+     {
+      "key": "left",
+      "label": "Left",
+      "outlets": 0,
+      "headlines": []
+     },
+     {
+      "key": "centre",
+      "label": "Centre",
+      "outlets": 1,
+      "headlines": [
+       "s4-1"
+      ]
+     },
+     {
+      "key": "right",
+      "label": "Right",
+      "outlets": 1,
+      "headlines": [
+       "s4-2"
+      ]
+     },
+     {
+      "key": "far_right",
+      "label": "Far right",
+      "outlets": 2,
+      "headlines": [
+       "s4-3",
+       "s4-4"
+      ]
+     }
+    ],
+    "eligible": false,
+    "written": null,
+    "status": "not-eligible",
+    "note": "No written comparison for this story: one is written only when at least three of the five sides carried it, one left of centre and one right of centre."
+   }
+  },
+  {
+   "id": "s5",
+   "rank": 5,
+   "outlets": 4,
+   "lead": "s5-1",
+   "headlines": [
+    {
+     "id": "s5-1",
+     "side": "centre",
+     "outlet": "UPI",
+     "outletId": "upi",
+     "caution": false,
+     "access": "free",
+     "headline": "Nebraska Sen. Deb Fischer's office says husband died by suicide",
+     "url": "https://www.upi.com/Top_News/US/2026/11/27/nebraska-senate/1371795816166/",
+     "published": "2026-11-27T23:02:53.000Z"
+    },
+    {
+     "id": "s5-2",
+     "side": "centre",
+     "outlet": "The Hill",
+     "outletId": "thehill",
+     "caution": false,
+     "access": "free",
+     "headline": "Sen. Deb Fischer’s office says her husband died by suicide",
+     "url": "https://thehill.com/homenews/senate/6245545-deb-fischer-nebraska/",
+     "published": "2026-11-27T19:39:16.000Z"
+    },
+    {
+     "id": "s5-3",
+     "side": "right",
+     "outlet": "The Daily Caller",
+     "outletId": "dailycaller",
+     "caution": true,
+     "access": "free",
+     "headline": "GOP Senator Deb Fischer’s Late Husband Died By Suicide",
+     "url": "https://dailycaller.com/2026/11/27/deb-fischer-husband-bruce-died-suicide",
+     "published": "2026-11-27T18:44:34.000Z"
+    },
+    {
+     "id": "s5-4",
+     "side": "far_right",
+     "outlet": "Breitbart",
+     "outletId": "breitbart",
+     "caution": true,
+     "access": "free",
+     "headline": "Republican Senator Deb Fischer's Husband, Bruce, Dies by Suicide: 'a Sad Update'",
+     "url": "https://www.breitbart.com/health/2026/11/27/republican-senator-deb-fischers-husband-bruce-dies-by-suicide-a-sad-update/",
+     "published": "2026-11-27T19:16:14.000Z"
+    }
+   ],
+   "sentences": null,
+   "five": {
+    "sides": [
+     {
+      "key": "far_left",
+      "label": "Far left",
+      "outlets": 0,
+      "headlines": []
+     },
+     {
+      "key": "left",
+      "label": "Left",
+      "outlets": 0,
+      "headlines": []
+     },
+     {
+      "key": "centre",
+      "label": "Centre",
+      "outlets": 2,
+      "headlines": [
+       "s5-1",
+       "s5-2"
+      ]
+     },
+     {
+      "key": "right",
+      "label": "Right",
+      "outlets": 1,
+      "headlines": [
+       "s5-3"
+      ]
+     },
+     {
+      "key": "far_right",
+      "label": "Far right",
+      "outlets": 1,
+      "headlines": [
+       "s5-4"
+      ]
+     }
+    ],
+    "eligible": false,
+    "written": null,
+    "status": "not-eligible",
+    "note": "No written comparison for this story: one is written only when at least three of the five sides carried it, one left of centre and one right of centre."
+   }
+  },
+  {
+   "id": "s6",
+   "rank": 6,
+   "outlets": 3,
+   "lead": "s6-2",
+   "headlines": [
+    {
+     "id": "s6-1",
+     "side": "left",
+     "outlet": "The Independent",
+     "outletId": "independent",
+     "caution": true,
+     "access": "free",
+     "headline": "US military disables another ship in Gulf of Oman after attempt to breach Iranian ports blockade",
+     "url": "https://www.independent.co.uk/news/world/americas/usa-military-gulf-of-oman-ship-iran-blockade-b3093017.html",
+     "published": "2026-11-27T19:54:54.000Z"
+    },
+    {
+     "id": "s6-2",
+     "side": "centre",
+     "outlet": "Deutsche Welle",
+     "outletId": "dw",
+     "caution": false,
+     "access": "free",
+     "headline": "US disables ship in Gulf of Oman under Iran blockade",
+     "url": "https://www.dw.com/en/us-disables-ship-in-gulf-of-oman-under-iran-blockade/a-80082950?maca=en-rss-en-all-1573-rdf",
+     "published": "2026-11-27T23:17:00.000Z"
+    },
+    {
+     "id": "s6-3",
+     "side": "right",
+     "outlet": "Washington Examiner",
+     "outletId": "washingtonexaminer",
+     "caution": false,
+     "access": "paid",
+     "headline": "US strikes commercial ship in Gulf of Oman for attempting to run naval blockade after leaving Iran",
+     "url": "https://www.washingtonexaminer.com/news/world/4816605/us-strikes-commercial-ship-gulf-of-oman/",
+     "published": "2026-11-27T20:18:41.000Z"
+    }
+   ],
+   "sentences": null,
+   "five": {
+    "sides": [
+     {
+      "key": "far_left",
+      "label": "Far left",
+      "outlets": 0,
+      "headlines": []
+     },
+     {
+      "key": "left",
+      "label": "Left",
+      "outlets": 1,
+      "headlines": [
+       "s6-1"
+      ]
+     },
+     {
+      "key": "centre",
+      "label": "Centre",
+      "outlets": 1,
+      "headlines": [
+       "s6-2"
+      ]
+     },
+     {
+      "key": "right",
+      "label": "Right",
+      "outlets": 1,
+      "headlines": [
+       "s6-3"
+      ]
+     },
+     {
+      "key": "far_right",
+      "label": "Far right",
+      "outlets": 0,
+      "headlines": []
+     }
+    ],
+    "eligible": true,
+    "written": null,
+    "status": "missing",
+    "note": "The written comparison is not available for this story."
+   }
+  },
+  {
+   "id": "s7",
+   "rank": 7,
+   "outlets": 3,
+   "lead": "s7-2",
+   "headlines": [
+    {
+     "id": "s7-1",
+     "side": "centre",
+     "outlet": "The Hill",
+     "outletId": "thehill",
+     "caution": false,
+     "access": "free",
+     "headline": "Trump: Iran war will be over ‘sort of whenever I want it to be’",
+     "url": "https://thehill.com/homenews/administration/6245034-trump-says-iran-war-ends-whenever/",
+     "published": "2026-11-27T01:41:40.000Z"
+    },
+    {
+     "id": "s7-2",
+     "side": "right",
+     "outlet": "The American Conservative",
+     "outletId": "amconmag",
+     "caution": false,
+     "access": "free",
+     "headline": "Iran War Day 273: Trump Says Victory Will Come ‘Whenever I Want It’",
+     "url": "https://www.theamericanconservative.com/iran-war-day-273-trump-says-victory-will-come-whenever-i-want-it/",
+     "published": "2026-11-27T15:30:00.000Z"
+    },
+    {
+     "id": "s7-3",
+     "side": "far_right",
+     "outlet": "ZeroHedge",
+     "outletId": "zerohedge",
+     "caution": true,
+     "access": "free",
+     "headline": "Watch: Trump Tells Troops Victory Over Iran Comes \"Whenever I Want It To Be\"",
+     "url": "https://www.zerohedge.com/geopolitical/watch-trump-tells-troops-victory-over-iran-comes-whenever-i-want-it-be",
+     "published": "2026-11-27T14:30:00.000Z"
+    }
+   ],
+   "sentences": null,
+   "five": {
+    "sides": [
+     {
+      "key": "far_left",
+      "label": "Far left",
+      "outlets": 0,
+      "headlines": []
+     },
+     {
+      "key": "left",
+      "label": "Left",
+      "outlets": 0,
+      "headlines": []
+     },
+     {
+      "key": "centre",
+      "label": "Centre",
+      "outlets": 1,
+      "headlines": [
+       "s7-1"
+      ]
+     },
+     {
+      "key": "right",
+      "label": "Right",
+      "outlets": 1,
+      "headlines": [
+       "s7-2"
+      ]
+     },
+     {
+      "key": "far_right",
+      "label": "Far right",
+      "outlets": 1,
+      "headlines": [
+       "s7-3"
+      ]
+     }
+    ],
+    "eligible": false,
+    "written": null,
+    "status": "not-eligible",
+    "note": "No written comparison for this story: one is written only when at least three of the five sides carried it, one left of centre and one right of centre."
+   }
+  },
+  {
+   "id": "s8",
+   "rank": 8,
+   "outlets": 3,
+   "lead": "s8-2",
+   "headlines": [
+    {
+     "id": "s8-1",
+     "side": "centre",
+     "outlet": "UPI",
+     "outletId": "upi",
+     "caution": false,
+     "access": "free",
+     "headline": "Sheinbaum criticizes DEA hotline to report corrupt Mexican officials",
+     "url": "https://www.upi.com/Top_News/World-News/2026/11/27/latam-mexico-Sheinbaum-criticizes-DEA-hotline-report-corrupt-officials/7961795736131/",
+     "published": "2026-11-27T06:02:02.000Z"
+    },
+    {
+     "id": "s8-2",
+     "side": "far_right",
+     "outlet": "Breitbart",
+     "outletId": "breitbart",
+     "caution": true,
+     "access": "free",
+     "headline": "Mexican Journalist Announces Use of DEA’s Tip Line in Mexico",
+     "url": "https://www.breitbart.com/border/2026/11/27/mexican-journalist-announces-use-of-deas-tip-line-in-mexico/",
+     "published": "2026-11-27T19:50:29.000Z"
+    },
+    {
+     "id": "s8-3",
+     "side": "far_right",
+     "outlet": "The Gateway Pundit",
+     "outletId": "gatewaypundit",
+     "caution": true,
+     "access": "free",
+     "headline": "Sheinbaum Calls DEA Tip Line for Reporting Narco Officials “Interference” as Cartels Control Territory in Most Mexican States",
+     "url": "https://www.thegatewaypundit.com/2026/11/sheinbaum-calls-dea-tip-line-reporting-narco-officials/",
+     "published": "2026-11-27T20:40:43.000Z"
+    },
+    {
+     "id": "s8-4",
+     "side": "far_right",
+     "outlet": "Breitbart",
+     "outletId": "breitbart",
+     "caution": true,
+     "access": "free",
+     "headline": "Mexican President Tells DEA to Butt Out After It Opened Secure Tip Line in Mexico",
+     "url": "https://www.breitbart.com/border/2026/11/27/mexican-president-tells-dea-to-butt-out-after-opening-secure-tip-line-in-mexico/",
+     "published": "2026-11-27T19:38:37.000Z"
+    }
+   ],
+   "sentences": null,
+   "five": {
+    "sides": [
+     {
+      "key": "far_left",
+      "label": "Far left",
+      "outlets": 0,
+      "headlines": []
+     },
+     {
+      "key": "left",
+      "label": "Left",
+      "outlets": 0,
+      "headlines": []
+     },
+     {
+      "key": "centre",
+      "label": "Centre",
+      "outlets": 1,
+      "headlines": [
+       "s8-1"
+      ]
+     },
+     {
+      "key": "right",
+      "label": "Right",
+      "outlets": 0,
+      "headlines": []
+     },
+     {
+      "key": "far_right",
+      "label": "Far right",
+      "outlets": 2,
+      "headlines": [
+       "s8-2",
+       "s8-3",
+       "s8-4"
+      ]
+     }
+    ],
+    "eligible": false,
+    "written": null,
+    "status": "not-eligible",
+    "note": "No written comparison for this story: one is written only when at least three of the five sides carried it, one left of centre and one right of centre."
+   }
+  },
+  {
+   "id": "s9",
+   "rank": 9,
+   "outlets": 3,
+   "lead": "s9-2",
+   "headlines": [
+    {
+     "id": "s9-1",
+     "side": "left",
+     "outlet": "The Independent",
+     "outletId": "independent",
+     "caution": true,
+     "access": "free",
+     "headline": "Joe Biden memoir sales lag behind Barack Obama and Bill Clinton books",
+     "url": "https://www.independent.co.uk/news/world/americas/joe-biden-memoir-sales-obama-clinton-b3092987.html",
+     "published": "2026-11-27T18:16:56.000Z"
+    },
+    {
+     "id": "s9-2",
+     "side": "right",
+     "outlet": "Fox News",
+     "outletId": "foxnews",
+     "caution": true,
+     "access": "free",
+     "headline": "Biden book sales lag way behind Obama, Clinton memoirs in first week",
+     "url": "https://www.foxnews.com/politics/biden-book-sales-lag-way-behind-obama-clinton-memoirs-first-week",
+     "published": "2026-11-27T19:38:23.000Z"
+    },
+    {
+     "id": "s9-3",
+     "side": "right",
+     "outlet": "Washington Examiner",
+     "outletId": "washingtonexaminer",
+     "caution": false,
+     "access": "paid",
+     "headline": "Biden’s first-week book sales lag behind Obama’s and Clinton’s",
+     "url": "https://www.washingtonexaminer.com/news/white-house/4816641/biden-book-sales-trail-obama-clinton/",
+     "published": "2026-11-27T21:16:41.000Z"
+    }
+   ],
+   "sentences": null,
+   "five": {
+    "sides": [
+     {
+      "key": "far_left",
+      "label": "Far left",
+      "outlets": 0,
+      "headlines": []
+     },
+     {
+      "key": "left",
+      "label": "Left",
+      "outlets": 1,
+      "headlines": [
+       "s9-1"
+      ]
+     },
+     {
+      "key": "centre",
+      "label": "Centre",
+      "outlets": 0,
+      "headlines": []
+     },
+     {
+      "key": "right",
+      "label": "Right",
+      "outlets": 2,
+      "headlines": [
+       "s9-2",
+       "s9-3"
+      ]
+     },
+     {
+      "key": "far_right",
+      "label": "Far right",
+      "outlets": 0,
+      "headlines": []
+     }
+    ],
+    "eligible": false,
+    "written": null,
+    "status": "not-eligible",
+    "note": "No written comparison for this story: one is written only when at least three of the five sides carried it, one left of centre and one right of centre."
+   }
+  },
+  {
+   "id": "s10",
+   "rank": 10,
+   "outlets": 3,
+   "lead": "s10-2",
+   "headlines": [
+    {
+     "id": "s10-1",
+     "side": "centre",
+     "outlet": "CNBC",
+     "outletId": "cnbc",
+     "caution": false,
+     "access": "free",
+     "headline": "SpaceX shares jump 4% amid tech rally and after Musk says he will expand on Trump Account share donations",
+     "url": "https://www.cnbc.com/2026/11/27/spacex-shares-musk-donations.html",
+     "published": "2026-11-27T10:20:39.000Z"
+    },
+    {
+     "id": "s10-2",
+     "side": "far_right",
+     "outlet": "One America News",
+     "outletId": "oann",
+     "caution": true,
+     "access": "unknown",
+     "headline": "Musk personally donates additional SpaceX shares to every U.S. child through Trump Accounts",
+     "url": "https://news.google.com/rss/articles/CBMivgFBVV95cUxQWTNMbTdIN3FtakxhOElXSXJVa3ZhOTAtRHpNQ1VCY2hubUZ1QUVxd0hOcU9NaEFRZEdoeGdiTnJoSXhOb25UZlgyeGdncERPcjhhTTdPaElsM3EzRVVRTHFKTzJoQkFUcklJQUczel8ybllMM0VxUmJibWIwcHRTVlRYT3otT0VKLWY2ZngxemY0cmJpdVBzNS12UEpWZjVMVVZoZGtYeklra25GMmhxdlptNjlhb1BwLThDcmF3?oc=5",
+     "published": "2026-11-27T16:09:54.000Z"
+    },
+    {
+     "id": "s10-3",
+     "side": "far_right",
+     "outlet": "American Greatness",
+     "outletId": "amgreatness",
+     "caution": true,
+     "access": "free",
+     "headline": "Musk and SpaceX to Give Each Child in a Trump Account One Share of Company Stock",
+     "url": "https://amgreatness.com/2026/11/27/musk-and-spacex-to-give-each-child-in-a-trump-account-one-share-of-company-stock/",
+     "published": "2026-11-27T08:45:29.000Z"
+    }
+   ],
+   "sentences": null,
+   "five": {
+    "sides": [
+     {
+      "key": "far_left",
+      "label": "Far left",
+      "outlets": 0,
+      "headlines": []
+     },
+     {
+      "key": "left",
+      "label": "Left",
+      "outlets": 0,
+      "headlines": []
+     },
+     {
+      "key": "centre",
+      "label": "Centre",
+      "outlets": 1,
+      "headlines": [
+       "s10-1"
+      ]
+     },
+     {
+      "key": "right",
+      "label": "Right",
+      "outlets": 0,
+      "headlines": []
+     },
+     {
+      "key": "far_right",
+      "label": "Far right",
+      "outlets": 2,
+      "headlines": [
+       "s10-2",
+       "s10-3"
+      ]
+     }
+    ],
+    "eligible": false,
+    "written": null,
+    "status": "not-eligible",
+    "note": "No written comparison for this story: one is written only when at least three of the five sides carried it, one left of centre and one right of centre."
+   }
+  }
+ ]
+}

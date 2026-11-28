@@ -5,29 +5,9 @@ CALSCALE:GREGORIAN
 METHOD:PUBLISH
 X-WR-CALNAME:Vitruvian Manager Realtime Calendar
 X-WR-CALDESC:Political events from six months ago to eighteen months ahead 
- (2026-05-27 to 2028-05-27)\, from Vitruvian Manager's Realtime Calendar.
+ (2026-05-28 to 2028-05-28)\, from Vitruvian Manager's Realtime Calendar.
 REFRESH-INTERVAL;VALUE=DURATION:PT12H
 X-PUBLISHED-TTL:PT12H
-BEGIN:VEVENT
-UID:dc6bf241e26492df@jdpi.pages.dev
-DTSTAMP:20261127T151826Z
-DTSTART;VALUE=DATE:20260527
-DTEND;VALUE=DATE:20260528
-SUMMARY:The United States Office of Foreign Assets Control announces under 
- Executive Order 13224 that it has imposed sanctions… (Iran)
-DESCRIPTION:The United States Office of Foreign Assets Control announces un
- der Executive Order 13224 that it has imposed sanctions against Iran's Per
- sian Gulf Strait Authority\, the newly-created body used for managing the 
- Strait of Hormuz.\n\nSanctions: Iran\nReported by Reuters: https://www.reu
- ters.com/world/us/carlos-de-la-cruz-wins-republican-nomination-texas-compe
- titive-35th-2026-05-27/\nSource: https://en.wikipedia.org/wiki/United_Stat
- es_sanctions_against_Iran\nText: Wikipedia (CC BY-SA 4.0)\, via Vitruvian 
- Manager (jdpi.pages.dev).
-CATEGORIES:Sanctions
-URL:https://en.wikipedia.org/wiki/United_States_sanctions_against_Iran
-STATUS:CONFIRMED
-TRANSP:TRANSPARENT
-END:VEVENT
 BEGIN:VEVENT
 UID:3cccb36bb26568dd@jdpi.pages.dev
 DTSTAMP:20261127T151826Z

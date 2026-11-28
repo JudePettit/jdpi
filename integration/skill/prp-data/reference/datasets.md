@@ -1,6 +1,6 @@
 # Vitruvian Manager datasets
 
-Generated 2026-11-27 from https://jdpi.pages.dev/integration/catalog.json. Read the live catalogue for current row counts.
+Generated 2026-11-28 from https://jdpi.pages.dev/integration/catalog.json. Read the live catalogue for current row counts.
 
 ## Realtime Geopolitics
 
@@ -94,9 +94,9 @@ National Analysis: key indicator time series. Yearly values since 1980 for every
 
 ### upcoming-political-events
 
-Realtime Calendar: recent and upcoming events. The Realtime Calendar's window: political events from six months ago to eighteen months ahead (2026-05-27 to 2028-05-27 at the last build): elections, referendums, summits, new leaders, coups, ceasefires, protests, court rulings and more.
+Realtime Calendar: recent and upcoming events. The Realtime Calendar's window: political events from six months ago to eighteen months ahead (2026-05-28 to 2028-05-28 at the last build): elections, referendums, summits, new leaders, coups, ceasefires, protests, court rulings and more.
 
-- Rows: 318 · refresh: daily · licence: Summaries from Wikipedia, CC BY-SA 4.0 (credit Wikipedia); facts from Wikidata (CC0) and UCDP/PRIO (CC BY 4.0); compilation © JDP-Iq. Leaders to 2015 after Archigos 4.1 (Goemans, Gleditsch and Chiozza), whose page states no licence: kept with its citation until VM’s owner decides.
+- Rows: 317 · refresh: daily · licence: Summaries from Wikipedia, CC BY-SA 4.0 (credit Wikipedia); facts from Wikidata (CC0) and UCDP/PRIO (CC BY 4.0); compilation © JDP-Iq. Leaders to 2015 after Archigos 4.1 (Goemans, Gleditsch and Chiozza), whose page states no licence: kept with its citation until VM’s owner decides.
 - File: https://jdpi.pages.dev/integration/data/upcoming-political-events.json (records at `records`)
 - Fields: `date` (date), `country` (string), `title` (string), `type` (string), `status` (string), `source` (string), `summary` (string), `ref` (string), `refName` (string), `level` (string), `iso3` (string), `class` (string), `precision` (string)
 
@@ -130,7 +130,7 @@ Daily Synopsis: the day's major stories. Each day's major political stories, pic
 
 Economics Briefing: stories and papers. Every paper and story in the Economics Briefing over the last 7 days, classed by fields (macro, monetary, trade, labour, development, finance, public, energy) and by type (papers or news). Join `source` to econ-briefing-sources.
 
-- Rows: 495 · refresh: 6-hourly · licence: Titles, links and short summaries © their publishers, quoted for reference; classification and metadata © JDP-Iq.
+- Rows: 489 · refresh: 6-hourly · licence: Titles, links and short summaries © their publishers, quoted for reference; classification and metadata © JDP-Iq.
 - File: https://jdpi.pages.dev/econ/briefing/data/stories.json (records at `items`)
 - Fields: `id` (string), `title` (string), `url` (string), `source` (string), `kind` (string), `tier` (number), `fields` (array), `type` (string), `published` (date), `summary` (string), `section` (string), `doi` (string), `authors` (string), `also` (array), `undated` (boolean), `access` (string), `alt` (array)
 
@@ -146,7 +146,7 @@ Economics Briefing: sources. The journals, preprint servers, institutions and ne
 
 Scientific Briefing: stories and papers. Every paper and story in the Scientific Briefing over the last 7 days, classed by disciplines (physics, chemistry, biology, earth, space) and by type (papers or news). Join `source` to science-briefing-sources.
 
-- Rows: 1,038 · refresh: 6-hourly · licence: Titles, links and short summaries © their publishers, quoted for reference; classification and metadata © JDP-Iq.
+- Rows: 1,074 · refresh: 6-hourly · licence: Titles, links and short summaries © their publishers, quoted for reference; classification and metadata © JDP-Iq.
 - File: https://jdpi.pages.dev/science/briefing/data/stories.json (records at `items`)
 - Fields: `id` (string), `title` (string), `url` (string), `source` (string), `kind` (string), `tier` (number), `disciplines` (array), `type` (string), `published` (date), `summary` (string), `section` (string), `doi` (string), `also` (array), `undated` (boolean), `access` (string), `alt` (array)
 
@@ -162,7 +162,7 @@ Scientific Briefing: sources. The journals, preprint servers, institutions and n
 
 Digital Briefing: stories and papers. Every paper and story in the Digital Briefing over the last 7 days, classed by fields (ai, software, security, hardware, networks, quantum, privacy, policy) and by type (papers or news). Join `source` to digital-briefing-sources.
 
-- Rows: 1,008 · refresh: 6-hourly · licence: Titles, links and short summaries © their publishers, quoted for reference; classification and metadata © JDP-Iq.
+- Rows: 986 · refresh: 6-hourly · licence: Titles, links and short summaries © their publishers, quoted for reference; classification and metadata © JDP-Iq.
 - File: https://jdpi.pages.dev/digital/briefing/data/stories.json (records at `items`)
 - Fields: `id` (string), `title` (string), `url` (string), `source` (string), `kind` (string), `tier` (number), `fields` (array), `type` (string), `published` (date), `summary` (string), `section` (string), `doi` (string), `authors` (string), `also` (array), `access` (string), `accessMark` (string), `alt` (array)
 

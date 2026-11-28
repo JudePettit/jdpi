@@ -1,5 +1,5 @@
 {
-  "generated": "2026-11-27T22:53:57.965Z",
+  "generated": "2026-11-28T01:12:37.210Z",
   "name": "Vitruvian Manager data catalogue",
   "publisher": "JDP-Iq",
   "description": "Every public dataset in Vitruvian Manager (VM, by JDP-Iq), with its fields, size, licence and sources. Read-only; no keys. Files are static JSON on this site; the MCP server (/mcp) and the JSON API (/api/v1/) query them with row and size caps.",
@@ -56,7 +56,7 @@
       "sources": [
         "The outlets' own RSS feeds, or Google News restricted to the outlet's site"
       ],
-      "updated": "2026-11-27",
+      "updated": "2026-11-28",
       "refresh": "static",
       "page": "q/headlines.html?view=current",
       "derivedFrom": [
@@ -997,7 +997,7 @@
       "title": "Realtime Calendar: recent and upcoming events",
       "module": "rt",
       "submodule": "calendar",
-      "description": "The Realtime Calendar's window: political events from six months ago to eighteen months ahead (2026-05-27 to 2028-05-27 at the last build): elections, referendums, summits, new leaders, coups, ceasefires, protests, court rulings and more.",
+      "description": "The Realtime Calendar's window: political events from six months ago to eighteen months ahead (2026-05-28 to 2028-05-28 at the last build): elections, referendums, summits, new leaders, coups, ceasefires, protests, court rulings and more.",
       "url": "integration/data/upcoming-political-events.json",
       "format": "json",
       "records": "records",
@@ -1068,7 +1068,7 @@
           "description": "month, when the date is known only to the month; absent when the day is known"
         }
       ],
-      "rows": 318,
+      "rows": 317,
       "licence": "Summaries from Wikipedia, CC BY-SA 4.0 (credit Wikipedia); facts from Wikidata (CC0) and UCDP/PRIO (CC BY 4.0); compilation © JDP-Iq. Leaders to 2015 after Archigos 4.1 (Goemans, Gleditsch and Chiozza), whose page states no licence: kept with its citation until VM’s owner decides.",
       "sources": [
         "Wikipedia national electoral calendars and lists of summits",
@@ -1088,7 +1088,7 @@
         "calendar/data/2010s.json",
         "calendar/data/2020s.json"
       ],
-      "bytes": 172969
+      "bytes": 172262
     },
     {
       "id": "intelligence-briefing-stories",
@@ -1413,7 +1413,7 @@
           "description": "The same item at the other outlets that carried it, each { source, url, title, access }"
         }
       ],
-      "rows": 495,
+      "rows": 489,
       "licence": "Titles, links and short summaries © their publishers, quoted for reference; classification and metadata © JDP-Iq.",
       "sources": [
         "RSS and Atom feeds of the journals, working-paper series, central banks, think tanks and economics desks listed in econ-briefing-sources"
@@ -1421,7 +1421,7 @@
       "updated": "2026-11-27",
       "refresh": "6-hourly",
       "page": "econ/briefing/index.html",
-      "bytes": 288310
+      "bytes": 285748
     },
     {
       "id": "econ-briefing-sources",
@@ -1557,7 +1557,7 @@
       "updated": "2026-11-27",
       "refresh": "6-hourly",
       "page": "econ/briefing/index.html",
-      "bytes": 288310
+      "bytes": 285748
     },
     {
       "id": "science-briefing-stories",
@@ -1650,7 +1650,7 @@
           "description": "The same item at the other outlets that carried it, each { source, url, title, access }"
         }
       ],
-      "rows": 1038,
+      "rows": 1074,
       "licence": "Titles, links and short summaries © their publishers, quoted for reference; classification and metadata © JDP-Iq.",
       "sources": [
         "RSS and Atom feeds of the journals and science desks listed in science-briefing-sources (Springer Nature, AAAS, Cell Press, PNAS, APS, Wiley, IOP, AAS, PLOS, NASA, ESA and others)"
@@ -1658,7 +1658,7 @@
       "updated": "2026-11-27",
       "refresh": "6-hourly",
       "page": "science/briefing/index.html",
-      "bytes": 615478
+      "bytes": 628579
     },
     {
       "id": "science-briefing-sources",
@@ -1784,7 +1784,7 @@
       "updated": "2026-11-27",
       "refresh": "6-hourly",
       "page": "science/briefing/index.html",
-      "bytes": 615478
+      "bytes": 628579
     },
     {
       "id": "digital-briefing-stories",
@@ -1882,7 +1882,7 @@
           "description": "The same item at the other outlets that carried it, each { source, url, title, access }"
         }
       ],
-      "rows": 1008,
+      "rows": 986,
       "licence": "Titles, links and short summaries © their publishers, quoted for reference; classification and metadata © JDP-Iq.",
       "sources": [
         "RSS and Atom feeds of the journals, preprint servers, labs and technology desks listed in digital-briefing-sources"
@@ -1890,7 +1890,7 @@
       "updated": "2026-11-27",
       "refresh": "6-hourly",
       "page": "digital/briefing/index.html",
-      "bytes": 602220
+      "bytes": 590184
     },
     {
       "id": "digital-briefing-sources",
@@ -2036,7 +2036,7 @@
       "updated": "2026-11-27",
       "refresh": "6-hourly",
       "page": "digital/briefing/index.html",
-      "bytes": 602220
+      "bytes": 590184
     },
     {
       "id": "political-calendar",
@@ -3627,7 +3627,7 @@
       "sources": [
         "registry.json"
       ],
-      "updated": "2026-11-27",
+      "updated": "2026-11-28",
       "refresh": "on change",
       "page": "index.html",
       "derivedFrom": [

@@ -20,10 +20,16 @@
 //   - A corrected start keeps Wikidata's precision (sWp); a correction that cannot apply is refused or warned of; the
 //     menu says "present" for every ongoing war.
 // The page test runs against JDPI_URL (default live); PRP_PAGES=0 leaves it out.
+// After the War Focus refresh was rehearsed (27 November 2026): War Focus is built again on the 2nd of each month from
+// what Wikidata and Wikipedia then say, and the deploy that follows runs this file. The sides, the control and the start
+// corrections are VM's own (wars.mjs, build.mjs DATE_FIXES) and are pinned outright; the days and ends Wikidata gives
+// the battles named here are pinned only for the files built on 27 November 2026 (AS_BUILT, the index's `generated`),
+// and the rules that read them are tested on fixtures of the same values whatever the day.
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { pageTest, launch } from './tools/pages.mjs';
+import { builtOn } from './tools/as-built.mjs';
 
 const BASE = (process.env.JDPI_URL || 'https://jdpi.pages.dev').replace(/\/$/, '');
 const text = rel => readFileSync(new URL(rel, import.meta.url), 'utf8');
@@ -32,6 +38,10 @@ const { WARS } = await import('../battlefield/focus/scripts/wars.mjs');
 const WW2 = WARS.find(w => w.id === 'ww2');
 const ww2 = json('../battlefield/focus/data/wars/ww2.json');
 const qOf = x => (Array.isArray(x) ? x[0] : x);
+const AS_BUILT = builtOn(json('../battlefield/focus/data/index.json').generated, '2026-11-27');
+// The Vatican's and Yawata's dates as Wikidata gave them on 27 November 2026 (Q2909620, Q4940734; P585).
+const VATICAN = { q: 'Q2909620', n: 'Bombing of the Vatican', s: '1943-11-05', e: '1944-03-01', p: null, pts: ['1943-11-05', '1944-03-01'] };
+const YAWATA = { q: 'Q4940734', n: 'Bombing of Yawata', s: '1944-06-01', e: '1945-08-08', p: 'm', pe: 'd', pts: ['1944-06', '1944-08-20', '1945-08-08'] };
 
 test('front-pages-8: Egypt is on the Allied side only from its declaration of war, 24 February 1945', () => {
   assert.deepEqual(WW2.sides.a.q.filter(x => qOf(x) === 'Q79'), [['Q79', '1945-02-24']]);
@@ -69,11 +79,12 @@ test('front-pages-10: a battle with several points in time is dated on each day,
   assert.equal(battleDates({ point: [P('1945-08-06'), P('1945-08-06')], name: 'Battle of Y' }).pts, undefined);
   assert.equal(battleDates({ point, name: 'Okinawa campaign' }).e, null);
   assert.equal(battleDates({ start: [P('1944-06-06')], end: [P('1944-08-30')], point, name: 'Battle of Z' }).pts, undefined);
-  // The committed file, rebuilt.
+  // The committed file, rebuilt (Wikidata as read on 27 November 2026).
   const by = new Map(ww2.battles.map(b => [b.q, b]));
-  assert.deepEqual(['s', 'e', 'pts'].map(k => by.get('Q488')[k]), ['1945-08-06', '1945-08-09', ['1945-08-06', '1945-08-09']]);
-  assert.deepEqual(by.get('Q2909620').pts, ['1943-11-05', '1944-03-01'], 'the Vatican');
-  assert.deepEqual(by.get('Q4940734').pts, ['1944-06', '1944-08-20', '1945-08-08'], 'Yawata');
+  if (AS_BUILT) {
+    assert.deepEqual(['s', 'e', 'pts'].map(k => by.get('Q488')[k]), ['1945-08-06', '1945-08-09', ['1945-08-06', '1945-08-09']]);
+    for (const x of [VATICAN, YAWATA]) assert.deepEqual(['n', 's', 'e', 'p', 'pe', 'pts'].map(k => by.get(x.q)[k] ?? null), ['n', 's', 'e', 'p', 'pe', 'pts'].map(k => x[k] ?? null), x.n);
+  }
   // Every battle of the war with pts has two days or more, its first and last as s and e, and no doubt about its end.
   for (const b of ww2.battles.filter(x => x.pts)) assert.ok(b.pts.length > 1 && b.s.startsWith(b.pts[0]) && b.e.startsWith(b.pts.at(-1)) && !b.u, b.q);
 });
@@ -82,12 +93,13 @@ test('several points in time: the page draws the battle only in their months, an
   const app = text('../battlefield/focus/app.js');
   const pick = name => { const m = new RegExp(`^const ${name} = (.*);$`, 'm').exec(app); assert.ok(m, name); return m[1]; };
   const { overlaps, underWay } = new Function(`const ptMonth = ${pick('ptMonth')}; const overlaps = ${pick('overlaps')}; const underWay = ${pick('underWay')}; return { overlaps, underWay };`)();
-  const vatican = ww2.battles.find(b => b.q === 'Q2909620');
+  // The two battles as War Focus's file held them on 27 November 2026 (VATICAN, YAWATA; checked against the file above).
+  const vatican = VATICAN;
   assert.equal(underWay(vatican, '1943-12', '1943-12'), false, 'not under way in December 1943, between its raids');
   for (const m of ['1943-11', '1944-03']) assert.equal(underWay(vatican, m, m), true, m);
   assert.equal(underWay(vatican, '1943-12', '1944-02'), false, 'nor in a period between them');
   assert.equal(underWay(vatican, '1943-12', '1944-03'), true, 'but in a period that holds a raid');
-  const yawata = ww2.battles.find(b => b.q === 'Q4940734');
+  const yawata = YAWATA;
   assert.deepEqual(['1944-06', '1944-07', '1944-08', '1945-01', '1945-08'].map(m => underWay(yawata, m, m)), [true, false, true, false, true]);
   // A battle with a start and an end is under way throughout, as before.
   assert.equal(overlaps({ s: '1944-06-06', e: '1944-08-30', p: null }, '1944-07', '1944-07'), true);
@@ -110,8 +122,9 @@ test('a point in time that holds a finer one is the same date twice: Operation M
   assert.deepEqual([tarbrush.s, tarbrush.p, tarbrush.e], ['1944-05-01', 'm', '1944-05-31']);
   // A year that holds no finer point stays.
   assert.deepEqual(battleDates({ point: [{ v: '1943-01-01T00:00:00Z', p: 9 }, { v: '1944-03-01T00:00:00Z', p: 10 }], name: 'Operation W' }).pts, ['1943', '1944-03']);
-  // The committed file, rebuilt.
+  // The committed file, rebuilt (Wikidata as read on 27 November 2026).
   const by = new Map(ww2.battles.map(b => [b.q, b]));
+  if (!AS_BUILT) return;
   assert.deepEqual(['s', 'e', 'p', 'pe'].map(k => by.get('Q19384597')[k] ?? null), ['1943-03-01', '1943-03-31', 'm', null], 'Operation Martin');
   assert.deepEqual(['s', 'e', 'p', 'pe'].map(k => by.get('Q7097614')[k] ?? null), ['1944-05-01', '1944-05-31', 'm', null], 'Operation Tarbrush');
 });
@@ -154,9 +167,11 @@ test('front-pages-9: date corrections, each with its source; the Battle of Iwo J
   for (const entry of entries) assert.match(entry, /^\s*\{ war: '[a-z0-9-]+', q: 'Q\d+', s: '\d{4}-\d{2}-\d{2}', source: '[^']+', url: 'https:\/\/en\.wikipedia\.org\/w\/index\.php\?oldid=\d+'/, entry);
   assert.match(build, /fixDates\(battleDates\(/, 'applied where the dates are read');
   assert.match(build, /for \(const f of DATE_FIXES\) if \(f\.war === warId && !out\.some\(b => b\.q === f\.q\)\) console\.warn\(/);
-  // The committed file, rebuilt; and the page names Wikipedia as a source of dates as well as of figures.
+  // The committed file, rebuilt; and the page names Wikipedia as a source of dates as well as of figures. The start is
+  // DATE_FIXES' whatever the day; the end and Wikidata's start are Wikidata's as read on 27 November 2026.
   const iwo = ww2.battles.find(b => b.q === 'Q180182');
-  assert.deepEqual([iwo.s, iwo.e, iwo.sW, iwo.sWp], ['1945-02-19', '1945-03-26', '1945-02-08', undefined]);
+  assert.equal(iwo.s, '1945-02-19');
+  if (AS_BUILT) assert.deepEqual([iwo.s, iwo.e, iwo.sW, iwo.sWp], ['1945-02-19', '1945-03-26', '1945-02-08', undefined]);
   assert.match(json('../battlefield/focus/data/index.json').sources.wikipedia, /the casualty fields of each battle’s infobox and, where the page says so, its dates, at the revision named/);
   // The page says where the start comes from, at Wikidata's precision.
   assert.match(text('../battlefield/focus/app.js'), /b\.sW \? ` · start as its Wikipedia article gives it; Wikidata starts it \$\{atPrec\(b\.sW, b\.sWp\)\}` : ''/);
@@ -199,20 +214,47 @@ test('page: the Allies of October 1939 leave out Egypt and Iran, the Axis Austri
     for (const o of options) assert.equal((o.match(/\(\d{4}/g) || []).length, 1, o);
     await page.goto(`${BASE}/battlefield/focus/#war=ww2&m=1945-03&v=battles`, { waitUntil: 'domcontentloaded' });
     await page.reload({ waitUntil: 'domcontentloaded' });
-    await page.waitForFunction(() => [...document.querySelectorAll('#battles-rows button.rowbtn')].some(b => b.textContent === 'Battle of Iwo Jima'), null, { timeout: 30000 });
-    const iwo = await page.$$eval('#battles-rows tr', rows => rows.find(r => r.querySelector('button.rowbtn')?.textContent === 'Battle of Iwo Jima')?.children[1].textContent);
-    assert.equal(iwo, '19 Feb 1945 – 26 Mar 1945 · start as its Wikipedia article gives it; Wikidata starts it 8 Feb 1945');
+    // Iwo Jima's row, by the name its file gives it: from DATE_FIXES' 19 February whatever the day, and Wikidata's start
+    // beside it while Wikidata's differs; the rest as Wikidata gave it on 27 November 2026.
+    const iwoB = ww2.battles.find(b => b.q === 'Q180182');
+    await page.waitForFunction(n => [...document.querySelectorAll('#battles-rows button.rowbtn')].some(b => b.textContent === n), iwoB.n, { timeout: 30000 });
+    const iwo = await page.$$eval('#battles-rows tr', (rows, n) => rows.find(r => r.querySelector('button.rowbtn')?.textContent === n)?.children[1].textContent, iwoB.n);
+    assert.match(iwo, /^19 Feb 1945 – /);
+    if (iwoB.sW) assert.match(iwo, / · start as its Wikipedia article gives it; Wikidata starts it /);
+    if (AS_BUILT) assert.equal(iwo, '19 Feb 1945 – 26 Mar 1945 · start as its Wikipedia article gives it; Wikidata starts it 8 Feb 1945');
     const row = name => page.$$eval('#battles-rows tr', (rows, n) => { const r = rows.find(x => x.querySelector('button.rowbtn')?.textContent === n); return r ? { dates: r.children[1].textContent, cls: r.className } : null; }, name);
-    assert.equal((await row('atomic bombings of Hiroshima and Nagasaki')).dates, '6 Aug 1945 and 9 Aug 1945');
-    assert.equal((await row('Bombing of the Vatican')).dates, '5 Nov 1943 and 1 Mar 1944');
-    assert.equal((await row('Bombing of Yawata')).dates, 'June 1944, 20 Aug 1944 and 8 Aug 1945');
-    assert.equal((await row('Operation Martin')).dates, 'March 1943');
-    // The Vatican is not under way in December 1943, between its two raids; it is in November 1943.
-    for (const [m, cls] of [['1943-12', ''], ['1943-11', 'sel']]) {
+    // The page's rule, whatever the day, on every battle the file gives several days (pts) under a name of its own: its
+    // days listed ("X and Y", "X, Y and Z"), each ending in its own year, never a span.
+    const named = n => ww2.battles.filter(b => b.n === n).length === 1;
+    const several = ww2.battles.filter(b => b.s && b.pts && named(b.n));
+    assert.ok(several.length >= 1, 'a battle of several days to check');
+    for (const b of several) {
+      const r = await row(b.n);
+      assert.ok(r, `${b.n}: listed`);
+      const dates = r.dates.split(' · ')[0], parts = dates.split(/, | and /);
+      assert.doesNotMatch(dates, / – /, `${b.n}: not a span`);
+      assert.match(dates, /^.+ and .+$/, `${b.n}: its days listed`);
+      assert.equal(parts.length, b.pts.length, `${b.n}: ${dates}`);
+      parts.forEach((p, i) => assert.ok(p.endsWith(b.pts[i].slice(0, 4)), `${b.n}: ${p} is ${b.pts[i]}`));
+    }
+    if (AS_BUILT) {
+      assert.equal((await row('atomic bombings of Hiroshima and Nagasaki')).dates, '6 Aug 1945 and 9 Aug 1945');
+      assert.equal((await row('Bombing of the Vatican')).dates, '5 Nov 1943 and 1 Mar 1944');
+      assert.equal((await row('Bombing of Yawata')).dates, 'June 1944, 20 Aug 1944 and 8 Aug 1945');
+      assert.equal((await row('Operation Martin')).dates, 'March 1943');
+    }
+    // The Vatican is not under way in a month between its raids (December 1943, as the file held it on 27 November);
+    // it is in the month of its first raid (November 1943). The months are the file's, whatever the day.
+    const vat = ww2.battles.find(b => b.q === 'Q2909620');
+    const next = m => { const [y, mo] = m.split('-').map(Number); return mo === 12 ? `${y + 1}-01` : `${y}-${String(mo + 1).padStart(2, '0')}`; };
+    const first = vat?.pts?.[0]?.length >= 7 ? vat.pts[0].slice(0, 7) : null, between = first && next(first);
+    const months = first && vat.pts.length > 1 && between < vat.pts[1].slice(0, 7) && !vat.pts.some(d => d.startsWith(between)) ? [[between, ''], [first, 'sel']] : [];
+    if (AS_BUILT) assert.deepEqual(months, [['1943-12', ''], ['1943-11', 'sel']]);
+    for (const [m, cls] of months) {
       await page.goto(`${BASE}/battlefield/focus/#war=ww2&m=${m}&v=battles`, { waitUntil: 'domcontentloaded' });
       await page.reload({ waitUntil: 'domcontentloaded' });
-      await page.waitForFunction(x => document.querySelector('#month')?.dataset.value === x && [...document.querySelectorAll('#battles-rows button.rowbtn')].some(b => b.textContent === 'Bombing of the Vatican'), m, { timeout: 30000 });
-      assert.equal((await row('Bombing of the Vatican')).cls, cls, m);
+      await page.waitForFunction(([x, n]) => document.querySelector('#month')?.dataset.value === x && [...document.querySelectorAll('#battles-rows button.rowbtn')].some(b => b.textContent === n), [m, vat.n], { timeout: 30000 });
+      assert.equal((await row(vat.n)).cls, cls, m);
     }
     assert.deepEqual(errors, []);
   } finally { await browser.close(); }

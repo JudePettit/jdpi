@@ -23,14 +23,22 @@ const ev = id => data.events.find(e => e.id === id);
 const text = s => s.replace(/<[^>]+>/g, '').replace(/\s+/g, ' ');
 const bare = s => (s || '').replace(/\s*\([^)]*\)\s*$/, '').trim();
 
+// progress-refresh.yml rebuilds science/progress/data/events.json on the 2nd of each month from what Wikidata then says
+// (people, life dates, institutions and their labels, places), and the deploy that follows runs this file. Today's
+// names of institutions (Wikidata's labels and descriptions) are pinned only while the file is the build of
+// 26 November 2026 that these pins were checked against (AS_BUILT, its `generated`); the names of the time (the seed's
+// pn) and the titles and notes are VM's own and are pinned outright; the rest is tested against the file as it stands.
+const { builtOn } = await import('./tools/as-built.mjs');
+const AS_BUILT = builtOn(data.generated, '2026-11-26');
+
 // The events placed at an institution under its name of the time: the place chip reads e.place.n, and the lookup
 // (data.institutions) holds one name per item, today's (Wikidata's label).
 const renamed = data.events.filter(e => e.inst.includes(e.place.q) && data.institutions[e.place.q] && data.institutions[e.place.q].name !== e.place.n);
 
 test('progress-8 (precondition): events placed at an institution under its name of the time, which the lookup names as today', () => {
   const ids = renamed.map(e => e.id);
-  for (const id of ['boolean-algebra', 'stethoscope', 'weather-fronts', 'general-relativity', 'artemisinin', 'rotation-curves', 'stm']) assert.ok(ids.includes(id), id);
-  assert.equal(data.institutions.Q1574185.name, 'University College Cork');
+  if (AS_BUILT) for (const id of ['boolean-algebra', 'stethoscope', 'weather-fronts', 'general-relativity', 'artemisinin', 'rotation-curves', 'stm']) assert.ok(ids.includes(id), id);
+  if (AS_BUILT) assert.equal(data.institutions.Q1574185.name, 'University College Cork');
   assert.equal(ev('boolean-algebra').place.n, 'Queen\'s College Cork');
 });
 
@@ -70,8 +78,18 @@ test('Sources: how names are shown, true to the build', () => {
 
 test('Omni: the breakthroughs layer is in step with the Invention Timeline’s events', () => {
   const layer = JSON.parse(read('omni/data/layers/breakthroughs/events.json'));
-  assert.equal(layer.of, data.generated);
-  assert.deepEqual(layer.rows, breakthroughRows(data));
+  // The layer is built by hand (omni/scripts/build-breakthroughs.mjs) from the events file it names (`of`); the monthly
+  // refresh rebuilds the events file and not the layer, so the two are compared row for row only while the layer is
+  // the one built from the file as it stands. Whatever the day, every row is an event of the timeline under VM's own
+  // title and note (the seed's).
+  if (layer.of === data.generated) assert.deepEqual(layer.rows, breakthroughRows(data));
+  else assert.ok(Date.parse(layer.of) < Date.parse(data.generated), `the layer (${layer.of}) is of an earlier events file than ${data.generated}`);
+  const events = new Map(data.events.map(e => [e.id, e]));
+  for (const r of layer.rows) {
+    const e = events.get(r.id);
+    assert.ok(e, `${r.id}: an event of the timeline`);
+    assert.deepEqual([r.label, r.note], [e.t, e.n || null], `${r.id}: VM's title and note`);
+  }
   const row = id => layer.rows.find(r => r.id === id);
   assert.equal(row('telescope').label, 'Lipperhey seeks a patent for the telescope');
   assert.equal(row('tcp-ip').label, 'Cerf and Kahn design a protocol to join networks');
@@ -102,16 +120,24 @@ test('page: the card’s Institutions list names the place’s institution as it
   };
   // The place's institution: its name of the time, with today's name below it ("now …"), and never today's description,
   // which is false for the year (UCC as a constituent university of the NUI, formed in 1908; the University of Bergen,
-  // established in 1946, as the Geophysical Institute's parent in 1919).
-  for (const [y, id, then, now, desc] of [[1854, 'boolean-algebra', 'Queen\'s College Cork', 'now University College Cork', /National University of Ireland/],
+  // established in 1946, as the Geophysical Institute's parent in 1919). The name of the time is the seed's (VM's);
+  // today's name and description are Wikidata's, from the file as it stands, and as the build of 26 November gave them
+  // while the file is that build (AS_BUILT).
+  for (const [y, id, then, nowAsBuilt, descAsBuilt] of [[1854, 'boolean-algebra', 'Queen\'s College Cork', 'now University College Cork', /National University of Ireland/],
     [1919, 'weather-fronts', 'Geophysical Institute, Bergen', 'now University of Bergen, Geophysical Institute', /department at the University of Bergen \(UiB\)/],
     [1816, 'stethoscope', 'Necker Hospital', 'now Necker–Enfants Malades Hospital', /teaching hospital in Paris/],
     [1915, 'general-relativity', 'Frederick William University Berlin', 'now Humboldt-Universität zu Berlin', /public research university in Berlin/],
     [1972, 'artemisinin', 'Academy of Traditional Chinese Medicine', 'now China Academy of Chinese Medical Sciences', /education organization in Beijing/]]) {
+    const inst = data.institutions[ev(id).place.q];
+    assert.equal(ev(id).place.n, then, `${id}: the seed's name of the time`);
+    if (!inst || inst.name === then) continue; // Wikidata now names it as it was named then: nothing to set beside it
+    const now = `now ${inst.name}`;
+    if (AS_BUILT) assert.equal(now, nowAsBuilt, id);
     const { card, list, items } = await institutions(y, id);
     assert.ok(items.some(([n, s]) => n === then && s === now), `${id}: ${list}`);
     assert.ok(!items.some(([n]) => n === now.slice(4)), `${id}: today's name stated as the body of ${y}: ${list}`);
-    assert.doesNotMatch(card, desc, id);
+    if (inst.desc) assert.ok(!card.includes(inst.desc), `${id}: today's description`);
+    if (AS_BUILT) assert.doesNotMatch(card, descAsBuilt, id);
   }
   // An institution that is not the event's place keeps the lookup's name (Principia: University of Cambridge).
   const { list } = await institutions(1687, 'principia');

@@ -1205,7 +1205,17 @@ test('committed lake: every book line says where in the book, its chapters’ ti
   assert.ok(inPrince.w.length > 1 && inPrince.w.every(([ch, p]) => p.startsWith(`c${String(ch).padStart(2, '0')}-`)), JSON.stringify(inPrince.w));
 });
 // The War Focus rule in the lake (RV-05 A1): an event listed with its parts gives the figure War Focus shows for it.
-test('committed lake: War Focus’s atomic bombings read as War Focus counts them, each death once', () => {
+test('committed lake: War Focus’s atomic bombings read as War Focus counts them, each death once', async t => {
+  // A comparison of two builds (refresh pins, 27 November 2026): the lake's War Focus lines are rebuilt from War Focus's
+  // files in the War Focus refresh, which throws them away and commits War Focus alone when that step fails; the lake
+  // then describes the files before, and the deploy would fail on battles whose parts Wikidata has since changed. So the
+  // lines are compared while the lake was built no earlier than War Focus (manifest.generated against index.generated),
+  // which the refresh's own Master Index step always is. (manifest.generated is any lake run's stamp: an --only run of
+  // another adapter after a failed War Focus lake step would bring the comparison back on stale lines; the scheduled
+  // lake refresh is a full build, so it cannot.)
+  const { readAfter } = await import('./tools/as-built.mjs');
+  const lakeBuilt = read('lake/data/manifest.json').generated, focusBuilt = read('battlefield/focus/data/index.json').generated;
+  if (!readAfter(lakeBuilt, focusBuilt)) { t.diagnostic(`the lake (${lakeBuilt}) was built before War Focus (${focusBuilt}): not compared`); return; }
   const all = lakeRecords(), at = (q, war) => all.get(q).mentions.find(m => m.m === 'war-focus' && m.u.includes(`#war=${war}`))?.c;
   // The lines expected, from War Focus's data by its own rule (figures.mjs), not written in (the second reader, WF2-08
   // and F4: an edit on Wikidata would otherwise stop the refresh), with a late count's year on its share alone (WF2-01).

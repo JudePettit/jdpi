@@ -1,5 +1,5 @@
 {
-  "generated": "2026-11-28T02:59:58.009Z",
+  "generated": "2026-11-28T04:50:09.150Z",
   "name": "Vitruvian Manager data catalogue",
   "publisher": "JDP-Iq",
   "description": "Every public dataset in Vitruvian Manager (VM, by JDP-Iq), with its fields, size, licence and sources. Read-only; no keys. Files are static JSON on this site; the MCP server (/mcp) and the JSON API (/api/v1/) query them with row and size caps.",
@@ -3411,13 +3411,13 @@
         "Wikidata (CC0), via wbgetentities; selection, titles and notes by Vitruvian Manager",
         "Natural Earth (public domain) for the map"
       ],
-      "updated": "2026-11-26",
+      "updated": "2026-11-28",
       "refresh": "monthly",
       "page": "science/progress/index.html",
       "derivedFrom": [
         "science/progress/data/events.json"
       ],
-      "bytes": 298061
+      "bytes": 298020
     },
     {
       "id": "science-progress-people",
@@ -3485,7 +3485,7 @@
       "sources": [
         "Wikidata (CC0), via wbgetentities; selection, titles and notes by Vitruvian Manager"
       ],
-      "updated": "2026-11-26",
+      "updated": "2026-11-28",
       "refresh": "monthly",
       "page": "science/progress/index.html",
       "derivedFrom": [
@@ -3534,18 +3534,18 @@
           "description": "Wikipedia article"
         }
       ],
-      "rows": 1194,
+      "rows": 1197,
       "licence": "Wikidata CC0.",
       "sources": [
         "Wikidata (CC0), via wbgetentities; selection, titles and notes by Vitruvian Manager"
       ],
-      "updated": "2026-11-26",
+      "updated": "2026-11-28",
       "refresh": "monthly",
       "page": "science/progress/index.html",
       "derivedFrom": [
         "science/progress/data/events.json"
       ],
-      "bytes": 244044
+      "bytes": 244578
     },
     {
       "id": "prp-submodules",

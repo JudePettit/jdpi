@@ -312,7 +312,7 @@ Invention Timeline: people. The scientists, inventors and thinkers behind the In
 
 Invention Timeline: institutions. Universities, laboratories, companies and academies linked to the Invention Timeline, with coordinates (Wikidata).
 
-- Rows: 1,194 · refresh: monthly · licence: Wikidata CC0.
+- Rows: 1,197 · refresh: monthly · licence: Wikidata CC0.
 - File: https://jdpi.pages.dev/integration/data/science-progress-institutions.json (records at `records`)
 - Fields: `qid` (string), `name` (string), `description` (string), `lat` (number), `lon` (number), `wikipedia` (string)
 

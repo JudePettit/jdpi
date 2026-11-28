@@ -92,6 +92,7 @@
 .headline{color:var(--prp-text);text-decoration:none;font:600 15px/1.4 var(--prp-font-serif)}
 .headline:hover{color:var(--prp-link);text-decoration:underline;text-underline-offset:2px}
 .orig{margin-top:3px;color:var(--prp-text-2);font:italic 13px/1.45 var(--prp-font-serif)}
+.orig-label{color:var(--prp-muted);font:500 var(--prp-fs-xs)/1.45 var(--prp-font-mono);font-style:normal}
 .source{display:flex;flex-wrap:wrap;gap:3px 10px;margin-top:5px;color:var(--prp-muted);font:var(--prp-fs-xs)/1.45 var(--prp-font-mono)}
 .outlet-group+.outlet-group{margin-top:4px}
 .outlet-name{margin:16px 0 0;padding-bottom:7px;border-bottom:1px solid var(--prp-line);color:var(--prp-text-2);font:600 var(--prp-fs-xs)/1.3 var(--prp-font-ui);letter-spacing:.06em;text-transform:uppercase}
@@ -464,7 +465,7 @@ function showDated(rows,period,s,e,today,pending){
 // (q/supabase-client.js, translated), so it is neither shown nor counted.
 function storyHtml(r,rank,extra){
   const en=r.title_en||r.title_original,orig=r.title_en&&r.title_en!==r.title_original?r.title_original:'';
-  return '<div class="article"><span class="rank">'+String(rank).padStart(2,'0')+'</span><div><a class="headline" href="'+escHtml(r.url)+'" target="_blank" rel="noreferrer">'+escHtml(en)+PRPAccess.label(rowAccess(r))+'</a>'+(orig?'<div class="orig" lang="">'+escHtml(orig)+'</div>':'')+'<div class="source"><span>'+escHtml(r.outlet)+'</span><span>'+(extra||(r.published_at?new Date(r.published_at).toLocaleString('en-GB',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit',timeZone:'UTC'})+' UTC':escHtml(r.snapshot_date)))+'</span></div></div></div>';
+  return '<div class="article"><span class="rank">'+String(rank).padStart(2,'0')+'</span><div><a class="headline" href="'+escHtml(r.url)+'" target="_blank" rel="noreferrer">'+escHtml(en)+PRPAccess.label(rowAccess(r))+'</a>'+(orig?'<div class="orig"><span class="orig-label">Original headline:</span> <span lang="">'+escHtml(orig)+'</span></div>':'')+'<div class="source"><span>'+escHtml(r.outlet)+'</span><span>'+(extra||(r.published_at?new Date(r.published_at).toLocaleString('en-GB',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit',timeZone:'UTC'})+' UTC':escHtml(r.snapshot_date)))+'</span></div></div></div>';
 }
 function renderByOutlet(rows){
   const latest=rows[0].snapshot_date,day=rows.filter(r=>r.snapshot_date===latest),outlets=[...new Map(day.map(r=>[r.outlet_rank,r.outlet])).entries()].sort((a,b)=>a[0]-b[0]);

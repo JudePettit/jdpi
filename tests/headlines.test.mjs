@@ -586,6 +586,10 @@ test('a story with no English title yet is not shown or counted, on the Tracker,
     const groups = await page.$$eval('.outlet-group', gs => gs.map(g => [g.querySelector('.outlet-name').textContent, ...[...g.querySelectorAll('a.headline')].map(a => a.textContent)]));
     assert.deepEqual(groups.map(g => g.slice(0, 1).concat(g.slice(1).sort())), [['One Daily', 'One Daily story 1 Kyiv', 'One Daily story 3 Kyiv'], ['Three Times', 'Three Times story 1 Kyiv']], `${width}: only the translated stories, and no outlet with none`);
     assert.doesNotMatch(await page.textContent('#articles'), /translation pending|original 2|Two Post/i, `${width}: no placeholder and no untranslated story`);
+    // Under a translated headline the outlet's own words are shown and labelled, so they do not read as a line the
+    // translation missed (the owner's report of 28 November 2026, on Greenland's Greenlandic titles).
+    assert.deepEqual((await page.$$eval('.outlet-group .orig', os => os.map(o => o.textContent))).sort(),
+      ['Original headline: One Daily original 1 Kyiv', 'Original headline: One Daily original 3 Kyiv', 'Original headline: Three Times original 1 Kyiv'], `${width}: the original title is labelled`);
     assert.equal(await page.textContent('#newsstate'), '3 stories from 2 outlets', `${width}: the count is what is shown`);
     assert.match(await page.textContent('#status-news'), /Top stories · 3 saved/);
     assert.deepEqual(errors, []);

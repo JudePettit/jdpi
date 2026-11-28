@@ -1,5 +1,5 @@
 {
-  "generated": "2026-11-28T04:50:09.150Z",
+  "generated": "2026-11-28T07:43:27.585Z",
   "name": "Vitruvian Manager data catalogue",
   "publisher": "JDP-Iq",
   "description": "Every public dataset in Vitruvian Manager (VM, by JDP-Iq), with its fields, size, licence and sources. Read-only; no keys. Files are static JSON on this site; the MCP server (/mcp) and the JSON API (/api/v1/) query them with row and size caps.",
@@ -3417,7 +3417,7 @@
       "derivedFrom": [
         "science/progress/data/events.json"
       ],
-      "bytes": 298020
+      "bytes": 296663
     },
     {
       "id": "science-progress-people",
@@ -3534,7 +3534,7 @@
           "description": "Wikipedia article"
         }
       ],
-      "rows": 1197,
+      "rows": 1200,
       "licence": "Wikidata CC0.",
       "sources": [
         "Wikidata (CC0), via wbgetentities; selection, titles and notes by Vitruvian Manager"
@@ -3545,7 +3545,7 @@
       "derivedFrom": [
         "science/progress/data/events.json"
       ],
-      "bytes": 244578
+      "bytes": 245188
     },
     {
       "id": "prp-submodules",

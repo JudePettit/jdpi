@@ -262,8 +262,15 @@ test('Retrospective data: Yugoslavia carries its earlier states’ names to 1929
   }
   assert.deepEqual(PLACES.places.Q83286, { n: 'Socialist Federal Republic of Yugoslavia', iso3: 'YUG',
     was: [{ n: 'Kingdom of Serbs, Croats and Slovenes', to: 1929 }, { n: 'Kingdom of Yugoslavia', to: 1945 }] });
-  const focus = JSON.parse(readFileSync(new URL('../battlefield/focus/data/wars/ww2.json', import.meta.url), 'utf8')).names.Q83286;
-  assert.deepEqual(PLACES.places.Q83286.was.at(-1), focus.then, 'one earlier name and one last year in both modules');
+  // War Focus names the same earlier item (VM's tables: its wars.mjs nameAs, NAMED_AS here), and so, while both modules
+  // read Wikidata on the same day, the same name and last year. Each reads the item's label and end (P576) when it is
+  // built: the Retrospective Battlefield by hand, War Focus each month (warfocus-refresh.yml), so after an edit on
+  // Wikidata between their builds the two may differ until the other is rebuilt, which is no fault of either.
+  const focusFile = JSON.parse(readFileSync(new URL('../battlefield/focus/data/wars/ww2.json', import.meta.url), 'utf8')), focus = focusFile.names.Q83286;
+  const { WARS: FOCUS_WARS } = await import('../battlefield/focus/scripts/wars.mjs');
+  assert.equal(FOCUS_WARS.find(w => w.id === 'ww2').nameAs.Q83286, NAMED_AS.Q83286.at(-1), 'one earlier item in both modules');
+  const { sameDay } = await import('./tools/as-built.mjs');
+  if (sameDay(PLACES.generated, JSON.parse(readFileSync(new URL('../battlefield/focus/data/index.json', import.meta.url), 'utf8')).generated)) assert.deepEqual(PLACES.places.Q83286.was.at(-1), focus.then, 'one earlier name and one last year in both modules');
   const { nameIn } = await import('../battlefield/scripts/history-places.mjs');
   assert.deepEqual([1926, 1929, 1930, 1945, 1946, 1991].map(y => nameIn(PLACES.places.Q83286, y)), ['Kingdom of Serbs, Croats and Slovenes', 'Kingdom of Serbs, Croats and Slovenes',
     'Kingdom of Yugoslavia', 'Kingdom of Yugoslavia', 'Socialist Federal Republic of Yugoslavia', 'Socialist Federal Republic of Yugoslavia']);

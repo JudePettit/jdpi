@@ -12,6 +12,16 @@ const fromSite = process.env.JDPI_URL && !pageTest.skip;
 // closed (ECONNRESET): such a failed request is made once more.
 const getJson = url => fetch(url).catch(() => fetch(url)).then(r => r.json());
 const dataFile = async path => (fromSite ? getJson(`${BASE}/${path}`) : JSON.parse(readFileSync(new URL(`../${path}`, import.meta.url), 'utf8')));
+// warfocus-refresh.yml rebuilds every war on the 2nd of each month from what Wikidata, Wikipedia and UCDP then say, and
+// runs this file before it commits (and the deploy after it). A value the build reads from a live source (a battle's
+// label, its dates, what Wikidata makes part of what) is pinned here only for the files as committed when War Focus's
+// index was stamped on 27 November 2026, the files these pins were last checked against (AS_BUILT, the index's
+// `generated`; an --only build moves it too, though the wars it does not name keep their earlier reads: that day's named
+// ww2, gaza-war, second-sino-japanese and bosnian-war only; refresh rehearsal of that day); the
+// rules are tested by fixture, and the files by their shape, whatever the day. VM's own tables (wars.mjs: sides,
+// control, LEFT_OUT, nameAs; build.mjs DATE_FIXES) and the borders it holds (Cliopatria v0.2.1) are pinned outright.
+const { builtOn } = await import('./tools/as-built.mjs');
+const AS_BUILT = builtOn((await dataFile('battlefield/focus/data/index.json')).generated, '2026-11-27');
 
 test('index lists the major wars with Wikidata IDs and deaths', async () => {
   const d = await dataFile('battlefield/focus/data/index.json');
@@ -511,13 +521,25 @@ test('rules: the Red Sea crisis and all its parts are left out of the Gaza war, 
 
 test('data: the Gaza war lists none of the Red Sea crisis and says why in its file', async () => {
   const w = await dataFile('battlefield/focus/data/wars/gaza-war.json');
+  const { LEFT_OUT } = await import('../battlefield/focus/scripts/wars.mjs');
+  // The Red Sea crisis is left out by VM's table, with VM's reason, whatever the day.
+  assert.ok(!w.battles.some(b => b.q === 'Q123285238'), 'the crisis itself');
+  // The build writes the row only while Wikidata still files some of the crisis under the war (build.mjs: rows with no
+  // items are dropped), so after an edit there an empty list is right too.
+  assert.ok((w.leftOut || []).length <= 1, JSON.stringify(w.leftOut));
+  if (w.leftOut?.length) {
+    assert.deepEqual([w.leftOut[0].q, w.leftOut[0].why], ['Q123285238', LEFT_OUT.find(r => r.war === 'gaza-war').why]);
+    assert.match(w.leftOut[0].why, /781 in 2025/);
+    assert.ok(Number.isInteger(w.leftOut[0].items) && w.leftOut[0].items >= 1);
+  }
+  // What Wikidata made part of it, as committed when the index was stamped on 27 November 2026: seven items, none
+  // listed, and the July 2024 attacks kept.
+  if (!AS_BUILT) return;
+  assert.equal(w.leftOut?.length, 1);
   const gone = ['Q123285238', 'Q124253753', 'Q124301569', 'Q133287207', 'Q133894632', 'Q134006902', 'Q134437528'];
   assert.deepEqual(w.battles.filter(b => gone.includes(b.q)).map(b => b.n), []);
   assert.ok(w.battles.some(b => b.q === 'Q127638355'), 'the July 2024 Houthi–Israel attacks stay');
-  assert.equal(w.leftOut?.length, 1);
-  assert.equal(w.leftOut[0].q, 'Q123285238');
   assert.equal(w.leftOut[0].items, gone.length);
-  assert.match(w.leftOut[0].why, /781 in 2025/);
   for (const b of w.battles) for (const k of ['up', 'upAlso', 'parts']) assert.ok(![b[k] || []].flat().some(q => gone.includes(q)), `${b.q} ${k}`);
 });
 
@@ -625,7 +647,7 @@ test('data: every spread by recorded battles is the rule\'s (a year-dated battle
   assert.ok(checked > 50, `spreads checked: ${checked}`);
   // Second World War: no year-dated battle of 1939 draws deaths to its first months.
   const ww2 = await dataFile('battlefield/focus/data/wars/ww2.json');
-  assert.ok(ww2.battles.some(b => b.p === 'y' && b.s.startsWith('1939')), 'the 1939 year-dated battles are still listed');
+  if (AS_BUILT) assert.ok(ww2.battles.some(b => b.p === 'y' && b.s.startsWith('1939')), 'the 1939 year-dated battles are still listed');
 });
 
 // S0 (16 November 2026): a battle whose start falls before its war's says so beside its dates (WWII: the Adriatic
@@ -642,7 +664,7 @@ test('figures: a battle that begins before its war\'s start says so', async () =
   assert.equal(beforeWarNote({ s: null, u: 'undated' }, '1939-09-01'), '');
   const ww2 = await dataFile('battlefield/focus/data/wars/ww2.json');
   const before = ww2.battles.filter(b => beforeWarNote(b, ww2.start)).map(b => b.n).sort();
-  assert.deepEqual(before, ['Adriatic Campaign of World War II', 'air raids on Japan']);
+  if (AS_BUILT) assert.deepEqual(before, ['Adriatic Campaign of World War II', 'air raids on Japan']);
   const app = readFileSync(new URL('../battlefield/focus/app.js', import.meta.url), 'utf8');
   assert.match(app, /beforeWarNote\(b, state\.war\?\.start\)/, 'the page writes it beside the battle\'s dates');
 });
@@ -940,16 +962,21 @@ test('data: every whole and part in a war\'s list carries the link both ways; th
   }
   assert.ok(links > 500, `links: ${links}`);
   const ww2 = new Map((await dataFile('battlefield/focus/data/wars/ww2.json')).battles.map(b => [b.q, b]));
-  assert.deepEqual([ww2.get('Q703203').up, ww2.get('Q4382340').up], ['Q488', 'Q488']);
-  assert.deepEqual(ww2.get('Q488').parts, ['Q703203', 'Q4382340']);
-  // Bound to the structure, not to today's figures (WF2-08: an edit on Wikidata must not stop the monthly refresh): a
-  // figure Q488 carries that is one of its parts' own is left to that part, and its own deaths are null when all are.
-  const partsOwn = new Set(ww2.get('Q488').parts.map(p => ww2.get(p).deaths).filter(Boolean));
-  const own = (ww2.get('Q488').dv || [ww2.get('Q488').deaths]).filter(v => v && !partsOwn.has(v));
-  assert.equal(ww2.get('Q488').deaths, own.length ? Math.max(...own) : null, 'its figures that are its parts\' are left to them');
+  // Wikidata's part-of links as read on 27 November 2026; the structure below holds whatever the build.
+  if (AS_BUILT) {
+    assert.deepEqual([ww2.get('Q703203').up, ww2.get('Q4382340').up], ['Q488', 'Q488']);
+    assert.deepEqual(ww2.get('Q488').parts, ['Q703203', 'Q4382340']);
+  }
+  if (ww2.get('Q488')?.parts?.length) {
+    // Bound to the structure, not to today's figures (WF2-08: an edit on Wikidata must not stop the monthly refresh): a
+    // figure Q488 carries that is one of its parts' own is left to that part, and its own deaths are null when all are.
+    const partsOwn = new Set(ww2.get('Q488').parts.map(p => ww2.get(p).deaths).filter(Boolean));
+    const own = (ww2.get('Q488').dv || [ww2.get('Q488').deaths]).filter(v => v && !partsOwn.has(v));
+    assert.equal(ww2.get('Q488').deaths, own.length ? Math.max(...own) : null, 'its figures that are its parts\' are left to them');
+  }
   // WF2-06: no casualties figure is a statement about something else (Q488's hibakusha, P805), and WF2-09: battles
   // that start on the same day are in QID order.
-  if (ww2.get('Q488').cas !== null) assert.notEqual(ww2.get('Q488').cas, 201779, 'the living survivors are no casualties');
+  if (ww2.get('Q488') && ww2.get('Q488').cas !== null) assert.notEqual(ww2.get('Q488').cas, 201779, 'the living survivors are no casualties');
   for (const x of d.wars) {
     const w = await dataFile(`battlefield/focus/data/wars/${x.id}.json`);
     for (let i = 1; i < w.battles.length; i++) {
@@ -972,6 +999,12 @@ test('data: each battle under its own war, with no impossible dates', async () =
       if (b.u === 'conflict') assert.ok(b.eW > b.e && b.eA === b.e, `${x.id}: ${b.n} is drawn to the earlier end`);
     }
   }
+  // The witnesses below are Wikidata's and Wikipedia's as committed when War Focus's index was stamped on 27 November
+  // 2026 (each war's file from its own last build, 21 to 27 November: what is part of each war, where it
+  // was fought, its dates and labels); the rules they witness are tested whatever the day, by the loop above and by
+  // fixture ("rules: Wikidata dates at their precision", "rules: a battle's end checked against its Wikipedia article",
+  // "rules: below an item also part of something outside the war, only the parts within the war's theatre").
+  if (!AS_BUILT) return;
   // Second reader, 15 November 2026. A battle Wikidata dates only to the decade is kept, undated (finding A).
   const tg = await dataFile('battlefield/focus/data/wars/tigray.json'), sot = tg.battles.find(b => b.q === 'Q121090645');
   assert.ok(sot && sot.u === 'undated' && sot.dec === 2020, 'the Siege of Tigray stays in the Tigray war, undated');
@@ -1818,7 +1851,8 @@ test('page (AC-5): the Pacific war draws no dot for a later state and its battle
   assert.ok(sea >= 24, `a dot's target over the sea is a finger's width at 1024 wide (${sea} px)`);
   // At its mark's centre the pointer finds a battle (Tarawa's lies under Makin's, two days and a few miles apart), never a
   // dot, and a click opens that battle's record.
-  for (const name of ['Battle of Tarawa', 'Battle of Kwajalein']) {
+  // (Wikidata's labels and points as committed when War Focus's index was stamped on 27 November 2026.)
+  for (const name of AS_BUILT ? ['Battle of Tarawa', 'Battle of Kwajalein'] : []) {
     const at = await page.evaluate(n => {
       const c = d3.selectAll('#map circle.battle').filter(b => b.n === n).node(); if (!c) return null;
       const r = c.getBoundingClientRect(), x = r.x + r.width / 2, y = r.y + r.height / 2, top = document.elementFromPoint(x, y);
@@ -2005,15 +2039,24 @@ test('data: a listed state\'s land is never coloured as another state of the war
 });
 test('data: WWII names Yugoslavia the Kingdom to 1945, and Japan\'s Taiwan is its own item, not the Republic of China', async () => {
   const ww2 = await dataFile('battlefield/focus/data/wars/ww2.json');
-  assert.deepEqual(ww2.names.Q83286.then, { n: 'Kingdom of Yugoslavia', to: 1945 });
-  assert.equal(P.stateName(ww2.names, 'Q83286', 1941), 'Kingdom of Yugoslavia');
+  // VM's tables name the item (wars.mjs nameAs, the Retrospective Battlefield's NAMED_AS); its label and end (P576) are
+  // Wikidata's, as read on 27 November 2026.
+  const { WARS } = await import('../battlefield/focus/scripts/wars.mjs');
+  const { NAMED_AS } = await import('../battlefield/scripts/history-places.mjs');
+  assert.equal(WARS.find(w => w.id === 'ww2').nameAs.Q83286, NAMED_AS.Q83286.at(-1));
+  const then = ww2.names.Q83286.then;
+  assert.ok(then && typeof then.n === 'string' && then.n && Number.isInteger(then.to), 'an earlier name with its last year');
+  assert.equal(P.stateName(ww2.names, 'Q83286', then.to), then.n);
+  assert.equal(P.stateName(ww2.names, 'Q83286', then.to + 1), ww2.names.Q83286.n);
+  if (AS_BUILT) assert.deepEqual(then, { n: 'Kingdom of Yugoslavia', to: 1945 });
+  if (AS_BUILT) assert.equal(P.stateName(ww2.names, 'Q83286', 1941), 'Kingdom of Yugoslavia');
   assert.equal(P.stateName({ Q83286: { n: 'Socialist Federal Republic of Yugoslavia', then: { n: 'Kingdom of Yugoslavia', to: 1945 } } }, 'Q83286', 1946), 'Socialist Federal Republic of Yugoslavia');
   for (const id of ['manchuria', 'second-sino-japanese', 'ww2']) {
     const w = await dataFile(`battlefield/focus/data/wars/${id}.json`);
     const japan = [w.sides.a, w.sides.b].find(s => s.states.some(x => x.q === 'Q17'));
     assert.ok(!P.warStates(w).has('Q865'), `${id}: no Q865`);
     assert.ok(japan.states.some(s => s.q === 'Q137816'), `${id}: Taiwan under Japanese rule with Japan`);
-    assert.match(w.names.Q137816.n, /Taiwan/);
+    if (AS_BUILT) assert.match(w.names.Q137816.n, /Taiwan/, 'Wikidata\'s label, as committed when the index was stamped on 27 November 2026');
   }
 });
 // The uncoloured entries over a point in a year: [the row's place, the land's state, its border year] of each.

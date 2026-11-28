@@ -27,6 +27,15 @@ import { titlesToFetch, cutAtAbbreviation, titleOf } from '../calendar/scripts/e
 const BASE = (process.env.JDPI_URL || 'https://jdpi.pages.dev').replace(/\/$/, '');
 const DECADES = ['1980s', '1990s', '2000s', '2010s', '2020s'].map(d => JSON.parse(readFileSync(new URL(`../calendar/data/${d}.json`, import.meta.url), 'utf8')));
 const ALL = DECADES.flatMap(d => d.events);
+// calendar-refresh.yml rebuilds calendar/data every day from what Wikidata and Wikipedia then say, and the deploy that
+// follows runs this file. The titles and days the built calendar gives the votes named below are Wikidata's labels and
+// dates and Wikipedia's titles and leads: they are pinned only while the files are the build of 27 November 2026 that
+// these pins were checked against (AS_BUILT, the decade files' `generated`). Whatever the day, the rules hold: one
+// record per vote at most, a vote below the state never listed, a vote filed under its own country, a summit from its
+// article; and the fixtures above prove mergeBallots, belowState and NOT_HELD. VM's own repairs (build-events.mjs
+// REPAIR: Antonio Saca) are pinned outright.
+const { builtOn } = await import('./tools/as-built.mjs');
+const AS_BUILT = builtOn(DECADES[0].generated, '2026-11-27');
 const CACHE = JSON.parse(readFileSync(new URL('../calendar/scripts/summary-cache.json', import.meta.url), 'utf8'));
 const wiki = t => `https://en.wikipedia.org/wiki/${encodeURIComponent(t.replace(/ /g, '_'))}`;
 const ev = (via, date, country, title, more = {}) => ({ via, date, country, title, type: 'election', status: 'declared', precision: 'day', source: wiki(title), ...more });
@@ -415,10 +424,15 @@ test('second readers: one vote under two titles or two days, the lead\'s day, an
 
 test('the built calendar: one record per vote, Antonio Saca, the referendums left out and counted, the votes placed', () => {
   const on = (date, re) => ALL.filter(e => e.date === date && re.test(e.title));
+  // A vote stands once at most, whatever the day; the title and day it stands under are the build's read of 27 November.
+  const once = (list, what, exact) => {
+    assert.ok(list.length <= 1, `${what}: ${JSON.stringify(list)}`);
+    if (AS_BUILT && exact !== undefined) assert.deepEqual(list, exact, what);
+  };
   // 1. France 2024 and Czechia 2025, once each.
-  assert.deepEqual(ALL.filter(e => e.country === 'France' && e.type === 'election' && /^2024-0[67]/.test(e.date)).map(e => [e.date, e.title]),
+  once(ALL.filter(e => e.country === 'France' && e.type === 'election' && /^2024-0[67]/.test(e.date)).map(e => [e.date, e.title]), 'France 2024',
     [['2024-06-30', '2024 French legislative election (first round; second round 7 July)']]);
-  assert.deepEqual(ALL.filter(e => e.country === 'Czechia' && e.type === 'election' && /^2025-10/.test(e.date)).map(e => [e.date, e.title]),
+  once(ALL.filter(e => e.country === 'Czechia' && e.type === 'election' && /^2025-10/.test(e.date)).map(e => [e.date, e.title]), 'Czechia 2025',
     [['2025-10-03', '2025 Czech parliamentary election']]);
   // Italy's next general election, at most once. Which source dates it is not this test's business, nor is its status:
   // a vote awaited by its deadline is tentative, and becomes declared on the day it is called.
@@ -446,39 +460,50 @@ test('the built calendar: one record per vote, Antonio Saca, the referendums lef
     assert.match(title, /\bparliamentary election\b/i);
     assert.match(status, /^(?:tentative|declared)$/);
   }
-  assert.deepEqual(ALL.filter(e => e.country === 'Dominican Republic' && e.type === 'election' && e.date.startsWith('2024-05')).map(e => e.date), ['2024-05-19']);
+  once(ALL.filter(e => e.country === 'Dominican Republic' && e.type === 'election' && e.date.startsWith('2024-05')).map(e => e.date), 'Dominican Republic 2024', ['2024-05-19']);
   // 2. The 2004 leader of El Salvador by his name.
   assert.deepEqual(on('2004-06-01', /takes power/).filter(e => e.country === 'El Salvador').map(e => e.title), ['Antonio Saca takes power']);
   assert.deepEqual(ALL.filter(e => /Saca González/.test(e.title)).map(e => e.title), []);
   // 4. Below the state, and never held: left out. Status votes stay.
   for (const t of ['2018 California Proposition 12', '2017 Lombard autonomy referendum', '2017 Venetian autonomy referendum', '2026 Hamburg Olympics referendum', '2020 Armenian constitutional amendment'])
     assert.deepEqual(ALL.filter(e => e.title === t).map(e => e.date), [], t);
-  assert.deepEqual(ALL.filter(e => e.title === '2025 Marshallese constitutional referendum' || (e.country === 'Marshall Islands' && e.type === 'referendum')).map(e => e.date), ['2025-04-25']);
-  assert.deepEqual(ALL.filter(e => e.title === '2020 Italian constitutional referendum').map(e => e.date), ['2020-09-21']);
+  once(ALL.filter(e => e.title === '2025 Marshallese constitutional referendum' || (e.country === 'Marshall Islands' && e.type === 'referendum')).map(e => e.date), 'Marshall Islands', ['2025-04-25']);
+  once(ALL.filter(e => e.title === '2020 Italian constitutional referendum').map(e => e.date), 'Italy 2020', ['2020-09-21']);
   // Wikidata's deprecated dates are not read: New Caledonia voted on 4 October 2020, not 6 September; Taiwan's 2021
   // referendum was held on 18 December, not 28 August (Wikipedia's leads, read 26 November 2026).
-  assert.deepEqual(ALL.filter(e => e.title === '2020 New Caledonian independence referendum').map(e => e.date), ['2020-10-04']);
-  assert.deepEqual(ALL.filter(e => e.title === '2021 Taiwanese referendum').map(e => e.date), ['2021-12-18']);
+  once(ALL.filter(e => e.title === '2020 New Caledonian independence referendum').map(e => e.date), 'New Caledonia 2020', ['2020-10-04']);
+  once(ALL.filter(e => e.title === '2021 Taiwanese referendum').map(e => e.date), 'Taiwan 2021', ['2021-12-18']);
   // A Wikidata vote that is a Retrospective vote of its year takes the Retrospective's day: one record, 28 June 1998.
-  assert.deepEqual(ALL.filter(e => e.title === '1998 Portuguese abortion referendum').map(e => e.date), ['1998-06-28']);
+  once(ALL.filter(e => e.title === '1998 Portuguese abortion referendum').map(e => e.date), 'Portugal 1998', ['1998-06-28']);
   // An item with two countries is filed under the one its title names.
-  assert.deepEqual(ALL.filter(e => e.title === '1991 Russian presidential referendum').map(e => e.country), ['Russia']);
-  assert.deepEqual(ALL.filter(e => e.title === '2014 Donetsk status referendum').map(e => e.country), ['Ukraine']);
-  for (const t of ['2014 Scottish independence referendum', '1980 Quebec referendum', '1995 Quebec referendum', '2001 Somaliland constitutional referendum'])
-    assert.equal(ALL.filter(e => e.title === t && e.type === 'referendum').length, 1, t);
+  once(ALL.filter(e => e.title === '1991 Russian presidential referendum').map(e => e.country), 'Russia 1991', ['Russia']);
+  once(ALL.filter(e => e.title === '2014 Donetsk status referendum').map(e => e.country), 'Donetsk 2014', ['Ukraine']);
+  for (const [t, c] of [['1991 Russian presidential referendum', 'Russia'], ['2014 Donetsk status referendum', 'Ukraine']])
+    assert.ok(ALL.filter(e => e.title === t).every(e => e.country === c), `${t}: under ${c}`);
+  for (const t of ['2014 Scottish independence referendum', '1980 Quebec referendum', '1995 Quebec referendum', '2001 Somaliland constitutional referendum']) {
+    const n = ALL.filter(e => e.title === t && e.type === 'referendum').length;
+    assert.ok(n <= 1, `${t}: ${n}`);
+    if (AS_BUILT) assert.equal(n, 1, t);
+  }
   assert.deepEqual(ALL.filter(e => e.type === 'referendum' && PARTY_CONTEST.test(e.title)).map(e => e.title), []);
-  // The counted note: the same counts in every decade's file, and at least the votes named above.
+  // The counted note: the same counts in every decade's file, and, in the build of 27 November, at least the votes
+  // named above (how many Wikidata holds is its own).
   const counts = DECADES.map(d => JSON.stringify(d.leftOut));
   assert.equal(new Set(counts).size, 1, counts.join(' / '));
   const n = DECADES[0].leftOut;
-  assert.ok(n.belowState >= 50 && n.notHeld >= 2 && n.datesGone >= 1, JSON.stringify(n));
+  for (const k of ['belowState', 'notHeld', 'datesGone']) assert.ok(Number.isInteger(n[k]) && n[k] >= 0, `${k}: ${JSON.stringify(n)}`);
+  if (AS_BUILT) assert.ok(n.belowState >= 50 && n.notHeld >= 2 && n.datesGone >= 1, JSON.stringify(n));
   // 5. Micronesia's elections are elections; the Barnier and May votes are France's and the United Kingdom's; Fiji's
   // referendum of 9 December 2026 is gone.
   const fsm = ALL.filter(e => e.country === 'Micronesia' && /Congress/.test(e.title));
-  assert.ok(fsm.length >= 1 && fsm.every(e => e.type === 'election'), JSON.stringify(fsm.map(e => [e.title, e.type])));
+  assert.ok(fsm.every(e => e.type === 'election'), JSON.stringify(fsm.map(e => [e.title, e.type])));
+  if (AS_BUILT) assert.ok(fsm.length >= 1, 'Micronesia\'s Congress elections are listed');
   assert.deepEqual(ALL.filter(e => e.class === 'atlas' && e.type === 'party' && !/\bparty congress\b|\bleadership\b|\bprimar/i.test(e.title)).map(e => e.title), []);
-  assert.deepEqual(on('2024-12-04', /Barnier government/).map(e => [e.country, e.iso3]), [['France', 'FRA']]);
-  assert.deepEqual(on('2019-01-16', /May ministry/).map(e => [e.country, e.iso3]), [['United Kingdom', 'GBR']]);
+  for (const [day, re, place] of [['2024-12-04', /Barnier government/, ['France', 'FRA']], ['2019-01-16', /May ministry/, ['United Kingdom', 'GBR']]]) {
+    const placed = on(day, re).map(e => [e.country, e.iso3]);
+    assert.ok(placed.every(p => p[0] === place[0] && p[1] === place[1]), `${re}: ${JSON.stringify(placed)}`);
+    if (AS_BUILT) assert.deepEqual(placed, [place]);
+  }
   assert.deepEqual(ALL.filter(e => e.country === 'Fiji' && e.date === '2026-12-09').map(e => e.title), []);
   // Nigeria's governorship elections are below the state.
   assert.deepEqual(ALL.filter(e => /Governorship/.test(e.title)).map(e => e.title), []);
@@ -486,38 +511,59 @@ test('the built calendar: one record per vote, Antonio Saca, the referendums lef
 
 test('the built calendar after the second readers', () => {
   const titled = t => ALL.filter(e => e.title === t);
-  // Votes whose leads give a deadline (summary-cache.json, read 26 November 2026) are expected, not set.
-  for (const [country, date] of [['Greece', '2027-07-25'], ['Fiji', '2027-02-06'], ['Estonia', '2027-03-07'], ['Montenegro', '2027-06-30'], ['Slovakia', '2027-09-25'], ['Libya', '2027-02-17'], ['Serbia', '2026-12-27']]) {
+  // Votes whose leads give a deadline (summary-cache.json, read 26 November 2026) are expected, not set: the leads of the
+  // build of 27 November (a lead that names the day once the vote is called makes it declared, rightly; the rule is
+  // proved by the deadlinesIn and markDeadlines fixtures above).
+  if (AS_BUILT) for (const [country, date] of [['Greece', '2027-07-25'], ['Fiji', '2027-02-06'], ['Estonia', '2027-03-07'], ['Montenegro', '2027-06-30'], ['Slovakia', '2027-09-25'], ['Libya', '2027-02-17'], ['Serbia', '2026-12-27']]) {
     const list = ALL.filter(e => e.country === country && e.date === date && e.type === 'election');
     assert.ok(list.length >= 1 && list.every(e => e.status === 'tentative'), `${country} ${date}: ${JSON.stringify(list.map(e => [e.title, e.status]))}`);
   }
+  // At most once whatever the day; once, under the title and on the day the build of 27 November gave.
+  const once = (list, what, exact) => {
+    assert.ok(list.length <= 1, `${what}: ${JSON.stringify(list)}`);
+    if (AS_BUILT && exact !== undefined) assert.deepEqual(list, exact, what);
+  };
   // Below the state: left out. A national vote, status votes and a dependent territory's own votes: kept, where they are.
   for (const t of ['2016 Brno central station referendum', 'Deutsche Wohnen & Co. enteignen', 'Hamburger Zukunftsentscheid', '2023 South Ethiopia Region referendum',
     '6.22 Civil Referendum', '2009 Catalan independence referendum in Arenys de Munt', '2012 North Kosovo referendum', '2011 South Ossetian referendum',
     '2017 South Ossetian name change referendum', '2003 Transnistrian referendum', '2020 Falkland Islands electoral system referendum'])
     assert.deepEqual(titled(t).map(e => e.date), [], t);
-  assert.deepEqual(titled('2004 Macedonian autonomy referendum').map(e => [e.date, e.country]), [['2004-11-07', 'North Macedonia']]);
-  for (const t of ['1993 Republika Srpska referendum', '1989–1990 Transnistrian referendum', '1991 Transcarpathian general regional referendum'])
-    assert.equal(titled(t).length, 1, t);
-  assert.deepEqual(titled('2011 Falkland Islands electoral system referendum').map(e => e.country), ['Falkland Islands']);
-  assert.deepEqual(titled('2021 Saint Helena governance system referendum').map(e => e.country), ['Saint Helena']);
+  once(titled('2004 Macedonian autonomy referendum').map(e => [e.date, e.country]), 'Macedonia 2004', [['2004-11-07', 'North Macedonia']]);
+  assert.ok(titled('2004 Macedonian autonomy referendum').every(e => e.country === 'North Macedonia'), 'Macedonia 2004: under its state');
+  for (const t of ['1993 Republika Srpska referendum', '1989–1990 Transnistrian referendum', '1991 Transcarpathian general regional referendum']) {
+    assert.ok(titled(t).length <= 1, t);
+    if (AS_BUILT) assert.equal(titled(t).length, 1, t);
+  }
+  for (const [t, c] of [['2011 Falkland Islands electoral system referendum', 'Falkland Islands'], ['2021 Saint Helena governance system referendum', 'Saint Helena']]) {
+    once(titled(t).map(e => e.country), t, [c]);
+    assert.ok(titled(t).every(e => e.country === c), `${t}: under ${c}`);
+  }
   // One record per vote: the titles that lead to another article's, and the Retrospective's 2 February for Liechtenstein.
-  for (const [country, date] of [['Romania', '1990-05-20'], ['Romania', '1992-09-27'], ['Romania', '1996-11-03'], ['Romania', '2000-11-26'], ['Romania', '2004-11-28'], ['Costa Rica', '1994-02-06']])
-    assert.equal(ALL.filter(e => e.country === country && e.date === date && e.type === 'election' && !/presidential|second round/i.test(e.title)).length, 1, `${country} ${date}`);
-  assert.equal(ALL.filter(e => /Serbia/.test(e.country) && e.date === '1992-12-20' && e.type === 'election' && !/presidential/i.test(e.title)).length, 1);
-  assert.deepEqual(titled('2025 Liechtenstein general election').map(e => e.date), ['2025-02-09']);
-  assert.deepEqual(titled('2025–26 Myanmar general election').map(e => e.date), ['2025-12-28', '2026-01-11', '2026-01-25']);
+  for (const [country, date] of [['Romania', '1990-05-20'], ['Romania', '1992-09-27'], ['Romania', '1996-11-03'], ['Romania', '2000-11-26'], ['Romania', '2004-11-28'], ['Costa Rica', '1994-02-06']]) {
+    const n = ALL.filter(e => e.country === country && e.date === date && e.type === 'election' && !/presidential|second round/i.test(e.title)).length;
+    assert.ok(n <= 1, `${country} ${date}: ${n}`);
+    if (AS_BUILT) assert.equal(n, 1, `${country} ${date}`);
+  }
+  const serbia = ALL.filter(e => /Serbia/.test(e.country) && e.date === '1992-12-20' && e.type === 'election' && !/presidential/i.test(e.title)).length;
+  assert.ok(serbia <= 1, `Serbia 1992: ${serbia}`);
+  if (AS_BUILT) assert.equal(serbia, 1);
+  once(titled('2025 Liechtenstein general election').map(e => e.date), 'Liechtenstein 2025', ['2025-02-09']);
+  // Myanmar's vote of three phases, each its own record, as its article dated them on 27 November.
+  if (AS_BUILT) assert.deepEqual(titled('2025–26 Myanmar general election').map(e => e.date), ['2025-12-28', '2026-01-11', '2026-01-25']);
   // Votes over two or three days keep one record, on the day they had before the second readers.
   for (const [t, d] of [['1997 Slovak referendum', '1997-05-24'], ['2003 Czech European Union membership referendum', '2003-06-14'],
     ['2020 Italian constitutional referendum', '2020-09-21'], ['2026 Russian legislative election', '2026-09-20'], ['2020 Russian constitutional referendum', '2020-07-01']])
-    assert.deepEqual(titled(t).map(e => e.date), [d], t);
+    once(titled(t).map(e => e.date), t, [d]);
   // The Turkic States' summits of 2023 and 2024, from the Organization of Turkic States article's table.
-  assert.deepEqual(ALL.filter(e => /Organization of Turkic States summit/.test(e.title) && e.date > '2023').map(e => [e.date, e.country, e.source]), [
+  const turkic = ALL.filter(e => /Organization of Turkic States summit/.test(e.title) && e.date > '2023').map(e => [e.date, e.country, e.source]);
+  assert.ok(turkic.every(([, , s]) => s === 'https://en.wikipedia.org/wiki/Organization_of_Turkic_States'), JSON.stringify(turkic));
+  if (AS_BUILT) assert.deepEqual(turkic, [
     ['2023-11-03', 'Kazakhstan', 'https://en.wikipedia.org/wiki/Organization_of_Turkic_States'],
     ['2024-11-06', 'Kyrgyzstan', 'https://en.wikipedia.org/wiki/Organization_of_Turkic_States']]);
   // The Pope's visit under its article's own title; Seychelles' first round on the day it was held.
-  assert.deepEqual(ALL.filter(e => e.date === '2026-11-06' && /Pope Leo XIV/.test(e.title)).map(e => e.title), ['Visit by Pope Leo XIV to Uruguay, Argentina, and Peru']);
-  assert.deepEqual(ALL.filter(e => e.country === 'Seychelles' && /first round/.test(e.title)).map(e => e.date), ['2025-09-27']);
+  once(ALL.filter(e => e.date === '2026-11-06' && /Pope Leo XIV/.test(e.title)).map(e => e.title), 'the Pope\'s visit', ['Visit by Pope Leo XIV to Uruguay, Argentina, and Peru']);
+  once(ALL.filter(e => e.country === 'Seychelles' && /first round/.test(e.title) && e.date.startsWith('2025')).map(e => e.date), 'Seychelles 2025', ['2025-09-27']);
+  if (AS_BUILT) assert.deepEqual(ALL.filter(e => e.country === 'Seychelles' && /first round/.test(e.title)).map(e => e.date), ['2025-09-27']);
   // No referendum is typed as a party contest for naming a constitutional convention.
   assert.deepEqual(ALL.filter(e => e.type === 'party' && /\bconstitutional convention\b/i.test(e.title)).map(e => e.title), []);
 });

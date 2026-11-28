@@ -2211,7 +2211,12 @@ test('page: at 360 wide the Reader sits in the AR Reader\'s row, to its left, bo
 
 // MP-10 (Jude, 17 November 2026): "when I clicked Classical Athens in The Prince on Bibliotheca it hovered over Italy.
 // It also notes classical Athens as lasting to 2026." The click itself: The Prince, chapter 5, the name "Athens".
-test('page: in The Prince V a click on "Athens" opens the map on Classical Athens\'s own years, never as lasting to this year, and says what the map holds of it', PAGE, async () => {
+test('page: in The Prince V a click on "Athens" opens the map on Classical Athens\'s own years, never as lasting to this year, and says what the map holds of it', PAGE, async t => {
+  // The case is Wikidata's, as the Master Index reads it (lake-refresh.yml, monthly): founded 508 BC, no end recorded.
+  // While the committed lake gives it so, the page is held to it; once Wikidata records it otherwise the case is gone,
+  // and the rule stays tested by fixture (tests/omni.test.mjs, MP-10).
+  const rec = read(`lake/data/e/${844930 % 512}.json`).Q844930;
+  if (!(rec && rec.facts?.founded === '-0508' && !rec.facts?.dissolved && !rec.facts?.end)) { t.skip(`the Master Index now gives Classical Athens ${JSON.stringify(rec?.facts || null)}`); return; }
   const browser = await launch({ args: ['--mute-audio'] });
   try {
     const page = await browser.newPage({ viewport: { width: 1440, height: 900 } });
@@ -2234,8 +2239,6 @@ test('page: in The Prince V a click on "Athens" opens the map on Classical Athen
     // Not the book's frame (1494) and not Italy: the map opens on Classical Athens's own years, and where VM can
     // neither outline it nor place its point, it says so and shows the world.
     const frame = await frameOf(page, '#map-frame');
-    const rec = read(`lake/data/e/${844930 % 512}.json`).Q844930;
-    assert.ok(rec && !rec.facts?.dissolved && !rec.facts?.end, 'the Master Index still records no end for it');
     // With the point the Master Index stores (pt, from its full build) the map opens on it; without one it says so.
     if (Array.isArray(rec.pt)) await frame.waitForFunction(() => window.omniState?.frame === -508 && window.omniState.points?.includes('Q844930'), null, { timeout: 30000 });
     else await frame.waitForFunction(() => window.omniState?.frame === -508 && /Classical Athens/.test(document.querySelector('#map-note')?.textContent || ''), null, { timeout: 30000 });

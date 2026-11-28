@@ -1692,14 +1692,52 @@ function warGaps() {
   })();
   return warGapsMemo;
 }
+// Refresh pins (27 November 2026): this file is the War Focus refresh's own test step, run on the new data before it
+// commits. A country of a war that is on a side comes from VM's tables (battlefield/focus/scripts/wars.mjs) and is held
+// to the film always; one that only a battle's place puts in the war comes from Wikidata's coordinates and part-of links,
+// so a battle added or moved there next month would stop the refresh until a film is rewritten. Such a country is held to
+// the film while War Focus's files are those committed when its index was stamped on 27 November, the files the films
+// were checked against (tests/tools/as-built.mjs). The Master Index's "battle entries" are War Focus battle places too
+// (coverage.mjs: a battle-place country whose battle the lake also holds), and are treated like them; warGaps passes no
+// Master Index battles, so here they do not arise. The same holds of a map scene: a country it leaves grey that only War
+// Focus battles of that month put in its view (sceneGap's why: the battles' names) is held while the files are those of
+// 27 November; one that UCDP's events (a pinned release) or the Retrospective Battlefield's year ("fought over that
+// year") put there is held always. (sceneGap keeps three names at most, battles first, so a country with three battle
+// names and UCDP events as well counts as battles only.)
+const { builtOn } = await import('./tools/as-built.mjs');
+const FOCUS_AS_BUILT = builtOn(read('battlefield/focus/data/index.json').generated, '2026-11-27');
+const fromBattlesOnly = (g, c) => Object.entries(g.evidence?.[c] || {}).every(([piece, why]) => (piece.startsWith('war-focus:') && /battle or event place/.test(why)) || (piece === 'master-index' && why === 'battle entries'));
+const filmGaps = (g, asBuilt = FOCUS_AS_BUILT) => asBuilt ? g.countries : g.countries.filter(c => !fromBattlesOnly(g, c));
+const FOCUS_BATTLE_NAMES = new Set(read('battlefield/focus/data/index.json').wars.flatMap(m => read(`battlefield/focus/data/wars/${m.id}.json`).battles.map(b => b.n)));
+const sceneGaps = (g, asBuilt = FOCUS_AS_BUILT, names = FOCUS_BATTLE_NAMES) => asBuilt ? g.scenes
+  : g.scenes.map(s => ({ ...s, missing: s.missing.filter(c => !(s.why?.[c] || []).every(l => names.has(l))) })).filter(s => s.missing.length || s.states.length);
+test('coverage rule: a country a side or the Retrospective Battlefield puts in a war is always held to the film; one only a War Focus battle place puts there is not, after a later build', () => {
+  const g = { countries: ['ETH', 'JPN', 'CHN', 'LAO'], evidence: {
+    ETH: { 'war-focus:korean-war': 'on a side' },
+    JPN: { 'war-focus:korean-war': '2 battle or event places' },
+    CHN: { 'war-focus:korean-war': '1 battle or event place', 'retrospective-battlefield:korean-war': 'fought there' },
+    LAO: { 'war-focus:vietnam-war': '1 battle or event place', 'master-index': 'battle entries' } } };
+  assert.deepEqual(g.countries.filter(c => !fromBattlesOnly(g, c)), ['ETH', 'CHN']);
+  assert.deepEqual(filmGaps(g, true), ['ETH', 'JPN', 'CHN', 'LAO']);
+  assert.deepEqual(filmGaps(g, false), ['ETH', 'CHN']);
+});
+test('coverage rule: a scene\'s grey country that only War Focus battles put in view is not held after a later build; UCDP\'s events and the Retrospective\'s year always are', () => {
+  const names = new Set(['Battle of X', 'Battle of Y']);
+  const g = { scenes: [
+    { scene: 'a', missing: ['JPN', 'CHN', 'KOR'], why: { JPN: ['Battle of X'], CHN: ['Battle of X', 'UCDP events'], KOR: ['fought over that year'] }, states: [] },
+    { scene: 'b', missing: ['MNG'], why: { MNG: ['Battle of X', 'Battle of Y'] }, states: [] },
+    { scene: 'c', missing: ['LAO'], why: { LAO: ['Battle of Y'] }, states: [{ code: 'SUN', name: 'Soviet Union', why: ['fought over that year'] }] }] };
+  assert.deepEqual(sceneGaps(g, true, names), g.scenes);
+  assert.deepEqual(sceneGaps(g, false, names).map(s => [s.scene, s.missing, s.states.map(x => x.code)]), [['a', ['CHN', 'KOR'], []], ['c', [], ['SUN']]]);
+});
 const UN_COMBAT = 'AUS BEL CAN COL ETH FRA GBR GRC LUX NLD NZL PHL THA TUR USA ZAF'.split(' ');
 const VIETNAM_ALLIES = 'AUS KOR NZL PHL THA USA'.split(' ');
 const lit = s => new Set([...(s.focus?.countries || []), ...(s.visual.groups || []).flatMap(g => g.countries)]);
 
 test('coverage: the Korean War film shows the sixteen countries that sent combat forces, and the Soviet Union', async () => {
   const g = (await warGaps())('kino:wars/korean-war');
-  assert.deepEqual(g.countries, [], 'countries of the war the film never shows');
-  assert.deepEqual(g.scenes, [], 'scenes that leave a fighting country grey');
+  assert.deepEqual(filmGaps(g), [], 'countries of the war the film never shows');
+  assert.deepEqual(sceneGaps(g), [], 'scenes that leave a fighting country grey');
   // The Soviet Union (UCDP/PRIO lists it on the North's side) is shown since Jude's choice 12 (17 November 2026).
   assert.deepEqual(g.states.map(s => s.name), [], 'historical states of the war the film never shows');
   const scenes = flatScenes(ctx.docs.get('korean-war')), i = scenes.findIndex(s => s.id === 'united-nations');
@@ -1713,8 +1751,8 @@ test('coverage: the Korean War film shows the sixteen countries that sent combat
 
 test('coverage: the Vietnam War film shows France, South Vietnam\'s allies and North Korea, and Laos at Tet', async () => {
   const g = (await warGaps())('kino:wars/vietnam-war');
-  assert.deepEqual(g.countries, [], 'countries of the war the film never shows');
-  assert.deepEqual(g.scenes.map(s => [s.scene, s.missing]), [], 'the Tet scene and every other leave no fighting country grey');
+  assert.deepEqual(filmGaps(g), [], 'countries of the war the film never shows');
+  assert.deepEqual(sceneGaps(g).map(s => [s.scene, s.missing]), [], 'the Tet scene and every other leave no fighting country grey');
   assert.deepEqual(g.states, []);
   const scenes = flatScenes(ctx.docs.get('vietnam-war')), by = id => scenes.find(s => s.id === id);
   const french = scenes.find(s => s.link?.at === 'battlefield/focus/index.html#war=first-indochina&m=1946-12');
@@ -1728,7 +1766,7 @@ test('coverage: the Vietnam War film shows France, South Vietnam\'s allies and N
 
 test('coverage: Churchill\'s Battle of Britain lights Norway, then occupied', async () => {
   const g = (await warGaps())('kino:political-figures/winston-churchill');
-  assert.deepEqual(g.scenes.map(s => [s.scene, s.missing]), []);
+  assert.deepEqual(sceneGaps(g).map(s => [s.scene, s.missing]), []);
   assert.ok(lit(flatScenes(ctx.docs.get('winston-churchill')).find(s => s.id === 'battle-of-britain')).has('NOR'));
 });
 
@@ -1756,9 +1794,9 @@ const ww2Scene = id => flatScenes(ctx.docs.get('ww2-europe')).find(s => s.id ===
 
 test('coverage: the Second World War film leaves no African country of its war grey, and no scene leaves a fighting country grey', async () => {
   const g = (await warGaps())('kino:wars/ww2-europe');
-  assert.deepEqual(g.countries.filter(c => WW2_AFRICA.has(c)), [], 'African countries of the war the film never shows');
+  assert.deepEqual(filmGaps(g).filter(c => WW2_AFRICA.has(c)), [], 'African countries of the war the film never shows');
   assert.deepEqual(g.states.filter(s => s.successors.some(c => WW2_AFRICA.has(c))).map(s => s.name), [], 'African territories of the war (Ruanda-Urundi) the film never shows');
-  assert.deepEqual(g.scenes.map(s => [s.scene, s.missing, s.states.map(x => x.name)]), [], 'scenes that leave a fighting country grey');
+  assert.deepEqual(sceneGaps(g).map(s => [s.scene, s.missing, s.states.map(x => x.name)]), [], 'scenes that leave a fighting country grey');
 });
 
 test('ww2-europe: the North Africa and Italy scene lights North Africa and Malta, takes in Morocco, and draws the Balkans and France', async () => {

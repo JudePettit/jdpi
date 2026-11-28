@@ -26,15 +26,30 @@
 //   catalogue          integration/scripts/build-catalog.mjs: retrospective-wars' `type` is the last active year's type;
 //                      war-focus-battles gains start_wikidata and pts, each described.
 // The page test runs against JDPI_URL (default live); PRP_PAGES=0 leaves it out.
+// After the War Focus refresh was rehearsed (27 November 2026): War Focus is built again on the 2nd of each month
+// (warfocus-refresh.yml) from what Wikidata and Wikipedia then say, and the deploy that follows runs this file. What War
+// Focus's files held when its index was stamped on 27 November is pinned only while the index carries that day's stamp
+// (AS_BUILT, its `generated`; an --only build moves the stamp too, while the wars it does not name keep their earlier
+// reads); what the Omni-Map's battles layer, built by hand, read on 26 November is pinned outright; and the two pages
+// are compared only while the layer was built from War Focus's files as they now stand (it reads them: focusNames,
+// focusDates), since a Wikidata edit that War Focus reads after the layer was built is no fault of either page (the
+// rehearsal: Wikidata's English label of Q120703876 lost its "July" on 20 November 2026; War Focus's russia-ukraine file
+// still held the name read before then, and the layer, built on 26 November, took it from that file; the rebuilt War
+// Focus reads the new label, the layer the old one).
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { readFileSync } from 'node:fs';
+import { mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
 import { pageTest, launch } from './tools/pages.mjs';
+import { builtOn, readAfter, sameDay } from './tools/as-built.mjs';
 
 const BASE = (process.env.JDPI_URL || 'https://jdpi.pages.dev').replace(/\/$/, '');
 const text = rel => readFileSync(new URL(rel, import.meta.url), 'utf8');
 const json = rel => JSON.parse(text(rel));
 const methodOf = html => /<p><b>Method\.<\/b>([\s\S]*?)<\/p>/.exec(html)?.[1] || '';
+const FOCUS_BUILT = json('../battlefield/focus/data/index.json').generated;
+const AS_BUILT = builtOn(FOCUS_BUILT, '2026-11-27');
 
 // A Wikidata time statement, as wbgetentities gives it.
 const time = (t, precision = 11, rank = 'normal', extra = {}) => ({ rank, mainsnak: { snaktype: 'value', datavalue: { value: { time: t, precision, calendarmodel: 'http://www.wikidata.org/entity/Q1985727' } } }, ...extra });
@@ -49,11 +64,16 @@ test('war-focus-method: the Method says a battle starts as its article gives it,
   assert.match(m, /gives one date twice, at two precisions \(a year, and a month in it\), the finer is used/);
   assert.match(m, /a state takes its side from the day it entered the war \(in World War II, as a rule, its declaration of war: Iran from 9 September 1943, Egypt from 24 February 1945\) and leaves it on the day it left, and a state annexed before the war, as Austria was in March 1938, is on neither side, only held \(Cliopatria draws it inside Germany, so the line under the map names it as held\)/);
   assert.doesNotMatch(m, /hatched as held|is no side/, 'Austria has no shape of its own to hatch');
-  // The Method's examples are the data's.
+  // The Method's examples are the data's. Iwo Jima's start is VM's own (build.mjs DATE_FIXES), so it holds whatever the
+  // day; Wikidata's start beside it, and the days Wikidata gives Q488 and Yawata, are pinned for 27 November's build.
   const ww2 = json('../battlefield/focus/data/wars/ww2.json');
   const iwo = ww2.battles.find(b => b.q === 'Q180182'), a = ww2.battles.find(b => b.q === 'Q488');
-  assert.equal(iwo.s, '1945-02-19'); assert.equal(iwo.sW, '1945-02-08');
-  assert.deepEqual(a.pts, ['1945-08-06', '1945-08-09']);
+  assert.equal(iwo.s, '1945-02-19');
+  if (iwo.sW) assert.notEqual(iwo.sW, iwo.s, 'Wikidata\'s start is kept only where it differs');
+  if (AS_BUILT) {
+    assert.equal(iwo.sW, '1945-02-08');
+    assert.deepEqual(a.pts, ['1945-08-06', '1945-08-09']);
+  }
   const allies = ww2.sides.a.states;
   assert.equal(allies.find(s => s.q === 'Q79').from, '1945-02-24');
   assert.equal(allies.find(s => s.q === 'Q794').from, '1943-09-09');
@@ -63,7 +83,8 @@ test('war-focus-method: the Method says a battle starts as its article gives it,
     assert.ok(ww2.unplaced[y].includes('Q40'), `${y}: so the line under the map names it`);
   }
   // A point of a battle's several may be a month: the Bombing of Yawata, June 1944 (Wikidata gives no day).
-  assert.deepEqual(ww2.battles.find(b => b.q === 'Q4940734').pts, ['1944-06', '1944-08-20', '1945-08-08']);
+  if (AS_BUILT) assert.deepEqual(ww2.battles.find(b => b.q === 'Q4940734').pts, ['1944-06', '1944-08-20', '1945-08-08']);
+  for (const b of ww2.battles.filter(x => x.pts)) for (const d of b.pts) assert.match(d, /^\d{4}(-\d{2}(-\d{2})?)?$/, `${b.q}: a day, a month or a year`);
 });
 
 test('western-sahara: its `since` is the end of its country (P17) Spanish Sahara, 1976; "today’s Western Sahara" in 1975', async () => {
@@ -236,18 +257,35 @@ test('omni-battles: the rebuilt layer dates Hiroshima and Nagasaki on both days 
     assert.ok(r.dates.length > 1 && r.date.from === r.dates[0].from && !r.date.to, `${r.q}: its first day, no span`);
     assert.deepEqual([...r.dates.map(d => d.from)].sort(), r.dates.map(d => d.from), `${r.q}: in order`);
   }
-  // Every War Focus battle the layer holds starts as War Focus shows it.
+  // Every War Focus battle the layer holds starts as War Focus shows it. The start War Focus corrects is VM's own
+  // (build.mjs DATE_FIXES, its source named there), so this holds whatever day either page was built.
   const ww2 = json('../battlefield/focus/data/wars/ww2.json');
   for (const b of ww2.battles.filter(b => b.sW && by.has(b.q))) assert.equal(by.get(b.q).date.from, b.s, `${b.q}: War Focus's start`);
-  // The Ardenne Abbey massacre on both its days, as War Focus gives it (Wikidata: 7 June preferred, 8 June normal).
+  // The Ardenne Abbey massacre on both its days, as the layer read Wikidata on 26 November (7 June preferred, 8 June
+  // normal); War Focus's read of 27 November gave the same.
   assert.deepEqual(by.get('Q22947455').dates.map(d => d.from), ['1944-06-07', '1944-06-08']);
-  assert.deepEqual(ww2.battles.find(b => b.q === 'Q22947455').pts, ['1944-06-07', '1944-06-08']);
-  // Every battle both pages hold has War Focus's name (the killing of Yahya Sinwar, not Wikidata's new label).
-  const gaza = json('../battlefield/focus/data/wars/gaza-war.json');
-  assert.equal(by.get('Q130549291').label, gaza.battles.find(b => b.q === 'Q130549291').n);
+  if (AS_BUILT) assert.deepEqual(ww2.battles.find(b => b.q === 'Q22947455').pts, ['1944-06-07', '1944-06-08']);
+  // The killing of Yahya Sinwar, not Wikidata's new label: VM's name (names-kept.mjs NAMES) on both pages, whatever the
+  // day, wherever War Focus still lists the battle.
+  const { focusNames, NAMES } = await import('../omni/scripts/build-battles.mjs');
+  const shown = focusNames();
   assert.equal(by.get('Q130549291').label, 'killing of Yahya Sinwar');
-  const { focusNames } = await import('../omni/scripts/build-battles.mjs');
-  for (const [q, n] of focusNames()) if (by.has(q)) assert.equal(by.get(q).label, n, `${q}: War Focus's name`);
+  const sinwar = json('../battlefield/focus/data/wars/gaza-war.json').battles.find(b => b.q === 'Q130549291');
+  if (sinwar) assert.equal(by.get('Q130549291').label, sinwar.n);
+  for (const [q, n] of Object.entries(NAMES)) {
+    if (by.has(q)) assert.equal(by.get(q).label, n, `${q}: the Omni-Map gives VM's name`);
+    if (shown.has(q)) assert.equal(shown.get(q), n, `${q}: War Focus gives VM's name`);
+  }
+  // Every other name both pages give is Wikidata's English label, and the layer takes War Focus's from War Focus's files
+  // (focusNames): the names are compared only while the layer was built after War Focus's last build, from the files as
+  // they stand now. Once War Focus is rebuilt (warfocus-refresh.yml) the layer may hold an earlier label, and the rule is
+  // tested by fixture below ("the layer takes War Focus's names and starts from its files").
+  if (readAfter(f.built, FOCUS_BUILT)) for (const [q, n] of shown) if (by.has(q)) assert.equal(by.get(q).label, n, `${q}: War Focus's name`);
+  // The several days, though, are each build's own read of Wikidata (the layer's P585, build-battles.mjs finestPoints;
+  // War Focus's pts): two independent reads, compared only while the layer was built after War Focus and on the same day.
+  if (readAfter(f.built, FOCUS_BUILT) && sameDay(f.built, FOCUS_BUILT)) {
+    for (const b of ww2.battles.filter(b => b.pts && by.has(b.q) && by.get(b.q).war === 'wf-ww2')) assert.deepEqual(by.get(b.q).dates?.map(d => String(d.from)), b.pts, `${b.q}: War Focus's days`);
+  }
   const L = json('../omni/data/layers.json').layers.find(l => l.id === 'battles');
   assert.match(L.method, /each is a date of its own \(a day, or only a month or a year where that is all Wikidata gives\), not a span \(the atomic bombings of Hiroshima and Nagasaki, 6 and 9 August 1945\), and every one is read that Wikidata does not mark deprecated/);
   assert.match(L.method, /the Battle of Iwo Jima: 19 February 1945, not 8 February/);
@@ -260,6 +298,31 @@ test('omni-battles: the rebuilt layer dates Hiroshima and Nagasaki on both days 
   assert.equal(battlesLegend({ rows: f.rows.filter(r => r.src.date.id === 'wikidata') }), 'Battles: Wikidata (CC0), each date and point with its Wikidata item and property');
 });
 
+// The rule the comparison above rests on, whatever day either page was built: the layer's build reads War Focus's war
+// files (focusNames, focusDates) and gives a battle War Focus holds War Focus's name and corrected start; VM's NAMES
+// comes first. Fixture war files, not the committed ones, so no live label is pinned.
+test('omni-battles: the layer takes War Focus\'s names and starts from its files, NAMES first, the first war\'s where two list a battle', async () => {
+  const { battleRow, focusNames, focusDates, NAMES } = await import('../omni/scripts/build-battles.mjs');
+  const dir = mkdtempSync(join(tmpdir(), 'vm-focus-'));
+  try {
+    const war = (id, battles) => writeFileSync(join(dir, `${id}.json`), JSON.stringify({ id, battles }));
+    war('a-war', [{ q: 'Q900001', n: 'War Focus’s name', s: '1945-02-19', sW: '1945-02-08', w: 'Battle of X' }, { q: 'Q130549291', n: 'killing of Yahya Sinwar' }]);
+    war('b-war', [{ q: 'Q900001', n: 'a second war’s name' }, { q: 'Q900002', n: 'only here' }, { q: 'not a Q-id', n: 'left out' }]);
+    const names = focusNames(dir), fixes = focusDates(dir);
+    assert.deepEqual([...names], [['Q900001', 'War Focus’s name'], ['Q130549291', 'killing of Yahya Sinwar'], ['Q900002', 'only here']]);
+    assert.deepEqual([...fixes], [['Q900001', { s: '1945-02-19', sW: '1945-02-08', w: 'Battle of X' }]]);
+    const e = (id, label) => ({ id, labels: { en: { value: label } }, claims: { P580: [time('+1945-02-08T00:00:00Z')], P582: [time('+1945-03-26T00:00:00Z')], P625: [point] } });
+    const r = battleRow(e('Q900001', 'Wikidata’s label today'), q => q, 'wf-a-war', fixes.get('Q900001'), names.get('Q900001'));
+    assert.deepEqual([r.label, r.date.from, r.wikidataFrom], ['War Focus’s name', '1945-02-19', '1945-02-08']);
+    assert.equal(battleRow(e('Q900003', 'Wikidata’s label today'), q => q, null, null, names.get('Q900003') || null).label, 'Wikidata’s label today', 'a battle War Focus does not hold');
+    assert.equal(battleRow(e('Q130549291', 'Shahadat of Yahya Sinwar'), q => q, null, null, 'another name').label, NAMES.Q130549291, 'NAMES first');
+  } finally { rmSync(dir, { recursive: true, force: true }); }
+  // The build passes them so (build-battles.mjs).
+  const build = text('../omni/scripts/build-battles.mjs');
+  assert.match(build, /const fixes = focusDates\(\), shownAs = focusNames\(\);/);
+  assert.match(build, /battleRow\(e, q => labels\.get\(q\) \|\| q, warOfBattle\(e\), fixes\.get\(e\.id\) \|\| null, shownAs\.get\(e\.id\) \|\| null\)/);
+});
+
 test('catalogue: retrospective-wars says its type is the last active year\'s; war-focus-battles gives start_wikidata and pts, described', () => {
   const s = text('../integration/scripts/build-catalog.mjs');
   assert.match(s, /\['type', 'Conflict type in its last active year \(civil, internationalised civil, interstate, colonial…\)/);
@@ -268,9 +331,14 @@ test('catalogue: retrospective-wars says its type is the last active year\'s; wa
   assert.match(s, /\['pts', 'For a battle Wikidata gives several points in time and no start or end, each date, comma-separated \(YYYY-MM-DD a day, YYYY-MM a month, YYYY a year\): separate dates, not a span/);
   assert.match(s, /\['end', 'End date: Wikidata\\'s, except where Wikidata ends the battle more than a month after its English Wikipedia article does, when it is the article\\'s \(the page marks it uncertain and gives both\); for a battle of several dates \(pts\), the last of them, not the end of a span'\]/);
   assert.match(s, /licence: 'Wikidata CC0; the figure_ columns, and a start or end War Focus takes from the battle\\'s English Wikipedia article, from English Wikipedia, CC BY-SA 4\.0/);
-  // The cases the notes name are the data's: Sangin's end is its article's (eA), Wikidata's later one (eW) not exported.
-  const sangin = json('../battlefield/focus/data/wars/afghanistan-2001.json').battles.find(b => b.q === 'Q4872292');
-  assert.deepEqual([sangin.e, sangin.eA, sangin.eW], ['2011-10-31', '2011-10-31', '2014-05-31']);
+  // The cases the notes name are the data's: Sangin's end is its article's (eA), Wikidata's later one (eW) not exported
+  // (read for the build of 22 November 2026, committed in the index stamped 27 November); whatever the build, an end taken from the article is the one shown, before Wikidata's.
+  const af = json('../battlefield/focus/data/wars/afghanistan-2001.json').battles;
+  if (AS_BUILT) {
+    const sangin = af.find(b => b.q === 'Q4872292');
+    assert.deepEqual([sangin.e, sangin.eA, sangin.eW], ['2011-10-31', '2011-10-31', '2014-05-31']);
+  }
+  for (const b of af.filter(x => x.eA && x.eW)) assert.ok(b.e === b.eA && b.eW > b.e, `${b.q}: ${b.e}, ${b.eA}, ${b.eW}`);
 });
 
 test('page: War Focus\'s Method names the article\'s start, the several days and the dates of joining', pageTest, async () => {

@@ -1,5 +1,5 @@
 {
-  "generated": "2026-11-28T14:20:06.783Z",
+  "generated": "2026-11-28T16:08:36.770Z",
   "name": "Vitruvian Manager data catalogue",
   "publisher": "JDP-Iq",
   "description": "Every public dataset in Vitruvian Manager (VM, by JDP-Iq), with its fields, size, licence and sources. Read-only; no keys. Files are static JSON on this site; the MCP server (/mcp) and the JSON API (/api/v1/) query them with row and size caps.",
@@ -1131,7 +1131,7 @@
           "description": "Soft-news class when the story is not hard news: s sport, e entertainment, l lifestyle; absent for news"
         }
       ],
-      "rows": 5814,
+      "rows": 5781,
       "licence": "Headlines, standfirsts and links © their publishers, quoted for reference; selection and metadata © JDP-Iq.",
       "sources": [
         "RSS and Atom feeds of the publishers listed in intelligence-briefing-sources",
@@ -1140,7 +1140,7 @@
       "updated": "2026-11-28",
       "refresh": "twice daily",
       "page": "q/briefing.html",
-      "bytes": 2536340
+      "bytes": 2521434
     },
     {
       "id": "intelligence-briefing-sources",
@@ -1208,7 +1208,7 @@
       "updated": "2026-11-28",
       "refresh": "twice daily",
       "page": "q/briefing.html",
-      "bytes": 2536340
+      "bytes": 2521434
     },
     {
       "id": "daily-synopsis-stories",
@@ -3417,7 +3417,7 @@
       "derivedFrom": [
         "science/progress/data/events.json"
       ],
-      "bytes": 296663
+      "bytes": 296670
     },
     {
       "id": "science-progress-people",
